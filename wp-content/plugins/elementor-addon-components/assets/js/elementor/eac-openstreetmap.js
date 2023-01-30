@@ -66,7 +66,7 @@ window.addEventListener("load", function(event) {
 				targetNonce = $targetInstance.find('#osm_nonce').val(),
 				settings = $targetWrapper.data('settings') || {},
 				osmImageUrl = eacElementsPath.osmImages,
-				proxyPhp = eacElementsPath.proxies + 'proxy_osm.php',
+				proxyPhp = eacElementsPath.proxies + 'proxy-osm.php',
 				osmTilesFile = eacElementsPath.osmConfig + 'osmTiles.json',
 				osmMap,
 				geoJsonHeader = 'FeatureCollection',

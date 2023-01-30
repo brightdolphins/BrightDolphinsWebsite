@@ -515,7 +515,7 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 			
 			$pathCurrentTheme = get_template_directory()."/";
 			
-			$dirAddons = apply_filters("blox_path_theme_addons", GlobalsUC::DIR_THEME_ADDONS);
+			$dirAddons = apply_filters("ue_path_theme_addons", GlobalsUC::DIR_THEME_ADDONS);
 			
 			$pathAddons = $pathCurrentTheme.$dirAddons."/";
 			

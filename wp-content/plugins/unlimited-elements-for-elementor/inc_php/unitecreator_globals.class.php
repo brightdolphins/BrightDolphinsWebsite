@@ -11,6 +11,8 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 		
 		public static $inDev = false;
 		
+		const DEBUG_ALLOW_SHOWVARS = false;		//keep it false
+		
 		const SHOW_TRACE = false;
 		const SHOW_TRACE_FRONT = false;
 		
@@ -55,7 +57,7 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 		const DIR_SCREENSHOTS = "blox_screenshots";
 		const DIR_THUMBS_ELFINDER = "elfinder_tmb";
 		
-		const DIR_THEME_ADDONS = "blox_addons";
+		const DIR_THEME_ADDONS = "ue_widgets";
 		
 		const URL_API = "https://api.unlimited-elements.com/index.php";
 		//const URL_API = "http://api.bloxbuilder.me/index.php";
@@ -80,6 +82,9 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 		
 		const VALUE_EMPTY_ARRAY = "[[uc_empty_array]]";
 		const LINK_TWIG = "https://twig.symfony.com/doc/2.x/templates.html";
+		
+		const ENABLE_CATALOG_SHORTPIXEL = true;
+		const SHORTPIXEL_PREFIX = "https://cdn.shortpixel.ai/spai/q_glossy+w_323+to_auto+ret_img/";
 		
 		public static $permisison_add = false;
 		public static $blankWindowMode = false;
@@ -216,11 +221,10 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 			
 			self::$urlPluginImages = self::$urlPlugin."images/";
 			
-			self::$url_no_image_placeholder = self::$urlPluginImages."no_image_placeholder.jpg";
+			self::$url_no_image_placeholder = self::$urlPluginImages."placeholder.png";
 			
 			self::$pathLibrary = self::$pathPlugin."assets_libraries/";
-			
-			
+						
 			//check for wp version
 			UniteFunctionsUC::validateNotEmpty(GlobalsUC::$url_assets_internal, "assets internal");
 			
@@ -238,11 +242,13 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 				self::$is_admin_debug_mode = UniteFunctionsUC::strToBool($isDebugMode);
 			}
 			
-			/*
-			$action = UniteFunctionsUC::getGetVar("maxaction", "", UniteFunctionsUC::SANITIZE_KEY);
-			if($action == "showvars")
-				GlobalsUC::printVars();
-			*/
+			if(self::DEBUG_ALLOW_SHOWVARS == true){
+				
+				$action = UniteFunctionsUC::getGetVar("maxaction", "", UniteFunctionsUC::SANITIZE_KEY);
+				if($action == "showvars")
+					GlobalsUC::printVars();
+				
+			}
 			
 			//GlobalsUC::printVars();
 		}

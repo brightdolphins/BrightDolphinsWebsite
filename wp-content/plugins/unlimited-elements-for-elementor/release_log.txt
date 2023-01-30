@@ -1,9 +1,118 @@
 
+
+version 1.5.50:
+
+-feature: added "media" to post types select in advanced post query
+-feature: improved the date time attribute
+
+
+version 1.5.49:
+
+-bug fix: fixed some js optimization issues 
+-bug fix: fixed filters related small js bug
+-bug fix: fixed lord icon
+
+
+version 1.5.48:
+
+-bug fix: fixed popular posts plugin integration multiple post types
+-feature: added gallery to multisource
+-bug fix: fixed background widgets some problematic attribute names
+-bug fix: fixed include terms by current post terms in some cases.
+-bug fix: fixed default url_assets value in multisoure
+-bug fix: fixed dark mode svg icons
+-feature: added post type override selectin current post query options
+-bug fix: fixed remote play with carousel
+-bug fix: fixed some multisource and ajax related bugs
+
+
+
+version 1.5.47:
+
+-feature: added more units to slider attribute
+-bug fix: fixed dynamic template render css for dynamic popup
+-feature: added "any" post type to post types select
+-feature: added include and exclude current post terms in terms selection
+-feature: added option to carousel - scroll to head - force
+-feature: allow import widgets with theme activate
+-bug fix: fixed users list select by manual
+
+
+
+version 1.5.46:
+
+-feature: set the items image size chooser work for certain image
+-change: updated the multisource that it works better with items images
+-feature: made option to put js script in saparate tags with id's for optimization plugins like wprocket
+-bug fix: fixed filters with sync multiple grid issues
+-feature: enriched the uc_lang variable. now it's always showing the current language
+-feature: added user_login variable to the users list output
+-bug fix: fixed the exclude users list with similar names
+-feature: has put the preview link always as a help link in widget edit panel.
+-change: allow html tags in post intro (excerpt) in widgets
+
+
+
+version 1.5.45:
+
+-bug fix: fixed entrance animation on ajax refresh
+-bug fix: done sync pause / play between carousels
+-feature: added json decode filter to twig
+-feature: added catalog images from shortpixel for speed loading
+-feature: done multisource group setting
+
+
+
+version 1.5.44:
+
+-change: updated freemius to the latest version
+-bug fix: fixed remote play / pause button
+-bug fix: fixed search filter unicode phrase
+-bug fix: fixed entrance animation appear on scroll
+-feature: added video gallery responsive options
+-bug fix: fixed some owl carousel size on init bug
+-bug fix: fixed js widgets under the dynamic grid template like flipbox
+
+
+
+version 1.5.43:
+
+-bug fix: fixed pods multiple image data
+-feature: add settings output to dynamic grid fields debug
+-bug fix: fixed url terms in filter with dynamic grid
+-change: updated twig engine to the latest version
+-bug fix: fixed users and menu not found bug in front	
+
+
+version 1.5.42:
+
+-feature: added functionality for time ago in posts widgets
+-feature: added woo variables to woo fields - woo_price_withtax, woo_price_notax
+-feature: added option for term child filter role
+-optimization: reduced number of queries in post related widgets and dynamic template widgets
+
+
+
+version 1.5.41:
+
+-bug fix: fixed post select in post query
+
+
+version 1.5.40:
+
+-feature: added integration to woocommerce multicourancy plugins
+-feature: made some integration with translate press plugin
+-feature: added select post and select term attribute
+-bug fix: fixed dynamic loop css backgrounds with containers
+-bug fix: fixed mousewheel event in the carousel
+-bug fix: fixed some rare php error with filters
+
+
+
 version 1.5.39:
 
 -bug fix: fixed small bug with zip extract
 -update: updated black friday sale banners
-
 
 
 version 1.5.38:

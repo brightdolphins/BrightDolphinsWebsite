@@ -382,6 +382,13 @@ class Wpr_Woo_Grid extends Widget_Base {
 			'default' => ''
 		];
 	}
+
+	public function add_repeater_args_element_trim_text_by() {
+		return [
+			'word_count' => esc_html__( 'Word Count', 'wpr-addons' ),
+			'pro-lc' => esc_html__( 'Letter Count (Pro)', 'wpr-addons' )
+		];
+	}
 	
 	public function add_control_overlay_animation_divider() {}
 	
@@ -584,10 +591,11 @@ class Wpr_Woo_Grid extends Widget_Base {
 			'query_taxonomy_product_cat',
 			[
 				'label' => esc_html__( 'Categories', 'wpr-addons' ),
-				'type' => Controls_Manager::SELECT2,
+				'type' => 'wpr-ajax-select2',
+				'options' => 'ajaxselect2/get_taxonomies',
+				'query_slug' => 'product_cat',
 				'multiple' => true,
 				'label_block' => true,
-				'options' => Utilities::get_terms_by_taxonomy( 'product_cat' ),
 				'condition' => [
 					'query_selection' => [ 'dynamic', 'onsale', 'featured' ],
 				],
@@ -599,10 +607,11 @@ class Wpr_Woo_Grid extends Widget_Base {
 			'query_taxonomy_product_tag',
 			[
 				'label' => esc_html__( 'Tags', 'wpr-addons' ),
-				'type' => Controls_Manager::SELECT2,
+				'type' => 'wpr-ajax-select2',
+				'options' => 'ajaxselect2/get_taxonomies',
+				'query_slug' => 'product_tag',
 				'multiple' => true,
 				'label_block' => true,
-				'options' => Utilities::get_terms_by_taxonomy( 'product_tag' ),
 				'condition' => [
 					'query_selection' => [ 'dynamic', 'onsale', 'featured' ],
 				],
@@ -614,10 +623,11 @@ class Wpr_Woo_Grid extends Widget_Base {
 			'query_exclude_products',
 			[
 				'label' => esc_html__( 'Exclude Products', 'wpr-addons' ),
-				'type' => Controls_Manager::SELECT2,
+				'type' => 'wpr-ajax-select2',
+				'options' => 'ajaxselect2/get_posts_by_post_type',
+				'query_slug' => 'product',
 				'multiple' => true,
 				'label_block' => true,
-				'options' => Utilities::get_posts_by_post_type( 'product' ),
 				'condition' => [
 					'query_selection!' => [ 'manual', 'onsale', 'current', 'upsell', 'cross-sell' ],
 				],
@@ -629,10 +639,11 @@ class Wpr_Woo_Grid extends Widget_Base {
 			'query_manual_products',
 			[
 				'label' => esc_html__( 'Select Products', 'wpr-addons' ),
-				'type' => Controls_Manager::SELECT2,
+				'type' => 'wpr-ajax-select2',
+				'options' => 'ajaxselect2/get_posts_by_post_type',
+				'query_slug' => 'product',
 				'multiple' => true,
 				'label_block' => true,
-				'options' => Utilities::get_posts_by_post_type( 'product' ),
 				'condition' => [
 					'query_selection' => 'manual',
 				],
@@ -988,7 +999,6 @@ class Wpr_Woo_Grid extends Widget_Base {
 				'max' => 10,
 				'frontend_available' => true,
 				'default' => 2,
-				'prefix_class' => 'wpr-grid-slides-to-scroll-',
 				'render_type' => 'template',
 				'separator' => 'before',
 				'condition' => [
@@ -1386,6 +1396,20 @@ class Wpr_Woo_Grid extends Widget_Base {
 		);
 
 		$repeater->add_control(
+			'element_trim_text_by',
+			[
+				'label' => esc_html__( 'Trim Text By', 'wpr-addons' ),
+				'type' => Controls_Manager::SELECT,
+				'default' => 'word_count',
+				'options' => $this->add_repeater_args_element_trim_text_by(),
+				'separator' => 'after',
+				'condition' => [
+					'element_select' => [ 'title', 'excerpt' ],
+				]
+			]
+		);
+
+		$repeater->add_control(
 			'element_word_count',
 			[
 				'label' => esc_html__( 'Word Count', 'wpr-addons' ),
@@ -1394,6 +1418,21 @@ class Wpr_Woo_Grid extends Widget_Base {
 				'min' => 1,
 				'condition' => [
 					'element_select' => [ 'title', 'excerpt' ],
+					'element_trim_text_by' => 'word_count'
+				]
+			]
+		);
+
+		$repeater->add_control(
+			'element_letter_count',
+			[
+				'label' => esc_html__( 'Letter Count', 'wpr-addons' ),
+				'type' => Controls_Manager::NUMBER,
+				'default' => 40,
+				'min' => 1,
+				'condition' => [
+					'element_select' => [ 'title', 'excerpt' ],
+					'element_trim_text_by' => 'letter_count'
 				]
 			]
 		);
@@ -7487,7 +7526,11 @@ class Wpr_Woo_Grid extends Widget_Base {
 		echo '<'. esc_attr($settings['element_title_tag']) .' class="'. esc_attr($class) .'">';
 			echo '<div class="inner-block">';
 				echo '<a '. $pointer_item_class .' href="'. esc_url( get_the_permalink() ) .'">';
-					echo esc_attr(wp_trim_words( get_the_title(), $settings['element_word_count'] ));
+				if ( 'word_count' === $settings['element_trim_text_by'] ) {
+					echo esc_html(wp_trim_words( get_the_title(), $settings['element_word_count'] ));
+				} else {
+					echo substr(html_entity_decode(get_the_title()), 0, $settings['element_letter_count']) .'...';
+				}
 				echo '</a>';
 			echo '</div>';
 		echo '</'. esc_attr($settings['element_title_tag']) .'>';
@@ -7501,7 +7544,12 @@ class Wpr_Woo_Grid extends Widget_Base {
 
 		echo '<div class="'. esc_attr($class) .'">';
 			echo '<div class="inner-block">';
-				echo '<p>'. esc_html(wp_trim_words( get_the_excerpt(), $settings['element_word_count'] )) .'</p>';
+			if ( 'word_count' === $settings['element_trim_text_by']) {
+			  echo '<p>'. esc_html(wp_trim_words( get_the_excerpt(), $settings['element_word_count'] )) .'</p>';
+			} else {
+			  // echo '<p>'. substr(html_entity_decode(get_the_title()), 0, $settings['element_letter_count']) .'...' . '</p>';
+			  echo '<p>'. esc_html(implode('', array_slice( str_split(get_the_excerpt()), 0, $settings['element_letter_count'] ))) .'...' .'</p>';
+			}
 			echo '</div>';
 		echo '</div>';
 	}
@@ -8301,7 +8349,7 @@ class Wpr_Woo_Grid extends Widget_Base {
 
 		// Load More / Infinite Scroll
 		} else {
-			echo '<a href="'. esc_url(get_pagenum_link( $paged + 1, true )) .'" class="wpr-load-more-btn">';
+			echo '<a href="'. esc_url(get_pagenum_link( $paged + 1, true )) .'" class="wpr-load-more-btn" data-e-disable-page-transition>';
 				echo esc_html($settings['pagination_load_more_text']);
 			echo '</a>';
 
@@ -8455,6 +8503,7 @@ class Wpr_Woo_Grid extends Widget_Base {
 			'pauseOnHover' => $settings['layout_slider_pause_on_hover'],
 			'prevArrow' => '#wpr-grid-slider-prev-'. $this->get_id(),
 			'nextArrow' => '#wpr-grid-slider-next-'. $this->get_id(),
+			'sliderSlidesToScroll' => +$settings['layout_slides_to_scroll'],
 		];
 
 		if ( ! wpr_fs()->can_use_premium_code() ) {

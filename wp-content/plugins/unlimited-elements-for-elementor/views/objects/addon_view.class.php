@@ -1538,7 +1538,10 @@ class UniteCreatorAddonView{
 		$arrAddKeys[UniteCreatorDialogParam::PARAM_USERS] = $this->objChildParams->getAddParams_users();
 		
 		$arrAddKeys[UniteCreatorDialogParam::PARAM_ICON_LIBRARY] = $this->objChildParams->getAddParams_iconLibrary();
+		
 		$arrAddKeys[UniteCreatorDialogParam::PARAM_LINK] = $this->objChildParams->getAddParams_link();
+		$arrAddKeys[UniteCreatorDialogParam::PARAM_DATETIME] = $this->objChildParams->getAddParams_datetime();
+		
 		$arrAddKeys[UniteCreatorDialogParam::PARAM_SLIDER] = $this->objChildParams->getAddParams_slider();
 		$arrAddKeys[UniteCreatorDialogParam::PARAM_DROPDOWN] = $this->objChildParams->getAddParams_dropdown();
 		$arrAddKeys[UniteCreatorDialogParam::PARAM_RADIOBOOLEAN] = $this->objChildParams->getAddParams_dropdown();

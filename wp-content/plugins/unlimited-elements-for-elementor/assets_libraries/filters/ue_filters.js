@@ -456,7 +456,7 @@ function UEDynamicFilters(){
 	/**
 	 * get element layout data
 	 */
-	function getElementLayoutData(objElement){
+	function getElementLayoutData(objElement, addSyncedGrids){
 		
 		if(!objElement || objElement.length == 0)
 			throw new Error("Element not found");
@@ -474,14 +474,26 @@ function UEDynamicFilters(){
 			throw new Error("widget id not found");
 		
 		//get synced grids
+		var objSyncedData = null;
 		
-		var objSyncedData = getSyncedWidgetData(objElement);
+		//add sync if allowed and available
 		
-		if(g_showDebug && objSyncedData){
+		if(addSyncedGrids){
 			
-			trace("sync data");
-			trace(objSyncedData);
+			var objSyncedData = getSyncedWidgetData(objElement);
+			
+			if(g_showDebug && objSyncedData){
+				
+				trace("sync data");
+				trace(objSyncedData);
+			}
+		}else{
+			
+			if(g_showDebug)
+				trace("skip sync grid");
+			
 		}
+
 		
 		//get layout id
 		var objLayout = objWidget.parents(".elementor");
@@ -570,7 +582,7 @@ function UEDynamicFilters(){
 	 * clear non main grid filters
 	 * hide children and just clear the main filters
 	 */
-	function clearChildFilters(objGrid, objCurrentFilter, isHideChildren){
+	function clearChildFilters(objGrid, objCurrentFilter, isHideChildren, termID){
 		
 		var objFilters = objGrid.data("filters");
 		
@@ -581,7 +593,7 @@ function UEDynamicFilters(){
 			return(false);
 		
 		var currentFilterID = objCurrentFilter.attr("id");
-		
+				
 		jQuery.each(objFilters, function(index, filter){
 			
 			var objFilter = jQuery(filter);
@@ -591,32 +603,53 @@ function UEDynamicFilters(){
 				return(true);
 						
 			var role = objFilter.data("role");
-			
-			if(role != "child" && role != "main")
+						
+			if(role != "child" && role != "main" && role != "term_child")
 				return(true);
 			
+			var isHide = false;
+			var isShow = false;
+			
 			switch(role){
+				case "term_child":
+					if(isHideChildren == true)
+						isHide = true;
+						
+					var linkedTermID = objFilter.data("childterm");
+					
+					if(linkedTermID == termID){		//show the filter
+						
+						objFilter.removeClass(g_vars.CLASS_HIDDEN);
+						objFilter.removeClass(g_vars.CLASS_INITING);
+						objFilter.removeClass(g_vars.CLASS_INITING_HIDDEN);
+					}else{
+						isHide = true;
+					}
+						
+				break;
 				case "child":
 					
-					if(isHideChildren == true){
-						
-						//hide the child filters and not refresh
-						
-						objFilter.addClass(g_vars.CLASS_HIDDEN);	
-					}
+					if(isHideChildren == true)
+						isHide = true;
 					else{
-						
 						//hide the filters and refresh
 						
 						objFilter.removeClass(g_vars.CLASS_HIDDEN);
 						
 						objFilter.addClass(g_vars.CLASS_INITING);
 						objFilter.addClass(g_vars.CLASS_INITING_HIDDEN);
+						
 					}
 					
 				break;
 			}
 						
+			//hide the child filters and not refresh
+			
+			if(isHide == true)
+				objFilter.addClass(g_vars.CLASS_HIDDEN);	
+			
+			
 			clearFilter(objFilter);
 						
 		});
@@ -764,9 +797,15 @@ function UEDynamicFilters(){
 		if(!numItems)
 			numItems = null;
 		
+		//affect only single grids
+		
+		var isSingleGridOnly = objFilter.data("affect_single_grid");
+		
+			
 		var data = {};
 		data.offset = nextOffset;
 		data.numItems = numItems;
+		data.singlegrid = isSingleGridOnly;
 		
 		return(data);
 	}
@@ -887,6 +926,7 @@ function UEDynamicFilters(){
 			throw new Error("Grid not found");
 		
 		//if main filter - clear other filters
+		
 		var filterRole = objTermsFilter.data("role");
 		
 		var termID = objLink.data("id");
@@ -894,9 +934,9 @@ function UEDynamicFilters(){
 		var isHideChildren = false;
 		if(!termID)
 			isHideChildren = true;
-				
+		
 		if(filterRole == "main")
-			clearChildFilters(objGrid, objTermsFilter, isHideChildren);
+			clearChildFilters(objGrid, objTermsFilter, isHideChildren, termID);
 		
 		//refresh grid		
 		refreshAjaxGrid(objGrid);
@@ -1272,12 +1312,33 @@ function UEDynamicFilters(){
 	 */
 	function operateAjax_setHtmlGrid(response, objGrid, isLoadMore){
 		
+		if(g_showDebug == true){
+			trace("set html grid, response: ");
+			trace(response);
+			
+			trace("obj grid:");
+			trace(objGrid);
+		}
+		
 		if(objGrid.length == 0)
 			return(false);
-				
+						
 		var objItemsWrapper = getGridItemsWrapper(objGrid);
 		var objItemsWrapper2 = getGridItemsWrapper(objGrid, true);
 		
+		if(g_showDebug == true){
+			trace("items wrapper 1: ");
+			trace(objItemsWrapper);
+			
+			trace("items wrapper 2:");
+			trace(objItemsWrapper2);
+		}
+		
+		
+		if(!objItemsWrapper || objItemsWrapper.length == 0)
+			throw new Error("Missing items wrapper: .uc-items-wrapper");
+		
+	
 		operateAjax_setHtmlDebug(response, objGrid);
 		
 		//set grid items
@@ -1285,7 +1346,7 @@ function UEDynamicFilters(){
 		//if init filters mode, and no items response - don't set
 		if(response.hasOwnProperty("html_items") == false)
 			return(false);
-		
+				
 		var htmlItems = getVal(response, "html_items");
 		
 		var htmlItems2 = null;
@@ -1305,7 +1366,7 @@ function UEDynamicFilters(){
 		
 		//show / hide empty message if available and empty response
 		var objEmptyMessage = getGridEmptyMessage(objGrid);
-		
+				
 		if(objEmptyMessage){
 			if(htmlItems == "")
 				objEmptyMessage.show();
@@ -1314,19 +1375,21 @@ function UEDynamicFilters(){
 		}
 		
 		//set the query data
-		var queryData = getVal(response, "query_data");
+		var queryDataOriginal = getVal(response, "query_data");
 		var queryIDs = getVal(response,"query_ids");
 		
-		//add to old data
+		var queryData = jQuery.extend({}, queryDataOriginal);
 		
+		//add to old data
+				
 		if(isLoadMore == true){
 						
 			var currentQueryData = objGrid.attr("querydata");
+			
 			var objCurrentData = jQuery.parseJSON(currentQueryData);
 			var currentNumPosts = getVal(objCurrentData, "count_posts");
 			
 			queryData.count_posts += currentNumPosts;
-			
 			
 			var currentQueryIDs = objGrid.data("postids");
 			
@@ -1334,12 +1397,11 @@ function UEDynamicFilters(){
 				queryIDs = currentQueryIDs + "," + queryIDs;
 		}
 		
-		
 		//query data replace
 		
-		objGrid.removeAttr("querydata");
-		
 		if(queryData){
+			
+			objGrid.removeAttr("querydata");
 			
 			var jsonData = JSON.stringify(queryData);
 			objGrid.attr("querydata", jsonData);
@@ -1361,10 +1423,15 @@ function UEDynamicFilters(){
 			return(false);
 		}
 		
+		
 		if(!htmlItems2)
 			htmlItems2 = "";
 		
 		if(isLoadMore === true){
+			
+			if(g_showDebug == true){
+				trace("append load more");
+			}
 			
 			objItemsWrapper.append(htmlItems);
 			
@@ -1372,9 +1439,10 @@ function UEDynamicFilters(){
 				objItemsWrapper.append(htmlItems2);
 			
 		}else{
+			
 			objItemsWrapper.html(htmlItems);
 			
-			if(objItemsWrapper2)
+			if(objItemsWrapper2 && objItemsWrapper2.length)
 				objItemsWrapper2.html(htmlItems2);
 			
 		}
@@ -1386,13 +1454,20 @@ function UEDynamicFilters(){
 	 * refresh synced grids
 	 */
 	function operateAjax_setHtmlSyngGrids(response, objGrid, isLoadMore){
-		
-		var objSyncWidgetsResponse = getVal(response, "html_sync_widgets");
 				
+		var objSyncWidgetsResponse = getVal(response, "html_sync_widgets");
+		
+		if(g_showDebug == true){
+			trace("set html sync grids");
+			trace(objSyncWidgetsResponse);
+		}
+		
+		var queryData = getVal(response,"query_data");
+		
 		if(!objSyncWidgetsResponse)
 			return(false);
 		
-		jQuery.each(objSyncWidgetsResponse, function(elementID, response){
+		jQuery.each(objSyncWidgetsResponse, function(elementID, childResponse){
 			
 			var objGridWidget = getGridFromElementorElementID(elementID);
 			
@@ -1401,11 +1476,13 @@ function UEDynamicFilters(){
 			
 			objGridWidget.removeClass(g_vars.CLASS_REFRESH_SOON);
 			
-			operateAjax_setHtmlGrid(response, objGridWidget, isLoadMore);
+			childResponse.query_data = queryData;
+			
+			operateAjax_setHtmlGrid(childResponse, objGridWidget, isLoadMore);
 			
 			objGrid.trigger(g_vars.EVENT_AJAX_REFRESHED);
 			g_objBody.trigger(g_vars.EVENT_AJAX_REFRESHED_BODY, [objGridWidget]);
-			
+						
 		});
 		
 	}
@@ -1933,8 +2010,8 @@ function UEDynamicFilters(){
 		});
 		
 		showMultipleAjaxLoaders(objFiltersToReload, true);
-		
-		if(g_lastSyncGrids)
+				
+		if(g_lastSyncGrids && isLoadMore !== true)
 			showMultipleAjaxLoaders(g_lastSyncGrids, true);
 		
 		
@@ -2129,6 +2206,7 @@ function UEDynamicFilters(){
 		var objTaxIDs = {};
 		var strSelectedTerms = "";
 		var search = "";
+		var addSyncedGrids = true;
 		
 		
 		//get ajax options
@@ -2183,6 +2261,11 @@ function UEDynamicFilters(){
 						offset = loadMoreData.offset;
 						numItems = loadMoreData.numItems;
 						
+						var isSingleGrid = loadMoreData.singlegrid;
+						
+						if(isSingleGrid == true)
+							addSyncedGrids = false;
+												
 						if(!offset)
 							urlAjax = null;
 						
@@ -2267,12 +2350,13 @@ function UEDynamicFilters(){
 			var filterRole = objFilter.data("role");
 			
 			var isMainFilter = (filterRole == "main");
+			var isTermChild = (filterRole == "term_child");
 			
 			//add to refresh filter if it's qualify
 			
 			var isRefresh = true;
 			
-			if(isFiltersInitMode == false && isMainFilter === true)
+			if(isFiltersInitMode == false && (isMainFilter === true || isTermChild == true))
 				isRefresh = false;
 			
 			if(isNoRefresh === true)
@@ -2327,13 +2411,24 @@ function UEDynamicFilters(){
 		if(urlAjax == null)
 			return(null);
 		
-		var dataLayout = getElementLayoutData(objGrid);
+		var dataLayout = getElementLayoutData(objGrid, addSyncedGrids);
 		
 		var widgetID = dataLayout["widgetid"];
 		var layoutID = dataLayout["layoutid"];
 		
-		var syncedWidgetIDs = getVal(dataLayout,"synced_widgetids");
-		g_lastSyncGrids = getVal(dataLayout,"synced_grids");
+		//disable synced
+		
+		if(addSyncedGrids == false){
+			
+			var syncedWidgetIDs = false;
+			g_lastSyncGrids = null;
+			
+		}else{
+			
+			var syncedWidgetIDs = getVal(dataLayout,"synced_widgetids");
+			g_lastSyncGrids = getVal(dataLayout,"synced_grids");
+		}
+		
 		
 		var urlFilterString = "";
 		
@@ -2382,7 +2477,7 @@ function UEDynamicFilters(){
 		//search
 		if(search){
 			search = encodeURIComponent(search);
-			search = escape(search);
+			//search = escape(search);
 			urlAjax += "&ucs=" + search;
 			
 			urlFilterString = addUrlParam(urlFilterString, "ucs=" + search);

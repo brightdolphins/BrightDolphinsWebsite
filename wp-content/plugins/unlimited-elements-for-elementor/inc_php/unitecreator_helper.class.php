@@ -622,6 +622,7 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 			
 			$urlRelative = self::URLtoRelative($url);
 			$path = GlobalsUC::$path_base.$urlRelative;
+			
 			if(file_exists($path) == false)
 				return(null);
 			
@@ -881,7 +882,7 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 			
 			if(is_string($value) == false)
 				return($value);
-				
+			
 			$value = str_replace("[url_assets]/", $urlAssets, $value);
 			$value = str_replace("{{url_assets}}/", $urlAssets, $value);
 			

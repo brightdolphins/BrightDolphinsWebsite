@@ -1113,6 +1113,52 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 		}
 		
 		/**
+		 * get listing type - if exists
+		 */
+		public function getListingTypes(){
+			
+			$paramsDynamic = $this->getParams(UniteCreatorDialogParam::PARAM_LISTING);
+			
+			if(empty($paramsDynamic))
+				return(array());
+			
+			$arrTypes = array();
+			
+			foreach($paramsDynamic as $param){
+				$useFor = UniteFunctionsUC::getVal($param, "use_for");
+				$arrTypes[] = $useFor;
+			}
+						
+			if(empty($arrTypes))
+				return(array());
+				
+			return($arrTypes);
+		}
+		
+		
+		/**
+		 * check if has remote
+		 */
+		public function hasRemote(){
+			
+			$arrTypes = $this->getListingTypes();
+						
+			return(in_array("remote",$arrTypes));
+		}
+		
+		
+		/**
+		 * check if has remote
+		 */
+		public function hasMultisource(){
+			
+			$arrTypes = $this->getListingTypes();
+			
+			return(in_array("items",$arrTypes));
+		}
+		
+		
+		/**
 		 * get special type
 		 */
 		public function getSpecialType(){

@@ -1,22 +1,19 @@
 <?php
-
-/*===========================================================================================
-* Class: Eac_Acf_Group_File
-*
-*
-* @return Affiche le fichier 'FILE' d'un champ ACF de type 'GROUP' pour l'article courant
-* 
-* 
-* @since 1.8.9
-*============================================================================================*/
+/**
+ * Class: Eac_Acf_Group_File
+ *
+ * @return Affiche le fichier 'FILE' d'un champ ACF de type 'GROUP' pour l'article courant
+ *
+ * @since 1.8.9
+ */
 
 namespace EACCustomWidgets\Includes\Elementor\DynamicTags\ACF\Tags;
 
-use Elementor\Modules\DynamicTags\Module as TagsModule;
-
-if(!defined('ABSPATH')) {
+if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
+
+use Elementor\Modules\DynamicTags\Module as TagsModule;
 
 class Eac_Acf_Group_File extends Eac_Acf_Group_Url {
 
@@ -25,17 +22,17 @@ class Eac_Acf_Group_File extends Eac_Acf_Group_Url {
 	}
 
 	public function get_title() {
-		return esc_html__('ACF Groupe Fichier', 'eac-components');
+		return esc_html__( 'ACF Groupe Fichier', 'eac-components' );
 	}
 
 	public function get_categories() {
-		return [
+		return array(
 			TagsModule::MEDIA_CATEGORY,
-			TagsModule::URL_CATEGORY
-		];
+			TagsModule::URL_CATEGORY,
+		);
 	}
-	
+
 	protected function get_acf_supported_fields() {
-		return ['file'];
+		return array( 'file' );
 	}
 }

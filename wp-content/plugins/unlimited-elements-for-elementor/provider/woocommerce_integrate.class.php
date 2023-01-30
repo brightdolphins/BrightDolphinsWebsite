@@ -225,7 +225,7 @@ class UniteCreatorWooIntegrate{
 			
 			$from = (float)$from;
 			$to = (float)$to;
-			
+						
 			$from = $this->modifyPrice($from, $objProduct);
 			$to = $this->modifyPrice($to, $objProduct);
 			
@@ -239,7 +239,6 @@ class UniteCreatorWooIntegrate{
 		$regularPriceTo = UniteFunctionsUC::getVal($arrProduct, "woo_regular_price_to");
 		
 		$salePriceFrom = UniteFunctionsUC::getVal($arrProduct, "woo_sale_price_from");
-				
 		
 		if($regularPriceFrom === $salePriceFrom){
 			$arrProduct["woo_sale_price_from"] = null;
@@ -249,6 +248,8 @@ class UniteCreatorWooIntegrate{
 			$regularPriceFrom = $this->modifyPrice($regularPriceFrom, $objProduct);
 			$regularPriceTo = $this->modifyPrice($regularPriceTo, $objProduct);
 			
+			$arrProduct["woo_regular_price_from"] = $regularPriceFrom;
+			$arrProduct["woo_regular_price_to"] = $regularPriceTo;
 		}
 				
 		return($arrProduct);
@@ -285,7 +286,7 @@ class UniteCreatorWooIntegrate{
     		$prefix."price_from",
     		$prefix."price_to"
     	);
-
+		
     	array_splice($arrProperties, 4, 0, $arrVariable);
     	
     	return($arrProperties);
@@ -684,16 +685,24 @@ class UniteCreatorWooIntegrate{
     	$regularPrice = UniteFunctionsUC::getVal($arrData, "regular_price");
     	$price = UniteFunctionsUC::getVal($arrData, "price");
     	
+    	$price = apply_filters("woocommerce_product_get_price", $price, $objInfo);
+    	$salePrice = apply_filters("woocommerce_product_get_sale_price", $salePrice, $objInfo);
+    	$regularPrice = apply_filters("woocommerce_product_get_regular_price", $regularPrice, $objInfo);
+    	
     	$salePrice = $this->modifyPrice($salePrice, $objInfo);
     	$regularPrice = $this->modifyPrice($regularPrice, $objInfo);
     	$price = $this->modifyPrice($price, $objInfo);
     	
+    	$priceNoTax = wc_get_price_excluding_tax($objInfo);
+    	$priceWithTax = wc_get_price_including_tax($objInfo);
+    	    	
     	if(empty($regularPrice) && !empty($price))
     		$regularPrice = $price;
     	
     	$arrData["regular_price"] = $regularPrice;
     	$arrData["price"] = $price;
     	$arrData["sale_price"] = $salePrice;
+    	
     	
     	$arrProduct = array();
     	
@@ -708,6 +717,11 @@ class UniteCreatorWooIntegrate{
     		$arrProduct["woo_".$propertyName] = $value;    		
     	}
 		
+    	//add the tax related variables
+    	$arrProduct["woo_price_notax"] = $priceNoTax;    		
+    	$arrProduct["woo_price_withtax"] = $priceWithTax;    		
+    	
+    	
     	//make the rating stars array
     	$arrWooStars = array();
     	$rating = UniteFunctionsUC::getVal($arrData, "average_rating");
@@ -748,8 +762,6 @@ class UniteCreatorWooIntegrate{
     	
     	$arrProduct["woo_discount_percent"] = $discountPercent;
     	
-    	
-    	
     	//add currency
     	$arrProduct["woo_currency"] = $this->currency;
     	$arrProduct["woo_currency_symbol"] = $this->currencySymbol;
@@ -774,6 +786,8 @@ class UniteCreatorWooIntegrate{
 		
 		$arrKeys += $arrProperties;
 		
+    	$arrKeys[] = "woo_price_notax";
+    	$arrKeys[] = "woo_price_withtax";
     	$arrKeys[] = "woo_rating_stars";
 		$arrKeys[] = "woo_discount_percent";
     	$arrKeys[] = "woo_currency";

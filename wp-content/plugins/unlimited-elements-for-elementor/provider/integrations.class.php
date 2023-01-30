@@ -41,7 +41,7 @@ class UniteCreatorPluginIntegrations{
 		$postType = UniteFunctionsUC::getVal($args, "post_type");
 		
 		if(is_array($postType))
-			$postType = $postType[0];
+			$postType = implode(",",$postType);
 		
 		if(empty($postType))
 			$postType = "post";

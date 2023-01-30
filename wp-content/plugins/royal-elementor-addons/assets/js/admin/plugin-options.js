@@ -73,6 +73,7 @@ jQuery(document).ready(function( $ ) {
 		// AJAX Data
 		var data = {
 			action: 'wpr_create_template',
+			nonce: WprPluginOptions.nonce,
 			user_template_library: library,
 			user_template_title: title,
 			user_template_slug: slug,
@@ -174,8 +175,11 @@ jQuery(document).ready(function( $ ) {
 			// Get Template Slug
 			var slug = deleteButton.attr('data-slug');
 
+			var oneTimeNonce = deleteButton.attr('data-nonce');
+
 			// AJAX Data
 			var data = {
+				nonce: oneTimeNonce,
 				action: 'wpr_delete_template',
 				template_slug: slug,
 				template_library: library,
@@ -206,7 +210,8 @@ jQuery(document).ready(function( $ ) {
 
 				// AJAX Data
 				var data = {
-					action: 'wpr_save_template_conditions'
+					action: 'wpr_save_template_conditions',
+					nonce: WprPluginOptions.nonce,
 				};
 				data['wpr_'+ currentTab +'_conditions'] = JSON.stringify(conditions);
 			}
@@ -587,6 +592,7 @@ jQuery(document).ready(function( $ ) {
 			// AJAX Data
 			var data = {
 				action: 'wpr_save_template_conditions',
+				nonce: WprPluginOptions.nonce,
 				template: template
 			};
 			data['wpr_'+ currentTab +'_conditions'] = JSON.stringify(conditions);

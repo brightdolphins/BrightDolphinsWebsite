@@ -1,4 +1,30 @@
 
+version 1.7.70
+
+- added video close panel handle
+
+
+version 1.7.69
+
+-fixed default gallery handle
+
+version 1.7.68
+
+-changed compact theme arrow to svg
+-changed some more images to svg
+
+version 1.7.67
+
+-bug fix: fixed vimeo api
+
+
+version 1.7.66
+
+-improved avia animation
+
+version 1.7.65
+
+-changed avia scroll method
 
 version 1.7.64
 

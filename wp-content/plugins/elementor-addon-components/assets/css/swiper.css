@@ -45,8 +45,10 @@
 	bottom: 0;
 }
 
-/** Image positionnée en absolute si un ratio est appliqué */
-div[class*='slider-ratio-'] .swiper-container .swiper-wrapper .swiper-slide img {
+/** Image positionnée en absolute si un ratio est appliqué
+* @since 2.0.0 Exclusion de la class 'avatar'
+*/
+div[class*='slider-ratio-'] .swiper-container .swiper-wrapper .swiper-slide img:not(.avatar) {
 	position: absolute;
 	display: block;
 	top: 0;

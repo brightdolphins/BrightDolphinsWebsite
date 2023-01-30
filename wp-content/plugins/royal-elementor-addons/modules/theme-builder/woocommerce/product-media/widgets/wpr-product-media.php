@@ -45,43 +45,43 @@ class Wpr_Product_Media extends Widget_Base {
 	}
 
 	public function add_control_gallery_slider_thumbs() {
-		// $this->add_control(
-		// 	'gallery_slider_thumbs_type',
-		// 	[
-		// 		'label' => esc_html__( 'Display Thumbs As', 'wpr-addons' ),
-		// 		'type' => Controls_Manager::SELECT,
-		// 		'options' => [
-		// 			'stacked' => esc_html__( 'Stacked', 'wpr-addons' ),
-		// 			'sl-pro' => esc_html__( 'Slider (Pro)', 'wpr-addons' )
-		// 		],
-		// 		'default' => 'stacked',
-		// 		'render_type' => 'template',
-		// 		'prefix_class' => 'wpr-product-media-thumbs-',
-		// 		'selectors' => [
-		// 			'{{WRAPPER}}.wpr-product-media-thumbs-none .wpr-product-media-wrap .flex-control-nav' => 'display: none;',
-		// 			'{{WRAPPER}}.wpr-product-media-thumbs-stacked .wpr-product-media-wrap .flex-control-nav' => 'display: grid;',
-		// 			'{{WRAPPER}}.wpr-product-media-thumbs-slider .wpr-product-media-wrap .flex-control-nav' => 'display: flex;',
-        //         ],
-        //         'condition' => [
-        //             'gallery_slider_thumbs' => 'yes'
-        //         ]
-		// 	]
-		// );
-
 		$this->add_control(
 			'gallery_slider_thumbs_type',
 			[
-				'type' => \Elementor\Controls_Manager::HIDDEN,
+				'label' => esc_html__( 'Display Thumbs As', 'wpr-addons' ),
+				'type' => Controls_Manager::SELECT,
+				'options' => [
+					'stacked' => esc_html__( 'Stacked', 'wpr-addons' ),
+					'pro-sl' => esc_html__( 'Slider (Pro)', 'wpr-addons' )
+				],
 				'default' => 'stacked',
+				'render_type' => 'template',
 				'prefix_class' => 'wpr-product-media-thumbs-',
 				'selectors' => [
+					'{{WRAPPER}}.wpr-product-media-thumbs-none .wpr-product-media-wrap .flex-control-nav' => 'display: none;',
 					'{{WRAPPER}}.wpr-product-media-thumbs-stacked .wpr-product-media-wrap .flex-control-nav' => 'display: grid;',
-				],
+					'{{WRAPPER}}.wpr-product-media-thumbs-slider .wpr-product-media-wrap .flex-control-nav' => 'display: flex;',
+                ],
                 'condition' => [
                     'gallery_slider_thumbs' => 'yes'
                 ]
 			]
 		);
+
+		// $this->add_control(
+		// 	'gallery_slider_thumbs_type',
+		// 	[
+		// 		'type' => \Elementor\Controls_Manager::HIDDEN,
+		// 		'default' => 'stacked',
+		// 		'prefix_class' => 'wpr-product-media-thumbs-',
+		// 		'selectors' => [
+		// 			'{{WRAPPER}}.wpr-product-media-thumbs-stacked .wpr-product-media-wrap .flex-control-nav' => 'display: grid;',
+		// 		],
+        //         'condition' => [
+        //             'gallery_slider_thumbs' => 'yes'
+        //         ]
+		// 	]
+		// );
 	}
 
 	public function add_controls_group_gallery_slider_thumbs() {}
@@ -856,7 +856,7 @@ class Wpr_Product_Media extends Widget_Base {
 			[
 				'label' => esc_html__( 'Color', 'wpr-addons' ),
 				'type' => Controls_Manager::COLOR,
-				'default' => '#C0A886',
+				'default' => '#FFFFFF',
 				'selectors' => [
 					'{{WRAPPER}} .wpr-thumbnail-slider-arrow' => 'color: {{VALUE}};',
 					'{{WRAPPER}} .wpr-thumbnail-slider-arrow svg' => 'fill: {{VALUE}};',
@@ -901,7 +901,7 @@ class Wpr_Product_Media extends Widget_Base {
 			[
 				'label' => esc_html__( 'Color', 'wpr-addons' ),
 				'type' => Controls_Manager::COLOR,
-				'default' => '#C0A886',
+				'default' => '#FFFFFF',
 				'selectors' => [
 					'{{WRAPPER}} .wpr-thumbnail-slider-arrow:hover' => 'color: {{VALUE}};',
 				],
@@ -1497,7 +1497,7 @@ class Wpr_Product_Media extends Widget_Base {
 			[
 				'class' => ['wpr-product-media-wrap', 'wpr-product-media-thumbs-horizontal'],
 				'data-slidestoshow' => $settings['gallery_slider_thumb_cols'],
-				'data-slidestoscroll' => $settings['gallery_slider_thumbs_to_slide'],
+				'data-slidestoscroll' => isset($settings['gallery_slider_thumbs_to_slide']) ? $settings['gallery_slider_thumbs_to_slide'] : '',
 			]
 		);
 

@@ -1,4 +1,3 @@
-/*! EAC - v1.0.2 - 06-01-2019 */
 
 /** jQuery dialog */
 #eac-dialog_acf-json p a, #eac-dialog_grant-option p a {
@@ -43,12 +42,12 @@
 	width: 150px !important;
 }
 
-th[class^="eac-promotion-"]:after {
+div[class*="eac-promotion-"]:after {
 	position: absolute;
-	bottom: 43px;
+	bottom: 40px;
 	font-size: 12px;
 	color: white;
-	left: 15px;
+	left: 10px;
 	font-weight: 600;
 	border-radius: 4px;
 	width: 65px;
@@ -57,14 +56,101 @@ th[class^="eac-promotion-"]:after {
 	line-height: 25px;
 }
 
+/** @since 1.9.9 Nouvelle mise en page en flex  */
+.eac-elements__table-common {
+	display: flex;
+	flex-wrap: wrap;
+	flex-direction: row;
+	align-items: center;
+	justify-content: flex-start;
+	background-color: #f0f8ff;
+	padding: 10px;
+	row-gap: 10px;
+	column-gap: 10px;
+}
+
+.eac-elements__table-common.wc {
+	flex-direction: column;
+	align-items: start;
+}
+
+.eac-elements__table-common.header {
+	width: 100%;
+	padding:  10px 0;
+	justify-content: flex-start;
+}
+
+.eac-elements__common-item {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	width: calc(100% / 4 - 10px);
+	background-color: white;
+	border-radius: 8px;
+	box-shadow: inset 2px 2px #FFEFD6;
+}
+
+/** L'onglet WC intégration */
+.eac-elements__common-item.redirect.hide,
+.eac-elements__common-item.breadcrumb.hide,
+.eac-elements__common-item.metas.hide,
+.eac-elements__common-item.request.hide,
+.eac-elements__common-item.pages.hide {
+	display: none;
+}
+
+.eac-elements__table-common.wc .eac-elements__common-item {
+	width: 100%;
+	justify-content: flex-start;
+}
+
+.eac-elements__common-item.request,
+.eac-elements__common-item.pages {
+	margin-left: 20px;
+	width: calc(100% - 20px) !important;
+}
+
+.eac-elements__table-common.wc .eac-elements__common-item .info {
+	font-size: 15px;
+	font-weight: 600;
+}
+
+.eac-elements__common-item.config {
+	height: 56.6px;
+	align-items: center;
+	justify-content: space-around !important;
+}
+
+.eac-elements__common-item.config > span {
+	font-size: 1.05rem !important;
+}
+
+/**----------*/
+.eac-elements__common-item.header {
+	width: 35%;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.eac-elements__item-content {
+	font-size: 15px;
+	font-weight: 600;
+	margin-left: 10px;
+}
+
+.eac-elements__item-content.header {
+	font-size: 20px;
+	font-weight: 600;
+}
+				
 /*----------------------------------------------*/
 /** Aide en ligne des composants/Fonctionnalités */
-.eac-elements-table .eac-admin-help, .eac-features-table .eac-admin-help,
 .eac-elements__table-common .eac-admin-help {
 	display: inline-block;
 	width: 20px;
 	height: 20px;
-	margin-left: 5px;
 	background-color: lightgray;
 	border-radius: 50%;
 	vertical-align: top;
@@ -72,30 +158,24 @@ th[class^="eac-promotion-"]:after {
 	text-align: center;
 }
 
-.eac-features-table a, .eac-features-table a:visited, .eac-features-table a:active, .eac-features-table a:focus,
-.eac-elements-table a, .eac-elements-table a:visited, .eac-elements-table a:active, .eac-elements-table a:focus {
+.eac-elements__table-common a, .eac-elements__table-common a:visited, .eac-elements__table-common a:active, .eac-elements__table-common a:focus {
 	text-decoration: none !important;
 	outline: 0 !important;
 }
 
-.eac-elements-table .eac-admin-help::after, .eac-features-table .eac-admin-help::after,
 .eac-elements__table-common .eac-admin-help::after {
 	content: '?';
 	font-size: 15px;
 	color: white;
 }
 
-.eac-elements-table .eac-admin-help.new, .eac-features-table .eac-admin-help.new {
-	background-color: red;
-}
-
 /** L'entête des pages de configuration */
 .eac-header-settings {
-	display:flex;
-	flex-direction:row;
-	justify-content:space-around;
-	align-items:center;
-	max-width:1140px;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+	align-items: center;
+	max-width: 1140px;
 	margin: 10px auto 30px;
 	height: auto;
     padding: 10px;
@@ -171,6 +251,11 @@ th[class^="eac-promotion-"]:after {
 	margin-right: 5px;
 }
 
+/** 2.0.1 */
+.eac-settings .tabs-nav #tab-5 {
+	/*display: none;*/
+}
+
 .tabs-stage {
     border: 1px solid hsl(210, 6%, 79%);
     -webkit-border-radius: 0 0 6px 6px;
@@ -191,55 +276,6 @@ th[class^="eac-promotion-"]:after {
 
 /*----------------------------------------------*/
 /* CSS des tabs composants et features */
-.eac-elements-table, .eac-features-table  {
-	border-collapse: separate;
-    border-spacing: 0px;
-}
-
-.eac-elements-table td, .eac-elements-table th,
-.eac-features-table td, .eac-features-table th {
-	position: relative;
-	border-top: 2px solid white;
-}
-
-.eac-settings-tabs {
-	padding: 5px;
-	border: 2px solid white;
-}
-
-.eac-elements-table, .eac-features-table {
-	width: 100%;
-	text-align: left;
-	font-size: 15px;
-	margin: 10px 0;
-	padding: 15px;
-	box-sizing: border-box;
-	border-radius: 5px;
-	background-color: rgb(255, 255, 255);
-	box-shadow: 0px 5px 18px 0px rgba(0, 4, 32, 0.08);
-}
-
-.eac-elements-table tr:nth-child(odd), .eac-features-table tr:nth-child(odd) {
-	background-color: aliceblue;
-}
-
-.eac-elements-table tr:nth-child(even), .eac-features-table tr:nth-child(even) {
-	background-color: white;
-}
-
-.eac-all-settings, .eac-all-features {
-	font-size: 1.5em;
-	font-weight: 400;
-	width: 50%;
-	/*color: blue;
-	margin: 0 auto;*/
-	background-color: white;
-}
-
-.eac-all-settings td, .eac-all-settings th, .eac-all-features td, .eac-all-features th {
-	border-top: none;
-}
-
 .eac-saving-box {
 	width: 50%;
 	margin: 0 auto;
@@ -256,36 +292,38 @@ th[class^="eac-promotion-"]:after {
 	cursor: pointer;
 }
 
-#eac-elements-saved, #eac-features-saved,
-#eac-elements-notsaved, #eac-features-notsaved {
+#eac-elements-saved, #eac-features-saved, #eac-wc-integration-saved,
+#eac-elements-notsaved, #eac-features-notsaved, #eac-wc-integration-notsaved {
 	font-size: 1.5em;
     font-weight: 600;
 	margin-top: .5em;
 	display:none;
 }
 
-#eac-elements-saved, #eac-features-saved {
+#eac-elements-saved, #eac-features-saved, #eac-wc-integration-saved {
 	color:blue;
 }
 
-#eac-elements-notsaved, #eac-features-notsaved {
+#eac-elements-notsaved, #eac-features-notsaved, #eac-wc-integration-notsaved {
 	color: red;
 }
 
-#eac-form-settings, #eac-form-features {
+#eac-form-settings, #eac-form-features, #eac-form-wc-integration {
 	padding: 10px;
 }
 
 /** Cache les input checkbox standards */
 #eac-form-settings input[type="checkbox"],
-#eac-form-features input[type="checkbox"] {
+#eac-form-features input[type="checkbox"],
+#eac-form-wc-integration input[type="checkbox"] {
     position: absolute;
     opacity: 0;
 }
 
 /** Normal Track */
 #eac-form-settings input[type="checkbox"].ios-switch + div,
-#eac-form-features input[type="checkbox"].ios-switch + div {
+#eac-form-features input[type="checkbox"].ios-switch + div,
+#eac-form-wc-integration input[type="checkbox"].ios-switch + div {
     vertical-align: middle;
     width: 40px;
 	height: 20px;
@@ -295,13 +333,14 @@ th[class^="eac-promotion-"]:after {
     -webkit-transition-duration: .4s;
     -webkit-transition-property: background-color, box-shadow;
     box-shadow: inset 0 0 0 0px rgba(0,0,0,0.4);
-    margin: 15px 1.2em 15px 2.5em;
+    margin: 15px 1.2em;
 	background-color: red;
 }
 
 /** Checked Track (Blue) */
 #eac-form-settings input[type="checkbox"].ios-switch:checked + div,
-#eac-form-features input[type="checkbox"].ios-switch:checked + div {
+#eac-form-features input[type="checkbox"].ios-switch:checked + div,
+#eac-form-wc-integration input[type="checkbox"].ios-switch:checked + div {
     width: 40px;
     background-position: 0 0;
     background-color: #3b89ec;
@@ -311,21 +350,24 @@ th[class^="eac-promotion-"]:after {
 
 /** Tiny Track */
 #eac-form-settings input[type="checkbox"].tinyswitch.ios-switch + div,
-#eac-form-features input[type="checkbox"].tinyswitch.ios-switch + div {
+#eac-form-features input[type="checkbox"].tinyswitch.ios-switch + div,
+#eac-form-wc-integration input[type="checkbox"].tinyswitch.ios-switch + div {
     width: 34px;
 	height: 18px;
 }
 
 /** Big Track */
 #eac-form-settings input[type="checkbox"].bigswitch.ios-switch + div,
-#eac-form-features input[type="checkbox"].bigswitch.ios-switch + div {
+#eac-form-features input[type="checkbox"].bigswitch.ios-switch + div,
+#eac-form-wc-integration input[type="checkbox"].bigswitch.ios-switch + div {
     width: 50px;
 	height: 25px;
 }
 
 /** Green Track */
 #eac-form-settings input[type="checkbox"].green.ios-switch:checked + div,
-#eac-form-features input[type="checkbox"].green.ios-switch:checked + div {
+#eac-form-features input[type="checkbox"].green.ios-switch:checked + div,
+#eac-form-wc-integration input[type="checkbox"].green.ios-switch:checked + div {
     background-color: #00e359;
     border: 1px solid rgba(0, 162, 63,1);
     box-shadow: inset 0 0 0 10px rgba(0,227,89,1);
@@ -333,7 +375,8 @@ th[class^="eac-promotion-"]:after {
 
 /** Normal Knob */
 #eac-form-settings input[type="checkbox"].ios-switch + div > div,
-#eac-form-features input[type="checkbox"].ios-switch + div > div {
+#eac-form-features input[type="checkbox"].ios-switch + div > div,
+#eac-form-wc-integration input[type="checkbox"].ios-switch + div > div {
     float: left;
     width: 18px;
 	height: 18px;
@@ -350,7 +393,8 @@ th[class^="eac-promotion-"]:after {
 
 /** Checked Knob (Blue Style) */
 #eac-form-settings input[type="checkbox"].ios-switch:checked + div > div,
-#eac-form-features input[type="checkbox"].ios-switch:checked + div > div {
+#eac-form-features input[type="checkbox"].ios-switch:checked + div > div,
+#eac-form-wc-integration input[type="checkbox"].ios-switch:checked + div > div {
     -webkit-transform: translate3d(20px, 0, 0);
     background-color: #ffffff;
     box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.3), 0px 0px 0 1px rgba(8, 80, 172,1);
@@ -358,7 +402,8 @@ th[class^="eac-promotion-"]:after {
 
 /** Tiny Knob */
 #eac-form-settings input[type="checkbox"].tinyswitch.ios-switch + div > div,
-#eac-form-features input[type="checkbox"].tinyswitch.ios-switch + div > div {
+#eac-form-features input[type="checkbox"].tinyswitch.ios-switch + div > div,
+#eac-form-wc-integration input[type="checkbox"].tinyswitch.ios-switch + div > div {
     width: 16px;
 	height: 16px;
     margin-top: 1px;
@@ -366,14 +411,16 @@ th[class^="eac-promotion-"]:after {
 
 /** Checked Tiny Knob (Blue Style) */
 #eac-form-settings input[type="checkbox"].tinyswitch.ios-switch:checked + div > div,
-#eac-form-features input[type="checkbox"].tinyswitch.ios-switch:checked + div > div {
+#eac-form-features input[type="checkbox"].tinyswitch.ios-switch:checked + div > div,
+#eac-form-wc-integration input[type="checkbox"].tinyswitch.ios-switch:checked + div > div {
     -webkit-transform: translate3d(16px, 0, 0);
     box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.3), 0px 0px 0 1px rgba(8, 80, 172,1);
 }
 
 /** Big Knob */
 #eac-form-settings input[type="checkbox"].bigswitch.ios-switch + div > div,
-#eac-form-features input[type="checkbox"].bigswitch.ios-switch + div > div {
+#eac-form-features input[type="checkbox"].bigswitch.ios-switch + div > div,
+#eac-form-wc-integration input[type="checkbox"].bigswitch.ios-switch + div > div {
     width: 23px;
 	height: 23px;
     margin-top: 1px;
@@ -381,13 +428,15 @@ th[class^="eac-promotion-"]:after {
 
 /** Checked Big Knob (Blue Style) */
 #eac-form-settings input[type="checkbox"].bigswitch.ios-switch:checked + div > div,
-#eac-form-features input[type="checkbox"].bigswitch.ios-switch:checked + div > div {
+#eac-form-features input[type="checkbox"].bigswitch.ios-switch:checked + div > div,
+#eac-form-wc-integration input[type="checkbox"].bigswitch.ios-switch:checked + div > div {
     -webkit-transform: translate3d(25px, 0, 0);
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3), 0px 0px 0 1px rgba(8, 80, 172,1);
 }
 
 /** Green Knob */
 #eac-form-settings input[type="checkbox"].green.ios-switch:checked + div > div,
-#eac-form-features input[type="checkbox"].green.ios-switch:checked + div > div {
+#eac-form-features input[type="checkbox"].green.ios-switch:checked + div > div,
+#eac-form-wc-integration input[type="checkbox"].green.ios-switch:checked + div > div {
     box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 162, 63,1);
 }

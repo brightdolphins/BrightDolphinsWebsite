@@ -1238,13 +1238,10 @@ function UniteCreatorElementorEditorAdmin(){
 	
 	function ____________BACKGROUNDS______________(){}
 	
-	
-	
 	/**
 	 * search elementor data
 	 */
 	function searchElementorData(data, id){
-		
 		
 		//get from last opened object
 		if(id && id == window.ucLastElementorModelID){
@@ -1581,8 +1578,8 @@ function UniteCreatorElementorEditorAdmin(){
 		var objSettings = getSettingsFromElementor(id);
 				
 		checkElementBackground(element, objSettings);
-		
 	}
+	
 	
 	/**
 	 * get last widget settings
@@ -1617,12 +1614,14 @@ function UniteCreatorElementorEditorAdmin(){
 		elementor.hooks.addAction("panel/open_editor/section", onElementorSectionPanelChange);
 		elementor.hooks.addAction("panel/open_editor/container", onElementorSectionPanelChange);
 		elementor.hooks.addAction("panel/open_editor/widget", onElementorSectionPanelChange);
-		
-		//elementorFrontend.hooks.addAction( 'frontend/element_ready/global', onFrontElementReady); 
-		
-		elementorFrontend.hooks.addAction( 'frontend/element_ready/section', onFrontElementReady); 
-		elementorFrontend.hooks.addAction( 'frontend/element_ready/container', onFrontElementReady); 
-		
+				
+		if(typeof elementorFrontend != "undefined"){
+			
+			//elementorFrontend.hooks.addAction( 'frontend/element_ready/widget', onFrontWidgetReady); 
+			
+			elementorFrontend.hooks.addAction( 'frontend/element_ready/section', onFrontElementReady); 
+			elementorFrontend.hooks.addAction( 'frontend/element_ready/container', onFrontElementReady); 
+		}
 	}
 
 	/**
@@ -1688,6 +1687,9 @@ function UniteCreatorElementorEditorAdmin(){
 	 */
 	this.initFrontEndInteraction = function(windowFront, elementorFrontend){
 		
+		if(typeof elementorFrontend == "undefined")
+			return(false);
+		
 		//wait for full load of front end object
 		if(typeof elementorFrontend.hooks == "undefined"){
 			
@@ -1710,6 +1712,14 @@ function UniteCreatorElementorEditorAdmin(){
 			initBackgrounds();
 		
 		elementor.hooks.addAction("panel/open_editor/widget", onElementorOpenWidget);
+		
+		if(elementor.channels){
+			elementor.channels.data.on("element:destroy",function(model){
+				
+				g_frontAPI.triggerEvent("after_delete_element", model.id);
+				
+			});
+		}
 		
 		
 	}
@@ -1787,7 +1797,6 @@ function UniteCreatorElementorFrontAPI(){
 
 
 var g_objUCElementorEditorAdmin = new UniteCreatorElementorEditorAdmin();
-
 
 jQuery(document).ready(function(){
 	g_objUCElementorEditorAdmin.init();

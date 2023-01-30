@@ -37,7 +37,7 @@ class UniteProviderCoreAdminUC_Elementor extends UniteProviderAdminUC{
 				"backgrounds",
 				GlobalsUnlimitedElements::VIEW_TEMPLATES_ELEMENTOR,
 				GlobalsUnlimitedElements::VIEW_CUSTOM_POST_TYPES,
-				"test_settings"
+				"testsettings"
 			);
 					
 			HelperProviderCoreUC_EL::globalInit();

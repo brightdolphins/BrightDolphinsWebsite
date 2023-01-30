@@ -328,8 +328,6 @@ class UniteCreatorElementorIntegrate{
 			$this->registerWidgets_categories();
 		else{
 			
-			//$arrAddons = $this->getArrAddons(true);
-			
 			$this->registerWidgets_addons(self::$arrAddonsRecords, true);
 		}
 		
@@ -750,9 +748,10 @@ class UniteCreatorElementorIntegrate{
 				$this->objBackgroundWidget = new UniteCreatorElementorBackgroundWidget();
 			
 			$arrAddonValues = $this->objBackgroundWidget->getBGSettings($settings, $backgroundType);
-			
+						
 			if(!empty($arrAddonValues))
 				$objAddon = $this->objBackgroundWidget->setAddonSettingsFromElementorSettings($objAddon, $arrAddonValues);
+			
 			
 			if(empty(self::$objAddons))
 				self::$objAddons = new UniteCreatorAddons();
@@ -1537,6 +1536,18 @@ class UniteCreatorElementorIntegrate{
 		return($filterValue);		
 	}
 	
+	/**
+	 * on wpml translation register
+	 */
+	public function onWpmlTranslateRegister($arrWidgets){
+		
+		
+		dmp("register wpml translate");
+		exit();
+		
+		return($arrWidgets);
+	}
+	
     
 	private function a____________INIT_INTEGRATION___________(){}
 
@@ -1607,7 +1618,7 @@ class UniteCreatorElementorIntegrate{
      * init the elementor integration
      */
     public function initElementorIntegration(){
-
+		
     	$isEnabled = HelperProviderCoreUC_EL::getGeneralSetting("el_enable");
     	$isEnabled = UniteFunctionsUC::strToBool($isEnabled);
     	if($isEnabled == false)
@@ -1694,13 +1705,18 @@ class UniteCreatorElementorIntegrate{
 		add_filter( 'pre_handle_404', array($this, 'checkAllowWidgetPagination' ), 11, 2 );
     	
 		//dynamic loop
+		add_action( 'elementor/frontend/container/before_render', array($this, "onBeforeRenderElement") );
 		add_action( 'elementor/frontend/section/before_render', array($this, "onBeforeRenderElement") );
 		add_action( 'elementor/frontend/column/before_render', array($this, 'onBeforeRenderElement') );
 		add_action( 'elementor/frontend/widget/before_render', array($this, 'onBeforeRenderElement') );
 		
 		add_action( 'elementor/frontend/before_get_builder_content', array($this, 'onBuilderContentData'),10,2);
 		
+		//wpml translation integrattion
+		
+		//add_filter( 'wpml_elementor_widgets_to_translate', array( $this, 'onWpmlTranslateRegister' ) );
 		 
+		
     	// ------ admin related only ----------
     	
     	if(is_admin() == false)

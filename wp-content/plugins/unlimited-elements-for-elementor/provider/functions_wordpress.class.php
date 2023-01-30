@@ -10,6 +10,7 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 		private static $db;
 		private static $objAcfIntegrate;
 		private static $cacheTermCustomFields = array();
+		private static $cacheUserCustomFields = array();
 		private static $cacheTermParents = array();
 		
 		private static $arrTermParentsCache = array();
@@ -291,6 +292,7 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 			$arrBuiltIn = array(
 			 	"post"=>"post",
 			 	"page"=>"page",
+			 	"attachment"=>"attachment",
 			 );
 			 
 			 $arrCustomTypes = get_post_types(array('_builtin' => false));
@@ -596,8 +598,16 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 		 */
 		public static function getPostSingleTerms($postID, $taxonomyName){
 			
-			$arrTerms = wp_get_post_terms($postID, $taxonomyName);
-						
+			//check from cache
+			if(isset(GlobalsProviderUC::$arrPostTermsCache[$postID][$taxonomyName])){
+				
+				$arrTerms = GlobalsProviderUC::$arrPostTermsCache[$postID][$taxonomyName];
+				
+				$arrTerms = array_values($arrTerms);
+			}else{
+				$arrTerms = wp_get_post_terms($postID, $taxonomyName);
+			}
+			
 			$arrTerms = self::getTermsObjectsData($arrTerms, $taxonomyName);
 			
 			return($arrTerms);
@@ -700,6 +710,40 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 			}
 			
 			return($arrTitles);
+		}
+		
+		/**
+		 * get post terms id's
+		 * if empty - get current post term id's
+		 */
+		public static function getPostTermIDs($post = null){
+			
+			if(empty($post))
+				$post = get_post();			
+			
+			if(empty($post))
+				return(array());
+				
+			$arrTermsWithTax = self::getPostTerms($post);
+
+			if(empty($arrTermsWithTax))
+				return(array());
+			
+			$arrTermIDs = array();
+			
+			foreach($arrTermsWithTax as $terms){
+				
+				if(empty($terms))
+					continue;
+				
+				foreach($terms as $term){
+					$termID = UniteFunctionsUC::getVal($term, "term_id");
+					$arrTermIDs[] = $termID;
+				}
+				
+			}
+			
+			return($arrTermIDs);
 		}
 		
 		
@@ -1275,8 +1319,8 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 			$arr[self::SORTBY_PARENT] = __("Parent Post", "unlimited-elements-for-elementor");
 			$arr["post__in"] = __("Preserve Posts In Order", "unlimited-elements-for-elementor");
 			
-			$arr[self::SORTBY_META_VALUE] = __("Custom Field Value", "unlimited-elements-for-elementor");
-			$arr[self::SORTBY_META_VALUE_NUM] = __("Custom Field Value (numeric)", "unlimited-elements-for-elementor");
+			$arr[self::SORTBY_META_VALUE] = __("Meta Field Value", "unlimited-elements-for-elementor");
+			$arr[self::SORTBY_META_VALUE_NUM] = __("Meta Field Value (numeric)", "unlimited-elements-for-elementor");
 			
 			return($arr);
 		}
@@ -1341,18 +1385,17 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 			
 			if(isset(self::$cacheTermCustomFields[$cacheKey]))
 				return(self::$cacheTermCustomFields[$cacheKey]);
-			
-			$prefix = null;
-			if($addPrefixes == true)
-				$prefix = "cf_";
-			
+						
 			$isAcfActive = UniteCreatorAcfIntegrate::isAcfActive();
 			
-			if($isAcfActive == false)
-				return(array());
-							
+			if($isAcfActive == false){
+				$arrMeta = self::getTermMeta($termID, $addPrefixes);
+				
+				return($arrMeta);
+			}
+			
 			$objAcf = self::getObjAcfIntegrate();
-			$arrCustomFields = $objAcf->getAcfFields($termID, "term");
+			$arrCustomFields = $objAcf->getAcfFields($termID, "term",$addPrefixes);
 			
 			self::$cacheTermCustomFields[$cacheKey] = $arrCustomFields;
 			
@@ -1481,7 +1524,7 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 		/**
 		 * get terms meta
 		 */
-		public static function getTermMeta($termID){
+		public static function getTermMeta($termID, $addPrefixes = false){
 			
 			$arrMeta = get_term_meta($termID);
 			
@@ -1495,9 +1538,12 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 				if(is_array($item) && count($item) == 1)
 					$item = $item[0];
 				
+				if($addPrefixes == true)
+					$key = "cf_".$key;
+				
 				$arrMetaOutput[$key] = $item;
 			}
-			
+						
 			return($arrMetaOutput);
 		}
 		
@@ -1603,6 +1649,35 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 			return($arrKeysOutput);
 		}
 		
+		
+		/**
+		 * get term custom field
+		 */
+		public static function getUserCustomFields($userID, $addPrefixes = true){
+			
+			$cacheKey = $termID;
+			if($addPrefixes == true)
+				$cacheKey = $userID."_prefixes";
+			
+			if(isset(self::$cacheUserCustomFields[$cacheKey]))
+				return(self::$cacheUserCustomFields[$cacheKey]);
+			
+			$isAcfActive = UniteCreatorAcfIntegrate::isAcfActive();
+			
+			if($isAcfActive == false){
+				
+				$arrMeta = self::getUserMeta($userID,array(),$addPrefixes);
+				
+				return($arrMeta);
+			}
+			
+			$objAcf = self::getObjAcfIntegrate();
+			$arrCustomFields = $objAcf->getAcfFields($userID, "user",$addPrefixes);
+			
+			self::$cacheUserCustomFields[$cacheKey] = $arrCustomFields;
+			
+			return($arrCustomFields);
+		}
 		
 		
 		public static function a__________POST_GETTERS__________(){}
@@ -1846,6 +1921,7 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 						
 			return($arrQuery);
 		}
+		
 		
 		/**
 		 * get taxanomy query
@@ -2426,7 +2502,118 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 			
 		}
 		
+		/**
+		 * cache attachment images query calls. one call instead of many
+		 * input - post array. 
+		 */
+		public static function cachePostsAttachmentsQueries($arrPosts){
+			
+			if(empty($arrPosts))
+				return(false);
+			
+			$arrAttachmentIDs = self::getPostsAttachmentsIDs($arrPosts);
+						
+			if(empty($arrAttachmentIDs))
+				return(false);
+			
+			self::cachePostMetaQueries($arrAttachmentIDs);
+		}
+		
+		/**
+		 * cache post meta queries by id's
+		 */
+		public static function cachePostMetaQueries($arrPostIDs){
+			
+			if(empty($arrPostIDs))
+				return(false);
+			
+			_prime_post_caches($arrPostIDs);
+			
+		}
+		
+		/**
+		 * get post terms queries
+		 */
+		public static function cachePostsTermsQueries($arrPosts){
+			
+			if(empty($arrPosts))
+				return(false);
+			
+			$arrIDs = array();
+			
+			//single type for now
+			$postType = null;
+			
+			foreach($arrPosts as $post){
+				
+				if(empty($postType))
+					$postType = $post->post_type;
+				
+				$arrIDs[] = $post->ID;
+			}
+			
+			
+			$arrTaxonomies = self::getPostTypeTaxomonies($postType);
+			
+			if(empty($arrTaxonomies))
+				return(false);
+			
+			$arrTaxKeys = array_keys($arrTaxonomies);
+			
+			//get all terms
+			
+			$args = array();
+			$args["fields"] = "all_with_object_id";
+			
+			$arrTerms = wp_get_object_terms($arrIDs, $arrTaxKeys, $args);
+			
+			$arrTermsByPosts = array();
+			
+			foreach($arrTerms as $term){
+				
+				$postID = $term->object_id;
+				
+				if(isset(GlobalsProviderUC::$arrPostTermsCache[$postID]) == false)
+					$arrTermsByPosts[$postID] = array();
+
+				$taxonomy = $term->taxonomy;
+					
+				$termID = $term->term_id;
+				
+				GlobalsProviderUC::$arrPostTermsCache[$postID][$taxonomy][$termID] = $term;
+			}
+			
+		}
+		
+		
 		public static function a__________ATTACHMENT________(){}
+		
+		/**
+		 * get attachmet id's from post
+		 */
+		public static function getPostsAttachmentsIDs($arrPosts){
+			
+			if(empty($arrPosts))
+				return(false);
+			
+			$arrIDs = array();
+						
+			foreach($arrPosts as $post){
+				
+				$postID = $post->ID;
+				
+				$featuredImageID = self::getFeaturedImageID($postID);
+				
+				if(empty($featuredImageID))
+					continue;
+				
+				$arrIDs[] = $featuredImageID;
+			}
+			
+			
+			return($arrIDs);
+		}
+		
 		
 		/**
 		 * get first image id from content
@@ -2853,7 +3040,7 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 		/**
 		 * get user meta
 		 */
-		public static function getUserMeta($userID, $arrMetaKeys = null){
+		public static function getUserMeta($userID, $arrMetaKeys = null, $addPrefixed = false){
 			
 			$arrMeta = get_user_meta($userID,'',true);
 			
@@ -2885,6 +3072,9 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 					if(!empty($arrOpened))
 						$metaValue = $arrOpened;
 				}
+				
+				if($addPrefixed == true)
+					$key = "cf_".$key;
 				
 				$arrOutput[$key] = $metaValue;
 			}
@@ -2923,6 +3113,9 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 		 */
 		public static function getUserData($objUser, $getMeta = false, $getAvatar = false, $arrMetaKeys = null){
 			
+			if(is_numeric($objUser))
+				$objUser = get_user_by("id",$objUser);
+			
 			$userID = $objUser->ID;
 						
 			$urlPosts = get_author_posts_url($userID);
@@ -2949,6 +3142,8 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 				$name = UniteFunctionsUC::getVal($userData, "user_login");
 				
 			$arrData["name"] = $name;
+			
+			$arrData["user_login"] = UniteFunctionsUC::getVal($userData, "user_login");
 			
 			$arrData["email"] = UniteFunctionsUC::getVal($userData, "user_email");
 			
@@ -3081,6 +3276,9 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 			
 			$arrUsersShort = array();
 			
+			$arrNames = array();
+			$arrAlternative = array();
+			
 			foreach($arrUsers as $objUser){
 				
 				$userID = $objUser->ID;
@@ -3090,10 +3288,31 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 					$name = $userData->user_nicename;
 				if(empty($name))
 					$name = $userData->user_login;
+				
+				$login = $userData->user_login;
+				$alternativeName = $name." ({$login})";
+					
+				
+				//avoid duplicate names
+				
+				if(isset($arrNames[$name])){
+					
+					$oridinalUserID = $arrNames[$name];
+					
+					$arrUsersShort[$oridinalUserID] = $arrAlternative[$name];
+					
+					$name = $alternativeName;
+					
+				}else{
+					$arrAlternative[$name] = $alternativeName;
+				}
+				
+				$arrNames[$name] = $userID;
 					
 				$arrUsersShort[$userID] = $name;
 			}
 			
+						
 			self::$cacheAuthorsShort = $arrUsersShort;
 			
 			if($addCurrentUser == true){
@@ -3181,12 +3400,32 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 		public static function a___________OTHER_FUNCTIONS__________(){}
 		
 		/**
+		 * get wordpress language
+		 */
+		public static function getLanguage(){
+			
+			$locale = get_locale();
+			if(is_string($locale) == false)
+				return("en");
+			
+			$pos = strpos($locale, "_");
+			
+			if($pos === false)
+				return($locale);
+				
+			$lang = substr($locale, 0, $pos);
+			
+			return($lang);
+		}
+		
+		
+		/**
 		 * get install plugin slug
 		 */
-		public static function getInstallPluginLink($slug){
+		public static function getInstallPluginLink($slug = 'doubly'){
 			
 			$action = 'install-plugin';
-			$slug = 'doubly';
+			
 			$urlInstall = wp_nonce_url(
 			    add_query_arg(
 			        array(

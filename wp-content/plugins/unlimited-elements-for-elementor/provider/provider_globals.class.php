@@ -34,6 +34,12 @@ class GlobalsProviderUC{
 	public static $lastPostQuery_paginationType = null;
 	public static $skipRunPostQueryOnce = false;
 	public static $lastQueryArgs = null;
+	public static $isUnderAjaxSearch = false;
+	public static $isUnderRenderPostItem = false;
+	public static $isUnderItem = false;
+	public static $lastItemParams = array();
+	
+	
 	
 	public static $arrTestTermIDs = null;	//test term id's for render taxonomies under ajax
 	
@@ -43,8 +49,10 @@ class GlobalsProviderUC{
 	const QUERY_TYPE_CUSTOM = "custom";
 	const QUERY_TYPE_MANUAL = "manual";
 	
-	
-	public static $arrFetchedPostIDs = array();
+	public static $arrFetchedPostIDs = array();	
+	public static $arrPostTermsCache = array();	
+	public static $isUnderAjaxDynamicTemplate = false;
+	public static $isUnderAjax = false;
 	
 	public static $arrFilterPostTypes = array(		//filter post types that will not show
 				"elementor_library", 

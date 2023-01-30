@@ -218,7 +218,7 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 		 * get row class
 		 */
 		protected function drawSettingRow_getRowClass($setting, $basClass = ""){
-			
+						
 			//set text class:
 			$class = $basClass;
 			

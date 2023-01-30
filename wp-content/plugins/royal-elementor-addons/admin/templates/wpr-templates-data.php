@@ -115,6 +115,32 @@ class WPR_Templates_Data {
 					'priority' => 4,
 				],
 			],
+			'hotel' => [
+				'v1' => [
+					'name' => 'Hotel',
+					'pages' => 'home,dining,rooms,services,history,gallery,contact,',
+					'plugins' => '{"contact-form-7":'. $is_cf7_active .', "media-library-assistant":'. $is_mla_active .'}',
+					'tags' => 'hotel motel rooms apartment guest house budget hotel lodge lodging resort bnb accommodation resort travel tourism luxury hotel',
+					'theme-builder' => false,
+					'woo-builder' => false,
+					'off-canvas' => false,
+					'price' => $is_pro_active ? 'free' : 'free',
+					'priority' => 20,
+				],
+			],
+			'fitness-gym' => [
+				'v1' => [
+					'name' => 'Fitness Gym',
+					'pages' => 'home,about,gallery,classes,pricing,gallery,review,trainers,contact,comingsoon,',
+					'plugins' => '{"contact-form-7":'. $is_cf7_active .', "media-library-assistant":'. $is_mla_active .'}',
+					'tags' => 'personal trainer gym fitness yoga exercises workout blog cardio strength training weightlifting crossfit hiit bodyweight exercises muscle building bodybuilding powerlifting',
+					'theme-builder' => true,
+					'woo-builder' => false,
+					'off-canvas' => false,
+					'price' => $is_pro_active ? 'free' : 'free',
+					'priority' => 21,
+				],
+			],
 			'food-blog' => [
 				'v1' => [
 					'name' => 'Food Blog',
@@ -199,6 +225,17 @@ class WPR_Templates_Data {
 					'woo-builder' => false,
 					'off-canvas' => false,
 					'price' => $is_pro_active ? 'free' : 'free',
+					'priority' => 1,
+				],
+				'v2' => [
+					'name' => 'Digital Marketing Agency 2',
+					'pages' => 'home,seo,social,web,email,blog,about,team,contact,pricing1,pricing2,pricing3,casestudy,',
+					'plugins' => '{"contact-form-7":'. $is_cf7_active .'}',
+					'tags' => 'digital agency company corporate digital services office agency web digital marketing seo social media branding',
+					'theme-builder' => true,
+					'woo-builder' => false,
+					'off-canvas' => false,
+					'price' => $is_pro_active ? 'free' : 'pro',
 					'priority' => 1,
 				],
 			],
@@ -584,6 +621,43 @@ class WPR_Templates_Data {
 					'priority' => 300,
 				],
 			],
+		];
+	}
+
+	public static function get_available_kits_for_pages() {
+		$is_pro_active = wpr_fs()->can_use_premium_code() && defined('WPR_ADDONS_PRO_VERSION');
+		
+		return [
+			'digital-marketing-agency-v1' => [
+				'name' => 'Digital Marketing Agency',
+				'pages' => ['home','seo','branding','marketing','social','about','contact'], // missing: services
+				'preview' => ['home','seo-services','branding','digital-marketing','social-media','about','contact'],
+				'price' => $is_pro_active ? 'free' : 'free',
+			],
+			'digital-agency-dark-v1' => [
+				'name' => 'Digital Agency Dark',
+				'pages' => ['home','about','services','team','portfolio','blog','contact'],
+				'preview' => ['home','about','services','team','portfolio','blog','contact'],
+				'price' => $is_pro_active ? 'free' : 'free',
+			],
+			'ittech-v1' => [
+				'name' => 'IT Tech',
+				'pages' => ['home','about','services','pricing','faq','contact'],
+				'preview' => ['home','about-us','services','pricing','faq','contact'],
+				'price' => $is_pro_active ? 'free' : 'free',
+			],
+			'nature-v1' => [
+				'name' => 'Nature',
+				'pages' => ['home','about','services','projects','contact'],
+				'preview' => ['home','about-us','services','projects','contact'],
+				'price' => $is_pro_active ? 'free' : 'free',
+			],
+			// 'fashion-v1' => [
+			// 	'name' => 'Fashion Shop',
+			// 	'pages' => ['home','shop-v1','shop-v2','about','faq','contact'],
+			// 	'preview' => ['home','shop-fashion-v1','shop-v2','about','faq','contact'],
+			// 	'price' => $is_pro_active ? 'free' : 'pro'
+			// ]
 		];
 	}
 

@@ -16,8 +16,11 @@ class UniteCreatorTemplateEngineWork{
 	protected $arrItems = array();
 	protected $addon = null;
 	protected $objParamsProcessor;
+	protected $isItemsFromPosts = false;
+	
 	private static $arrSetVarsCache = array();
 	private static $urlBaseCache = null;
+	
 	
 	
 	/**
@@ -38,7 +41,18 @@ class UniteCreatorTemplateEngineWork{
 	 */
 	private function outputItem($index, $itemParams, $templateName, $sap, $newLine = true){
 		
+		GlobalsProviderUC::$isUnderItem = true;
+		
+		if($this->isItemsFromPosts == true){
+			
+			//HelperProviderUC::startDebugQueries();
+			
+			GlobalsProviderUC::$isUnderRenderPostItem = true;
+		}			
+			
 		$params = array_merge($this->arrParams, $itemParams);
+		
+		GlobalsProviderUC::$lastItemParams = $params;
 		
 		$htmlItem = $this->twig->render($templateName, $params);
 		
@@ -51,6 +65,20 @@ class UniteCreatorTemplateEngineWork{
 		
 		if($newLine)
 			echo "\n";
+		
+		
+		if($this->isItemsFromPosts == true){
+			
+			GlobalsProviderUC::$isUnderRenderPostItem = false;
+			
+			//HelperProviderUC::printDebugQueries();
+			//dmp("check queries");exit();
+			
+		}
+		
+		GlobalsProviderUC::$isUnderItem = false;
+		
+		
 	}
 	
 	
@@ -65,7 +93,6 @@ class UniteCreatorTemplateEngineWork{
 		if($this->isTemplateExists($templateName) == false)
 			return(false);
 		
-				
 		if($numItem !== null){
 			$itemParams = UniteFunctionsUC::getVal($this->arrItems, $numItem);
 			if(empty($itemParams))
@@ -180,7 +207,7 @@ class UniteCreatorTemplateEngineWork{
 			$arrAttr = UniteFunctionsUC::removeArrItemsByKeys($arrAttr, GlobalsProviderUC::$arrAttrConstantKeys);
 		
 		$jsonAttr = UniteFunctionsUC::jsonEncodeForClientSide($arrAttr);
-				
+		
 		echo $jsonAttr;
 	}
 	
@@ -380,6 +407,14 @@ class UniteCreatorTemplateEngineWork{
 	 * filter uc date, clear html first, then replace the date
 	 */
 	public function filterUCDate($dateStamp, $format = "", $formatDateFrom = "d/m/Y"){
+		
+		//get the time ago string
+		
+		if($format === "time_ago"){
+			$strTimeAgo = UniteFunctionsUC::getTimeAgoString($dateStamp);
+			
+			return($strTimeAgo);
+		}
 		
 		if(empty($format))
 			$format = get_option("date_format");
@@ -717,12 +752,12 @@ class UniteCreatorTemplateEngineWork{
 	 * put dynamic loop template, similar to put listing template
 	 */
 	public function putDynamicLoopTemplate($item, $templateID){
-				
+			
 		$widgetID = UniteFunctionsUC::getVal($this->arrParams, "uc_id");
 		
 		$objFilters = new UniteCreatorFiltersProcess();
 		$isAjax = $objFilters->isFrontAjaxRequest();
-
+		
 		if($isAjax == true)
 			$widgetID = "%uc_widget_id%";
 		
@@ -760,6 +795,16 @@ class UniteCreatorTemplateEngineWork{
 		$newPrice = wc_price($price);
 		
 		return($newPrice);
+	}
+	
+	/**
+	 * json decode
+	 */
+	public function filterJsonDecode($strJson){
+		
+		$arrOutput = UniteFunctionsUC::jsonDecode($strJson);
+		
+		return($arrOutput);
 	}
 	
 	
@@ -1094,6 +1139,12 @@ class UniteCreatorTemplateEngineWork{
 				
 					$this->checkPutSchemaItems($arg1);
 			break;
+			case "render":		//render twig template
+								
+				$html = $this->getRenderedHtml($arg1, GlobalsProviderUC::$isUnderItem);
+				echo $html;
+				
+			break;
 			default:
 				
 				$type = UniteFunctionsUC::sanitizeAttr($type);
@@ -1112,6 +1163,11 @@ class UniteCreatorTemplateEngineWork{
 		
 		dmp("put some test html");
 		dmP($type);
+		
+		//unset($data["current_post"]["content"]);
+		//$post = UniteFunctionsUC::getVal($data, "")
+		unset($data["content"]);
+		dmp($data);
 		
 	}
 	
@@ -1183,6 +1239,7 @@ class UniteCreatorTemplateEngineWork{
 		$filterUCDate = new Twig_SimpleFilter("ucdate", array($this, "filterUCDate"));
 		$filterPriceNumberFormat = new Twig_SimpleFilter("price_number_format", array($this, "filterPriceNumberFormat"));
 		$filterWcPrice = new Twig_SimpleFilter("wc_price", array($this, "filterWcPrice"));
+		$filterJsonDecode = new Twig_SimpleFilter("json_decode", array($this, "filterJsonDecode"));
 		
 		$putTestHtml = new Twig_SimpleFunction('putTestHTML', array($this,"putTestHTML"));
 		
@@ -1243,6 +1300,7 @@ class UniteCreatorTemplateEngineWork{
 		$this->twig->addFilter($filterUCDate);
 		$this->twig->addFilter($filterPriceNumberFormat);
 		$this->twig->addFilter($filterWcPrice);
+		$this->twig->addFilter($filterJsonDecode);
 		
 		
 		//pro functions
@@ -1352,6 +1410,16 @@ class UniteCreatorTemplateEngineWork{
 		
 	}
 	
+	/**
+	 * set items source
+	 */
+	public function setItemsSource($source){
+		
+		if($source == "posts")
+			$this->isItemsFromPosts = true;
+		
+	}
+	
 	
 	/**
 	 * set items
@@ -1383,7 +1451,7 @@ class UniteCreatorTemplateEngineWork{
 	 * get rendered html
 	 * @param $name
 	 */
-	public function getRenderedHtml($name){
+	public function getRenderedHtml($name, $isInsideItems = false){
 		
 		UniteFunctionsUC::validateNotEmpty($name);
 		$this->validateInited();
@@ -1393,7 +1461,12 @@ class UniteCreatorTemplateEngineWork{
 		if(empty($this->twig))
 			$this->initTwig();
 		
-		$output = $this->twig->render($name, $this->arrParams);
+		$params = $this->arrParams;
+
+		if($isInsideItems == true)
+			$params = GlobalsProviderUC::$lastItemParams;
+		
+		$output = $this->twig->render($name, $params);
 		
 		return($output);
 	}

@@ -306,14 +306,17 @@ class Utilities {
 	** Get Posts of Post Type
 	*/
 	public static function get_posts_by_post_type( $slug ) {
-		$query = get_posts( [ 'post_type' => $slug, 'posts_per_page' => -1 ] );
 		$posts = [];
 
-		foreach ( $query as $post ) {
-			$posts[$post->ID] = $post->post_title;
+		if ( is_admin() ) {
+			$query = get_posts( [ 'post_type' => $slug, 'posts_per_page' => -1 ] );
+
+			foreach ( $query as $post ) {
+				$posts[$post->ID] = $post->post_title;
+			}
+			
+			wp_reset_postdata();
 		}
-		
-		wp_reset_postdata();
 
 		return $posts;
 	}
@@ -469,8 +472,48 @@ class Utilities {
 		return $result;
 	}
 
+	/**
+	** Disable Extra Image Sizes
+	*/
+	public static function disable_extra_image_sizes( $new_sizes, $image_meta, $attachment_id ) {
+		$all_attachments = get_option( 'st_attachments', array() );
+
+		// If the cron job is already scheduled, bail.
+		if ( in_array( $attachment_id, $all_attachments, true ) ) {
+			return $new_sizes;
+		}
+
+		$all_attachments[] = $attachment_id;
+
+		update_option( 'st_attachments', $all_attachments, 'no' );
+
+		// Return blank array of sizes to not generate any sizes in this request.
+		return array();
+	}
+
+	/**
+	** Regenerate Extra Image Sizes
+	*/
+	public static function regenerate_extra_image_sizes() {
+		$all_attachments = get_option( 'st_attachments', array() );
+	
+		if ( empty( $all_attachments ) ) {
+			return;
+		}
+	
+		foreach ( $all_attachments as $attachment_id ) {
+			$file = get_attached_file( $attachment_id );
+			if ( false !== $file ) {
+				wp_generate_attachment_metadata( $attachment_id, $file );
+			}
+		}
+		update_option( 'st_attachments', array(), 'no' );
+	}
+
 	// Get Post Sharing Icon
 	public static function get_post_sharing_icon( $args = [] ) {
+
+		$args['url'] = esc_url($args['url']);
 		
 		if ( 'facebook-f' === $args['network'] ) {
 			$sharing_url = 'https://www.facebook.com/sharer.php?u='. $args['url'];
@@ -513,7 +556,7 @@ class Utilities {
 			$sharing_url = 'https://web.skype.com/share?url='. $args['url'];
 			$network_title = esc_html__( 'Skype', 'wpr-addons' );
 		} elseif ( 'whatsapp' === $args['network'] ) {
-			$sharing_url = 'https://api.whatsapp.com/send?text=*'. $args['title'] .'*\n'. $args['text'] .'\n'. $args['url'];
+			$sharing_url = 'https://api.whatsapp.com/send?text=*'. $args['title'] .'*%0a'. $args['text'] .'%0a'. $args['url'];
 			$network_title = esc_html__( 'WhatsApp', 'wpr-addons' );
 		} elseif ( 'telegram' === $args['network'] ) {
 			$sharing_url = 'https://telegram.me/share/url?url='. $args['url'] .'&text='. $args['text'];
@@ -532,12 +575,12 @@ class Utilities {
 			$network_title = '';
 		}
 
-		$sharing_url = 'print' === $args['network'] ? $sharing_url : esc_url( $sharing_url );
+		$sharing_url = 'print' === $args['network'] ? $sharing_url : $sharing_url;
 
 		$output = '';
 
 		if ( '' !== $network_title ) {
-			$output .= '<a href="'. esc_url($sharing_url) .'" class="wpr-sharing-icon wpr-sharing-'. esc_attr( $args['network'] ) .'" title="" target="_blank">';
+			$output .= '<a href="'. $sharing_url .'" class="wpr-sharing-icon wpr-sharing-'. esc_attr( $args['network'] ) .'" title="" target="_blank">';
 				// Tooltip
 				$output .= 'yes' === $args['tooltip'] ? '<span class="wpr-sharing-tooltip wpr-tooltip">'. esc_html( $network_title ) .'</span>' : '';
 				
@@ -730,6 +773,7 @@ class Utilities {
         $merge_fields = array(
             'FNAME' => !empty( $fields['wpr_mailchimp_firstname'] ) ? sanitize_text_field($fields['wpr_mailchimp_firstname']) : '',
             'LNAME' => !empty( $fields['wpr_mailchimp_lastname'] ) ? sanitize_text_field($fields['wpr_mailchimp_lastname']) : '',
+			'PHONE' => !empty ( $fields['wpr_mailchimp_phone_number'] ) ? sanitize_text_field($fields['wpr_mailchimp_phone_number']) : '',
         );
 
         // API URL
@@ -958,6 +1002,10 @@ class Utilities {
 	*/
 	public static function is_new_free_user() {
 		return !wpr_fs()->can_use_premium_code() && (intval(get_option('royal_elementor_addons_activation_time')) > 1649247746);
+	}
+	
+	public static function is_new_free_user2() {
+		return !wpr_fs()->can_use_premium_code() && (intval(get_option('royal_elementor_addons_activation_time')) > 1670317149);
 	}
 
 }

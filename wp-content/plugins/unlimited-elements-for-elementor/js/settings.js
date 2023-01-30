@@ -3881,7 +3881,6 @@ function UniteSettingsUC(){
 		if(!g_ucAdmin)
 			g_ucAdmin = new UniteAdminUC();
 		
-				
 		g_objParent = objParent;
 		
 		if(g_objParent.length > 1){
@@ -3931,7 +3930,7 @@ function UniteSettingsUC(){
 		t.updateEvents();
 		
 		initSaps();
-				
+		
 		t.clearSettingsInit();
 		
 		g_objProvider.initEditors(t);

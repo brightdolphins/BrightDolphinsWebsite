@@ -84,7 +84,7 @@ var ajaxCallFeed = function() {
 		allItems = [],
 		item = {},
 		acr_opts = Math.random().toString(36).substr(2, 10), // Génère un nombre aléatoire unique pour l'instance courante
-		acr_proxy = eacElementsPath.proxies + 'proxy_rss.php', // eacElementsPath est initialisé dans 'eac-register-scripts.php',
+		acr_proxy = eacElementsPath.proxies + 'proxy-rss.php', // eacElementsPath est initialisé dans 'eac-register-scripts.php',
 		acr_url,
 		acr_nonce,
 		acr_id;

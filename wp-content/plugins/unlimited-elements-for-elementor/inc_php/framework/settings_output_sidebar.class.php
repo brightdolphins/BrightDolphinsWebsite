@@ -117,7 +117,7 @@ class UniteSettingsOutputSidebarUC extends UniteCreatorSettingsOutput{
 		        $textClassAdd = "";
 		        if($this->showTips == true)
 		            $textClassAdd = " uc-tip";
-		           
+
 		        
 		        ?>
 				<li id="<?php echo esc_attr($settingID)?>_row" <?php echo UniteProviderFunctionsUC::escAddParam($rowClass)?>>

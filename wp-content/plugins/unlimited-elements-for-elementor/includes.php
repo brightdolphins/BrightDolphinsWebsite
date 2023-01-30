@@ -12,7 +12,7 @@ if(!defined('UNLIMITED_ELEMENTS_INC'))
 defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 
 if(!defined("UNLIMITED_ELEMENTS_VERSION"))
-	define("UNLIMITED_ELEMENTS_VERSION", "1.5.39");
+	define("UNLIMITED_ELEMENTS_VERSION", "1.5.50");
  
 $currentFile = __FILE__;
 $currentFolder = dirname($currentFile);
@@ -20,7 +20,7 @@ $folderIncludesMain = $currentFolder."/inc_php/";
 
 $filepathFramework = $folderIncludesMain . 'framework/include_framework.php';
 
-
+ 
 
 if(file_exists($filepathFramework) == false)
 	throw new Exception("core file not found: framework/include_framework.php", 100);

@@ -104,7 +104,7 @@ function ucDocReady(fn) {
 
 ucDocReady(function(){
 	
-	window.g_ueSettingsAPI = window.parent.g_objUCElementorEditorAdmin.initFrontEndInteraction(window, elementorFrontend);
-		
+	window.parent.g_objUCElementorEditorAdmin.initFrontEndInteraction(window, elementorFrontend);
+	
 });
 

@@ -14,11 +14,6 @@ The best package of Free Elementor Addons. +100 Free Elementor Widgets, +10 Free
 
 == Description ==
 
-BLACK FRIDAY SALE STARTS NOW!
-Grab the PRO version for 50% off. <a href='https://unlimited-elements.com/pricing/' target='_blank'>Get It Now</a>
-
-<br><br>
-
 Take your Elementor page building experience to the next level with Unlimited Elements for Elementor. This is the last widget pack you will need. Find everything in one place and get more than +100 free widgets for your Elementor website. All our elements are easy to use and built with our unique Widget Creator framework. 
 <a href="https://unlimited-elements.com/elementor-widgets/">CHECK OUT THE DEMOS</a>
 <br>
@@ -1242,6 +1237,108 @@ Note : This plugin works with Elementor. Make sure you have [Elementor](https://
 3. Navigate to Unlimited Elements in the WordPress side menu and install the widget you want by hovering over it and clicking install.
 
 == Changelog ==
+
+
+version 1.5.50: 2023-01-24
+
+-feature: added "media" to post types select in advanced post query
+-feature: improved the date time attribute
+
+
+version 1.5.49: 2023-01-23
+
+-bug fix: fixed some js optimization issues 
+-bug fix: fixed filters related small js bug
+
+
+version 1.5.48: 2023-01-19
+
+* Feature: added gallery to multisource
+* Feature: added post type override selectin current post query options
+* Fix: fixed remote play with carousel
+* Fix: fixed some multisource and ajax related bugs
+* Fix: fixed popular posts plugin integration multiple post types
+* Fix: fixed background widgets some problematic attribute names
+* Fix: fixed include terms by current post terms in some cases.
+* Fix: fixed default url_assets value in multisoure
+* Fix: fixed dark mode svg icons
+
+
+version 1.5.47: 2023-01-10
+
+* Feature: added more units to slider attribute
+* Feature: added "any" post type to post types select
+* Feature: added include and exclude current post terms in terms selection
+* Feature: added option to carousel - scroll to head - force
+* Feature: allow import widgets with theme activate
+* Fix: fixed dynamic template render css for dynamic popup
+* Fix: fixed users list select by manual
+
+
+version 1.5.46: 2023-01-08
+
+* Feature: set the items image size chooser work for certain image
+* Feature: made option to put js script in saparate tags with id's for optimization plugins like wprocket
+* Feature: enriched the uc_lang variable. now it's always showing the current language
+* Feature: added user_login variable to the users list output
+* Feature: has put the preview link always as a help link in widget edit panel.
+* Change: updated the multisource that it works better with items images
+* Change: allow html tags in post intro (excerpt) in widgets
+* Fix: fixed filters with sync multiple grid issues
+* Fix: fixed the exclude users list with similar names
+
+
+version 1.5.45: 2022-12-26
+
+* Feature: added json decode filter to twig
+* Feature: added catalog images from shortpixel for speed loading
+* Feature: done multisource group setting
+* Fix: fixed entrance animation on ajax refresh
+* Fix: done sync pause / play between carousels
+
+
+version 1.5.44: 2022-12-19
+
+* Change: updated freemius to the latest version
+* Fix: fixed remote play / pause button
+* Fix: fixed search filter unicode phrase
+* Fix: fixed entrance animation appear on scroll
+* Feature: added video gallery responsive options
+* Fix: fixed some owl carousel size on init bug
+* Fix: fixed js widgets under the dynamic grid template like flipbox
+
+
+
+version 1.5.43: 2022-12-04
+
+* Feature: add settings output to dynamic grid fields debug
+* Fix: fixed pods multiple image data
+* Fix: fixed url terms in filter with dynamic grid
+* Fix: fixed users and menu not found bug in front	
+* Change: updated twig engine to the latest version
+
+
+version 1.5.42: 2022-11-29
+
+* Feature: added functionality for time ago in posts widgets
+* Feature: added woo variables to woo fields - woo_price_withtax, woo_price_notax
+* Feature: added option for term child filter role
+-optimization: reduced number of queries in post related widgets
+
+
+version 1.5.41: 2022-11-24
+
+-bug fix: fixed post select in post query
+
+
+version 1.5.40: 2022-11-23
+
+* Feature: added integration to woocommerce multicourancy plugins
+* Feature: made some integration with translate press plugin
+* Feature: added select post and select term attribute
+* Fix: fixed dynamic loop css backgrounds with containers
+* Fix: fixed mousewheel event in the carousel
+* Fix: fixed some rare php error with filters
 
 
 version 1.5.39: 2022-11-16

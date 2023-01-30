@@ -3,6 +3,7 @@ namespace WprAddons;
 
 use Elementor\Utils;
 use Elementor\Controls_Manager;
+use WprAddons\Includes\Controls\WprAjaxSelect2\WPR_Control_Ajax_Select2;
 use WprAddons\Includes\Controls\WPR_Control_Animations;
 use WprAddons\Includes\Controls\WPR_Control_Animations_Alt;
 use WprAddons\Includes\Controls\WPR_Control_Button_Animations;
@@ -80,6 +81,8 @@ class Plugin {
 		require WPR_ADDONS_PATH . 'includes/modules-manager.php';
 
 		// Custom Controls
+		require WPR_ADDONS_PATH . 'includes/controls/wpr-ajax-select2/wpr-control-ajax-select2.php';
+		require WPR_ADDONS_PATH . 'includes/controls/wpr-ajax-select2/wpr-control-ajax-select2-api.php';
 		require WPR_ADDONS_PATH . 'includes/controls/wpr-control-animations.php';
 		require WPR_ADDONS_PATH . 'includes/controls/wpr-control-icons.php';
 
@@ -93,7 +96,7 @@ class Plugin {
 		require WPR_ADDONS_PATH . 'classes/wpr-ajax-search.php';
 
 		// Particles
-		if ( 'on' === get_option('wpr-particles-toggle', 'on') ) {//TODO: make this check automatic(loop through) for all extensions
+		if ( 'on' === get_option('wpr-particles', 'on') ) {//TODO: make this check automatic(loop through) for all extensions
 			require WPR_ADDONS_PATH . 'extensions/wpr-particles.php';
 		}
 
@@ -108,7 +111,9 @@ class Plugin {
 		}
 
 		// Custom CSS
-		require WPR_ADDONS_PATH . 'extensions/wpr-custom-css.php';
+		if ( 'on' === get_option('wpr-custom-css', 'on') ) {
+			require WPR_ADDONS_PATH . 'extensions/wpr-custom-css.php';
+		}
 
 		// Mega Menu
 		require WPR_ADDONS_PATH . 'admin/mega-menu.php';
@@ -223,6 +228,7 @@ class Plugin {
 	public function register_custom_controls() {
 
 		$controls_manager = \Elementor\Plugin::$instance->controls_manager;
+		$controls_manager->register( new WPR_Control_Ajax_Select2() );
 		$controls_manager->register( new WPR_Control_Animations() );
 		$controls_manager->register( new WPR_Control_Animations_Alt() );
 		$controls_manager->register( new WPR_Control_Button_Animations() );
@@ -308,7 +314,7 @@ class Plugin {
 			'wpr-addons-css',
 			WPR_ADDONS_URL . 'assets/css/frontend'. $this->script_suffix() .'.css',
 			[],
-			Plugin::instance()->get_version() .'1'
+			Plugin::instance()->get_version()
 		);
 
         // Load FontAwesome - TODO: Check if necessary (maybe elementor is already loading this)
@@ -394,7 +400,7 @@ class Plugin {
 			[
 				'jquery',
 			],
-			Plugin::instance()->get_version() .'1',
+			Plugin::instance()->get_version(),
 			true
 		);
 
@@ -582,6 +588,14 @@ class Plugin {
 			'white_label',
 			[
 				'logo_url' => !empty(get_option('wpr_wl_plugin_logo')) ? esc_url(wp_get_attachment_image_src(get_option('wpr_wl_plugin_logo'), 'full')[0]) : WPR_ADDONS_ASSETS_URL .'img/logo-40x40.png'
+			]
+		);
+
+		wp_localize_script(
+			'wpr-addons-library-frontend-js',
+			'WprLibFrontLoc',
+			[
+				'nonce' => wp_create_nonce('wpr-addons-library-frontend-js')
 			]
 		);
 

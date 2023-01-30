@@ -45,8 +45,11 @@
 }
 
 .elementor-panel .ue-widget-icon.ue-dark-mode::after{
-	filter: brightness(4);
+	filter: brightness(4) invert(100%);	
+	content:url(../images/logo-mini-dark.svg);	
 }
+
+
 
 .elementor-panel .ue-wi-svg::after{
 	height:44px;

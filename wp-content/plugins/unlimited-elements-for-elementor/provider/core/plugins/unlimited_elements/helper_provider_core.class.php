@@ -234,6 +234,12 @@ class HelperProviderCoreUC_EL{
 		if(!empty(self::$arrCacheElementorTemplate))
 			return(self::$arrCacheElementorTemplate);
 		
+		
+		//save db access where front output
+			
+		if(GlobalsUC::$is_admin == false)
+			return(array());
+			
 		//our db avoid some filters like polylang
 		try{
 			$db = HelperUC::getDB();
@@ -266,6 +272,9 @@ class HelperProviderCoreUC_EL{
 			if($postType == "jet-engine"){
 				$postID = "jet_".$postID;
 			}
+			
+			if(is_string($templateType) == false)
+				$templateType = "template";
 			
 			switch($templateType){
 				case "single-post":
@@ -409,6 +418,9 @@ class HelperProviderCoreUC_EL{
 	 * get hover animation classes
 	 */
 	public static function getHoverAnimationClasses($addNotChosen = false){
+		
+		if(class_exists("\Elementor\Control_Hover_Animation") == false)
+			return(array());
 		
 		$arrAnimations = \Elementor\Control_Hover_Animation::get_animations();
 		
@@ -639,6 +651,12 @@ class HelperProviderCoreUC_EL{
 			
 		$GLOBALS['post'] = $post;
 		
+		//set the flag on dynamic ajax
+		
+		if(GlobalsProviderUC::$isUnderAjax == true){
+			GlobalsProviderUC::$isUnderAjaxDynamicTemplate = true;
+		}
+		
 		//set elementor document
 		
 		$isElementorProActive = HelperUC::isElementorProActive();
@@ -664,8 +682,6 @@ class HelperProviderCoreUC_EL{
 			"doc_to_change"=>$documentToChange
 		);
 		
-		
-		
 		if($listingType == "jet")
 			$htmlTemplate = self::getJetTemplateListingItem($templateID, $post);
 		else
@@ -678,10 +694,13 @@ class HelperProviderCoreUC_EL{
 		$dest = "{$source} uc-post-$postID";
 		
 		$htmlTemplate = str_replace($source, $dest, $htmlTemplate);
-				
+		
 		echo $htmlTemplate;
 		
 		GlobalsUnlimitedElements::$renderingDynamicData = null;
+		
+		GlobalsProviderUC::$isUnderAjaxDynamicTemplate = false;
+		
 		
 		//restore the original queried object
 		
@@ -718,7 +737,7 @@ class HelperProviderCoreUC_EL{
 					
 		$elementID = $element->get_ID();
   		$dynamicSettings = $element->get_settings( '__dynamic__' );
-		  		
+		
   		if(empty($dynamicSettings))
   			return(false);
   		  			
@@ -801,7 +820,7 @@ class HelperProviderCoreUC_EL{
   		$strOutput = "<style type='text/css'>\n";
   		$strOutput .= $strStyle;
   		$strOutput .= "</style>";
-
+		
   		echo $strOutput;		
 	}
 	

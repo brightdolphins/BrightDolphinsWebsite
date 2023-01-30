@@ -13,6 +13,7 @@ class UniteProviderFrontUC{
 	private $t;
 	const ACTION_FOOTER_SCRIPTS = "wp_print_footer_scripts";
 	const ACTION_AFTER_SETUP_THEME = "after_setup_theme";
+	const DEBUG_PAGE_QUERIES = false;
 	
 	
 	/**
@@ -63,15 +64,16 @@ class UniteProviderFrontUC{
 		
 		if(empty($renderTemplateID))
 			return($template);
-
+					
 		if(defined("ELEMENTOR_PATH") == false)
 			return($template);
 		
 		$pathTemplate = HelperProviderCoreUC_EL::$pathCore."template.php";
 		
-		
 		return($pathTemplate);
 	}
+	
+	
 	
 	/**
 	 *
@@ -93,13 +95,9 @@ class UniteProviderFrontUC{
 		//modify output <script> tag, add module to it
 		$this->addFilter("script_loader_tag", 'onScriptTagOutput',10,3);
 		
-		if(GlobalsUC::$inDev == true){
-			
-			//set elementor canvas accorging "GET" variable
-			$this->addFilter("template_include", "onTemplateInclude");
-			
-		}
-		
+		//set elementor canvas accorging "GET" variable
+		$this->addFilter("template_include", "onTemplateInclude",12);	//after elementor and woo
+				
 	}
 	
 	
@@ -111,11 +109,22 @@ class UniteProviderFrontUC{
 	  HelperProviderUC::outputCustomStyles();	  
 	}
 	
+	/**
+	 * show queries debug
+	 */
+	private function showDebugQueries(){
+		
+		HelperProviderUC::printDebugQueries(true);
+		
+	}
 	
 	/**
 	 * print footer scripts
 	 */
 	public function onPrintFooterStyles(){
+		
+		if(self::DEBUG_PAGE_QUERIES == true)
+			$this->showDebugQueries();
 		
 		HelperProviderUC::onPrintFooterScripts(true, "css");
 		

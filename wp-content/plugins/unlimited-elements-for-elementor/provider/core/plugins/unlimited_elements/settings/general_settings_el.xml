@@ -30,6 +30,15 @@
 					label="		Js Always in Footer"
 					description="Put addon javascript always in the footer of the page. If no, it will be put right after the body">	
 				</field>
+
+				<field name="js_saparate" 
+					type="boolean"
+					default="false" 
+					label="		Each JS in saparate tag"
+					description="if yes, each js will be put in saparate tag with it's own id. good for optimization plugins">	
+				</field>
+	
+				<field type="control" parent="js_in_footer" child="js_saparate" ctype="show" value="true" />
 				
 				<field name="css_includes_to" 
 					type="list"

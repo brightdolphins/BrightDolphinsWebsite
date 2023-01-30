@@ -544,7 +544,6 @@ class HelperInstaUC{
 	 */
 	public static function getTimeSince($time_stamp){
 		
-		
 		$time_difference = strtotime('now') - $time_stamp;
 		
 		//year

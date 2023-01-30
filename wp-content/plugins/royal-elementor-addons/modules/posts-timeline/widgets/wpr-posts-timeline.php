@@ -672,9 +672,6 @@ class Wpr_Posts_Timeline extends Widget_Base {
 				'label' => __( 'Choose Image', 'wpr-addons' ),
 				'type' => \Elementor\Controls_Manager::MEDIA,
 				'description' => __('Image Size will not work with default image','wpr-addons'),
-				'default' => [
-					'url' => \Elementor\Utils::get_placeholder_image_src(),
-				],
 				'condition' => [
 					'repeater_media' => 'image'
 				]
@@ -1292,16 +1289,11 @@ class Wpr_Posts_Timeline extends Widget_Base {
 
 		$this->end_controls_section();
 
-		$post_types = Utilities::get_custom_types_of( 'post', false );
+		// Get Available Post Types
 		$post_types = $this->add_option_query_source();
-		unset( $post_types['product'] );
-		// unset($post_types['page']);
-		// unset($post_types['e-landing-page']);
+
+		// Get Available Taxonomies
 		$post_taxonomies = Utilities::get_custom_types_of( 'tax', false );
-		$categories = [];
-		foreach(get_categories() as $key=>$category) {
-			array_push($categories, $key);
-		}
 
         $this->start_controls_section(
             'query_section',
@@ -1362,10 +1354,11 @@ class Wpr_Posts_Timeline extends Widget_Base {
 				'query_manual_'. $slug,
 				[
 					'label' => esc_html__( 'Select ', 'wpr-addons' ) . $title,
-					'type' => Controls_Manager::SELECT2,
+					'type' => 'wpr-ajax-select2',
+					'options' => 'ajaxselect2/get_posts_by_post_type',
+					'query_slug' => $slug,
 					'multiple' => true,
 					'label_block' => true,
-					'options' => Utilities::get_posts_by_post_type( $slug ),
 					'condition' => [
 						'timeline_post_types' => $slug,
 						'query_selection' => 'manual',
@@ -1379,10 +1372,10 @@ class Wpr_Posts_Timeline extends Widget_Base {
 			'query_author',
 			[
 				'label' => esc_html__( 'Authors', 'wpr-addons' ),
-				'type' => Controls_Manager::SELECT2,
+				'type' => 'wpr-ajax-select2',
+				'options' => 'ajaxselect2/get_users',
 				'multiple' => true,
 				'label_block' => true,
-				'options' => Utilities::get_users(),
 				'separator' => 'before',
 				'condition' => [
 					'timeline_post_types!' => [ 'current', 'related' ],
@@ -1402,10 +1395,11 @@ class Wpr_Posts_Timeline extends Widget_Base {
 				'query_taxonomy_'. $slug,
 				[
 					'label' => $title,
-					'type' => Controls_Manager::SELECT2,
+					'type' => 'wpr-ajax-select2',
+					'options' => 'ajaxselect2/get_taxonomies',
+					'query_slug' => $slug,
 					'multiple' => true,
 					'label_block' => true,
-					'options' => Utilities::get_terms_by_taxonomy( $slug ),
 					'condition' => [
 						'timeline_post_types' => $post_type,
 						'query_selection' => 'dynamic',
@@ -1419,10 +1413,11 @@ class Wpr_Posts_Timeline extends Widget_Base {
 				'query_exclude_'. $slug,
 				[
 					'label' => esc_html__( 'Exclude ', 'wpr-addons' ) . $title,
-					'type' => Controls_Manager::SELECT2,
+					'type' => 'wpr-ajax-select2',
+					'options' => 'ajaxselect2/get_posts_by_post_type',
+					'query_slug' => $slug,
 					'multiple' => true,
 					'label_block' => true,
-					'options' => Utilities::get_posts_by_post_type( $slug ),
 					'condition' => [
 						'timeline_content' => 'dynamic',
 						'timeline_post_types' => $slug,
@@ -1467,7 +1462,7 @@ class Wpr_Posts_Timeline extends Widget_Base {
         $this->add_control(
 			'order_direction',
 			[
-				'label' => esc_html__( 'Order By', 'wpr-addons'),
+				'label' => esc_html__( 'Order', 'wpr-addons'),
 				'type' => Controls_Manager::SELECT,
 				'default' => 'DESC',
 				'label_block' => false,
@@ -2212,6 +2207,7 @@ class Wpr_Posts_Timeline extends Widget_Base {
 		// Section: Pro Features
 		Utilities::pro_features_list_section( $this, '', Controls_Manager::RAW_HTML, 'posts-timeline', [
 			'Add Unlimited Custom Timeline Items',
+			'Custom Post Types Support',
 			'Unlimited Slides to Show option',
 			'Carousel Autoplay and Autoplay Speed',
 			'Unlimited Posts Per Page option',
@@ -5567,12 +5563,27 @@ class Wpr_Posts_Timeline extends Widget_Base {
 	}
 
 	public function add_option_query_source() {
-		$pro_query = [
-			'pro-rl' => 'Related Query (Pro)',
-			'pro-cr' => 'Current Query (Pro)',
-		];
+		$post_types = [];
+		$post_types['post'] = esc_html__( 'Posts', 'wpr-addons' );
+		$post_types['page'] = esc_html__( 'Pages', 'wpr-addons' );
+
+		$custom_post_types = Utilities::get_custom_types_of( 'post', true );
+		foreach( $custom_post_types as $slug => $title ) {
+			if ( 'product' === $slug || 'e-landing-page' === $slug ) {
+				continue;
+			}
+
+			if ( Utilities::is_new_free_user2() ) {
+				$post_types['pro-'. substr($slug, 0, 2)] = esc_html( $title ) .' (Pro)';
+			} else {
+				$post_types[$slug] = esc_html( $title );
+			}
+		}
+
+		$post_types['current'] = esc_html__( 'Current Query', 'wpr-addons' );
+		$post_types['pro-rl'] = esc_html__( 'Related Query (Pro)', 'wpr-addons' );
 		
-		return array_merge(Utilities::get_custom_types_of( 'post', false ), $pro_query);
+		return $post_types;
 	}
 
 	protected function render() {

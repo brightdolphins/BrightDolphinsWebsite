@@ -2,6 +2,9 @@
 
 class HelperProviderUC{
 	
+	private static $numQueriesStart = null;
+	
+	
 	/**
 	 * is activated by freemis
 	 */
@@ -488,6 +491,9 @@ class HelperProviderUC{
 		
 		if($scriptType != "css"){
 			
+			$isSaparateScripts = HelperProviderCoreUC_EL::getGeneralSetting("js_saparate");
+			$isSaparateScripts = UniteFunctionsUC::strToBool($isSaparateScripts);
+			
 			$arrScrips = UniteProviderFunctionsUC::getCustomScripts();
 			
 			if(!empty($arrScrips)){
@@ -497,25 +503,44 @@ class HelperProviderUC{
 				$arrModulesOutput = array();
 				
 				foreach ($arrScrips as $key=>$script){
+										
 					$isModule = (strpos($key, "module_") !== false);
 					
 					if($isModule == true)
-						$arrModulesOutput[] = $script;
+						$arrModulesOutput[$key] = $script;
 					else 
-						$arrScriptsOutput[] = $script;
+						$arrScriptsOutput[$key] = $script;
 				}
 				
 				//print the scripts
 				
 				if(!empty($arrScriptsOutput)){
 					
-					echo "<script type='text/javascript'>\n";
-					
-						foreach ($arrScriptsOutput as $script){
+					if($isSaparateScripts == false){		//one script tag
+						
+						echo "<script type='text/javascript' id='unlimited-elements-scripts'>\n";
+							
+							foreach ($arrScriptsOutput as $script){
+								
+								echo $script."\n";
+							}
+						
+						echo "</script>\n";
+					}
+					else{			//multiple script tags
+													
+						foreach ($arrScriptsOutput as $handle => $script){
+							
+							echo "\n<script type='text/javascript' id='{$handle}'>\n";
+							
 							echo $script."\n";
+							
+							echo "</script>\n";
 						}
+						
+					}
 					
-					echo "</script>\n";
+					
 				}
 					
 				//print the modules
@@ -603,6 +628,86 @@ class HelperProviderUC{
 		return($term);
 	}
 	
+	/**
+	 * remember the current query
+	 */
+	public static function startDebugQueries(){
+		
+		global $wpdb;
+		$queries = $wpdb->queries;
+		
+		self::$numQueriesStart = count($queries);
+		
+		
+	}
+	
+	/**
+	 * print queries debug
+	 */
+	public static function printDebugQueries($showTrace = false){
+		
+		global $wpdb;
+		$queries = $wpdb->queries;
+
+		if(empty($queries)){
+			dmp("queries not collected");
+			exit();
+		}
+		
+		$numQueries = count($queries);
+		
+		dmp("num querie found: ".$numQueries);
+				
+		$start = 0;
+		if(!empty(self::$numQueriesStart))
+			$start = self::$numQueriesStart;
+		
+		if(!empty($start) && $start == $numQueries){
+			
+			dmp("nothing changed since the start : $start");
+			exit();
+		}
+		
+		if(!empty($start)){
+			
+			$numToShow = $numQueries - $start;
+			
+			dmp("Showing $numToShow queries");
+		}
+		
+		echo "<div style='font-size:12px;color:black;'>";
+				
+		foreach($queries as $index => $query){
+			
+			if($index < $start)
+				continue;
+			
+			if(empty($query))
+				continue;
+			
+			$color = "";
+			
+			$sql = $query[0];
+			
+			$strTrace = $query[2];
+			
+			
+			if(strpos($sql, "wp_postmeta") !== false)
+				$color = "red";
+			
+			echo("<div style='padding:10px;border-bottom:1px solid lightgray;color:$color'> $index: {$sql} </div>");
+			
+			if($showTrace){
+				echo "<div>";
+				dmp($strTrace);
+				echo "<div>";
+			}
+			
+		}
+		
+		echo "<div style='font-size:10px;'>";
+		
+	}
 	
 	
 }

@@ -31,7 +31,9 @@ class UniteCreatorOutputWork extends HtmlOutputBaseUC{
 	private $arrOptions;
 	private $isShowDebugData = false;
 	private $debugDataType = "";
+	private $itemsSource = "";
 	
+	private static $arrScriptsHandles = array();
 	
 	private static $arrUrlCacheCss = array();
 	private static $arrHandleCacheCss = array();
@@ -404,7 +406,17 @@ class UniteCreatorOutputWork extends HtmlOutputBaseUC{
 					break;
 				case "css":
 					$cssID = "{$handle}-css";
-					$html .= self::TAB2."<link id='{$cssID}' href='{$url}' type='text/css' rel='stylesheet' >".self::BR;
+					
+					$isDelayedScript = apply_filters("unlimited_element_is_style_delayed", $cssID);
+					
+					if($isDelayedScript === true){
+						$styleHtml = "<link id='{$cssID}' data-debloat-delay='' data-href='{$url}' type='text/css' rel='stylesheet' media='all' >";
+						
+						$html .= self::TAB2.$styleHtml.self::BR;
+					}
+					else
+						$html .= self::TAB2."<link id='{$cssID}' href='{$url}' type='text/css' rel='stylesheet' >".self::BR;
+					
 					break;
 				default:
 					UniteFunctionsUC::throwError("Wrong include type: {$type} ");
@@ -1613,6 +1625,32 @@ class UniteCreatorOutputWork extends HtmlOutputBaseUC{
 		return($html);
 	}
 	
+	/**
+	 * get script handle with serial
+	 */
+	private function getScriptHandle($handle){
+		
+		if(isset(self::$arrScriptsHandles[$handle]) == false){
+			self::$arrScriptsHandles[$handle] = true;
+			return($handle);
+		}
+		
+		$counter = 2;
+				
+		do{
+			
+			$outputHandle = $handle.$counter;
+			
+			$isExists = isset(self::$arrScriptsHandles[$outputHandle]);
+			
+			$counter++;
+			
+		}while($isExists);
+		
+			self::$arrScriptsHandles[$outputHandle] = true;
+		
+		return($outputHandle);
+	}
 	
 	/**
 	 * place output by shortcode
@@ -1698,18 +1736,24 @@ class UniteCreatorOutputWork extends HtmlOutputBaseUC{
 				$isOutputJs = true;
 			
 			//output js
+							
 			if($isOutputJs == true){
 				
 				$isJSAsModule = $this->addon->getOption("js_as_module");
 				$isJSAsModule = UniteFunctionsUC::strToBool($isJSAsModule);
 				
 				$title = $this->addon->getTitle();
-								
-				if($scriptHardCoded == false)
-					$js = "// $title scripts: \n".$js;
+							
+				$js = "\n/* $title scripts: */ \n\n".$js;
+				
+				$addonName = $this->addon->getAlias();
+				
+				$handle = $this->getScriptHandle("ue_script_".$addonName);
+				
+				//self::
 				
 				if($scriptHardCoded == false){
-					UniteProviderFunctionsUC::printCustomScript($js, false, $isJSAsModule);
+					UniteProviderFunctionsUC::printCustomScript($js, false, $isJSAsModule, $handle);
 				}
 				else{
 					$wrapInTimeout = UniteFunctionsUC::getVal($params, "wrap_js_timeout");
@@ -1722,8 +1766,13 @@ class UniteCreatorOutputWork extends HtmlOutputBaseUC{
 					if($isJSAsModule == true)
 						$jsType = "module";
 					
-					$output .= "\n\n			<script type=\"{$jsType}\">";
-										
+					$htmlHandle = "";
+					if($wrapInTimeout == false){	 //add id's in front
+						$htmlHandle = " id=\"{$handle}\"";
+					}
+					
+					$output .= "\n\n			<script type=\"{$jsType}\" {$htmlHandle} >";
+					
 					if(!empty($wrapStart))
 						$output .= "\n		".$wrapStart;
 					
@@ -1766,6 +1815,17 @@ class UniteCreatorOutputWork extends HtmlOutputBaseUC{
 		return($output);
 	}
 	
+	/**
+	 * get addon uc_id
+	 */
+	public function getWidgetID(){
+		
+		$data = $this->getConstantData();
+		
+		$widgetID = UniteFunctionsUC::getVal($data, "uc_id");
+		
+		return($widgetID);
+	}
 	
 	
 	/**
@@ -2036,11 +2096,25 @@ class UniteCreatorOutputWork extends HtmlOutputBaseUC{
 		$this->objTemplate->addTemplate(self::TEMPLATE_HTML, $html);
 		$this->objTemplate->addTemplate(self::TEMPLATE_CSS, $css);
 		$this->objTemplate->addTemplate(self::TEMPLATE_JS, $js);
-
+		
+		//add custom templates
+		
+		$arrCustomTemplates = array();
+		
+		$arrCustomTemplates = apply_filters("ue_get_twig_templates", $arrCustomTemplates);
+		
+		if(!empty($arrCustomTemplates)){
+			
+			foreach($arrCustomTemplates as $templateName=>$templateValue)
+				$this->objTemplate->addTemplate($templateName, $templateValue);
+		}
+		
 		
 		$arrItemData = null;
 		
 		$paramPostsList = null;
+		
+		$itemsSource = null;		//from what object the items came from
 		
 		//set items template
 		if($this->isItemsExists == false){
@@ -2074,6 +2148,8 @@ class UniteCreatorOutputWork extends HtmlOutputBaseUC{
 					//set main param (true/false)
 					$arrData[$postsListName] = !empty($arrItemData);
 					
+					$itemsSource = "posts";
+					
 				break;
 				case UniteCreatorAddon::ITEMS_TYPE_DATASET:
 					
@@ -2102,14 +2178,14 @@ class UniteCreatorOutputWork extends HtmlOutputBaseUC{
 						UniteFunctionsUC::throwError("Some listing param should be found");
 					
 					$paramName = UniteFunctionsUC::getVal($paramListing, "name");
-										
+					
 					$arrItemData = UniteFunctionsUC::getVal($arrData, $paramName."_items");
-										
+					
 					if(empty($arrItemData))
 						$arrItemData = array();
 					else
 						$arrItemData = $this->normalizeItemsData($arrItemData, $paramName);
-											
+					
 				break;
 				case "multisource":
 					
@@ -2121,9 +2197,10 @@ class UniteCreatorOutputWork extends HtmlOutputBaseUC{
 					$paramName = UniteFunctionsUC::getVal($paramListing, "name");
 					
 					$dataValue = UniteFunctionsUC::getVal($arrData, $paramName);
-										
-					if(is_string($dataValue) && $dataValue === "uc_items")
+					
+					if(is_string($dataValue) && $dataValue === "uc_items"){
 						$arrItemData = $this->addon->getProcessedItemsData($this->processType);
+					}
 					elseif(is_array($dataValue)){
 						
 						$arrItemData = $dataValue;
@@ -2132,7 +2209,10 @@ class UniteCreatorOutputWork extends HtmlOutputBaseUC{
 						dmp($arrItemData);
 						UniteFunctionsUC::throwError("Wrong multisouce data");
 					}
+					
+					UniteCreatetorParamsProcessorMultisource::checkShowItemsDebug($arrItemData);
 										
+					
 				break;
 				default:
 					
@@ -2159,9 +2239,12 @@ class UniteCreatorOutputWork extends HtmlOutputBaseUC{
 							
 			$this->objTemplate->setParams($arrData);
 			
-			
 			$this->objTemplate->setArrItems($arrItemData);
 			
+			if(!empty($itemsSource))
+				$this->objTemplate->setItemsSource($itemsSource);
+			
+				
 			$htmlItem = $this->addon->getHtmlItem();
 						
 			$this->objTemplate->addTemplate(self::TEMPLATE_HTML_ITEM, $htmlItem);
@@ -2214,7 +2297,7 @@ class UniteCreatorOutputWork extends HtmlOutputBaseUC{
 			
 		$this->addon = $addon;
 		$this->isItemsExists = $this->addon->isHasItems();
-				
+		
 		$this->itemsType = $this->addon->getItemsType();
 		
 		$this->arrOptions = $this->addon->getOptions();

@@ -11,14 +11,15 @@ class GlobalsUnlimitedElements{
 	
 	public static $enableInsideNotification = true;
 	
-	public static $insideNotificationText = "BLACK FRIDAY SALE STARTS NOW! <br> Grab the PRO version for 50% off. <br> <a href='https://unlimited-elements.com/pricing/' target='_blank'>Get It Now</a> ";
-	//public static $insideNotificationText = "Unlock Access To All PRO Widgets and Features.  <a href='https://unlimited-elements.com/pricing/' target='_blank'>Upgrade Now</a> ";
+	//public static $insideNotificationText = "BLACK FRIDAY SALE STARTS NOW! <br> Grab the PRO version for 50% off. <br> <a href='https://unlimited-elements.com/pricing/' target='_blank'>Get It Now</a> ";
+	//public static $insideNotificationText = "BLACK FRIDAY DEAL ENDS SOON! <br> Last chance to get 50% off. <br> <a href='https://unlimited-elements.com/pricing/' target='_blank'>Get It Now</a> ";
+	public static $insideNotificationText = "Unlock Access To All PRO Widgets and Features.  <a href='https://unlimited-elements.com/pricing/' target='_blank'>Upgrade Now</a> ";
 	public static $insideNotificationUrl = "https://unlimited-elements.com/pricing/";
 	
-	public static $showAdminNotice = true;
+	public static $showAdminNotice = false;
 	
 	public static $arrAdminNotice = array(
-		"id"=>"black_friday_22",
+		"id"=>"black_friday_22_last",
 		"text"=>"temp text",		//real text goes from event
 		"banner"=>"ue-black-friday-banner.jpg",
 		//"type"=>"simple",

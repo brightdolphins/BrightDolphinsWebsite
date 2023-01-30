@@ -118,7 +118,7 @@ class UCEmptyTemplate{
 
 		$this->validateTemplateExists();
 		
-		$content = HelperProviderCoreUC_EL::getElementorTemplate($this->templateID);
+		$content = HelperProviderCoreUC_EL::getElementorTemplate($this->templateID, true);
 		
 		$this->renderHeaderPart();
 		

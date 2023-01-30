@@ -17,6 +17,9 @@ class UniteCreatorPodsIntegrate{
 	const TYPE_FILE = "file";
 	const TYPE_PICK = "pick";
 	const TYPE_PANDA_REPEATER = "pandarepeaterfield";
+	const TYPE_FILES = "files";
+	
+	const DEBUG_FIELDS = false;
 	
 	
 	/**
@@ -204,9 +207,41 @@ class UniteCreatorPodsIntegrate{
 		else
 			$arrValues = $this->getFileData($post, $fieldName, $arrValues);
 		
+		if(self::DEBUG_FIELDS == true){
+			dmp("file data $postID is image: ".$isImage);
+			dmp($arrValues[$fieldName]);
+		}
 				
 		return($arrValues);
 	}
+	
+	/**
+	 * get file data
+	 */
+	private function getFilesData($data, $fieldName, $arrValues){
+		
+		if(empty($data)){
+			
+			$arrValues[$fieldName] = "";
+			return($arrValues);
+		}
+			
+		$arrOutput = array();
+		
+		foreach($data as $post){
+			
+			$arrFileData = array();
+			$arrFileData = $this->getFileFieldData($post, "image", $arrFileData);
+						
+			$arrOutput[] = $arrFileData;
+		}
+			
+		
+		$arrValues[$fieldName] = $arrOutput;
+		
+		return($arrValues);
+	}
+	
 	
 	/**
 	 * modify data by type
@@ -226,6 +261,11 @@ class UniteCreatorPodsIntegrate{
 			case self::TYPE_PANDA_REPEATER:
 				
 				$arrValues = $this->getPandaRepeaterData($data, $fieldName, $arrValues);
+				
+			break;
+			case self::TYPE_FILES:
+				
+				$arrValues = $this->getFilesData($data, $fieldName, $arrValues);
 				
 			break;
 			default:
@@ -270,10 +310,11 @@ class UniteCreatorPodsIntegrate{
 			return(null);
 		
 		$arrFields = $objPod->fields();
-				
+
 		if(empty($arrFields))
 			return(null);
 		
+			
 		$arrValues = array();
 		foreach($arrFields as $name => $field){
 			
@@ -282,8 +323,21 @@ class UniteCreatorPodsIntegrate{
 				$fieldName = self::PREFIX.$fieldName;	
 			
 			$type = UniteFunctionsUC::getVal($field, "type");
-				
+			
+			if($type == self::TYPE_FILE){
+				$format = UniteFunctionsUC::getVal($field, "file_format_type");
+				if($format == "multi")
+					$type = self::TYPE_FILES;
+			}
+			
 			$data = $objPod->field($name);
+
+			if(self::DEBUG_FIELDS == true){
+				dmp("Pod field: $name ($type)");
+				dmp($field);
+				dmp($data);
+			}
+			
 			
 			$arrValues = $this->addFieldDataByType($type, $data, $fieldName, $arrValues);
 		}

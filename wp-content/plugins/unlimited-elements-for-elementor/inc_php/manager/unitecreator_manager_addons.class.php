@@ -404,6 +404,8 @@ class UniteCreatorManagerAddonsWork extends UniteCreatorManager{
 		
 		$svgIcon = $objAddon->getUrlSvgIconForEditor();
 		
+		$linkDemo = $objAddon->getOption("link_preview");
+		
 		
 		$data["title"] = $title;
 		$data["name"] = $name;
@@ -415,6 +417,7 @@ class UniteCreatorManagerAddonsWork extends UniteCreatorManager{
 		$data["font_icon"] = $fontIcon;
 		$data["svg_icon"] = $svgIcon;
 		$data["add_html"] = $addHtml;
+		$data["link_demo"] = $linkDemo;
 		
 		return($data);
 	}
@@ -644,15 +647,21 @@ class UniteCreatorManagerAddonsWork extends UniteCreatorManager{
 		$urlViewPost = UniteFunctionsUC::getVal($data, "url_view_post");
 		$isGroup = UniteFunctionsUC::getVal($data, "is_group");
 		$isGroup = UniteFunctionsUC::strToBool($isGroup);
+		$linkToDemo = UniteFunctionsUC::getVal($data, "link_demo");
+		
 		
 		$state = null;
 		
 		if($isweb == true){
 			
 			$urlPreview = UniteFunctionsUC::getVal($data, "image");
+			
+			if(GlobalsUC::ENABLE_CATALOG_SHORTPIXEL == true)
+				$urlPreview = GlobalsUC::SHORTPIXEL_PREFIX.$urlPreview;
+			
 			$isActive = true;
 			$webData = $this->getWebAddonData($data);
-						
+			
 			$urlPreviewDefault = UniteFunctionsUC::getVal($webData, "url_preview_default");
 						
 			$addHtml .= $webData["html_state"];
@@ -754,7 +763,7 @@ class UniteCreatorManagerAddonsWork extends UniteCreatorManager{
 				$urlPreview = $urlPreviewDefault;
 			}
 		}
-				
+		
 		if(!empty($urlPreview)){			
 			$styleThumb = "style=\"background-image:url('{$urlPreview}')\"";
 		}
@@ -845,13 +854,20 @@ class UniteCreatorManagerAddonsWork extends UniteCreatorManager{
 			
 			$textDuplicate = __("Duplicate ", "unlimited-elements-for-elementor").$this->textSingle;
 			
-			
 			$htmlItem .= "<div class=\"uc-item-actions\">";
 			
 			$htmlItem .= "	<a href='javascript:void(0)' class='uc-item-action uc-item-action-edit uc-tip' onfocus='this.blur()' data-action='{$actionEdit}' title='{$textEdit}' ><img src='{$urlIconEdit}'></a>";
+
+			$textViewDemo = __("View ", "unlimited-elements-for-elementor").$this->textSingle.__(" Demo and Help", "unlimited-elements-for-elementor");
 			
 			if($isGroup == false){
-				$htmlItem .= "	<a href='javascript:void(0)' class='uc-item-action uc-item-action-preview uc-tip' onfocus='this.blur()' data-action='preview_addon' title='$textPreview'><img src='{$urlIconPreview}'></a>";
+				
+				//preview widget
+				if(!empty($linkToDemo))
+					$htmlItem .= "	<a href='{$linkToDemo}' target='_blank' class='uc-item-action uc-item-action-preview uc-tip' onfocus='this.blur()' title='$textViewDemo'><img src='{$urlIconPreview}'></a>";
+				else
+					$htmlItem .= "	<a href='javascript:void(0)' class='uc-item-action uc-item-action-preview uc-tip' onfocus='this.blur()' data-action='preview_addon' title='$textPreview'><img src='{$urlIconPreview}'></a>";
+					
 				$htmlItem .= "	<a href='javascript:void(0)' class='uc-item-action uc-item-action-duplicate uc-tip' onfocus='this.blur()' data-action='duplicate_item' title='$textDuplicate'><img src='{$urlIconDuplicate}'></a>";
 			}
 			

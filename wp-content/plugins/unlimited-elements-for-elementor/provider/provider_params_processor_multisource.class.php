@@ -9,17 +9,25 @@ class UniteCreatetorParamsProcessorMultisource{
 	private $itemsType;
 	private $debugJsonCsv = false;
 	private $showDebugData = false;
+	private $showDataType = null;		//input / output / input_output
+	private $showDebugMeta = false;
+	private $addData = array();		//addition to return data	
+	private $arrDefaults = array();		//addition to return data	
 	
+	
+	private static $showItemsDebug = false;		//show items debug next output
 	
 	
 	const SOURCE_REPEATER = "repeater";
 	const SOURCE_JSONCSV = "json_csv";
 	const SOURCE_POSTS = "posts";
+	const SOURCE_PRODUCTS = "products";
 	const SOURCE_DEMO = "demo";
 	const SOURCE_TERMS = "terms";
 	const SOURCE_USERS = "users";
 	const SOURCE_MENU = "menu";
 	const SOURCE_INSTAGRAM = "instagram";
+	const SOURCE_GALLERY = "gallery";
 	
 	
 	
@@ -40,7 +48,7 @@ class UniteCreatetorParamsProcessorMultisource{
 	/**
 	 * get posts data
 	 */
-	private function getData_posts(){
+	private function getData_posts($forWooProducts = false){
 		
 		$paramPosts = $this->param;
 		
@@ -48,24 +56,41 @@ class UniteCreatetorParamsProcessorMultisource{
 		$paramPosts["name_listing"] = $this->name;
 		$paramPosts["use_for_listing"] = true;
 		
+		if($forWooProducts == true)
+			$paramPosts["for_woocommerce_products"] = true;
+		
+		
 		$dataResponse = $this->objProcessor->getPostListData($this->arrValues, $paramPosts["name"], $this->processType, $paramPosts, $this->inputData);
+		
+		//add the filters to output data
+		
+		$fileringAttributes = UniteFunctionsUC::getVal($dataResponse, "uc_filtering_attributes");
+		$fileringAddClass = UniteFunctionsUC::getVal($dataResponse, "uc_filtering_addclass");
+		
+		if(!empty($fileringAttributes)){
+			
+			$this->addData["uc_filtering_addclass"] = $fileringAddClass;
+			$this->addData["uc_filtering_attributes"] = $fileringAttributes;
+		}
 		
 		$arrPosts = UniteFunctionsUC::getVal($dataResponse, $this->name."_items");
 		
+		//debug meta
+		
+		if($this->showDebugMeta == true)
+			HelperUC::$operations->putPostsCustomFieldsDebug($arrPosts);
+		
 		//get the post items array
-		
-		$arrImageSizes = null;
-		if(!empty($this->itemsImageSize))
-			$arrImageSizes = array("desktop"=>$this->itemsImageSize);
-		
+			
 		$arrPostItems = array();
 		
 		foreach($arrPosts as $post){
-		
-			$postItem = $this->objProcessor->getPostDataByObj($post, null, $arrImageSizes);
 			
-			$arrPostItems = $postItem;
+			$postItem = $this->objProcessor->getPostDataByObj($post, null, null,array("skip_images"=>true));
+			
+			$arrPostItems[] = $postItem;
 		}
+
 		
 		return($arrPostItems);
 	}
@@ -83,6 +108,10 @@ class UniteCreatetorParamsProcessorMultisource{
 		$paramTerms["use_for_listing"] = true;
 		
 		$arrTerms = $this->objProcessor->getWPTermsData($this->arrValues, $paramTerms["name"], $this->processType, $paramTerms, $this->inputData);
+		
+		if($this->showDebugMeta == true)
+			HelperUC::$operations->putTermsCustomFieldsDebug($arrTerms);
+		
 		
 		return($arrTerms);
 	}
@@ -133,26 +162,124 @@ class UniteCreatetorParamsProcessorMultisource{
 	private function getData_repeater(){
 		
 		
-		
-		$post = get_post();
-		
-		if(empty($post))
-			return(null);
-		
-		$postID = $post->ID;
-		
-		
 		$nameParamRepeater = $this->name."_repeater";
 		
 		$repeaterName = UniteFunctionsUC::getVal($this->arrValues, $this->name."_repeater_name");
 		
 		$location = UniteFunctionsUC::getVal($this->arrValues, $this->name."_repeater_location");
 		
-		$repeaterPostID = UniteFunctionsUC::getVal($this->arrValues, $this->name."_repeater_post");
+		$arrRepeaterItems = array();
+		
+		$postID = null;
+		$post = null;
+		$termID = null;
+		$userID = null;
 		
 		switch($location){
-			//case "selected_post":
-			//break;
+			case "selected_post":
+				
+				$repeaterPostID = UniteFunctionsUC::getVal($this->arrValues, $this->name."_repeater_post");
+				
+				if(empty($repeaterPostID) || is_numeric($repeaterPostID) == 0){
+					
+					if($this->showDebugData == true)
+						dmp("wrong post id $repeaterPostID");
+					
+					return(null);
+				}
+								
+				$postID = $repeaterPostID;
+				
+				$post = get_post($postID);
+				
+				if(empty($post)){
+					
+					if($this->showDebugData == true)
+						dmp("post with id: $postID not found");
+					
+					return(null);
+				}
+				
+			break;
+			case "current_post":
+				
+				$post = get_post();
+				
+				if(empty($post)){
+					
+					if($this->showDebugData == true)
+						dmp("get data from current post - no current post found");
+					
+					return(null);
+				}
+				
+				$postID = $post->ID;
+				
+			break;
+			case "parent_post":
+				
+				$post = get_post_parent();
+				
+				if(empty($post)){
+					
+					if($this->showDebugData == true)
+						dmp("get data from parent post - no parent post found");
+					
+					return(null);
+				}
+				
+				$postID = $post->ID;
+				
+			break;
+			case "current_term":
+				
+				$termID = UniteFunctionsWPUC::getCurrentTermID();
+								
+				if(empty($termID)){
+				
+					if($this->showDebugData == true)
+						dmp("get data from current term - no current term found. try to load from some category archive page.");
+					
+					return(null);
+				}
+				
+			break;
+			case "parent_term":
+				
+				$termID = UniteFunctionsWPUC::getCurrentTermID();
+								
+				if(empty($termID)){
+				
+					if($this->showDebugData == true)
+						dmp("get parent term - no current term found. try to load from some category archive page.");
+					
+					return(null);
+				}
+				
+				$termID = wp_get_term_taxonomy_parent_id($termID);
+				
+				if(empty($termID)){
+					
+					if($this->showDebugData == true)
+						dmp("get parent term - no parent term found from term id: $termID. check this term if it has parent.");
+					
+					return(null);
+				}
+				
+			break;
+			case "current_user":
+				
+				$userID = get_current_user_id();
+				
+				if(empty($userID)){
+					
+					if($this->showDebugData == true)
+						dmp("get current user no logged in user found.");
+					
+					return(null);
+				}
+
+			break;
 			default:
 				dmp("get data from location: $location !!!!!!!!!!!!!!!!!!!!!");
 			break;
@@ -164,11 +291,82 @@ class UniteCreatetorParamsProcessorMultisource{
 			return(array());
 		}
 		
+		//---- load from post
 		
-		//debug
+		if(!empty($postID)){
+			
+			$arrCustomFields = UniteFunctionsWPUC::getPostCustomFields($postID, false);
+		}
+		
+		//------ load from term
+		
+		if(!empty($termID)){
+			
+			$arrCustomFields = UniteFunctionsWPUC::getTermCustomFields($termID, false);
+		}
+		
+		if(!empty($userID))
+			$arrCustomFields = UniteFunctionsWPUC::getUserCustomFields($userID, false);
+
+		$arrRepeaterItems = UniteFunctionsUC::getVal($arrCustomFields, $repeaterName);
+		
+		//show debug meta text
+		
+		if($this->showDebugMeta == true){
+			
+			if(!empty($postID)){
+				
+				$text = "Post <b>".$post->post_title." ($postID)</b>";
+				
+				HelperUC::$operations->putCustomFieldsArrayDebug($arrCustomFields, $text);
+			}
+			
+			if(!empty($termID)){
+				
+				$text = "Term <b>".$term->name." ($termID)</b>";
+				
+				HelperUC::$operations->putCustomFieldsArrayDebug($arrCustomFields, $text);
+			}
+			
+			if(!empty($userID)){
+				
+				$text = "User <b>".$user["name"]." ($userID)</b>";
+				
+				HelperUC::$operations->putCustomFieldsArrayDebug($arrCustomFields, $text);
+			}
+			
+			
+		}
+		
+		//show debug data text
 		
 		if($this->showDebugData == true){
-			$text = "Getting meta data from field: <b>$repeaterName</b> from <b>$location</b> ";
+			
+			$text = "Getting meta data from field: <b>$repeaterName</b> from <b>$location</b>";
+			
+			switch($location){
+				case "parent_post":
+				case "selected_post":
+				case "current_post":
+						$text .= ", <b>".$post->post_title."</b>";
+				break;
+				case "current_term":
+				case "parent_term":
+					
+					$term = get_term($termID);
+					
+					$text .= ", <b>".$term->name."</b>";
+				break;
+				case "current_user":
+					
+					$user = UniteFunctionsWPUC::getUserData($userID);
+					
+					$userName = UniteFunctionsUC::getVal($user, "name");
+					
+					$text .= ", <b>".$userName."</b>";
+					
+				break;
+			}
 			
 			dmp($text);
 		}
@@ -176,11 +374,7 @@ class UniteCreatetorParamsProcessorMultisource{
 		
 		//get the data from repeater
 		
-		$arrCustomFields = UniteFunctionsWPUC::getPostCustomFields($postID, false, $this->itemsImageSize);
-		
-		$arrRepeaterItems = UniteFunctionsUC::getVal($arrCustomFields, $repeaterName);
-		
-		if(empty($arrRepeaterItems)){
+		if(empty($arrRepeaterItems) && !empty($postID) ){
 			
 			$previewID = UniteFunctionsUC::getGetVar("preview_id","",UniteFunctionsUC::SANITIZE_TEXT_FIELD);
 
@@ -198,20 +392,38 @@ class UniteCreatetorParamsProcessorMultisource{
 		return($arrRepeaterItems);
 	}
 	
+	
 	/**
 	 * add dynamic field items
 	 */
 	private function getData_jsonCsv(){
 		
-		$showDebug = $this->debugJsonCsv;
+		$showDebug = $this->showDebugData;
 		
 		if($showDebug == true){
 			dmp("---- the debug is ON, please turn it off before release --- ");
 		}
+				
+		$contentLocation = UniteFunctionsUC::getVal($this->arrValues, $this->name."_json_csv_location");
 		
-		
-		$dynamicFieldValue = UniteFunctionsUC::getVal($this->arrValues, $this->name."_json_csv_dynamic_field");
-		
+		if($contentLocation == "url"){
+			
+			$url = UniteFunctionsUC::getVal($this->arrValues, $this->name."_json_csv_url");
+			
+			if(empty($url)){
+				
+				if($showDebug)
+					dmp("no url found for json csv");
+				
+				return(null);
+			}
+			
+			$dynamicFieldValue = HelperUC::$operations->getUrlContents($url, $showDebug);
+			
+		}else{
+			$dynamicFieldValue = UniteFunctionsUC::getVal($this->arrValues, $this->name."_json_csv_dynamic_field");
+		}
+				
 		if(empty($dynamicFieldValue)){
 			
 			if($showDebug)
@@ -239,7 +451,8 @@ class UniteCreatetorParamsProcessorMultisource{
 		//if not, try csv
 		if(is_array($arrData) == false)
 			$arrData = UniteFunctionsUC::maybeCsvDecode($arrData);
-
+		
+		
 		//debug CSV
 		
 		if($showDebug == true && is_array($arrData)){
@@ -252,7 +465,9 @@ class UniteCreatetorParamsProcessorMultisource{
 			
 			if($showDebug == true){
 				dmp("No CSV or JSON data found. The input is: ");
-				dmp($dynamicFieldValue);
+				echo "<div style='background-color:lightgray'>";
+				dmp(htmlspecialchars($dynamicFieldValue));
+				echo "</div>";
 				dmp("------------------------------");
 			}
 						
@@ -313,6 +528,70 @@ class UniteCreatetorParamsProcessorMultisource{
 		return($items);			
 	}
 	
+	/**
+	 * get gallery data
+	 */
+	private function getData_gallery(){
+		
+		$arrImages = UniteFunctionsUC::getVal($this->arrValues, $this->name."_gallery");
+		
+		if(empty($arrImages))
+			return(array());
+		
+		$arrGallery = array();
+		
+		//cache
+		$arrCacheIDs = array();
+		 
+		foreach($arrImages as $index => $image){
+			
+			$id = UniteFunctionsUC::getVal($image, "id");
+			if(!empty($id))
+				$arrCacheIDs[] = $id;
+		}
+				
+		//cache queries
+		if(!empty($arrCacheIDs))
+			UniteFunctionsWPUC::cachePostMetaQueries($arrCacheIDs);
+		
+		
+		foreach($arrImages as $index => $image){
+			
+			$id = UniteFunctionsUC::getVal($image, "id");
+			$url = UniteFunctionsUC::getVal($image, "url");
+
+			$arrImage = array();
+			
+			//demo images
+			
+			if($id === 0){
+				$counter = $index+1;
+				$title = "Demo Image Title $counter";
+				$caption = "Demo Image Caption $counter";
+				$alt = "Demo Image Alt $counter";
+				$description = "Demo Image Description $counter";
+				
+				$arrImage["image_imageid"] = $url;
+				$arrImage["image_title"] = $title;
+				$arrImage["image_alt"] = $alt;
+				$arrImage["image_caption"] = $caption;
+				$arrImage["image_description"] = $description;
+				
+				$arrGallery[] = $arrImage;
+				continue;
+			}
+			
+			//get image data
+						
+			$imageData = $this->getImageData($id);
+			
+			$arrGallery[] = $imageData;
+		}
+				
+		
+		return($arrGallery);
+	}
+	
 	
 	/**
 	 * get multisource data
@@ -325,6 +604,13 @@ class UniteCreatetorParamsProcessorMultisource{
 				$arrPosts = $this->getData_posts();
 				
 				return($arrPosts);
+			break;
+			case self::SOURCE_PRODUCTS:
+				
+				$arrProducts = $this->getData_posts(true);
+				
+				return($arrProducts);
+				
 			break;
 			case self::SOURCE_REPEATER:
 				
@@ -361,6 +647,11 @@ class UniteCreatetorParamsProcessorMultisource{
 				$arrInstagram = $this->getData_instagram();
 				
 				return($arrInstagram);
+			break;
+			case self::SOURCE_GALLERY:
+				$arrGallery = $this->getData_gallery();
+				
+				return($arrGallery);
 			break;
 			default:
 				
@@ -431,7 +722,7 @@ class UniteCreatetorParamsProcessorMultisource{
 		
 		$csv = UniteFunctionsUC::arrayToCsv($arrExample);
 		
-		$css = "border:1px solid gray;background-color:lightgray;padding:10px;";
+		$css = "border:1px solid gray;background-color:lightgray;padding:10px;;margin-top:20px;margin-bottom:20px;";
 		
 		echo "<div style='{$css}'>";
 			dmp($csv);
@@ -446,50 +737,53 @@ class UniteCreatetorParamsProcessorMultisource{
 	/**
 	 * show debug
 	 */
-	private function showDebug($source, $arrData){
+	private function showDebug_input($source, $arrData){
 		
-		if($this->showDebugData){
+		if($this->showDataType == "output")
+			return(false);
+				
+		if($this->showDebugData == false)
+			return(false);
+		
+		echo "<div style='background-color:#E5F7E1;font-size:12px;padding:5px;'>";
 			
-			if($source == self::SOURCE_DEMO){
-				dmp("Switching to demo data source in editor only.");
-			}
-			
+		if($source == self::SOURCE_DEMO){
+			dmp("Switching to demo data source in editor only.");
+		}
+		
+		$numItems = 0;
+		
+		if(is_array($arrData))
 			$numItems = count($arrData);
-			
-			dmp("Input data from: <b>$source</b>, found: $numItems");
-			dmp($arrData);
-		}
 		
+		dmp("Input data from: <b>$source</b>, found: $numItems");
+		dmp($arrData);
 		
-		switch($source){
-			case self::SOURCE_POSTS:
-				
-				//addData is posts
-				
-				//show meta fields
-				$isShowMeta =  UniteFunctionsUC::getVal($this->arrValues, $this->name."_show_metafields"); 
-				$isShowMeta = UniteFunctionsUC::strToBool($isShowMeta);
-		
-				if($isShowMeta == true)
-					HelperUC::$operations->putPostsCustomFieldsDebug($arrData);
-				
-			break;
-			case self::SOURCE_REPEATER:
-				
-				//show current post meta
-				
-				$isShowMeta = UniteFunctionsUC::getVal($this->arrValues, $this->name."_show_current_meta");
-				$isShowMeta = UniteFunctionsUC::strToBool($isShowMeta);
-				
-				if($isShowMeta == true)
-					HelperUC::$operations->putPostCustomFieldsDebug("current", true);
-				
-			break;
-			
-		}
-		
-		
+		echo "</div>";
 	}
+	
+	/**
+	 * show debug
+	 */
+	private function showDebug_output($arrItems){
+		
+		if($this->showDebugData == false)
+			return(false);
+
+		if($this->showDataType == "input")
+			return(false);
+		
+		echo "<div style='background-color:lightgray;font-size:12px;margin-top:20px;margin-bottom:20px;padding:5px;'>";
+		 
+		dmp("------------------------------------------");
+				
+		dmp("input data settings");
+		
+		dmp($arrItems);
+		
+		echo "</div>";
+	}
+	
 	
 	/**
 	 * get all fields from the values
@@ -517,9 +811,28 @@ class UniteCreatetorParamsProcessorMultisource{
 
 	
 	/**
+	* get image data by id
+	 */
+	private function getImageData($id){
+		
+		$itemParam = array();
+		$itemParam["type"] = UniteCreatorDialogParam::PARAM_IMAGE;
+		$itemParam["name"] = "image";
+		
+		$item = array();
+		$item = $this->objProcessor->getProcessedParamData($item, $id, $itemParam, UniteCreatorParamsProcessorWork::PROCESS_TYPE_OUTPUT);
+				
+		return($item);
+	}
+	
+	
+	/**
 	 * modify param value
 	 */
 	private function modifyParamValue($value, $param){
+		
+		$value = $this->addon->convertFromUrlAssets($value);
+		
 		
 		$paramType = UniteFunctionsUC::getVal($param, "type");
 
@@ -636,24 +949,27 @@ class UniteCreatetorParamsProcessorMultisource{
 	private function getFieldValue($item, $paramName, $source, $dataItem, $param){
 		
 		//set as default value
-				
+		
 		$defaultValue = UniteFunctionsUC::getVal($param, "default_value");
 		
 		$item[$paramName] = $defaultValue;
 		
-		
-		if($source == "default")
+		if($source == "default"){
+			
+			$item = $this->objProcessor->getProcessedParamData($item, $defaultValue, $param, UniteCreatorParamsProcessorWork::PROCESS_TYPE_OUTPUT);
+						
 			return($item);
+		}
 			
 		//some protections
 			
 		if(empty($dataItem))
 			return($item);
 		
-		
 		if(!is_array($dataItem))
 			return($item);
-					
+			
+			
 		$isProcessReturn = false;
 			
 		//process static value
@@ -695,7 +1011,6 @@ class UniteCreatetorParamsProcessorMultisource{
 		}
 		
 		
-		
 		//return the static value or meta field
 		
 		if($isProcessReturn == true){
@@ -708,13 +1023,6 @@ class UniteCreatetorParamsProcessorMultisource{
 			
 			$type = UniteFunctionsUC::getVal($param, "type");
 			
-			if($type == UniteCreatorDialogParam::PARAM_IMAGE && !empty($this->itemsImageSize)){
-				$param["add_image_sizes"] = true;
-				$param["value_size"] = $this->itemsImageSize;
-				
-			}
-			
-			
 			$item = $this->objProcessor->getProcessedParamData($item, $value, $param, UniteCreatorParamsProcessorWork::PROCESS_TYPE_OUTPUT);
 			
 			return($item);
@@ -725,8 +1033,9 @@ class UniteCreatetorParamsProcessorMultisource{
 		if($source == "field")
 			$source = UniteFunctionsUC::getVal($this->arrValues, $this->nameParam."_field_name_".$paramName);
 
-			
 		//post values source
+		
+		$isFound = false;
 		
 		foreach($dataItem as $name => $value){
 			
@@ -738,23 +1047,39 @@ class UniteCreatetorParamsProcessorMultisource{
 				
 				$item[$paramName] = $value;
 				
-				
 				$item = $this->objProcessor->getProcessedParamData($item, $value, $param, UniteCreatorParamsProcessorWork::PROCESS_TYPE_OUTPUT);
+				
+				$isFound = true;
 				
 				continue;
 			}
 						
-			//get children fields values
 			
-			if(strpos($name, $source."_") === 0){
+			//get children fields values
+			if($this->itemsType != self::SOURCE_GALLERY){
 				
-				$suffix = substr($name, strlen($source));
+				if(strpos($name, $source."_") === 0){
+					
+					$suffix = substr($name, strlen($source));
+					
+					$item[$paramName.$suffix] = $value;				
+				}
 				
-				$item[$paramName.$suffix] = $value;				
 			}
+			
 				
 		}
 		
+		
+		/**
+		 * handle if param not found, process it anyway
+		 */
+		if($isFound == false){
+		
+			$value = $this->modifyParamValue($defaultValue, $param);
+			
+			$item = $this->objProcessor->getProcessedParamData($item, $value, $param, UniteCreatorParamsProcessorWork::PROCESS_TYPE_OUTPUT);
+		}
 		
 		
 		return($item);
@@ -770,12 +1095,12 @@ class UniteCreatetorParamsProcessorMultisource{
 		
 		if(empty($arrData))
 			return(array());
-					
+			
 		// get fields from settings
 		
 		$arrFields = $this->getFields();
 		
-		if(empty($arrFields)){
+		if(empty($arrFields) && GlobalsProviderUC::$isUnderAjax == false){
 			
 			UniteFunctionsUC::throwError("multisource getItems error: $itemsSource fields not found");
 		}
@@ -785,8 +1110,16 @@ class UniteCreatetorParamsProcessorMultisource{
 		$arrItemParams = $this->addon->getParamsItems();
 		$arrItemParams = UniteFunctionsUC::arrayToAssoc($arrItemParams,"name");
 		
-		$arrItems = array();
+		//update image sizess
+		
+		$arrItemsImageSizes = $this->objProcessor->getProcessedItemsData_getImageSize($this->processType);
+		
+		if(!empty($arrItemsImageSizes))
+			$arrItemParams = $this->objProcessor->getProcessedItemsData_modifyImageItem($arrItemParams, $arrItemsImageSizes);
+		
 			
+		$arrItems = array();
+		
 		foreach($arrData as $index => $dataItem){
 			
 			$item = array();
@@ -802,7 +1135,7 @@ class UniteCreatetorParamsProcessorMultisource{
 					$paramName = str_replace($this->nameParam."_field_source_", "", $fieldKey);
 					
 					$param = UniteFunctionsUC::getVal($arrItemParams, $paramName);
-					
+										
 					$item = $this->getFieldValue($item, $paramName, $source, $dataItem, $param);
 					
 					$arrUsedParams[$paramName] = true;
@@ -813,7 +1146,7 @@ class UniteCreatetorParamsProcessorMultisource{
 			//add other default fields
 			
 			foreach($arrItemParams as $itemParam){
-				
+								
 				$paramName = UniteFunctionsUC::getVal($itemParam, "name");
 				
 				if(isset($arrUsedParams[$paramName]))
@@ -821,11 +1154,57 @@ class UniteCreatetorParamsProcessorMultisource{
 				
 				$value = UniteFunctionsUC::getVal($itemParam, "default_value");
 				
+				$paramType = UniteFunctionsUC::getVal($itemParam, "type");
+				
+				
+				//set from items defaults
+				
+				switch($this->itemsType){
+					case self::SOURCE_PRODUCTS:
+					case self::SOURCE_POSTS:
+						
+						if($paramName == "title")
+							$value = UniteFunctionsUC::getVal($dataItem, "title");
+						
+						if($paramType == UniteCreatorDialogParam::PARAM_IMAGE)
+							$value = UniteFunctionsUC::getVal($dataItem, "image");
+						
+					break;
+					case self::SOURCE_TERMS:
+						if($paramName == "title")
+							$value = UniteFunctionsUC::getVal($dataItem, "name");
+					break;
+					case self::SOURCE_USERS:
+						if($paramName == "title")
+							$value = UniteFunctionsUC::getVal($dataItem, "name");
+						
+					break;
+					case self::SOURCE_MENU:
+						if($paramName == "title")
+							$value = UniteFunctionsUC::getVal($dataItem, "title");
+					break;
+					case self::SOURCE_INSTAGRAM:
+						
+						if($paramName == "title")
+							$value = UniteFunctionsUC::getVal($dataItem, "caption_text");
+						
+						if($paramType == UniteCreatorDialogParam::PARAM_IMAGE)
+							$value = UniteFunctionsUC::getVal($dataItem, "image");
+						
+					break;
+				}
+				
+				
+				//set from defined defaults if exists (param option)
+				if(isset($this->arrDefaults[$paramName]))
+					$value = $this->arrDefaults[$paramName];
+
 				$item[$paramName] = $value;
 				
 				$item = $this->objProcessor->getProcessedParamData($item, $value, $itemParam, UniteCreatorParamsProcessorWork::PROCESS_TYPE_OUTPUT);
+				
 			}
-			
+						
 			//modify demo fields
 			
 			if($itemsSource == self::SOURCE_DEMO){
@@ -878,6 +1257,38 @@ class UniteCreatetorParamsProcessorMultisource{
 		return($arrDemo);
 	}
 	
+	/**
+	 * get attribute defaults
+	 */
+	private function getAttributeDefaults($param){
+		
+		$strDefaults = UniteFunctionsUC::getVal($param, "multisource_attributes_defaults");
+		
+		$strDefaults = trim($strDefaults);
+		
+		if(empty($strDefaults))
+			return(array());
+			
+		$arrDefaults = explode(",",$strDefaults);
+		
+		$arrValues = array();
+		
+		foreach($arrDefaults as $strDefault){
+			
+			$arrDefault = explode("=",$strDefault);
+			
+			if(count($arrDefault) != 2)
+				continue;
+				
+			$key = trim($arrDefault[0]);
+			$value = trim($arrDefault[1]);
+			
+			$arrValues[$key] = $value;
+		}
+		
+		return($arrValues);
+	}
+	
 	
 	/**
 	 * get multisource data
@@ -888,13 +1299,6 @@ class UniteCreatetorParamsProcessorMultisource{
 		
 		$itemsSource = UniteFunctionsUC::getVal($value, $name."_source");
 		
-		if($itemsSource == "items"){
-			
-			$data[$name] = "uc_items";
-			
-			return($data);
-		}
-		
 		//set the inputs
 		
 		$this->arrValues = $value;
@@ -904,41 +1308,98 @@ class UniteCreatetorParamsProcessorMultisource{
 		$this->processType = $processType;
 		$this->inputData = $data;
 		$this->itemsType = $itemsSource;
+		$this->arrDefaults = $this->getAttributeDefaults($param);
 		
 		
-		//get image size
-		$this->itemsImageSize = $this->objProcessor->getProcessedItemsData_getImageSize($processType);
+		//debug
 		
 		$isShowInputData = UniteFunctionsUC::getVal($this->arrValues, $this->name."_show_input_data"); 
 		$isShowInputData = UniteFunctionsUC::strToBool($isShowInputData);
 		
 		$this->showDebugData = $isShowInputData;
+				
+		$this->showDataType = UniteFunctionsUC::getVal($this->arrValues, $this->name."_input_data_type"); 
 		
+		if(empty($this->showDataType))
+			$this->showDataType = "input";
+		
+		
+		$isShowMeta =  UniteFunctionsUC::getVal($this->arrValues, $this->name."_show_metafields"); 
+		$isShowMeta = UniteFunctionsUC::strToBool($isShowMeta);
+		
+		$this->showDebugMeta = $isShowMeta;
+
+		if($itemsSource == "items"){
+			
+			$data[$name] = "uc_items";
+			
+			if($this->showDebugData == true)
+				self::$showItemsDebug = true;
+			
+			return($data);
+		}
 		
 		$this->checkDebugBeforeData($itemsSource);
 		
 		$arrData = $this->getData($itemsSource);
-		
-		$this->showDebug($itemsSource, $arrData);
+				
+		$this->showDebug_input($itemsSource, $arrData);
 		
 		if(empty($arrData) && $this->isInsideEditor == true){
 			$arrData = $this->getDemoDataForEditor();
 			
 			$itemsSource = self::SOURCE_DEMO;
 		
-			$this->showDebug($itemsSource, $arrData);
+			$this->showDebug_input($itemsSource, $arrData);
 			
 		}
 		
+		$arrItems = $this->getItems($itemsSource, $arrData);
+
+		$data[$name] = $arrItems;
 		
-		$response = $this->getItems($itemsSource, $arrData);
+		if($this->showDebugData == true)
+			$this->showDebug_output($arrItems);
+		
+			
+		//add additional data
+		
+		if(!empty($this->addData))
+			$data = array_merge($this->addData, $data);
 		
 		
-		$data[$name] = $response;
-				
 		return($data);
 	}
 	
+	
+	/**
+	 * show items debug from the output if needed
+	 */
+	public static function checkShowItemsDebug($arrItemData){
+		
+		if(self::$showItemsDebug == false)
+			return(false);
+			
+		self::$showItemsDebug = false;
+		
+		$arrOutput = array();
+		
+		if(empty($arrItemData)){
+			dmp("no items data found");
+			return(false);
+		}
+		
+		foreach($arrItemData as $item){
+			
+			if(count($item) == 1 && isset($item["item"]))
+				$arrOutput[] = $item["item"];
+		}
+
+		dmp("Getting data from the settings items repeater");
+		
+		dmp($arrOutput);
+		
+	}
 	
 	
 }

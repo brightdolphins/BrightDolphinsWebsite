@@ -889,6 +889,8 @@ class UniteCreatorParamsProcessorWork{
 	 */
 	private function getProcessedParamsValue_imageJson($data, $value, $param){
 		
+				
+		
 		//if the value is emtpy
 		if(empty($value)){
 			
@@ -911,8 +913,9 @@ class UniteCreatorParamsProcessorWork{
 			$urlDefault = $this->getImageJsonDefaultUrl($param);
 			return($urlDefault);
 		}
-		
+				
 		$urlJson = $postThumb->guid;
+		
 		
 		return($urlJson);
 	}
@@ -943,7 +946,7 @@ class UniteCreatorParamsProcessorWork{
 			
 			if(isset($value["url"]))
 				$value = $value["url"];
-			
+				
 			if(empty($value))
 				return($data);
 		}
@@ -959,8 +962,6 @@ class UniteCreatorParamsProcessorWork{
 			$data[$name] = $value;
 		}
 		
-		if(is_numeric($value) == false)
-			return($data);
 		
 		$sizeFilters = UniteFunctionsUC::getVal($param, "size_filters");
 		$isNoAttributes = UniteFunctionsUC::getVal($param, "no_attributes");
@@ -980,8 +981,10 @@ class UniteCreatorParamsProcessorWork{
 		if(empty($urlThumb))
 			$data[$keyThumb] = $urlImage;
 		
+			
 		return($data);
 	}
+	
 	
 	
 	private function z___________ICON_____________(){}
@@ -1627,6 +1630,42 @@ class UniteCreatorParamsProcessorWork{
 	}
 	
 	/**
+	 * get date time data
+	 */
+	protected function getDateTimeData($data, $value, $name, $param, $processType){
+
+		//not given - return current date
+		
+		$formatFullDate = "d-M-Y, H:i";
+		
+		if(empty($value)){
+			$stamp = time();
+			$data[$name."_stamp"] = $stamp;
+			$data[$name] = date($formatFullDate, $stamp);
+			
+			return($data);
+		}
+		
+		//numeric - date is stamp
+		
+		if(is_numeric($value)){
+			
+			$data[$name."_stamp"] = $value;
+			$data[$name] = date($formatFullDate, $stamp);
+			return($data);
+		}
+		
+		//date is string 
+		
+		$stamp = strtotime($value);
+		
+		$data[$name."_stamp"] = $stamp;
+		
+		return($data);
+	}
+	
+	
+	/**
 	 * put hover animation style if needed
 	 */
 	protected function outputHoverAnimationsStyles($value, $name, $param, $processType){
@@ -1688,6 +1727,9 @@ class UniteCreatorParamsProcessorWork{
 			break;
 			case UniteCreatorDialogParam::PARAM_SLIDER:
 			    $data = $this->getSliderData($data, $value, $name, $param, $processType);
+			break;
+			case UniteCreatorDialogParam::PARAM_DATETIME:
+			    $data = $this->getDateTimeData($data, $value, $name, $param, $processType);
 			break;
 			case UniteCreatorDialogParam::PARAM_DATASET:
 			    $data[$name] = $this->getDatasetData($value, $name, $param, $processType);
@@ -1870,7 +1912,9 @@ class UniteCreatorParamsProcessorWork{
 		
 		if(empty($paramsSpecial))
 			return(null);
-			
+		
+		$arrValues = array();
+		
 		foreach($paramsSpecial as $param){
 						
 			$attributeType = UniteFunctionsUC::getVal($param, "attribute_type");
@@ -1888,18 +1932,25 @@ class UniteCreatorParamsProcessorWork{
 				$value = UniteFunctionsUC::getVal($value, $name."_size");
 			}
 			
-			return($value);
+			$destParamName = UniteFunctionsUC::getVal($param, "image_size_param_name");
+			
+			if(empty($destParamName))
+				$destParamName = "_default_";
+			
+			$arrValues[$destParamName] = $value;
 		}
 		
 		
-		return(null);
+		return($arrValues);
 	}
 	
 	/**
 	 * modify image param
 	 */
-	private function getProcessedItemsData_modifyImageItem($arrItemParams, $itemsImageSize){
+	public function getProcessedItemsData_modifyImageItem($arrItemParams, $arrImageSizes){
 		
+		$defaultSize = UniteFunctionsUC::getVal($arrImageSizes, "_default_");
+				
 		foreach($arrItemParams as $index => $param){
 			
 			$type = UniteFunctionsUC::getVal($param, "type");
@@ -1907,11 +1958,24 @@ class UniteCreatorParamsProcessorWork{
 			if($type != UniteCreatorDialogParam::PARAM_IMAGE)
 				continue;
 			
+			$name = UniteFunctionsUC::getVal($param, "name");
+			
+			$size = UniteFunctionsUC::getVal($arrImageSizes, $name);
+			
+			if(empty($size))
+				$size = $defaultSize;
+
+			if(empty($size))
+				continue;
+			
+				
 			$param["add_image_sizes"] = true;
-			$param["value_size"] = $itemsImageSize;
+			$param["value_size"] = $size;
 			
 			$arrItemParams[$index] = $param;
+				
 		}
+		
 		
 		return($arrItemParams);
 	}
@@ -1938,15 +2002,15 @@ class UniteCreatorParamsProcessorWork{
 			return(array());
 		
 		//check for special params
-		$itemsImageSize = $this->getProcessedItemsData_getImageSize($processType);
+		$arrItemsImageSizes = $this->getProcessedItemsData_getImageSize($processType);
 		
 		$operations = new UCOperations();
 		
 		$arrItemsNew = array();
 		$arrItemParams = $this->addon->getParamsItems();
 		
-		if(!empty($itemsImageSize)){
-			$arrItemParams = $this->getProcessedItemsData_modifyImageItem($arrItemParams, $itemsImageSize);
+		if(!empty($arrItemsImageSizes)){
+			$arrItemParams = $this->getProcessedItemsData_modifyImageItem($arrItemParams, $arrItemsImageSizes);
 		}
 		
 		$arrItemParams = $this->initProcessParams($arrItemParams);

@@ -130,6 +130,9 @@ class UniteCreatorSettings extends UniteCreatorSettingsWork{
 			//some fix that avoid double names
 			$arrDuplicateValues = UniteFunctionsUC::getArrayDuplicateValues($arrItemTax);
 			
+			if(empty($arrItemTax))
+				$arrItemTax = array();
+			
 			foreach($arrItemTax as $slug => $taxTitle){
 
 				if(is_string($taxTitle) == false)
@@ -241,9 +244,9 @@ class UniteCreatorSettings extends UniteCreatorSettingsWork{
 		$params["placeholder"] = __("Select one or more users", "unlimited-elements-for-elementor");
 		$params["elementor_condition"] = $arrConditionCustom;
 		
-		$arrAuthors = array_flip($arrAuthors);
+		$arrAuthorsFlipped = array_flip($arrAuthors);
 		
-		$this->addMultiSelect($name."_exclude_authors", $arrAuthors, __("Exclude By Specific Users", "unlimited-elements-for-elementor"), "", $params);
+		$this->addMultiSelect($name."_exclude_authors", $arrAuthorsFlipped, __("Exclude By Specific Users", "unlimited-elements-for-elementor"), "", $params);
 		
 		//---- include users -----
 		
@@ -253,7 +256,7 @@ class UniteCreatorSettings extends UniteCreatorSettingsWork{
 		$params["placeholder"] = __("Select one or more users", "unlimited-elements-for-elementor");
 		$params["elementor_condition"] = $arrConditionManual;
 		
-		$this->addMultiSelect($name."_include_authors", $arrAuthors, __("Select Specific Users", "unlimited-elements-for-elementor"), "", $params);
+		$this->addMultiSelect($name."_include_authors", $arrAuthorsFlipped, __("Select Specific Users", "unlimited-elements-for-elementor"), "", $params);
 		
 		
 		//---- hr before max users -----
@@ -342,7 +345,11 @@ class UniteCreatorSettings extends UniteCreatorSettingsWork{
 	 */
 	protected function addMenuPicker($name, $value, $title, $extra){
 		
-		$arrMenus = UniteFunctionsWPUC::getMenusListShort();
+		$arrMenus = array();
+		
+		//if(GlobalsUC::$is_admin == true)
+			$arrMenus = UniteFunctionsWPUC::getMenusListShort();
+		
 		
 		$menuID = UniteFunctionsUC::getVal($value, $name."_id");
 		
@@ -413,13 +420,12 @@ class UniteCreatorSettings extends UniteCreatorSettingsWork{
 			
 			$arrPostTypes[$title] = $typeName;
 		}
-		
-		
+				
 		$postType = UniteFunctionsUC::getVal($value, $name."_posttype");
 		if(empty($postType))
 			$postType = UniteFunctionsUC::getArrFirstValue($arrPostTypes);
 		
-				
+		
 		$params = array();
 		
 		$params[UniteSettingsUC::PARAM_CLASSADD] = "unite-setting-post-type";
@@ -458,6 +464,7 @@ class UniteCreatorSettings extends UniteCreatorSettingsWork{
 		$arrIncludeBy["spacific_terms"] = __("Specific Terms","unlimited-elements-for-elementor");
 		$arrIncludeBy["parents"] = __("Children Of","unlimited-elements-for-elementor");
 		$arrIncludeBy["children_of_current"] = __("Children Of Current Term","unlimited-elements-for-elementor");
+		$arrIncludeBy["current_post_terms"] = __("Current Post Terms","unlimited-elements-for-elementor");
 		$arrIncludeBy["search"] = __("By Search Text","unlimited-elements-for-elementor");
 		$arrIncludeBy["childless"] = __("Only Childless","unlimited-elements-for-elementor");
 		$arrIncludeBy["no_parent"] = __("Not a Child of Other Term","unlimited-elements-for-elementor");
@@ -561,18 +568,19 @@ class UniteCreatorSettings extends UniteCreatorSettingsWork{
 
 		// --------- add exclude by -------------
 		
-		$arrIncludeBy = array();
-		$arrIncludeBy["spacific_terms"] = __("Specific Terms","unlimited-elements-for-elementor");
-		$arrIncludeBy["current_term"] = __("Current Term (for archive only)","unlimited-elements-for-elementor");
-		$arrIncludeBy["hide_empty"] = __("Hide Empty Terms","unlimited-elements-for-elementor");
+		$arrExcludeBy = array();
+		$arrExcludeBy["spacific_terms"] = __("Specific Terms","unlimited-elements-for-elementor");
+		$arrExcludeBy["current_term"] = __("Current Term (for archive only)","unlimited-elements-for-elementor");
+		$arrExcludeBy["current_post_terms"] = __("Current Post Terms","unlimited-elements-for-elementor");
+		$arrExcludeBy["hide_empty"] = __("Hide Empty Terms","unlimited-elements-for-elementor");
 		
-		$arrIncludeBy = array_flip($arrIncludeBy);
+		$arrExcludeBy = array_flip($arrExcludeBy);
 		
 		$params = array();
 		$params["is_multiple"] = true;
 		$params["origtype"] = UniteCreatorDialogParam::PARAM_DROPDOWN;
 				
-		$this->addMultiSelect($name."_excludeby", $arrIncludeBy, esc_html__("Exclude By", "unlimited-elements-for-elementor"), "", $params);
+		$this->addMultiSelect($name."_excludeby", $arrExcludeBy, esc_html__("Exclude By", "unlimited-elements-for-elementor"), "", $params);
 		
 		
 		//---------- add exclude ---------
@@ -1033,6 +1041,7 @@ class UniteCreatorSettings extends UniteCreatorSettingsWork{
 	 */
 	protected function addPostsListPicker($name,$value,$title,$extra){
 		
+		
  		$simpleMode = UniteFunctionsUC::getVal($extra, "simple_mode");
 		$simpleMode = UniteFunctionsUC::strToBool($simpleMode);
 		
@@ -1047,8 +1056,14 @@ class UniteCreatorSettings extends UniteCreatorSettingsWork{
 		
 		$defaultMaxPosts = UniteFunctionsUC::getVal($extra, "default_max_posts");
 		$defaultMaxPosts = (int)($defaultMaxPosts);
-				
-		$arrPostTypes = UniteFunctionsWPUC::getPostTypesWithCats(GlobalsProviderUC::$arrFilterPostTypes);
+
+		
+		$arrPostTypes = array();
+		
+		//if(GlobalsUC::$is_admin == true){
+			$arrPostTypes = UniteFunctionsWPUC::getPostTypesWithCats(GlobalsProviderUC::$arrFilterPostTypes);
+		//}
+		
 		
 		$isWpmlExists = UniteCreatorWpmlIntegrate::isWpmlExists();
 		
@@ -1089,6 +1104,9 @@ class UniteCreatorSettings extends UniteCreatorSettingsWork{
 			}
 			
 		}
+		
+		$arrTypesSimple["Any"] = "any";
+		
 		
 		//----- posts source ----
 		//UniteFunctionsUC::showTrace();
@@ -1149,7 +1167,7 @@ class UniteCreatorSettings extends UniteCreatorSettingsWork{
 			
 			$source = UniteFunctionsUC::getVal($value, $name."_source", "custom");
 			$arrSourceOptions = array();
-			$arrSourceOptions[sprintf(__("Current Query %s", "unlimited-elements-for-elementor"), $textPost)] = "current";
+			$arrSourceOptions[sprintf(__("Current Query %s", "unlimited-elements-for-elementor"), $textPosts)] = "current";
 			$arrSourceOptions[sprintf(__("Custom %s", "unlimited-elements-for-elementor"),$textPosts)] = "custom";
 			$arrSourceOptions[sprintf(__("Related %s", "unlimited-elements-for-elementor"), $textPosts)] = "related";
 			$arrSourceOptions[__("Manual Selection", "unlimited-elements-for-elementor")] = "manual";
@@ -1211,6 +1229,7 @@ class UniteCreatorSettings extends UniteCreatorSettingsWork{
 		$params["elementor_condition"] = $arrCustomOnlyCondition;
 		
 		$params["is_multiple"] = true;
+		
 		
 		if($isForWooProducts == false)
 			$this->addMultiSelect($name."_posttype", $arrTypesSimple, esc_html__("Post Types", "unlimited-elements-for-elementor"), $postType, $params);
@@ -1288,7 +1307,12 @@ class UniteCreatorSettings extends UniteCreatorSettingsWork{
 		
 		//---- Include By Author -----
 		
-		$arrAuthors = UniteFunctionsWPUC::getArrAuthorsShort(true);
+		//optimize requests for front
+		
+		$arrAuthors = array();
+		
+		//if(GlobalsUC::$is_admin == true)
+			$arrAuthors = UniteFunctionsWPUC::getArrAuthorsShort(true);
 				
 		$params = array();
 		$params["origtype"] = UniteCreatorDialogParam::PARAM_DROPDOWN;
@@ -1715,7 +1739,7 @@ class UniteCreatorSettings extends UniteCreatorSettingsWork{
 		$params["label_block"] = true;
 		$params["description"] = "Optional. Select some dynamic field, that has output of post ids (string or array) like 15,40,23";
 		
-		$this->addTextBox($name."_manual_post_ids_dynamic", "", __("Or Select Post IDs by Dynamic Field", "unlimited-elements-for-elementor"), $params);
+		$this->addTextBox($name."_manual_post_ids_dynamic", "", __("Or Select Post IDs 	", "unlimited-elements-for-elementor"), $params);
 
 		// --------- add hr before avoid duplicates -------------
 		
@@ -1755,7 +1779,7 @@ class UniteCreatorSettings extends UniteCreatorSettingsWork{
 		}
 		
 		$arrExclude["terms"] = __("Terms", "unlimited-elements-for-elementor");		
-		$arrExclude["current_post"] = sprintf(__("Current %s", "unlimited-elements-for-elementor"), $textPosts);
+		$arrExclude["current_post"] = sprintf(__("Current %s", "unlimited-elements-for-elementor"), $textPost);
 		$arrExclude["specific_posts"] = sprintf(__("Specific %s", "unlimited-elements-for-elementor"), $textPosts);
 		$arrExclude["author"] = __("Author", "unlimited-elements-for-elementor");
 		$arrExclude["no_image"] = sprintf(__("%s Without Featured Image", "unlimited-elements-for-elementor"),$textPost);
@@ -1908,6 +1932,17 @@ class UniteCreatorSettings extends UniteCreatorSettingsWork{
 		$params["add_dynamic"] = true;
 		
 		$this->addTextBox($name."_maxitems", $maxItems, sprintf(esc_html__("Max %s", "unlimited-elements-for-elementor"), $textPosts), $params);
+
+		//------- override post type --------
+		
+		$arrTypesCurrent = UniteFunctionsUC::addArrFirstValue($arrTypesSimple, "","[Original Post Type]");
+		
+		$params = array();
+		$params["origtype"] = UniteCreatorDialogParam::PARAM_DROPDOWN;
+		$params["elementor_condition"] = $arrCurrentElementorCondition;
+		
+		$this->addSelect($name."_posttype_current", $arrTypesCurrent, esc_html__("Post Type Override", "unlimited-elements-for-elementor"), "", $params);
+		
 		
 		//------- max items for current --------
 		

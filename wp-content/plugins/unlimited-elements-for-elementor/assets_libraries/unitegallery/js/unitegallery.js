@@ -1,4 +1,4 @@
-//Unite Gallery, Version: 1.7.69, released 20 September 2022
+//Unite Gallery, Version: 1.7.70, released 15 December 2022
 
 //------ ug-common-libraries.js------ 
 
@@ -346,18 +346,17 @@ function UGFunctions(){
 	 */
 	this.toFullscreen = function(element, fullscreenID) {
 		  	  
-		  if(element.requestFullscreen) {
-		    element.requestFullscreen();
-		  } else if(element.mozRequestFullScreen) {
-		    element.mozRequestFullScreen();
-		  } else if(element.webkitRequestFullscreen) {
-		    element.webkitRequestFullscreen(); 
-		  } else if(element.msRequestFullscreen) {
-			    element.msRequestFullscreen(); 
-		  } else{
-			  return(false);
-		  }
-		  
+		if(element.requestFullscreen) {
+			element.requestFullscreen();
+		} else if(element.mozRequestFullScreen) {
+			element.mozRequestFullScreen();
+		} else if(element.webkitRequestFullscreen) {
+			element.webkitRequestFullscreen(); 
+		} else if(element.msRequestFullscreen) {
+			element.msRequestFullscreen(); 
+		} else{
+			return(false);
+		}		  
 		  return(true);
 	}	
 	
@@ -367,25 +366,24 @@ function UGFunctions(){
 	 * return if operation success (or if fullscreen mode supported)
 	 */
 	this.exitFullscreen = function() {
-		  if(t.isFullScreen() == false)
-			  return(false);
-			  
-		  if(document.exitFullscreen) {
-		    document.exitFullscreen();
-
-		  } else if(document.cancelFullScreen) {
-			    document.cancelFullScreen();
-		    
-		  } else if(document.mozCancelFullScreen) {
-		    document.mozCancelFullScreen();
-		    
-		  } else if(document.webkitExitFullscreen) {
-		    document.webkitExitFullscreen();
-		    
-		  } else if(document.msExitFullscreen) {
-			    document.msExitFullscreen();
-			    
-		  }else{
+		if(t.isFullScreen() == false)
+		return(false);
+		
+		if(document.exitFullscreen) {
+			document.exitFullscreen();
+			
+		} else if(document.cancelFullScreen) {
+			document.cancelFullScreen();
+			
+		} else if(document.mozCancelFullScreen) {
+			document.mozCancelFullScreen();
+			
+		} else if(document.webkitExitFullscreen) {
+			document.webkitExitFullscreen();
+		} else if(document.msExitFullscreen) {
+			document.msExitFullscreen();
+			
+		}else{
 			  return(false);
 		  }
 		  
@@ -5701,19 +5699,19 @@ function UGPanelHandle(){
 		switch(orientation){
 			case "right":
 				classTip += " ug-handle-tip-left";
-				svgArrow = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="12px" height="12px" viewBox="0 0 12 12"><g stroke-width="1" transform="translate(0, 0)"><polyline points="3.5 0.5 9.5 6 3.5 11.5" fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"></polyline></g></svg>';
+				svgArrow = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="12px" height="12px" viewBox="0 0 12 12"><g stroke-width="2" transform="translate(0, 0)"><polyline points="3.5 0.5 9.5 6 3.5 11.5" fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"></polyline></g></svg>';
 				break;
 				case "left":
 				classTip += " ug-handle-tip-right";
-				svgArrow = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="12px" height="12px" viewBox="0 0 12 12"><g stroke-width="1" transform="translate(0, 0)"><polyline points="7.5 0.5 3.5 6 7.5 11.5" fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"></polyline></g></svg>';
+				svgArrow = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="12px" height="12px" viewBox="0 0 12 12"><g stroke-width="2" transform="translate(0, 0)"><polyline points="7.5 0.5 3.5 6 7.5 11.5" fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"></polyline></g></svg>';
 			break;
 			case "bottom":
 				classTip += " ug-handle-tip-top";		
-				svgArrow = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="12px" height="12px" viewBox="0 0 12 12"><g stroke-width="1" transform="translate(0, 0)"><polyline points="0.5 3.5 6 9.5 11.5 3.5" fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"></polyline></g></svg>';
+				svgArrow = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="12px" height="12px" viewBox="0 0 12 12"><g stroke-width="2" transform="translate(0, 0)"><polyline points="0.5 3.5 6 9.5 11.5 3.5" fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"></polyline></g></svg>';
 				break;
 				case "top":
 				classTip += " ug-handle-tip-bottom";
-				svgArrow = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="12px" height="12px" viewBox="0 0 12 12"><g stroke-width="1" transform="translate(0, 0)"><polyline points="0.5 8.5 6 2.5 11.5 8.5" fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"></polyline></g></svg>';
+				svgArrow = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="12px" height="12px" viewBox="0 0 12 12"><g stroke-width="2" transform="translate(0, 0)"><polyline points="0.5 8.5 6 2.5 11.5 8.5" fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"></polyline></g></svg>';
 			break;
 		}
 		
@@ -5749,7 +5747,7 @@ function UGPanelHandle(){
 	 * on handle click, close or open panel
 	 */
 	function onHandleClick(event){
-		
+	
 		event.stopPropagation();
 		event.stopImmediatePropagation();
 		
@@ -5760,7 +5758,10 @@ function UGPanelHandle(){
 			g_panel.openPanel();
 		else
 			g_panel.closePanel();
+
+		g_objHandleTip.trigger('handle_tip_clicked');
 	}
+
 	
 	/**
 	 * init events
@@ -6499,7 +6500,7 @@ function UGStripPanel() {
 	this.resize = function(newWidth) {
 		t.setWidth(newWidth);
 		setElementsSize();
-		placeElements();
+		placeElements();		
 	}
 	
 	this.__________Functions_From_Base_____ = function() {}
@@ -12497,13 +12498,13 @@ function UGTiles(){
 
 //------ ug-avia.js------ 
 /**
-    * avia control class
-    * addon to strip gallery
-    */
- function UGAviaControl(){
-      
+* avia control class
+* addon to strip gallery
+*/
+function UGAviaControl(){
+  
   var g_parent, g_gallery, g_objects, g_objStrip, g_objStripInner, g_options;
-  var g_isVertical;
+  var g_isVertical, g_isMouseOverStrip;
   
   var g_temp = {
     touchEnabled:false,			//variable that tells if touch event was before move event
@@ -12592,7 +12593,7 @@ function UGTiles(){
     
     return(event.pageY);
   }
-    
+  
   
   /**
   * get area type - start / stop / null
@@ -12621,33 +12622,51 @@ function UGTiles(){
       
       if(mousePos < stripRightPos && mousePos > scrollAreaEnd)
       return('stop');
-     
+      
       return(null);
     }
     
     //--- for vertical
-      
-	  //get top / bottom position of the strap
-	  var stripTopPos = g_objStrip.offset().top;
-	  var stripBotPos = stripTopPos + g_objStrip.height();
-	  
-	  //define scroll areas sizes
-	  var scrollAreaStart = stripTopPos + areaSize;
-	  var scrollAreaEnd = stripBotPos - areaSize;
-	  
-	  //return scroll area type
-	  if(mousePos > stripTopPos && mousePos < scrollAreaStart)
-	  return('start');
-	  
-	  if(mousePos < stripBotPos && mousePos > scrollAreaEnd)
-	  return('stop');
-      
+    
+    //get top / bottom position of the strap
+    var stripTopPos = g_objStrip.offset().top;
+    var stripBotPos = stripTopPos + g_objStrip.height();
+    
+    //define scroll areas sizes
+    var scrollAreaStart = stripTopPos + areaSize;
+    var scrollAreaEnd = stripBotPos - areaSize;
+    
+    //return scroll area type
+    if(mousePos > stripTopPos && mousePos < scrollAreaStart)
+    return('start');
+    
+    if(mousePos < stripBotPos && mousePos > scrollAreaEnd)
+    return('stop');
     
     //return null if no scroll area found
     return(null);
     
   }
   
+  /**
+  * check if mouse is over strip
+  */
+  function isMouseOverStrip(){
+    
+    g_isMouseOverStrip = true;   
+    
+  }
+  
+  /**
+  * check if mouse left strip
+  */
+  function isMouseOffStrip(){
+    
+    g_isMouseOverStrip = false;   
+    
+    stopStripMovingLoop();
+    
+  }
   
   /**
   * on mouse move
@@ -12663,24 +12682,24 @@ function UGTiles(){
       return(true);
     }
     
-    g_temp.isMouseInsideStrip = g_objStrip.ismouseover();
+    g_temp.isMouseInsideStrip = g_objStrip.ismouseover(); 
     
     var strip_touch_active = g_parent.isTouchMotionActive();
     
-    if(g_temp.isMouseInsideStrip == true && strip_touch_active == false){
+    if(g_isMouseOverStrip == true && strip_touch_active == false){
       
       var mousePos = getMousePos(event);
       
       //get the area type - start / end / null          
       var areaType = getStripAreaType(mousePos);
-   
+      
       if(!areaType){
         stopStripMovingLoop();  
         return(false);
       }
       
       moveStripToMousePosition(areaType);
-                
+      
     }else{
       stopStripMovingLoop();
     }
@@ -12705,6 +12724,12 @@ function UGTiles(){
     //on body move
     jQuery("body").mousemove(onMouseMove);
     
+    //define mouse over event
+    g_objStrip.on('mouseover', isMouseOverStrip);
+    
+    //define mouse off event
+    g_objStrip.on('mouseleave', isMouseOffStrip);
+    
   }
   
   
@@ -12726,16 +12751,16 @@ function UGTiles(){
   function moveStripStep(){
     
     if(g_temp.is_strip_moving == false)
-    	return(false);
+    return(false);
     
     var innerPos = g_parent.getInnerStripPos();
     
     if(Math.floor(innerPos) == Math.floor(g_temp.strip_finalPos))
-    	stopStripMovingLoop();
+    stopStripMovingLoop();
     
     //calc step
     var diff = Math.abs(g_temp.strip_finalPos - innerPos);
-            
+    
     //get speed
     var dpos = g_temp.strip_speed;
     
@@ -12745,13 +12770,13 @@ function UGTiles(){
     var newPos = innerPos + dpos;
     
     if(g_temp.strip_finalPos > newPos && dpos < 0)
-    	newPos = g_temp.strip_finalPos;
-        
+    newPos = g_temp.strip_finalPos;
+    
     if(diff == 0){
       stopStripMovingLoop();
       return(false);
     }
-
+    
     g_parent.positionInnerStrip(newPos);
     
     g_temp.handle_request_frame = requestAnimationFrame(moveStripStep);
@@ -12778,7 +12803,7 @@ function UGTiles(){
   function stopStripMovingLoop(){
     
     if(g_temp.isStripMoving == false)
-    	return(false);
+    return(false);
     
     g_temp.isStripMoving = false;
     cancelAnimationFrame(g_temp.handle_request_frame);
@@ -12795,30 +12820,30 @@ function UGTiles(){
     
     //--for horizontal mode
     if(g_isVertical == false){
-
+      
       var stripInnerWidth = g_objStripInner.width();
       var stripOuterWidth = g_objStrip.width();
-
+      
       if(areaType == 'start')
       finalPos = 0;
       
       if(areaType == 'stop')
       finalPos = -(stripInnerWidth - stripOuterWidth);
-
+      
     }
-
+    
     //--for vertical mode
     if(g_isVertical == true){
-
+      
       var stripInnerHeight = g_objStripInner.height();
       var stripOuterHeight = g_objStrip.height();
-
+      
       if(areaType == 'start')
       finalPos = 0;
       
       if(areaType == 'stop')
       finalPos = -(stripInnerHeight - stripOuterHeight);
-
+      
     }
     
     finalPos = Math.floor(finalPos);
@@ -12937,6 +12962,7 @@ function UGSlider(){
 		  
 		  slider_enable_arrows: true,					//enable arrows onslider element
 		  slider_arrows_skin: "",						//skin of the slider arrows, if empty inherit from gallery skin
+		  slider_arrows_width: 2,						//stroke width of the slider arrows, if empty equals 1px
 		  
 		  slider_arrow_left_align_hor:"left",	  		//left, center, right - left arrow horizonal align
 		  slider_arrow_left_align_vert:"middle", 		//top, middle, bottom - left arrow vertical align
@@ -13195,10 +13221,12 @@ function UGSlider(){
 		
 		//add arrows
 		if(g_options.slider_enable_arrows == true){
+
+			var svgArrowsWidth = g_options.slider_arrows_width;
 			
-			var svgArrowLeft = '<svg x="0px" y="0px" width="32px" height="32px" viewBox="0 0 32 32"><g stroke-width="1" transform="translate(0.5, 0.5)"><polyline fill="none" stroke="#ffffff" stroke-width="1" stroke-linecap="square" stroke-miterlimit="10" points="21,2 11,16 21,30 " stroke-linejoin="miter"></polyline></g></svg>';
+			var svgArrowLeft = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="32px" height="32px" viewBox="0 0 48 48"><g stroke-width="'+svgArrowsWidth+'" transform="translate(0.5, 0.5)"><polyline fill="none" stroke="#ffffff" stroke-width="'+svgArrowsWidth+'" stroke-linecap="square" stroke-miterlimit="10" points="31,3 17,24 31,45 " stroke-linejoin="miter"></polyline></g></svg>';
 			
-			var svgArrowRight = '<svg x="0px" y="0px" width="32px" height="32px" viewBox="0 0 32 32"><g stroke-width="1" transform="translate(0.5, 0.5)"><polyline fill="none" stroke="#ffffff" stroke-width="1" stroke-linecap="square" stroke-miterlimit="10" points="11,2 21,16 11,30 " stroke-linejoin="miter"></polyline></g></svg>';
+			var svgArrowRight = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="32px" height="32px" viewBox="0 0 48 48"><g stroke-width="'+svgArrowsWidth+'" transform="translate(0.5, 0.5)"><polyline fill="none" stroke="#ffffff" stroke-width="'+svgArrowsWidth+'" stroke-linecap="square" stroke-miterlimit="10" points="17,3 31,24 17,45 " stroke-linejoin="miter"></polyline></g></svg>';
 			
 			html += "<div class='ug-slider-control ug-arrow-left ug-skin-"+g_options.slider_arrows_skin+"'>"+svgArrowLeft+"</div>";
 			html += "<div class='ug-slider-control ug-arrow-right ug-skin-"+g_options.slider_arrows_skin+"'>"+svgArrowRight+"</div>";

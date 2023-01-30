@@ -260,7 +260,7 @@ class InstaObjItemUC{
 	 * get time passed till now
 	 */
 	public function getTimePassedText(){
-				
+		
 		$timeSinse = HelperInstaUC::getTimeSince($this->createdDateStamp);
 		
 		return($timeSinse);

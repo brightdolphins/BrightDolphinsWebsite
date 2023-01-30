@@ -387,12 +387,16 @@ class UniteCreatorDialogParamElementor extends UniteCreatorDialogParam{
 		$arrUnits["%"] = "%";
 		$arrUnits["em"] = "EM";
 		$arrUnits["vh"] = __("VH","unlimited-elements-for-elementor");
+		$arrUnits["vw"] = __("VW","unlimited-elements-for-elementor");
 		$arrUnits["percent_px"] = __("%, PX","unlimited-elements-for-elementor");		
 		$arrUnits["px_percent"] = __("PX, %","unlimited-elements-for-elementor");
 		$arrUnits["px_percent_em"] = __("PX, %, EM","unlimited-elements-for-elementor");
 		$arrUnits["vh_px"] = __("VH, PX","unlimited-elements-for-elementor");
 		$arrUnits["px_vh"] = __("PX, VH","unlimited-elements-for-elementor");
 		$arrUnits["px_vh_percent"] = __("PX, VH, %","unlimited-elements-for-elementor");
+		$arrUnits["vw_px"] = __("VW, PX","unlimited-elements-for-elementor");
+		$arrUnits["px_vw"] = __("PX, VW","unlimited-elements-for-elementor");
+		$arrUnits["px_vw_percent"] = __("PX, VW, %","unlimited-elements-for-elementor");
 		
 		
 		$arrUnits = array_flip($arrUnits);
@@ -682,7 +686,15 @@ class UniteCreatorDialogParamElementor extends UniteCreatorDialogParam{
 	 */
 	protected function putDateTimeParam(){
 		
-		$checkID = "check_datetime_show_time_picker";
+		
+		$arrModes = array();
+		$arrModes["date"] = "Date Only";
+		$arrModes["date_time"] = "Date And Time";
+		$arrModes["time"] = "Time Only";
+		
+		
+		$htmlSelect = HelperHtmlUC::getHTMLSelect($arrModes, "", "name='date_time_mode'", true, "date");
+		
 		
 		?>
 		
@@ -698,10 +710,13 @@ class UniteCreatorDialogParamElementor extends UniteCreatorDialogParam{
 
 		<div class="unite-inputs-sap-double"></div>
 		
-		<label for="<?php echo esc_attr($checkID)?>" >
-			<input id="<?php echo esc_attr($checkID)?>" type="checkbox" class="uc-param-checkbox"  name="show_time_picker">
-			<?php _e("Show Time Picker", "unlimited-elements-for-elementor")?>
-		</label>
+		<div class="unite-inputs-label">
+			<?php echo __("Date / Time Mode", "unlimited-elements-for-elementor")?>:
+			
+			<?php echo $htmlSelect?>
+			
+		</div>
+			
 				
 		
 		<?php 	
@@ -896,6 +911,8 @@ class UniteCreatorDialogParamElementor extends UniteCreatorDialogParam{
 			
 			<div class="vert_sap30"></div>
  		    
+ 		    <!-- animation -->
+ 		    
  		    <div class="<?php echo $optionsClass?>" data-control="entrance_animation" style="display:none">
 				
 				<div class="unite-inputs-label">
@@ -924,8 +941,25 @@ class UniteCreatorDialogParamElementor extends UniteCreatorDialogParam{
  		    	
  		    	<input type="text" name="schema_content_name" value="content" placeholder="example: content">
 
+			</div>
+
+<!-- image size -->
+			
+ 		    <div class="<?php echo $optionsClass?>" data-control="items_image_size" style="display:none">
+				
+				<div class="unite-inputs-label">
+			 		    <?php _e("Items Attribute Name","unlimited-elements-for-elementor")?>		
+				</div>
+ 		    		 		    
+ 		    	<input type="text" name="image_size_param_name" value="" placeholder="Example: image1">
+	 		    
+				<div class="unite-dialog-description-left">
+					<?php _e("* If leave empty, then the image size chooser will affect the first item image attribute.", "unlimited-elements-for-elementor")?>
+				</div>
+	 		    
 	 		    
 			</div>
+
 			
 		<?php 
 	}
@@ -976,6 +1010,24 @@ class UniteCreatorDialogParamElementor extends UniteCreatorDialogParam{
 		
 		$this->addPHPFilterOptions("dropdown");
 		
+	}
+	
+	/**
+	 * 
+	 * function for override
+	 */
+	protected function putPostSelectAttribute(){
+		
+		$this->putNoDefaultValueText();
+				
+	}
+
+	/**
+	 * function for override
+	 */
+	protected function putTermSelectAttribute(){
+		
+		$this->putNoDefaultValueText();
 	}
 	
 	

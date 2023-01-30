@@ -2209,10 +2209,7 @@ function UCManagerActionsAddons(){
 		var isDebugMode = g_ucAdmin.isDebugMode();
 		
 		var data = {};
-		if(isDebugMode == true)
-			data["force"] = true;
-		
-		trace(data);
+		data["force"] = true;
 		
 		g_ucAdmin.ajaxRequest("check_catalog", data, function(response){
 			

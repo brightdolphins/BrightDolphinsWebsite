@@ -135,15 +135,27 @@ class Wpr_Content_Ticker extends Widget_Base {
 	public function add_section_ticker_items() {}
 
 	public function add_control_query_source () {
-
 		// Get Available Post Types
-		$this->post_types = Utilities::get_custom_types_of( 'post', false );
+		$this->post_types = [];
+		$this->post_types['post'] = esc_html__( 'Posts', 'wpr-addons' );
+		$this->post_types['page'] = esc_html__( 'Pages', 'wpr-addons' );
 
-		// Remove WooCommerce
-		unset( $this->post_types['product'] );
-		$this->post_types['product-pro'] = 'Product (Pro)';
-		$this->post_types['featured-pro'] = 'Featured (Pro)';
-		$this->post_types['sale-pro'] = 'On Sale (Pro)';
+		$custom_post_types = Utilities::get_custom_types_of( 'post', true );
+		foreach( $custom_post_types as $slug => $title ) {
+			if ( 'product' === $slug || 'e-landing-page' === $slug ) {
+				continue;
+			}
+
+			if ( Utilities::is_new_free_user2() ) {
+				$this->post_types['pro-'. substr($slug, 0, 2)] = esc_html( $title ) .' (Pro)';
+			} else {
+				$this->post_types[$slug] = esc_html( $title );
+			}
+		}
+
+		$this->post_types['pro-pd'] = 'Products (Pro)';
+		$this->post_types['pro-ft'] = 'Featured (Pro)';
+		$this->post_types['pro-sl'] = 'On Sale (Pro)';
 
 		$this->add_control(
 			'query_source',
@@ -209,7 +221,7 @@ class Wpr_Content_Ticker extends Widget_Base {
 		$this->add_control_query_source();
 
 		// Upgrade to Pro Notice
-		Utilities::upgrade_pro_notice( $this, Controls_Manager::RAW_HTML, 'content-ticker', 'query_source', ['product-pro', 'featured-pro', 'sale-pro'] );
+		Utilities::upgrade_pro_notice( $this, Controls_Manager::RAW_HTML, 'content-ticker', 'query_source', ['pro-pd', 'pro-ft', 'pro-sl'] );
 		
 		// Get Available Taxonomies
 		$post_taxonomies = Utilities::get_custom_types_of( 'tax', false );
@@ -250,10 +262,10 @@ class Wpr_Content_Ticker extends Widget_Base {
 			'query_author',
 			[
 				'label' => esc_html__( 'Authors', 'wpr-addons' ),
-				'type' => Controls_Manager::SELECT2,
+				'type' => 'wpr-ajax-select2',
+				'options' => 'ajaxselect2/get_users',
 				'multiple' => true,
 				'label_block' => true,
-				'options' => Utilities::get_users(),
 				'separator' => 'before',
 				'condition' => [
 					'query_source!' => [ 'current', 'related' ],
@@ -275,10 +287,11 @@ class Wpr_Content_Ticker extends Widget_Base {
 				'query_taxonomy_'. $slug,
 				[
 					'label' => $title,
-					'type' => Controls_Manager::SELECT2,
+					'type' => 'wpr-ajax-select2',
+					'options' => 'ajaxselect2/get_taxonomies',
+					'query_slug' => $slug,
 					'multiple' => true,
 					'label_block' => true,
-					'options' => Utilities::get_terms_by_taxonomy( $slug ),
 					'condition' => [
 						'query_source' => $post_type,
 						'query_selection' => 'dynamic',
@@ -294,10 +307,11 @@ class Wpr_Content_Ticker extends Widget_Base {
 					'query_exclude_'. $slug,
 					[
 						'label' => esc_html__( 'Exclude ', 'wpr-addons' ) . $title,
-						'type' => Controls_Manager::SELECT2,
+						'type' => 'wpr-ajax-select2',
+						'options' => 'ajaxselect2/get_posts_by_post_type',
+						'query_slug' => $slug,
 						'multiple' => true,
 						'label_block' => true,
-						'options' => Utilities::get_posts_by_post_type( $slug ),
 						'condition' => [
 							'query_source' => $slug,
 							'query_source!' => [ 'current', 'related' ],
@@ -314,10 +328,11 @@ class Wpr_Content_Ticker extends Widget_Base {
 				'query_manual_'. $slug,
 				[
 					'label' => esc_html__( 'Select ', 'wpr-addons' ) . $title,
-					'type' => Controls_Manager::SELECT2,
+					'type' => 'wpr-ajax-select2',
+					'options' => 'ajaxselect2/get_posts_by_post_type',
+					'query_slug' => $slug,
 					'multiple' => true,
 					'label_block' => true,
-					'options' => Utilities::get_posts_by_post_type( $slug ),
 					'condition' => [
 						'query_source' => $slug,
 						'query_selection' => 'manual',
@@ -1030,6 +1045,7 @@ class Wpr_Content_Ticker extends Widget_Base {
 		// Section: Pro Features
 		Utilities::pro_features_list_section( $this, '', Controls_Manager::RAW_HTML, 'content-ticker', [
 			'Add Custom Ticker Items (Instead of loading Dynamically)',
+			'Custom Post Types Support',
 			'Marquee Animation - a Smooth Animation with Direction option',
 			'Slider Animation options - Typing, Fade & Vertical Slide',
 			'Heading Icon Type - Animated Circle',
@@ -1811,7 +1827,7 @@ class Wpr_Content_Ticker extends Widget_Base {
 		$settings = $this->get_settings();
 		$author = ! empty( $settings[ 'query_author' ] ) ? implode( ',', $settings[ 'query_author' ] ) : '';
 
-		in_array( $settings[ 'query_source' ], ['product-pro', 'featured-pro', 'sale-pro'] ) ? $settings[ 'query_source' ] = 'post' : '';
+		in_array( $settings[ 'query_source' ], ['pro-pd', 'pro-ft', 'pro-sl'] ) ? $settings[ 'query_source' ] = 'post' : '';
 
 		// Dynamic
 		$args = [

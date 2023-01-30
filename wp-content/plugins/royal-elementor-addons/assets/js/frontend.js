@@ -47,6 +47,7 @@
 				'wpr-reading-progress-bar.default' : WprElements.widgetReadingProgressBar,
 				'wpr-data-table.default' : WprElements.widgetDataTable,
 				'wpr-charts.default': WprElements.widgetCharts,
+				'wpr-taxonomy-list.default': WprElements.widgetTaxonomyList,
 				'global': WprElements.widgetSection,
 
 				// Single
@@ -350,6 +351,14 @@
 			var subMenuFirst = $navMenu.find( '.wpr-nav-menu > li.menu-item-has-children' ),
 				subMenuDeep = $navMenu.find( '.wpr-sub-menu li.menu-item-has-children' );
 
+			if ( $scope.find('.wpr-mobile-toggle').length ) {
+				$scope.find('a').on('click', function() {
+					if (this.pathname == window.location.pathname && !($(this).parent('li').children().length > 1)) {
+						$scope.find('.wpr-mobile-toggle').trigger('click');
+					}
+				});
+			}
+
 			if ( $navMenu.attr('data-trigger') === 'click' ) {
 				// First Sub
 				subMenuFirst.children('a').on( 'click', function(e) {
@@ -539,6 +548,14 @@
 			// Menu
 			var subMenuFirst = $navMenu.find( '.wpr-nav-menu > li.menu-item-has-children' ),
 				subMenuDeep = $navMenu.find( '.wpr-sub-menu li.menu-item-has-children' );
+
+			if ( $scope.find('.wpr-mobile-toggle').length ) {
+				$scope.find('a').on('click', function() {
+					if (this.pathname == window.location.pathname && !($(this).parent('li').children().length > 1)) {
+						$scope.find('.wpr-mobile-toggle').trigger('click');
+					}
+				});
+			}
 
 			// Click
 			if ( $navMenu.attr('data-trigger') === 'click' ) {
@@ -1075,7 +1092,7 @@
 							var updatedResultCount = resultCount.replace( /\d\u2013\d+/, '1\u2013' + ( $scope.find('.wpr-grid-item').length + items.length ) );
 							$scope.find('.woocommerce-result-count').text(updatedResultCount);
 						}
-
+						
 						iGrid.infiniteScroll( 'appendItems', items );
 						iGrid.isotopewpr( 'appended', items );
 
@@ -1154,15 +1171,17 @@
 			} else {
 				iGrid.animate({ 'opacity': '1' }, 1000);
 
+				settings = JSON.parse( iGrid.attr( 'data-slick' ) );
+
 				var sliderClass = $scope.attr('class'),
 					sliderColumnsDesktop = sliderClass.match(/wpr-grid-slider-columns-\d/) ? sliderClass.match(/wpr-grid-slider-columns-\d/).join().slice(-1) : 2,
 					sliderColumnsWideScreen = sliderClass.match(/columns--widescreen\d/) ? sliderClass.match(/columns--widescreen\d/).join().slice(-1) : sliderColumnsDesktop,
 					sliderColumnsLaptop = sliderClass.match(/columns--laptop\d/) ? sliderClass.match(/columns--laptop\d/).join().slice(-1) : sliderColumnsDesktop,
-					sliderColumnsTabletExtra = sliderClass.match(/columns--tablet_extra\d/) ? sliderClass.match(/columns--tablet_extra\d/).join().slice(-1) : sliderColumnsTablet,
 					sliderColumnsTablet = sliderClass.match(/columns--tablet\d/) ? sliderClass.match(/columns--tablet\d/).join().slice(-1) : 2,
+					sliderColumnsTabletExtra = sliderClass.match(/columns--tablet_extra\d/) ? sliderClass.match(/columns--tablet_extra\d/).join().slice(-1) : sliderColumnsTablet,
 					sliderColumnsMobileExtra = sliderClass.match(/columns--mobile_extra\d/) ? sliderClass.match(/columns--mobile_extra\d/).join().slice(-1) : sliderColumnsTablet,
 					sliderColumnsMobile = sliderClass.match(/columns--mobile\d/) ? sliderClass.match(/columns--mobile\d/).join().slice(-1) : 1,
-					sliderSlidesToScroll = sliderClass.match(/wpr-grid-slides-to-scroll-\d/) ? +(sliderClass.match(/wpr-grid-slides-to-scroll-\d/).join().slice(-1)) : 1;
+					sliderSlidesToScroll = settings.sliderSlidesToScroll;
 
 				iGrid.slick({
 					appendDots : $scope.find( '.wpr-grid-slider-dots' ),
@@ -1226,6 +1245,31 @@
 					],
 				});
 
+				var gridNavPrevArrow = $scope.find('.wpr-grid-slider-prev-arrow');
+				var gridNavNextArrow = $scope.find('.wpr-grid-slider-next-arrow');
+
+				if ( gridNavPrevArrow.length > 0 && gridNavNextArrow.length > 0 ) {
+					var positionSum = gridNavPrevArrow.position().left * -2;
+					if ( positionSum > 0 ) {
+						$(window).on('load', function() {
+							if ( $(window).width() <= ($scope.outerWidth() + gridNavPrevArrow.outerWidth() + gridNavNextArrow.outerWidth() + positionSum) ) {
+								gridNavPrevArrow.addClass('wpr-adjust-slider-prev-arrow');
+								gridNavNextArrow.addClass('wpr-adjust-slider-next-arrow');
+							}
+						});
+		
+						$(window).smartresize(function() {
+							if ( $(window).width() <= ($scope.outerWidth() + gridNavPrevArrow.outerWidth() + gridNavNextArrow.outerWidth() + positionSum) ) {
+								gridNavPrevArrow.addClass('wpr-adjust-slider-prev-arrow');
+								gridNavNextArrow.addClass('wpr-adjust-slider-next-arrow');
+							} else {
+								gridNavPrevArrow.removeClass('wpr-adjust-slider-prev-arrow');
+								gridNavNextArrow.removeClass('wpr-adjust-slider-next-arrow');
+							}
+						});
+					}
+				}
+
 				// Adjust Horizontal Pagination
 				if ( $scope.find( '.slick-dots' ).length && $scope.hasClass( 'wpr-grid-slider-dots-horizontal') ) {
 					// Calculate Width
@@ -1247,8 +1291,6 @@
 						}, 300 );
 					});
 				}
-
-				settings = JSON.parse( iGrid.attr( 'data-slick' ) );
 			}
 
 			// Add To Cart AJAX
@@ -2119,6 +2161,16 @@
 				});
 			}
 
+			var iGridLength = iGrid.find('.wpr-mgzn-grid-item').length;
+
+			// $(window).smartresize(function() {
+			// 	if (window.matchMedia("(max-width: 767px)").matches) { // If media query matches
+			// 		iGrid.find('.wpr-magazine-grid.wpr-mgzn-grid-3-h')[0].style.gridTemplateRows = 'repeat('+ iGridLength +', 1fr)';
+			// 	} else {
+			// 		iGrid.find('.wpr-magazine-grid.wpr-mgzn-grid-3-h').removeAttr('style');
+			// 	}
+			// });
+
 			// Media Hover Link
 			if ( 'yes' === iGrid.find( '.wpr-grid-media-wrap' ).attr( 'data-overlay-link' ) && ! WprElements.editorCheck() ) {
 				iGrid.find( '.wpr-grid-media-wrap' ).css('cursor', 'pointer');
@@ -2463,7 +2515,6 @@
 	
 				$scope.find('.wpr-thumbnail-slider-next-arrow').on('click', function() {
 					console.log(
-						'works',
 						slideCount + thumbsToScroll,
 						$scope.find('.flex-control-nav li').length - 1
 						);
@@ -2698,7 +2749,8 @@
 					}
 
 					if ( dataActions.hasOwnProperty( 'load-template' ) ) {
-						countDownWrap.parent().find( '.elementor-inner' ).parent().show();
+						// countDownWrap.parent().find( '.elementor-inner' ).parent().show();
+						countDownWrap.next('.elementor').show();
 					}
 
 				}
@@ -3039,6 +3091,12 @@
 						listId: mailchimpForm.data( 'list-id' )
 					},
 					success: function(data) {
+						if ( 'yes' == mailchimpForm.data('clear-fields') ) {
+							mailchimpForm.find('input').each(function() {
+								$(this).val('');
+							});
+						}
+
 						mailchimpForm.find('button').text( buttonText );
 
 						if ( 'subscribed' === data.status ) {
@@ -3064,8 +3122,8 @@
 				sliderColumnsDesktop = sliderClass.match(/wpr-adv-slider-columns-\d/) ? sliderClass.match(/wpr-adv-slider-columns-\d/).join().slice(-1) : 2,
 				sliderColumnsWideScreen = sliderClass.match(/columns--widescreen\d/) ? sliderClass.match(/columns--widescreen\d/).join().slice(-1) : sliderColumnsDesktop,
 				sliderColumnsLaptop = sliderClass.match(/columns--laptop\d/) ? sliderClass.match(/columns--laptop\d/).join().slice(-1) : sliderColumnsDesktop,
-				sliderColumnsTabletExtra = sliderClass.match(/columns--tablet_extra\d/) ? sliderClass.match(/columns--tablet_extra\d/).join().slice(-1) : sliderColumnsTablet,
 				sliderColumnsTablet = sliderClass.match(/columns--tablet\d/) ? sliderClass.match(/columns--tablet\d/).join().slice(-1) : 2,
+				sliderColumnsTabletExtra = sliderClass.match(/columns--tablet_extra\d/) ? sliderClass.match(/columns--tablet_extra\d/).join().slice(-1) : sliderColumnsTablet,
 				sliderColumnsMobileExtra = sliderClass.match(/columns--mobile_extra\d/) ? sliderClass.match(/columns--mobile_extra\d/).join().slice(-1) : sliderColumnsTablet,
 				sliderColumnsMobile = sliderClass.match(/columns--mobile\d/) ? sliderClass.match(/columns--mobile\d/).join().slice(-1) : 1,
 				sliderSlidesToScroll = +(sliderClass.match(/wpr-adv-slides-to-scroll-\d/).join().slice(-1)),
@@ -3265,16 +3323,18 @@
 
 		widgetTestimonialCarousel: function( $scope ) {
 			var testimonialCarousel = $scope.find( '.wpr-testimonial-carousel' );
+			var settings = JSON.parse( testimonialCarousel.attr( 'data-slick' ) );
+			
 			// Slider Columns
 			var sliderClass = $scope.attr('class'),
 				sliderColumnsDesktop = sliderClass.match(/wpr-testimonial-slider-columns-\d/) ? sliderClass.match(/wpr-testimonial-slider-columns-\d/).join().slice(-1) : 2,
 				sliderColumnsWideScreen = sliderClass.match(/columns--widescreen\d/) ? sliderClass.match(/columns--widescreen\d/).join().slice(-1) : sliderColumnsDesktop,
 				sliderColumnsLaptop = sliderClass.match(/columns--laptop\d/) ? sliderClass.match(/columns--laptop\d/).join().slice(-1) : sliderColumnsDesktop,
-				sliderColumnsTabletExtra = sliderClass.match(/columns--tablet_extra\d/) ? sliderClass.match(/columns--tablet_extra\d/).join().slice(-1) : sliderColumnsTablet,
 				sliderColumnsTablet = sliderClass.match(/columns--tablet\d/) ? sliderClass.match(/columns--tablet\d/).join().slice(-1) : 2,
+				sliderColumnsTabletExtra = sliderClass.match(/columns--tablet_extra\d/) ? sliderClass.match(/columns--tablet_extra\d/).join().slice(-1) : sliderColumnsTablet,
 				sliderColumnsMobileExtra = sliderClass.match(/columns--mobile_extra\d/) ? sliderClass.match(/columns--mobile_extra\d/).join().slice(-1) : sliderColumnsTablet,
 				sliderColumnsMobile = sliderClass.match(/columns--mobile\d/) ? sliderClass.match(/columns--mobile\d/).join().slice(-1) : 1,
-				sliderSlidesToScroll = +(sliderClass.match(/wpr-adv-slides-to-scroll-\d/).join().slice(-1)),
+				sliderSlidesToScroll = settings.sliderSlidesToScroll,
 				dataSlideEffect = testimonialCarousel.attr('data-slide-effect');
 
 			testimonialCarousel.slick({
@@ -4041,8 +4101,8 @@
 				sliderColumnsDesktop = sliderClass.match(/wpr-ticker-slider-columns-\d/) ? sliderClass.match(/wpr-ticker-slider-columns-\d/).join().slice(-1) : 2,
 				sliderColumnsWideScreen = sliderClass.match(/columns--widescreen\d/) ? sliderClass.match(/columns--widescreen\d/).join().slice(-1) : sliderColumnsDesktop,
 				sliderColumnsLaptop = sliderClass.match(/columns--laptop\d/) ? sliderClass.match(/columns--laptop\d/).join().slice(-1) : sliderColumnsDesktop,
-				sliderColumnsTabletExtra = sliderClass.match(/columns--tablet_extra\d/) ? sliderClass.match(/columns--tablet_extra\d/).join().slice(-1) : sliderColumnsTablet,
 				sliderColumnsTablet = sliderClass.match(/columns--tablet\d/) ? sliderClass.match(/columns--tablet\d/).join().slice(-1) : 2,
+				sliderColumnsTabletExtra = sliderClass.match(/columns--tablet_extra\d/) ? sliderClass.match(/columns--tablet_extra\d/).join().slice(-1) : sliderColumnsTablet,
 				sliderColumnsMobileExtra = sliderClass.match(/columns--mobile_extra\d/) ? sliderClass.match(/columns--mobile_extra\d/).join().slice(-1) : sliderColumnsTablet,
 				sliderColumnsMobile = sliderClass.match(/columns--mobile\d/) ? sliderClass.match(/columns--mobile\d/).join().slice(-1) : 1,
 				dataSlideEffect = $contentTickerSlider.attr('data-slide-effect'),
@@ -4126,12 +4186,19 @@
 
 			// Active Tab
 			var activeTabIndex = tabsData.activeTab - 1;
+
+			var activeTabIndexFromLocation = window.location.href.indexOf("active_tab=");
+
+			if (activeTabIndexFromLocation > -1) {
+				activeTabIndex = +window.location.href.substring(activeTabIndexFromLocation,  window.location.href.lastIndexOf("#")).replace("active_tab=", '') - 1;
+			}
+
 				$tabList.eq( activeTabIndex ).addClass( 'wpr-tab-active' );
 				$contentList.eq( activeTabIndex ).addClass( 'wpr-tab-content-active wpr-animation-enter' );
 
 			if ( tabsData.autoplay === 'yes' ) {
 				
-				var startIndex = tabsData.activeTab - 1;
+				var startIndex = activeTabIndex;
 
 				var autoplayInterval = setInterval( function() {
 
@@ -4900,6 +4967,59 @@
 			}
 		}, // End of widgetCharts
 
+		widgetTaxonomyList: function($scope) {
+			var taxList = $scope.find('.wpr-taxonomy-list');
+
+			if ( taxList.data('show-on-click') == 'yes' ) {
+
+				// $scope.find('.wpr-tax-dropdown').css('margin-left', -($scope.find('.wpr-tax-dropdown').width()));
+
+				taxList.find('.wpr-taxonomy i.wpr-tax-dropdown').on('click', function(e) {
+
+					e.preventDefault();
+
+					if ( taxList.find('.wpr-sub-taxonomy[data-term-id="child-'+ $(this).closest('li').data('term-id') +'"]').hasClass('wpr-sub-hidden') ) {
+						$(this).removeClass('fa-caret-right').addClass('fa-caret-down');
+						// $scope.find('.fa-caret-down').css('margin-left', -($scope.find('.fa-caret-down').width()));
+						taxList.find('.wpr-sub-taxonomy[data-term-id="child-'+ $(this).closest('li').data('term-id') +'"]').removeClass('wpr-sub-hidden');
+					} else {
+						$(this).removeClass('fa-caret-down').addClass('fa-caret-right');
+						// $scope.find('.fa-caret-right').css('margin-left', -($scope.find('.fa-caret-right').width()));
+						taxList.find('.wpr-sub-taxonomy[data-term-id="child-'+ $(this).closest('li').data('term-id') +'"]').addClass('wpr-sub-hidden');
+
+						taxList.find('.wpr-inner-sub-taxonomy[data-term-id="grandchild-'+ $(this).closest('li').data('term-id') +'"]').each(function() {
+							if ( !$(this).hasClass('wpr-sub-hidden') ) {
+								taxList.find('.wpr-sub-taxonomy[data-id="'+ $(this).data('parent-id') +'"] i.wpr-tax-dropdown').removeClass('fa-caret-down').addClass('fa-caret-right');
+								// $scope.find('.fa-caret-right').css('margin-left', -($scope.find('.fa-caret-right').width()));
+								$(this).addClass('wpr-sub-hidden');
+							}
+						});
+
+						// if (!taxList.find('.wpr-inner-sub-taxonomy[data-term-id="grandchild-'+ $(this).parent('li').data('term-id') +'"]').hasClass('wpr-sub-hidden')) {
+						// 	taxList.find('.wpr-sub-taxonomy[data-term-id="child-'+ $(this).parent('li').data('term-id') +'"] i').removeClass('fa-caret-down').addClass('fa-caret-right');
+						// 	taxList.find('.wpr-inner-sub-taxonomy[data-term-id="grandchild-'+ $(this).parent('li').data('term-id') +'"]').addClass('wpr-sub-hidden');
+						// }
+					}
+				});
+
+				taxList.find('.wpr-sub-taxonomy i.wpr-tax-dropdown').on('click', function(e) {
+
+					e.preventDefault();
+
+					if ( taxList.find('.wpr-inner-sub-taxonomy[data-parent-id="'+ $(this).closest('li').data('id') +'"]').hasClass('wpr-sub-hidden') ) {
+						$(this).removeClass('fa-caret-right').addClass('fa-caret-down');
+						// $scope.find('.fa-caret-down').css('margin-left', -($scope.find('.fa-caret-down').width()));
+						taxList.find('.wpr-inner-sub-taxonomy[data-parent-id="'+ $(this).closest('li').data('id') +'"]').removeClass('wpr-sub-hidden');
+					} else {
+						$(this).removeClass('fa-caret-down').addClass('fa-caret-right');
+						// taxList.find('.wpr-sub-taxonomy i').removeClass('fa-caret-down').addClass('fa-caret-right');
+						// $scope.find('.fa-caret-right').css('margin-left', -($scope.find('.fa-caret-right').width()));
+						taxList.find('.wpr-inner-sub-taxonomy[data-parent-id="'+ $(this).closest('li').data('id') +'"]').addClass('wpr-sub-hidden');
+					}
+				});
+			}
+		}, // End of widgetTaxonomyList
+
 		widgetPostsTimeline: function($scope) { // goback
 			var iScrollTarget = $scope.find( '.wpr-timeline-centered' ).length > 0 ? $scope.find( '.wpr-timeline-centered' ) : '',
 			    element = $scope.find('.wpr-timeline-centered').length > 0 ? $scope.find('.wpr-timeline-centered') : '',
@@ -5337,7 +5457,6 @@
 					if ( thisValue.length > 0 ) {
 						$scope.find('.wpr-acc-search-input-wrap').find('i.fa-times').css('display', 'inline-block');
 						allInAcc.each(function() {
-							// console.log($(this), $(this).text().toUpperCase().indexOf(thisValue.toUpperCase()));
 							if ( $(this).hasClass('wpr-accordion-item-wrap') ) {
 								var itemWrap = $(this);
 								if ( itemWrap.text().toUpperCase().indexOf(thisValue.toUpperCase()) == -1 ) {

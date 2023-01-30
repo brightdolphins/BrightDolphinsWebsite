@@ -44,7 +44,7 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 		 * set the view from GET variables
 		 */
 		private function initView(){
-			
+
 			$defaultView = GlobalsUC::$view_default;
 			
 			//set view

@@ -45,6 +45,21 @@ class Wpr_Post_Navigation extends Widget_Base {
 		return [ 'navigation', 'arrows', 'pagination' ];
 	}
 
+	public function add_control_display_on_separate_lines() {
+		$this->add_responsive_control(
+			'display_on_separate_lines',
+			[
+				'label' => esc_html__( 'Display on Separate Lines', 'wpr-addons' ),
+				'type' => Controls_Manager::SWITCHER,
+				'separator' => 'before',
+				'classes' => 'wpr-pro-control',
+				'condition' => [
+					'post_nav_layout' => 'static'
+				],
+			]
+		);
+	}
+
 	public function add_control_post_nav_layout() {
 		$this->add_control(
 			'post_nav_layout',
@@ -189,6 +204,8 @@ class Wpr_Post_Navigation extends Widget_Base {
 			]
 		);
 
+		$this->add_control_display_on_separate_lines();
+
 		$this->add_control_post_nav_query();
 
 		$this->end_controls_section();
@@ -204,6 +221,7 @@ class Wpr_Post_Navigation extends Widget_Base {
 			'Show/Hide Post Title.',
 			'Show/Hide Post Thumbnail, Show on hover or set as Navigation Label Background.',
 			'Show/Hide Back Button - Set custom link to any page to go back to.',
+			'Display Navigation on Separate Lines'
 		] );
 
 		// Styles ====================

@@ -711,8 +711,6 @@ class UniteCreatorWebAPIWork{
 			
 			$response = $this->callAPI("check_catalog", $data);
 			
-			
-			
 			/*	print pages
 			unset($response["catalog"]["addons"]);dmp($response["catalog"]);exit();
 			*/

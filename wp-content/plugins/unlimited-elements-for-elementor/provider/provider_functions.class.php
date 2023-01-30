@@ -253,7 +253,7 @@ class UniteProviderFunctionsUC{
 	 * register script
 	 */
 	public static function addStyle($handle, $url){
-	
+				
 		if(empty($url))
 			UniteFunctionsUC::throwError("empty style url, handle: $handle");
 		
@@ -269,22 +269,28 @@ class UniteProviderFunctionsUC{
 	
 	/**
 	 * print some script at some place in the page
+	 * handle meanwhile inactive
 	 */
-	public static function printCustomScript($script, $hardCoded = false, $isModule = false){
+	public static function printCustomScript($script, $hardCoded = false, $isModule = false, $handle = null){
 		
 		self::$counterScripts++;
-		$key = "script_".self::$counterScripts;
 		
+		if(empty($handle))
+			$handle = "script_".self::$counterScripts;
+				
 		if($isModule == true)
-			$key = "module_".$key;
+			$handle = "module_".$handle;
+		
+		if(isset(self::$arrScripts[$handle]))
+			$handle .= "_". UniteFunctionsUC::getRandomString(5, true);
 		
 		if($hardCoded == false)
-			self::$arrScripts[$key] = $script;
+			self::$arrScripts[$handle] = $script;
 		else{
 			if($isModule == true)
-				echo "<script type='module'>{$script}</script>";
+				echo "<script type='module' id='{$handle}'>{$script}</script>";
 			else 
-				echo "<script type='text/javascript'>{$script}</script>";
+				echo "<script type='text/javascript' id='{$handle}'>{$script}</script>";
 			
 		}
 	}
@@ -563,7 +569,11 @@ class UniteProviderFunctionsUC{
 			$activeLanguage = $objWpml->getActiveLanguage();
 			
 			$data["uc_lang"] = $activeLanguage;
+		}else{
+							
+			$data["uc_lang"] = UniteFunctionsWPUC::getLanguage();
 		}
+		
     	
 		$isInsideEditor = UniteCreatorElementorIntegrate::$isEditMode;
 				

@@ -196,25 +196,27 @@ function UERemoteGeneralAPI(){
 	
 	
 
-/*
-	events
-*/	
-this.onEvent = function(name, func){
-
-	  validateInited();
-	  
-      switch(name){
-		case "change":
-			
-			g_objParent.on("uc_change", func);
-						
-		break;
-		default:
-			throw new Error("General API: Wrong event: "+event);
-		break;
-
+	/*
+		events
+	*/	
+	this.onEvent = function(name, func){
+	
+		  validateInited();
+		  
+	      switch(name){
+			case "change":
+				
+				g_objParent.on("uc_change", func);
+				
+			break;
+			case "pause":		// do nothing
+			break;
+			default:
+				throw new Error("General API: Wrong event: "+name);
+			break;
+	
+		}
 	}
-}
 	
 	
 	/**
@@ -269,7 +271,9 @@ this.onEvent = function(name, func){
 				changeItem(arg1);
 				
 			break;
-						
+			case "pause":
+			case "play":
+			break;
 			default:
 				throw new Error("General API: Wrong action: "+action);
 			break;
@@ -521,6 +525,9 @@ function UERemoteGalleryAPI(){
 				g_api.selectItem(arg1);
 				
 			break;
+			case "pause":
+			case "play":
+			break;
 			default:
 				throw new Error("GALLERY API: Wrong action: "+action);
 			break;
@@ -541,8 +548,10 @@ function UERemoteGalleryAPI(){
 				g_api.on("item_change", func);
 			
 			break;
+			case "pause":	//do nothing for now
+			break;
 			default:
-				throw new Error("General API: Wrong event: "+event);
+				throw new Error("Gallery API: Wrong event: "+name);
 			break;
 	
 		}
@@ -595,7 +604,9 @@ function UERemoteCarouselAPI(){
 
 	var g_owlCarousel, g_owl, g_isInited;
 	var t = this;
-
+	var enableDebug = false;
+	
+	
 	/**
 	* console log some string
 	*/
@@ -639,8 +650,12 @@ function UERemoteCarouselAPI(){
 		do some action
 	*/
 	this.doAction = function(action, arg1, arg2){
-				
+		
 		validateInited();
+		
+		if(enableDebug == true){
+			trace("carousel action: "+action+" "+arg1+" "+arg2);
+		}
 		
 		switch(action){
 			case "next":
@@ -652,15 +667,13 @@ function UERemoteCarouselAPI(){
 			break;
 			case "play":
 				
-				g_owlCarousel.trigger('play.owl.autoplay');
-				g_owlCarousel.trigger('next.owl.carousel');
+				g_owlCarousel.trigger('start_autoplay.owl.autoplay');
 				
 			break;
 			case "pause":
 
 				g_owlCarousel.trigger('stop.owl.autoplay');
-				g_owl.settings.autoplay = false;				
-								
+				
 			break;
 			case "is_playing":
 				
@@ -692,6 +705,10 @@ function UERemoteCarouselAPI(){
 			case 'get_num_current':
 				
       			var currentItem = g_owl.relative(g_owl.current());
+      			
+      			if(enableDebug == true){
+      				trace("num current: " + currentItem);
+      			}
       			
       			return(currentItem);
 			break;
@@ -751,14 +768,14 @@ function UERemoteCarouselAPI(){
 		  
           switch(name){
 			case "play":
-
-				g_owlCarousel.on("play.owl.autoplay", func);
+								
+				g_owlCarousel.on("play_autoplay.owl.carousel", func);
 				
 			break;
 			case "pause":
+								
+				g_owlCarousel.on("stop_autoplay.owl.carousel", func);
 				
-				g_owlCarousel.on("stop.owl.autoplay", func);
-
 			break;
 			case "change":
 				
@@ -778,10 +795,11 @@ function UERemoteCarouselAPI(){
 			case "refreshed":
 				
 				g_owlCarousel.on("refreshed.owl.carousel", func);
-
+				
 			break;
 			default:
-				throw new Error("Carousel API: Wrong event: "+event);
+				console.error("Carousel API: Wrong event: "+name);
+				throw new Error("Carousel API: Wrong event: "+name);
 			break;
 
 		}
@@ -838,7 +856,8 @@ function UESyncObject(){
 	
 	var g_vars = {
 		is_editor:false,
-		is_editor_func_started:false
+		is_editor_func_started:false,
+		show_debug:false
 	};
 	
 	/**
@@ -940,14 +959,37 @@ function UESyncObject(){
 	function onItemChange(objAPI){
 		
 		var numCurrent = objAPI.doAction("get_num_current");
-				
+		
 		var objElement = objAPI.getElement();
 		
+		if(g_vars.show_debug == true){
+			
+			trace("sync onchange: " + numCurrent);
+			trace(objElement);
+			trace(g_objApis);
+		}
+			
 		mapAPIs(function(api){
 						
 			api.doAction("change_item", numCurrent);
 			
 		}, objElement);
+		
+	}
+	
+	/**
+	 * on pause - pause others as well
+	 */
+	function onPause(objAPI){
+		
+		var objElement = objAPI.getElement();
+		
+		mapAPIs(function(api){
+						
+			api.doAction("pause");
+			
+		}, objElement);
+		
 		
 	}
 	
@@ -1079,6 +1121,14 @@ function UESyncObject(){
 			onItemChange(objAPI);
 			
 		});
+		
+		//sync objects pause 
+		
+		objAPI.onEvent("pause", function(){
+			
+			onPause(objAPI);
+		});
+				
 		
 		if(g_vars.is_editor == true && g_vars.is_editor_func_started == false){
 			

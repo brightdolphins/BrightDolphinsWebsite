@@ -485,7 +485,7 @@ class UniteCreatorEntranceAnimations{
   
     //check and add animation
     function ueCheckEntranceAnimation(objElement, step, classItem, order){
-                
+        
         var isStarted = objElement.data("ue_entrance_animation_started");
         
         if(isStarted === true)
@@ -542,8 +542,8 @@ class UniteCreatorEntranceAnimations{
 		
 			?>
 
-/* entrance animation js */		
-	
+/* entrance animation js*/	
+
 <?php 
 	if($isInsideEditor == false){
 		HelperHtmlUC::putJSFunc_isElementInViewport();
@@ -570,9 +570,16 @@ jQuery(document).ready(function(){
     ueCheckEntranceAnimation(objElement, <?php echo $animationStep?>,"<?php echo $classItem?>", "<?php echo $order?>");
     
     jQuery(window).on("scroll", function(){
-    	ueCheckEntranceAnimation(objElement,"<?php echo $animationType?>", <?php echo $animationStep?>, "<?php echo $classItem?>", "<?php echo $order?>")
+    	ueCheckEntranceAnimation(objElement, <?php echo $animationStep?>, "<?php echo $classItem?>", "<?php echo $order?>")
     });
-   
+    
+    objElement.on("uc_ajax_refreshed", function(){
+        
+        objElement.removeData("ue_entrance_animation_started");
+    	
+    	ueCheckEntranceAnimation(objElement, <?php echo $animationStep?>, "<?php echo $classItem?>", "<?php echo $order?>")
+    });
+       
 });			
 			<?php 
 			

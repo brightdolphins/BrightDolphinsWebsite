@@ -688,20 +688,29 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 			break;
 			case UniteCreatorDialogParam::PARAM_NUMBER:
 				
-				$extra["class"] = UniteCreatorSettingsOutput::INPUT_CLASS_NUMBER;
-				$this->addTextBox($name, $value, $title, $extra);
-				
 				$isResponsive = UniteFunctionsUC::getVal($param, "is_responsive");
 				$isResponsive = UniteFunctionsUC::strToBool($isResponsive);
 				
+				$extra["is_responsive"] = $isResponsive;
+				
+				if($isResponsive == true)
+					$extra["responsive_type"] = "desktop";
+				
+				$extra["class"] = UniteCreatorSettingsOutput::INPUT_CLASS_NUMBER;
+				$this->addTextBox($name, $value, $title, $extra);
+								
 				if($isResponsive == true){
 					
 					$valueTablet = UniteFunctionsUC::getVal($param, "default_value_tablet");
 					$valueMobile = UniteFunctionsUC::getVal($param, "default_value_mobile");
+										
+					$extra["responsive_type"] = "tablet";
 					
 					$this->addTextBox($name."_tablet", $valueTablet, $title." - Tablet", $extra);
-					$this->addTextBox($name."_mobile", $valueMobile, $title." - Mobile", $extra);
 					
+					$extra["responsive_type"] = "mobile";
+					
+					$this->addTextBox($name."_mobile", $valueMobile, $title." - Mobile", $extra);
 				}
 				
 			break;
@@ -888,17 +897,29 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 				$extra["max"] = UniteFunctionsUC::getVal($param, "max");
 				$extra["step"] = UniteFunctionsUC::getVal($param, "step");
 				$extra["unit"] = UniteFunctionsUC::getVal($param, "units");
-				
-				$this->addRangeSlider($name, $value, $title, $extra);
 
 				$isResponsive = UniteFunctionsUC::getVal($param, "is_responsive");
 				$isResponsive = UniteFunctionsUC::strToBool($isResponsive);
+				
+				$extra["is_responsive"] = $isResponsive;
+				
+				if($isResponsive == true)
+					$extra["responsive_type"] = "desktop";
+				
+				
+				$this->addRangeSlider($name, $value, $title, $extra);
+				
 				if($isResponsive == true){
 					
 					$valueTablet = UniteFunctionsUC::getVal($param, "default_value_tablet");
 					$valueMobile = UniteFunctionsUC::getVal($param, "default_value_mobile");
-										
+
+					$extra["responsive_type"] = "tablet";
+					
 					$this->addRangeSlider($name."_tablet", $valueTablet, $title." - Tablet", $extra);
+					
+					$extra["responsive_type"] = "mobile";
+					
 					$this->addRangeSlider($name."_mobile", $valueMobile, $title." - Mobile", $extra);
 				}
 				

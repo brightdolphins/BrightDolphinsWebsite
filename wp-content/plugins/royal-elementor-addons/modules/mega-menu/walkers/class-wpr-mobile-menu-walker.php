@@ -24,7 +24,7 @@ class Wpr_Mobile_Menu_Walker extends \Walker_Nav_Menu {
 		$output .= "{$n}{$indent}<ul $class_names>{$n}";
 
 		if ( wpr_fs()->can_use_premium_code() && $depth === 0 ) {
-			$output .= '<li>';
+			$output .= '<li class="wpr-menu-offcanvas-back-wrap">';
 				$output .= '<div class="wpr-menu-offcanvas-back">';
 				$output .= '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 499.6 320.6" style="enable-background:new 0 0 499.6 320.6;" xml:space="preserve"><g><path class="st0" d="M499.6,159.3c0.3,7-2.4,13.2-7,17.9c-4.3,4.3-10.4,7-16.9,7H81.6l95.6,95.6c9.3,9.3,9.3,24.4,0,33.8c-4.6,4.6-10.8,7-16.9,7c-6.1,0-12.3-2.4-16.9-7L6.9,177.2c-9.3-9.3-9.3-24.4,0-33.8l16.9-16.9l0,0L143.3,6.9c9.3-9.3,24.4-9.3,33.8,0c4.6,4.6,7,10.8,7,16.9s-2.4,12.3-7,16.9l-95.6,95.6h393.7C488.3,136.3,499.1,146.4,499.6,159.3z"/></g></svg>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped';
 					$output .= '<h3></h3>';
@@ -136,7 +136,7 @@ class Wpr_Mobile_Menu_Walker extends \Walker_Nav_Menu {
 
                     // Badge
                     if ( wpr_fs()->can_use_premium_code() && '' !== $settings['wpr_mm_badge_text'] ) {
-                        $item_badge_style .= 'color: '. $settings['wpr_mm_badge_color'] .';';
+                        $item_badge_style = 'color: '. $settings['wpr_mm_badge_color'] .';';
                         $item_badge_style .= 'background-color: '. $settings['wpr_mm_badge_bg_color'] .';';
                         $item_badge_html = '<span class="wpr-mega-menu-badge" style="'. $item_badge_style .'">'. $settings['wpr_mm_badge_text'] .'</span>';
                     }
@@ -147,7 +147,7 @@ class Wpr_Mobile_Menu_Walker extends \Walker_Nav_Menu {
                 $atts['title'] = ! empty( $item->attr_title ) ? $item->attr_title : '';
                 $atts['target'] = ! empty( $item->target ) ? $item->target : '';
                 $atts['rel'] = ! empty( $item->xfn ) ? $item->xfn : '';
-                $atts['href'] = ! empty( $item->url ) ? $item->url : '';
+                $atts['href'] = ! empty( $item->url ) ? $item->url : '#';
                 $atts['class'] = $item_a_class;
         
                 $atts = apply_filters( 'nav_menu_link_attributes', $atts, $item, $args, $depth );

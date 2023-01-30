@@ -12,7 +12,7 @@ class UniteCreatorFiltersProcess{
 	const DEBUG_MAIN_QUERY = false;
 	
 	const DEBUG_FILTER = false;
-
+	
 	private static $showDebug = false;
 	
 	private static $filters = null;
@@ -34,6 +34,9 @@ class UniteCreatorFiltersProcess{
 	
 	const TYPE_TABS = "tabs";
 	const TYPE_SELECT = "select";
+	
+	const ROLE_CHILD = "child";
+	const ROLE_TERM_CHILD = "term_child";
 	
 	
 	/**
@@ -741,7 +744,7 @@ class UniteCreatorFiltersProcess{
 	 * get content element html
 	 */
 	private function getContentWidgetHtml($arrContent, $elementID, $isGrid = true){
-				
+		
 		$arrElement = HelperProviderCoreUC_EL::getArrElementFromContent($arrContent, $elementID);
 		
 		if(empty($arrElement)){
@@ -807,6 +810,9 @@ class UniteCreatorFiltersProcess{
 			$output["html"] = UniteFunctionsUC::getVal($arrHtml, "html_items1");
 			$output["html2"] = UniteFunctionsUC::getVal($arrHtml, "html_items2");
 			
+			$output["uc_id"] = $objOutput->getWidgetID();
+			
+			
 		}else{		//not a grid - output of html template
 
 			$htmlBody = $objOutput->getHtmlOnly();
@@ -819,7 +825,9 @@ class UniteCreatorFiltersProcess{
 		
 		if(!empty($htmlDebug))
 			$output["html_debug"] = $htmlDebug;
-			
+		
+		
+		
 		return($output);
 	}
 	
@@ -877,7 +885,10 @@ class UniteCreatorFiltersProcess{
 	 * get init filtres taxonomy request
 	 */
 	private function getInitFiltersTaxRequest($request, $strTestIDs){
-
+		
+		if(strpos($request, "WHERE 1=2") !== false)
+			return(null);
+		
 		$posLimit = strpos($request, "LIMIT");
 		
 		if($posLimit){
@@ -934,8 +945,7 @@ class UniteCreatorFiltersProcess{
 				
 		$fullQuery = "SELECT $selectTop from($query) as summary";
 
-		
-		
+				
 		return($fullQuery);
 	}
 	
@@ -997,8 +1007,10 @@ class UniteCreatorFiltersProcess{
 		$isModeReplace = UniteFunctionsUC::getPostGetVariable("ucreplace","",UniteFunctionsUC::SANITIZE_TEXT_FIELD);
 		$isModeReplace = UniteFunctionsUC::strToBool($isModeReplace);
 		
+		GlobalsProviderUC::$isUnderAjax = true;
+		
 		self::$isModeReplace = $isModeReplace;
-				
+		
 		//if($isModeFiltersInit == true)
 			//GlobalsProviderUC::$skipRunPostQueryOnce = true;
 		
@@ -1025,11 +1037,11 @@ class UniteCreatorFiltersProcess{
 				dmp("--- Last Query Args:");
 				dmp($args);
 			}
-			
+						
 			$query = new WP_Query($args);
 						
 			$request = $query->request;
-						
+			
 			$taxRequest = $this->getInitFiltersTaxRequest($request, $testTermIDs);
 			
 			if(self::$showDebug == true){
@@ -1037,11 +1049,22 @@ class UniteCreatorFiltersProcess{
 				dmp("---- Terms request: ");
 				dmp($taxRequest);
 			}
+				
+			$arrFoundTermIDs = array();
 			
-			$db = HelperUC::getDB();
-			$arrFoundTermIDs = $db->fetchSql($taxRequest);
+			if(!empty($taxRequest)){
+				
+				$db = HelperUC::getDB();
+				try{
+					
+					$arrFoundTermIDs = $db->fetchSql($taxRequest);
+					$arrFoundTermIDs = $this->modifyFoundTermsIDs($arrFoundTermIDs);
+					
+				}catch(Exception $e){
+					//just leave it empty
+				}
+			}
 			
-			$arrFoundTermIDs = $this->modifyFoundTermsIDs($arrFoundTermIDs);
 			
 			if(self::$showDebug == true){
 				
@@ -1055,6 +1078,15 @@ class UniteCreatorFiltersProcess{
 		
 		$htmlGridItems = UniteFunctionsUC::getVal($arrHtmlWidget, "html");
 		$htmlGridItems2 = UniteFunctionsUC::getVal($arrHtmlWidget, "html2");
+		
+		//replace widget id
+		$widgetHTMLID = UniteFunctionsUC::getVal($arrHtmlWidget, "uc_id");				
+		
+		if(!empty($widgetHTMLID)){
+			
+			$htmlGridItems = str_replace($widgetHTMLID, "%uc_widget_id%", $htmlGridItems);
+			$htmlGridItems2 = str_replace($widgetHTMLID, "%uc_widget_id%", $htmlGridItems2);
+		}
 		
 		$htmlDebug = UniteFunctionsUC::getVal($arrHtmlWidget, "html_debug");
 		
@@ -1103,11 +1135,25 @@ class UniteCreatorFiltersProcess{
 	
 	private function _______AJAX_SEARCH__________(){}
 	
+	/**
+	 * before custom posts query
+	 * if under ajax search then et main query
+	 */
+	public function onBeforeCustomPostsQuery($query){
+		
+		if(GlobalsProviderUC::$isUnderAjaxSearch == false)
+			return(false);
+			
+		global $wp_the_query;
+		$wp_the_query = $query;
+	}
+	
 	
 	/**
 	 * ajax search
 	 */
 	private function putAjaxSearchData(){
+		
 		
 		$responseCode = http_response_code();
 		
@@ -1116,15 +1162,20 @@ class UniteCreatorFiltersProcess{
 		
 		$layoutID = UniteFunctionsUC::getPostGetVariable("layoutid","",UniteFunctionsUC::SANITIZE_KEY);
 		$elementID = UniteFunctionsUC::getPostGetVariable("elid","",UniteFunctionsUC::SANITIZE_KEY);
-
+		
 		$arrContent = HelperProviderCoreUC_EL::getElementorContentByPostID($layoutID);
 		
 		if(empty($arrContent))
 			UniteFunctionsUC::throwError("Elementor content not found");
-		
+			
 		//run the post query
+		GlobalsProviderUC::$isUnderAjaxSearch = true;
+			
 		$arrHtmlWidget = $this->getContentWidgetHtml($arrContent, $elementID);
-
+		
+		GlobalsProviderUC::$isUnderAjaxSearch = false;
+		
+		
 		$htmlGridItems = UniteFunctionsUC::getVal($arrHtmlWidget, "html");
 		$htmlGridItems2 = UniteFunctionsUC::getVal($arrHtmlWidget, "html2");
 		
@@ -1373,7 +1424,6 @@ class UniteCreatorFiltersProcess{
 		$isDebug = UniteFunctionsUC::getGetVar("ucfiltersdebug","",UniteFunctionsUC::SANITIZE_TEXT_FIELD);
 		$isDebug = UniteFunctionsUC::strToBool($isDebug);
 		
-		
 		//get current filters
 		
 		$arrData = array();
@@ -1553,10 +1603,9 @@ class UniteCreatorFiltersProcess{
 			
 			$role = UniteFunctionsUC::getVal($data, "filter_role");
 			
-			if($role == "child")
+			if(strpos($role,"child") !== false)
 				$isSelectFirst = false;
 		}
-		
 		
 		if($isSelectFirst == false)
 			return($arrTerms);	
@@ -1836,7 +1885,7 @@ class UniteCreatorFiltersProcess{
 		$filterRole = UniteFunctionsUC::getVal($data, "filter_role");
 		if($filterRole == "single")		
 			$filterRole = null;
-			
+		
 		$attributes = "";
 		$style = "";
 		$addClass = " uc-grid-filter";
@@ -1863,8 +1912,17 @@ class UniteCreatorFiltersProcess{
 		}
 		
 		//hide child filter at start
-		if($filterRole == "child" && $isUnderAjax == false && $isInsideEditor == false){
+		if(strpos($filterRole,"child") !== false && $isUnderAjax == false && $isInsideEditor == false){
 			$addClass .= " uc-filter-initing uc-initing-filter-hidden";
+		}
+				
+		if($filterRole == self::ROLE_TERM_CHILD){
+			
+			$termID = UniteFunctionsUC::getVal($data, "child_termid");
+			
+			if(!empty($termID))
+				$attributes .= " data-childterm=\"$termID\"";
+			
 		}
 		
 		if($isInsideEditor == true)
@@ -2093,6 +2151,10 @@ class UniteCreatorFiltersProcess{
 			return(false);
 		
 		add_action("wp", array($this, "operateAjaxResponse"));
+		
+		add_action("ue_before_custom_posts_query", array($this, "onBeforeCustomPostsQuery"));
+		//add_action("ue_after_custom_posts_query", array($this, "onAfterCustomPostsQuery"));
+		
 		
 	}
 	

@@ -257,6 +257,15 @@ class UniteCreatorAddonViewChildParams{
 {# use the raw filter for printing attribute with html tags#}
 {{ some_attribute|raw }}
 ";
+
+		//----- Json Decode ------
+		
+		$key = "JSON Decode";
+		$text = "
+	  {% set arr = jsonvar|json_decode %}
+	  {{arr.yourkey}}
+";
+		
 		
 		$arrParams[] = $this->createChildParam_code($key, $text);
 
@@ -1511,7 +1520,7 @@ console.log(arrItems);
 	
 	
 	/**
-	 * get post child params
+	 * get link add params
 	 */
 	public function getAddParams_link(){
 
@@ -1525,6 +1534,27 @@ console.log(arrItems);
 		return($arrParams);
 	}
 
+	/**
+	 * get date time add params
+	 */
+	public function getAddParams_datetime(){
+
+		$arrParams = array();
+		
+		$arrParams[] = $this->createAddParam();
+		$arrParams[] = $this->createAddParam("stamp");
+		
+		$strUcDate = "\n {{[param_prefix]_stamp|ucdate(\"d m Y\")}}
+					  \n {{[param_prefix]_stamp|ucdate(\"H:i\")}}
+		";
+		
+		$arrParams[] = $this->createChildParam_code("[parent_name]_stamp|ucdate", $strUcDate);
+		
+		
+		return($arrParams);
+	}
+	
+	
 	/**
 	 * get post child params
 	 */

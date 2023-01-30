@@ -66,6 +66,30 @@ class Wpr_Media_Grid extends Widget_Base {
 			]
 		);
 	}
+
+	public function add_control_order_posts() {
+        $this->add_control(
+			'order_posts',
+			[
+				'label' => esc_html__( 'Order By', 'wpr-addons'),
+				'type' => Controls_Manager::SELECT,
+				'default' => 'date',
+				'label_block' => false,
+				'options' => [
+					'date' => esc_html__( 'Date', 'wpr-addons'),
+					'pro-tl' => esc_html__( 'Title (Pro)', 'wpr-addons'),
+					'pro-mf' => esc_html__( 'Last Modified (Pro)', 'wpr-addons'),
+					'pro-d' => esc_html__( 'Post ID', 'wpr-addons' ),
+					'pro-ar' => esc_html__( 'Post Author', 'wpr-addons' ),
+					'pro-cc' => esc_html__( 'Comment Count', 'wpr-addons' )
+				],
+				'condition' => [
+					'query_randomize!' => 'rand',
+					'query_selection!' => 'manual'
+				]
+			]
+		);
+	}
 	
 	public function add_control_layout_columns() {
 		$this->add_responsive_control(
@@ -542,14 +566,37 @@ class Wpr_Media_Grid extends Widget_Base {
 			]
 		);
 
+		$this->add_control_order_posts();
+
+		// Upgrade to Pro Notice
+		Utilities::upgrade_pro_notice( $this, Controls_Manager::RAW_HTML, 'grid', 'order_posts', ['pro-tl', 'pro-mf', 'pro-d', 'pro-ar', 'pro-cc'] );
+
+        $this->add_control(
+			'order_direction',
+			[
+				'label' => esc_html__( 'Order', 'wpr-addons'),
+				'type' => Controls_Manager::SELECT,
+				'default' => 'DESC',
+				'label_block' => false,
+				'options' => [
+					'ASC' => esc_html__( 'Ascending', 'wpr-addons'),
+					'DESC' => esc_html__( 'Descending', 'wpr-addons'),
+				],
+				'condition' => [
+					'query_randomize!' => 'rand',
+					'query_selection!' => 'manual'
+				]
+			]
+		);
+
 		$this->add_control(
 			'query_author',
 			[
 				'label' => esc_html__( 'Authors', 'wpr-addons' ),
-				'type' => Controls_Manager::SELECT2,
+				'type' => 'wpr-ajax-select2',
+				'options' => 'ajaxselect2/get_users',
 				'multiple' => true,
 				'label_block' => true,
-				'options' => Utilities::get_users(),
 				'separator' => 'before',
 				'condition' => [
 					'query_selection' => 'dynamic',
@@ -571,12 +618,14 @@ class Wpr_Media_Grid extends Widget_Base {
 			$this->add_control(
 				'query_taxonomy_'. $slug,
 				[
-					'label' => $tax->label,
-					'type' => Controls_Manager::SELECT2,
+					'label' => $tax,
+					'type' => 'wpr-ajax-select2',
+					'options' => 'ajaxselect2/get_taxonomies',
+					'query_slug' => $slug,
 					'multiple' => true,
 					'label_block' => true,
-					'options' => Utilities::get_terms_by_taxonomy( $slug ),
 					'condition' => [
+						'query_source' => $post_type,
 						'query_selection' => 'dynamic',
 					],
 				]
@@ -588,10 +637,11 @@ class Wpr_Media_Grid extends Widget_Base {
 			'query_exclude_attachment',
 			[
 				'label' => esc_html__( 'Exclude Images', 'wpr-addons' ),
-				'type' => Controls_Manager::SELECT2,
+				'type' => 'wpr-ajax-select2',
+				'options' => 'ajaxselect2/get_posts_by_post_type',
+				'query_slug' => 'attachment',
 				'multiple' => true,
 				'label_block' => true,
-				'options' => Utilities::get_posts_by_post_type( 'attachment' ),
 				'condition' => [
 					'query_selection' => 'dynamic',
 				],
@@ -832,15 +882,7 @@ class Wpr_Media_Grid extends Widget_Base {
 				'min' => 1,
 				'max' => 10,
 				'default' => 2,
-				'prefix_class' => 'wpr-grid-slides-to-scroll-',
 				'frontend_available' => true,
-				'default' => 2,
-				'widescreen_default' => 2,
-				'laptop_default' => 2,
-				'tablet_extra_default' => 2,
-				'tablet_default' => 1,
-				'mobile_extra_default' => 1,
-				'mobile_default' => 1,
 				'separator' => 'before',
 				'condition' => [
 					'layout_select' => 'slider',
@@ -2484,6 +2526,7 @@ class Wpr_Media_Grid extends Widget_Base {
 
 		// Section: Pro Features
 		Utilities::pro_features_list_section( $this, '', Controls_Manager::RAW_HTML, 'media-grid', [
+			'Posts Order',
 			'Grid Columns 1,2,3,4,5,6,7,8',
 			'Masonry Layout',
 			'Random Images Query',
@@ -3014,7 +3057,7 @@ class Wpr_Media_Grid extends Widget_Base {
 				'type' => Controls_Manager::COLOR,
 				'default' => '#ffffff',
 				'selectors' => [
-					'{{WRAPPER}} .wpr-grid-item-caption .inner-block' => 'color: {{VALUE}}',
+					'{{WRAPPER}} .wpr-grid-item-caption .inner-block p' => 'color: {{VALUE}}',
 				],
 			]
 		);
@@ -6406,6 +6449,13 @@ class Wpr_Media_Grid extends Widget_Base {
 
 		if ( ! wpr_fs()->can_use_premium_code() ) {
 			$settings[ 'query_randomize' ] = '';
+			$settings['order_posts'] = 'date';
+		}
+
+		$query_order_by = '' != $settings['query_randomize'] ? $settings['query_randomize'] : $settings['order_posts'];
+
+		if ( 'manual' === $settings[ 'query_selection' ] ) {
+			$query_order_by = 'post__in';
 		}
 
 		// Dynamic
@@ -6415,7 +6465,7 @@ class Wpr_Media_Grid extends Widget_Base {
 			'tax_query' => $this->get_tax_query_args(),
 			'post__not_in' => $settings[ 'query_exclude_attachment' ],
 			'posts_per_page' => $settings['query_posts_per_page'],
-			'orderby' => $settings[ 'query_randomize' ],
+			'orderby' => $query_order_by,
 			'author' => $author,
 			'paged' => $paged,
 			'offset' => $offset
@@ -6440,6 +6490,10 @@ class Wpr_Media_Grid extends Widget_Base {
 				'posts_per_page' => $settings['query_posts_per_page'],
 				'paged' => $paged,
 			];
+		}
+
+		if ( 'rand' !== $query_order_by && 'manual' !== $settings['query_selection'] ) {
+			$args['order'] = $settings['order_direction'];
 		}
 
 		return $args;
@@ -7196,7 +7250,7 @@ class Wpr_Media_Grid extends Widget_Base {
 
 		// Load More / Infinite Scroll
 		} else {
-			echo '<a href="'. esc_url(get_pagenum_link( $paged + 1, true )) .'" class="wpr-load-more-btn">';
+			echo '<a href="'. esc_url(get_pagenum_link( $paged + 1, true )) .'" class="wpr-load-more-btn" data-e-disable-page-transition >';
 				echo esc_html($settings['pagination_load_more_text']);
 			echo '</a>';
 
@@ -7348,6 +7402,7 @@ class Wpr_Media_Grid extends Widget_Base {
 			'pauseOnHover' => $settings['layout_slider_pause_on_hover'],
 			'prevArrow' => '#wpr-grid-slider-prev-'. $this->get_id(),
 			'nextArrow' => '#wpr-grid-slider-next-'. $this->get_id(),
+			'sliderSlidesToScroll' => +$settings['layout_slides_to_scroll'],
 		];
 
 		if ( ! wpr_fs()->can_use_premium_code() ) {

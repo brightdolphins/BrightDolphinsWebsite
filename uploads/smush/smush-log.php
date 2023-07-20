@@ -47,3 +47,7 @@
 [2023-06-26T02:52:31+00:00] Info: Background wp_smush_background_scan_process: Setting last run timestamp for instance ID 34d9813f92c6d7e8b1cd1d45d3750b50 to 2023-06-26 02:52:31
 [2023-06-26T02:52:31+00:00] Info: Background wp_smush_background_scan_process: Executing task 1.
 [2023-06-26T02:52:31+00:00] Info: Background wp_smush_background_scan_process: Cancelling event with hook wp_smush_background_scan_process_cron.
+[2023-07-20T09:22:25+00:00] Error: Count not delete webp versions of the media item [3859]
+[2023-07-20T09:22:41+00:00] Error: Count not delete webp versions of the media item [3860]
+[2023-07-20T09:45:02+00:00] Error: Count not delete webp versions of the media item [3861]
+[2023-07-20T09:46:30+00:00] Error: Count not delete webp versions of the media item [3862]

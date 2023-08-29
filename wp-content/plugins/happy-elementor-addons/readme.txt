@@ -1,12 +1,12 @@
 === Happy Addons for Elementor ===
 Plugin Name: Happy Addons for Elementor
-Version: 3.8.2
+Version: 3.8.6
 Author: weDevs
 Author URI: https://happyaddons.com/
 Contributors: happyaddons, thehappymonster, wedevs
 Tags: Elementor, Elementor Addons, Mega Menu, Header Footer Builder, Elementor Widget, Elementor Addon,
 Requires at least: 4.7
-Tested up to: 6.1
+Tested up to: 6.2
 Stable tag: trunk
 Requires PHP: 5.4
 License: GPLv2
@@ -655,6 +655,29 @@ For a more detailed explanation check out the following documentation
 
 
 == Changelog ==
+
+= 3.8.6 - 7 August 2023 =
+
+- Update: Made Compatible with Elementor Free 3.15.1 & Elementor Pro 3.15.0.
+
+= 3.8.5 - 14 June 2023 =
+
+- Fix: Minor Fixes.
+- Fix: Elementor compatibility tag updated.
+
+= 3.8.4 - 11 April 2023 =
+
+- New: Section features compatibility with container.
+- Fix: Global color issue fixed with Info Box, LordIcon & Icon Box widget.
+- Fix: Themebuilder widget compatible with Elementor experimental featues.
+- Fix: Safary compatibility for specific js.
+- Fix: Nav Menu widget humberger issues fixes.
+- Fix: Minor bug fixes.
+
+= 3.8.3 - 27 March 2023 =
+
+- Update: Appsero client updated to `v1.2.3`.
+- Fix: Specific fixes for Elementor cloud.
 
 = 3.8.2 - 25 January 2023 =
 

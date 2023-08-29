@@ -22,6 +22,8 @@ if ( defined( 'ELEMENTOR_PRO_VERSION' ) ) {
 	return;
 }
 
+use EACCustomWidgets\EAC_Plugin;
+
 use Elementor\Controls_Manager;
 use Elementor\Element_Base;
 use Elementor\Core\Files\CSS\Post;
@@ -47,7 +49,7 @@ class Eac_Custom_Css {
 	 * @since 1.6.0
 	 */
 	public function enqueue_editor_scripts() {
-		wp_enqueue_script( 'eac-custom-css', EAC_ADDONS_URL . 'assets/js/elementor/eac-custom-css.min.js', array( 'jquery' ), '1.6.0', true );
+		wp_enqueue_script( 'eac-custom-css', EAC_Plugin::instance()->get_script_url( 'assets/js/elementor/eac-custom-css' ), array( 'jquery' ), '1.6.0', true );
 	}
 
 	/**
@@ -56,7 +58,7 @@ class Eac_Custom_Css {
 	 * Remplace le control Custom CSS de la version PRO
 	 */
 	public static function add_controls_section( $element, $section_id, $args ) {
-		if ( $section_id == 'section_custom_css_pro' ) {
+		if ( 'section_custom_css_pro' === $section_id ) {
 
 			// $element->remove_control('section_custom_css_pro');
 			\Elementor\Plugin::$instance->controls_manager->remove_control_from_stack( $element->get_unique_name(), array( 'section_custom_css_pro', 'custom_css_pro' ) );

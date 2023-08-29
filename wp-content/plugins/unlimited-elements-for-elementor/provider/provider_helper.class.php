@@ -19,7 +19,73 @@ class HelperProviderUC{
         	
         return($isActivated);
 	}
+	
+	/**
+	 * get sort filter default values
+	 */
+	public static function getSortFilterDefaultValues(){
+		
+		$arrValues = array();
+		$arrValues["default"] = __("Default","unlimited-elements-for-elementor");
+		$arrValues["meta"] = __("Meta Field","unlimited-elements-for-elementor");
+		$arrValues["id"] = __("ID","unlimited-elements-for-elementor");
+		$arrValues["date"] = __("Date","unlimited-elements-for-elementor");
+		$arrValues["title"] = __("Title","unlimited-elements-for-elementor");
+		$arrValues["sale_price"] = __("Sale Price","unlimited-elements-for-elementor");
+		$arrValues["sales"] = __("Number Of Sales","unlimited-elements-for-elementor");
+		$arrValues["rating"] = __("Rating","unlimited-elements-for-elementor");
+		$arrValues["name"] = __("Name","unlimited-elements-for-elementor");
+		$arrValues["author"] = __("Author","unlimited-elements-for-elementor");
+		$arrValues["modified"] = __("Last Modified","unlimited-elements-for-elementor");
+		$arrValues["comment_count"] = __("Number Of Comments","unlimited-elements-for-elementor");
+		$arrValues["rand"] = __("Random","unlimited-elements-for-elementor");
+		$arrValues["none"] = __("Unsorted","unlimited-elements-for-elementor");
+		$arrValues["menu_order"] = __("Menu Order","unlimited-elements-for-elementor");
+		$arrValues["parent"] = __("Parent Post","unlimited-elements-for-elementor");
+		
+		$output = array();
+		
+		foreach($arrValues as $type=>$title){
+			$output[] = array("type"=>$type,"title"=>$title);
+		}
+		
+		return($output);
+	}
     
+	
+	/**
+	 * get sort filter repeater fields
+	 */
+	public static function getSortFilterRepeaterFields(){
+		
+		$settings = new UniteCreatorSettings();
+		
+		//--- field type -----
+		
+		$params = array();
+		$params["origtype"] = UniteCreatorDialogParam::PARAM_DROPDOWN;
+		
+		$arrSort = UniteFunctionsWPUC::getArrSortBy(true, true);
+		
+		
+		$arrSort = array_flip($arrSort);
+		
+		$settings->addSelect("type", $arrSort, __("Field Type","unlimited-elements-for-elementor"),"default",$params);
+
+		
+		//--- field Title -----
+		
+		$params = array();
+		$params["origtype"] = UniteCreatorDialogParam::PARAM_TEXTFIELD;
+		
+		$settings->addTextBox("title", "", __("Field Title","unlimited-elements-for-elementor"),$params);
+		
+		
+		
+		return($settings);		
+	}
+	
+	
 	/**
 	 * get data for meta compare select
 	 */
@@ -173,6 +239,7 @@ class HelperProviderUC{
 		
 		return($arrItems);
 	}
+	
 	
 	
 	/**
@@ -495,9 +562,10 @@ class HelperProviderUC{
 			$isSaparateScripts = UniteFunctionsUC::strToBool($isSaparateScripts);
 			
 			$arrScrips = UniteProviderFunctionsUC::getCustomScripts();
+			$version = UNLIMITED_ELEMENTS_VERSION;
 			
 			if(!empty($arrScrips)){
-				echo "\n<!--   Unlimited Elements Scripts  --> \n";
+				echo "\n<!--   Unlimited Elements $version Scripts --> \n";
 				
 				$arrScriptsOutput = array();
 				$arrModulesOutput = array();
@@ -709,5 +777,32 @@ class HelperProviderUC{
 		
 	}
 	
+	/**
+	 * check if user has some operations permissions
+	 */
+	public static function isUserHasOperationsPermissions(){
+		
+		$permission = HelperProviderCoreUC_EL::getGeneralSetting("edit_permission");
+		
+		$capability = "manage_options";
+		if($permission == "editor")
+			$capability = "edit_posts";
+		
+		$isUserHasPermission = current_user_can($capability);
+		
+		return($isUserHasPermission);
+	}
+	
+	/**
+	 * verify admin permisison of the plugin, use it before ajax actions
+	 */
+	public static function verifyAdminPermission(){
+		
+		$hasPermission = self::isUserHasOperationsPermissions();
+		
+		if($hasPermission == false)
+			UniteFunctionsUC::throwError("The user don't have permission to do this operation");
+		
+	}
 	
 }

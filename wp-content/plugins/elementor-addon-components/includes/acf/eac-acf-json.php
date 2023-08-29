@@ -6,18 +6,32 @@
  * Maintenant localisé dans le répertoire '/includes/acf' du plugin
  *
  * @since 1.8.7
+ * @since 2.1.0 Check si le répertoire existe
  */
 
+// Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 add_filter( 'acf/settings/save_json', 'eac_acf_json_save_point' );
+add_filter( 'acf/settings/load_json', 'eac_acf_json_load_point' );
 
 function eac_acf_json_save_point( $path ) {
 	// check le répertoire 'acf-json' du thème
 	if ( is_writable( get_stylesheet_directory() . '/acf-json' ) ) {
 		return $path; }
 
+	/**
+	 * Le répertoire existe déjà
+	 * @since 2.1.0
+	 */
+	if ( is_dir( EAC_PATH_ACF_JSON ) ) {
+		return $paths;
+	}
+
 	// check le répertoire 'acf-json' du plugin
 	if ( ! is_writable( EAC_PATH_ACF_JSON ) ) {
-		// console_log('ACF failed to save field group. Path does not exist: ' . EAC_PATH_ACF_JSON);
 		if ( ! eac_create_json_dir() ) {
 			return $path; }
 	}
@@ -28,8 +42,6 @@ function eac_acf_json_save_point( $path ) {
 	return $path;
 }
 
-add_filter( 'acf/settings/load_json', 'eac_acf_json_load_point' );
-
 /**
  * Register the path to load the ACF json files so that they are version controlled.
  *
@@ -39,11 +51,19 @@ add_filter( 'acf/settings/load_json', 'eac_acf_json_load_point' );
 function eac_acf_json_load_point( $paths ) {
 	// check le répertoire 'acf-json' du thème
 	if ( is_writable( get_stylesheet_directory() . '/acf-json' ) ) {
-		return $paths; }
+		return $paths;
+	}
+
+	/**
+	 * Le répertoire existe déjà
+	 * @since 2.1.0
+	 */
+	if ( is_dir( EAC_PATH_ACF_JSON ) ) {
+		return $paths;
+	}
 
 	// check le répertoire 'acf-json' du plugin
 	if ( ! is_writable( EAC_PATH_ACF_JSON ) ) {
-		// console_log('ACF failed to save field group. Path does not exist: ' . EAC_PATH_ACF_JSON);
 		if ( ! eac_create_json_dir() ) {
 			return $paths; }
 	}

@@ -7,6 +7,7 @@
  * @since 1.9.8
  * @since 1.9.9 Ajout d'une notice pour le mode catalogue
  * @since 2.0.1 Non régression avec la nouvelle structure de l'option WC intégration
+ * @since 2.1.0 Ajout de l'option mini-cart
  */
 
 namespace EACCustomWidgets\Includes\Woocommerce;
@@ -72,6 +73,10 @@ class Eac_Woo_Filters {
 	 */
 	private $breadcrumb = false;
 
+	/**
+	 * @var Boolean $mini_cart Option mini_cart mettre à jour le badge du mini cart dans le menu de navigation
+	 */
+	private $mini_cart = false;
 
 	/** Constructeur */
 	private function __construct() {
@@ -80,7 +85,12 @@ class Eac_Woo_Filters {
 
 		$this->options = get_option( $this->options_shop_name );
 
-		/** @since 2.00.1 Ancien format de l'option */
+		/** @since 2.1.0 */
+		if ( $this->options && isset( $this->options['mini_cart'] ) ) {
+			$this->mini_cart = true === $this->options['mini_cart'] ? true : false;
+		}
+
+		/** @since 2.0.1 Ancien format de l'option */
 		if ( $this->options && isset( $this->options['catalog']['active'] ) ) {
 			$this->catalog = true === $this->options['catalog']['active'] ? true : false;
 		} elseif ( $this->options && isset( $this->options['catalog'] ) ) {
@@ -98,7 +108,7 @@ class Eac_Woo_Filters {
 
 		$this->request_quote = $this->options && isset( $this->options['catalog']['request_quote'] ) && $this->options['catalog']['request_quote'];
 
-		$this->redirect_url = $this->options && ! empty( $this->options['product-page']['shop']['url'] ) ? esc_url( $this->options['product-page']['shop']['url'] ) : '';
+		$this->redirect_url = $this->options && ! empty( $this->options['product-page']['shop']['url'] ) ? $this->options['product-page']['shop']['url'] : '';
 
 		$this->redirect_metas = $this->options && isset( $this->options['product-page']['metas'] ) && $this->options['product-page']['metas'];
 
@@ -149,22 +159,28 @@ class Eac_Woo_Filters {
 		add_filter( 'woocommerce_price_trim_zeros', '__return_true' );
 
 		/** Change l'url des catégories du breadcrumb de la page produit */
-		add_filter( 'woocommerce_get_breadcrumb', array( $this, 'change_terms_breadcrumb_url' ), 9999, 2 );
+		if ( $this->breadcrumb ) {
+			add_filter( 'woocommerce_get_breadcrumb', array( $this, 'change_terms_breadcrumb_url' ), 9999, 2 );
+		}
 
 		/** Supprime le breadcrumb de la page produit */
 		// add_action( 'woocommerce_before_main_content', array( $this, 'remove_product_breadcrumb' ) );
 
 		/** Supprime le SKU, les catégories et les tags de la page produit */
-		add_action( 'woocommerce_single_product_summary', array( $this, 'remove_product_meta_tags' ), 39 );
+		if ( $this->redirect_metas ) {
+			add_action( 'woocommerce_single_product_summary', array( $this, 'remove_product_meta_tags' ), 39 );
+			/** Ajoute le SKU les catégories et les tags de la page produit */
+			add_action( 'woocommerce_single_product_summary', array( $this, 'add_product_meta_sku' ), 40 );
+			add_action( 'woocommerce_single_product_summary', array( $this, 'add_product_meta_cats' ), 40 );
+			add_action( 'woocommerce_single_product_summary', array( $this, 'add_product_meta_tags' ), 40 );
+		}
 		// add_filter( 'wc_product_sku_enabled', array( $this, 'remove_product_meta_sku' ) );
 
-		/** Ajoute le SKU, les catégories et les tags de la page produit */
-		add_action( 'woocommerce_single_product_summary', array( $this, 'add_product_meta_sku' ), 40 );
-		add_action( 'woocommerce_single_product_summary', array( $this, 'add_product_meta_cats' ), 40 );
-		add_action( 'woocommerce_single_product_summary', array( $this, 'add_product_meta_tags' ), 40 );
-
 		/** Transforme le site en catalogue de produits */
-		add_action( 'woocommerce_single_product_summary', array( $this, 'turn_catalog_mode_request_quote' ), 19 );
+		if ( $this->catalog && $this->request_quote ) {
+			add_action( 'woocommerce_single_product_summary', array( $this, 'turn_catalog_mode_request_quote' ), 19 );
+		}
+
 		add_filter( 'woocommerce_get_price_html', array( $this, 'turn_catalog_mode_on_for_product' ), 9999 );
 		add_filter( 'woocommerce_sale_flash', array( $this, 'turn_catalog_mode_on_for_sale' ), 9999, 3 );
 		add_filter( 'woocommerce_get_stock_html', array( $this, 'turn_catalog_mode_on_for_stock' ), 9999, 2 );
@@ -174,6 +190,11 @@ class Eac_Woo_Filters {
 
 		/** Supprime la notice de la page Commande 'checkout' */
 		add_filter( 'woocommerce_add_notice', array( $this, 'url_redirect_to_product_grid_notice' ), 10, 1 );
+
+		/** @since 2.1.0  */
+		if ( $this->mini_cart ) {
+			add_filter( 'woocommerce_add_to_cart_fragments', array( $this, 'update_mini_cart_count' ), 10, 1 );
+		}
 	}
 
 	/**
@@ -200,24 +221,22 @@ class Eac_Woo_Filters {
 	 * @since 2.0.1 Non régression option WC intégration
 	 */
 	public function turn_catalog_mode_request_quote() {
-		if ( $this->catalog && $this->request_quote ) {
-			global $product;
-			$product_id = absint( $product->get_id() );
-			$notice     = esc_html__( 'Contactez-nous pour demander un devis', 'eac-components' );
+		global $product;
+		$product_id = absint( $product->get_id() );
+		$notice     = esc_html__( 'Contactez-nous pour demander un devis', 'eac-components' );
 
-			/**
-			 * Affiche une notice dans la page détail du produit
-			 *
-			 * @since 1.9.9
-			 *
-			 * @param String $notice La notice à afficher dans la page produit sous le titre/avis
-			 * @param Int $product_id L'ID du produit courant pour filtrer/cibler des produits spécifiques
-			 */
-			$notice = apply_filters( 'eac_woo_catalog_product_request_a_quote', $notice, $product_id );
+		/**
+		 * Affiche une notice dans la page détail du produit
+		 *
+		 * @since 1.9.9
+		 *
+		 * @param String $notice La notice à afficher dans la page produit sous le titre/avis
+		 * @param Int $product_id L'ID du produit courant pour filtrer/cibler des produits spécifiques
+		 */
+		$notice = apply_filters( 'eac_woo_catalog_product_request_a_quote', $notice, $product_id );
 
-			if ( ! empty( $notice ) ) {
-				wc_print_notice( esc_html( $notice ), 'notice' );
-			}
+		if ( ! empty( $notice ) ) {
+			wc_print_notice( esc_html( $notice ), 'notice' );
 		}
 	}
 
@@ -309,7 +328,7 @@ class Eac_Woo_Filters {
 		}
 
 		if ( ! empty( $url ) ) {
-			wp_safe_redirect( $url );
+			wp_safe_redirect( esc_url( $url ) );
 			exit();
 		}
 	}
@@ -320,10 +339,7 @@ class Eac_Woo_Filters {
 	 * Supprime le block metas de la page produit
 	 */
 	public function remove_product_meta_tags() {
-		// Page produit
-		if ( $this->redirect_metas ) {
-			remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_meta', 40 );
-		}
+		remove_action( 'woocommerce_single_product_summary', 'woocommerce_template_single_meta', 40 );
 	}
 
 	/**
@@ -333,16 +349,13 @@ class Eac_Woo_Filters {
 	 */
 	public function add_product_meta_sku() {
 		global $product;
-
-		if ( $this->redirect_metas ) {
-			?>
-			<div class="product_meta">
-				<?php if ( wc_product_sku_enabled() && $product->get_sku() ) : ?>
-					<span class="sku_wrapper"><?php esc_html_e( 'UGS:', 'eac-components' ); ?> <span class="sku"><?php echo ( $sku = $product->get_sku() ) ? esc_attr( $sku ) : esc_html__( 'N/A', 'eac-components' ); ?></span></span>
-				<?php endif; ?>
-			</div>
-			<?php
-		}
+		?>
+		<div class="product_meta">
+			<?php if ( wc_product_sku_enabled() && $product->get_sku() ) : ?>
+				<span class="sku_wrapper"><?php esc_html_e( 'UGS:', 'eac-components' ); ?> <span class="sku"><?php echo ( $sku = $product->get_sku() ) ? esc_attr( $sku ) : esc_html__( 'N/A', 'eac-components' ); ?></span></span>
+			<?php endif; ?>
+		</div>
+		<?php
 	}
 
 	/**
@@ -353,11 +366,7 @@ class Eac_Woo_Filters {
 	public function add_product_meta_cats() {
 		global $product;
 		$links = array();
-		$url   = '';
-
-		if ( $this->redirect_metas ) {
-			$url = $this->redirect_url;
-		}
+		$url   = $this->redirect_url;
 
 		if ( ! empty( $url ) ) {
 			$cat_ids = $product->get_category_ids();
@@ -365,7 +374,7 @@ class Eac_Woo_Filters {
 			foreach ( $cat_ids as $cat_id ) {
 				$term = get_term( $cat_id, 'product_cat' );
 				if ( ! is_wp_error( $term ) && ! empty( $term ) ) {
-					$links[] = '<a href="' . $url . '?filter=' . urlencode( $term->slug ) . '" rel="tag">' . esc_attr( ucfirst( $term->name ) ) . '</a>';
+					$links[] = '<a href="' . esc_url( $url ) . '?filter=' . rawurlencode( $term->slug ) . '" rel="tag">' . esc_html( ucfirst( $term->name ) ) . '</a>';
 				}
 			}
 
@@ -390,11 +399,7 @@ class Eac_Woo_Filters {
 	public function add_product_meta_tags() {
 		global $product;
 		$links = array();
-		$url   = '';
-
-		if ( $this->redirect_metas ) {
-			$url = $this->redirect_url;
-		}
+		$url   = $this->redirect_url;
 
 		if ( ! empty( $url ) ) {
 			$tag_ids = $product->get_tag_ids();
@@ -402,7 +407,7 @@ class Eac_Woo_Filters {
 			foreach ( $tag_ids as $tag_id ) {
 				$term = get_term( $tag_id, 'product_tag' );
 				if ( ! is_wp_error( $term ) && ! empty( $term ) ) {
-					$links[] = '<a href="' . $url . '?filter=' . urlencode( $term->slug ) . '" rel="tag">' . esc_attr( ucfirst( $term->name ) ) . '</a>';
+					$links[] = '<a href="' . esc_url( $url ) . '?filter=' . rawurlencode( $term->slug ) . '" rel="tag">' . esc_html( ucfirst( $term->name ) ) . '</a>';
 				}
 			}
 
@@ -425,30 +430,73 @@ class Eac_Woo_Filters {
 	 * @return le breadcrumb avec les nouvelles URL sur les catégories
 	 * Ajoute un paramètre dans l'URL pour activer le filtre dans la page de la grille des produits
 	 */
-	public function change_terms_breadcrumb_url( $crumbs, $object_class ) {
-		$url = '';
-
-		if ( $this->breadcrumb ) {
-			$url = $this->redirect_url;
-		}
+	public function __change_terms_breadcrumb_url( $crumbs, $object_class ) {
+		$url = $this->redirect_url;
 
 		if ( ! empty( $url ) ) {
 			foreach ( $crumbs as $key => $crumb ) {
-				$taxonomy = 'product_cat'; // The product category taxonomy
-				// error_log($key."::".json_encode($crumb)."::".json_encode($crumb[1]));
+				$taxonomy = 'product_cat';
 
 				// Check if it is a product category term
 				$term_array = term_exists( $crumb[0], $taxonomy );
 
 				// if it is a product category term
-				if ( 0 !== $term_array && null !== $term_array ) {
+				if ( 0 !== $term_array && null !== $term_array && is_array( $term_array ) ) {
 
 					// Get the WP_Term instance object
 					$term = get_term( $term_array['term_id'], $taxonomy );
 
 					// Ajoute le slug de la catégorie au paramètre 'filter' de l'URL
-					$crumbs[ $key ][1] = $url . '?filter=' . urlencode( $term->slug );
-					// $crumbs[$key][1] = $url;
+					if ( ! is_wp_error( $term ) && ! empty( $term ) ) {
+						$crumbs[ $key ][1] = esc_url( $url ) . '?filter=' . rawurlencode( $term->slug );
+					}
+				}
+			}
+		}
+		return $crumbs;
+	}
+
+	public function change_terms_breadcrumb_url( $crumbs, $object_class ) {
+		$url       = $this->redirect_url;
+		$query_obj = get_queried_object();
+
+		if ( is_null( $query_obj ) || empty( $url ) ) {
+			return $crumbs;
+		}
+
+		if ( is_a( $query_obj, 'WP_Term' ) ) {
+			if ( 'pa_' === substr( $query_obj->taxonomy, 0, 3 ) ) {
+				$taxo_obj  = get_taxonomy( $query_obj->taxonomy );
+				$taxonomy  = $taxo_obj->name;
+				$taxo_name = $taxo_obj->labels->singular_name;
+			} else {
+				$taxonomy  = $query_obj->taxonomy;
+			}
+		} elseif ( is_a( $query_obj, 'WP_Post_Type' ) || is_search() ) {
+			$crumbs[ count( $crumbs ) - 2 ][1] = esc_url( $url );
+			return $crumbs;
+		} else {
+			$taxonomy = 'product_cat';
+		}
+
+		foreach ( $crumbs as $key => $crumb ) {
+			if ( is_a( $query_obj, 'WP_Term' ) && 'pa_' === substr( $query_obj->taxonomy, 0, 3 ) ) {
+				$key = --$key;
+			}
+
+			// Check if it is a product category term
+			$term_array = term_exists( $crumb[0], $taxonomy );
+
+			// if it is a product category term
+			if ( 0 !== $term_array && null !== $term_array && is_array( $term_array ) ) {
+				// Get the WP_Term instance object
+				$term = get_term( $term_array['term_id'], $taxonomy );
+					// Ajoute le slug de la catégorie au paramètre 'filter' de l'URL
+				if ( ! is_wp_error( $term ) && ! empty( $term ) ) {
+					if ( isset( $taxo_name ) ) {
+						$crumbs[ $key ][0] = $taxo_name;
+					}
+					$crumbs[ $key ][1] = esc_url( $url ) . '?filter=' . rawurlencode( $term->slug );
 				}
 			}
 		}
@@ -464,9 +512,9 @@ class Eac_Woo_Filters {
 	 * @return L'url du bouton
 	 */
 	public function cart_buttons_redirect_url( $shop_url ) {
-		$url = $this->redirect_buttons && ! empty( $this->redirect_url ) ? $this->redirect_url : esc_url( $shop_url );
+		$url = $this->redirect_buttons && ! empty( $this->redirect_url ) ? $this->redirect_url : $shop_url;
 
-		return $url;
+		return esc_url( $url );
 	}
 
 	/**
@@ -482,13 +530,27 @@ class Eac_Woo_Filters {
 		switch ( $product_type ) {
 			case 'simple':
 				return esc_html__( 'Ajouter au panier!!', 'eac-components' );
-				break;
 			case 'variable':
 				return esc_html__( 'Select the variations, yo!', 'eac-components' );
-				break;
 			default:
 				return $button_text;
 		}
+	}
+
+	/**
+	 * @since 2.1.0 Mise à jour du badge du mini_cart
+	 */
+	public function update_mini_cart_count( $fragments ) {
+		$has_cart = is_a( WC()->cart, 'WC_Cart' );
+		if ( $has_cart && ( ! is_null( WC()->cart ) && ! is_cart() && ! is_checkout() ) ) {
+			$count_items = WC()->cart->get_cart_contents_count();
+			ob_start();
+			?>
+			<span class='badge-cart__quantity'><?php echo esc_attr( $count_items ); ?></span>
+			<?php
+			$fragments['#menu-item-mini-cart span.badge-cart__quantity'] = ob_get_clean();
+		}
+		return $fragments;
 	}
 
 	/**

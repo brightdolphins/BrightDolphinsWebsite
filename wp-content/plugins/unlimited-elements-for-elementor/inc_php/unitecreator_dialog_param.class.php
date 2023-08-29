@@ -46,7 +46,6 @@ class UniteCreatorDialogParamWork{
 	const PARAM_SHAPE = "uc_shape";
 	const PARAM_IMAGE = "uc_image";
 	const PARAM_MAP = "uc_map";
-	const PARAM_FORM = "uc_form";
 	const PARAM_ADDONPICKER = "uc_addonpicker";
 	const PARAM_TYPOGRAPHY = "uc_typography";
 	const PARAM_HIDDEN = "hidden";
@@ -68,9 +67,11 @@ class UniteCreatorDialogParamWork{
 	const PARAM_SPECIAL = "uc_special";
 	const PARAM_POST_SELECT = "uc_post_select";
 	const PARAM_TERM_SELECT = "uc_term_select";
+	const PARAM_RAW_HTML = "uc_raw_html";
 	
 	const PARAM_VAR_GET = "uc_var_get";
 	const PARAM_VAR_FILTER = "uc_var_filter";
+	const PARAM_REPEATER = "repeater";
 	
 	protected $addon, $objSettings, $objDatasets, $addonType;
 	private $type;
@@ -199,7 +200,6 @@ class UniteCreatorDialogParamWork{
 		$this->addParam(self::PARAM_TEMPLATE, esc_html__("Elementor Template", "unlimited-elements-for-elementor"));
 		$this->addParam(self::PARAM_MENU, esc_html__("Menu", "unlimited-elements-for-elementor"));
 		
-		$this->addParam(self::PARAM_FORM, esc_html__("Form", "unlimited-elements-for-elementor"));
 		$this->addParam(self::PARAM_INSTAGRAM, esc_html__("Instagram", "unlimited-elements-for-elementor"));
 		$this->addParam(self::PARAM_MAP, esc_html__("Google Map", "unlimited-elements-for-elementor"));
 		$this->addParam(self::PARAM_DATASET, esc_html__("Dataset", "unlimited-elements-for-elementor"));
@@ -297,16 +297,6 @@ class UniteCreatorDialogParamWork{
 	}
 	
 	
-	/**
-	 * put form param
-	 */
-	private function putFormParam(){
-		?>
-			<div class="unite-inputs-label">
-				<?php esc_html_e("Form Params Goes Here", "unlimited-elements-for-elementor")?>
-			</div>
-		<?php 
-	}
 	
 	/**
 	 * put no default value text
@@ -1536,9 +1526,6 @@ class UniteCreatorDialogParamWork{
 			case self::PARAM_LISTING:
 				$this->putListingParam();
 			break;
-			case self::PARAM_FORM:
-				$this->putFormParam();
-			break;
 			case self::PARAM_INSTAGRAM:
 				$this->putInstagramParam();
 			break;
@@ -2011,23 +1998,32 @@ class UniteCreatorDialogParamWork{
 	}
 	
 	
-	/**
-	 * init form item params
-	 */
-	private function initFormItemParams(){
-		
-		$objForm = new UniteCreatorForm();
-		$this->arrParams = $objForm->getDialogFormParams();
-		
-		$this->option_putDecsription = false;
-		$this->option_allowFontEditCheckbox = false;
-	}
 	
 	/**
 	 * init by addon type
 	 * function for override
 	 */
 	protected function initByAddonType($addonType){
+	}
+	
+	
+	/**
+	 * sort main params
+	 */
+	private function sortMainParams(){
+		
+		
+		$arrParams = array();
+		
+		foreach($this->arrParams as $type){
+			$text = UniteFunctionsUC::getVal($this->arrParamsTypes, $type);
+			$arrParams[$type] = $text;
+		}
+		
+		asort($arrParams);
+		
+		$this->arrParams = array_keys($arrParams);
+		
 	}
 	
 	
@@ -2051,7 +2047,7 @@ class UniteCreatorDialogParamWork{
 				
 		switch($this->type){
 			case self::TYPE_MAIN:
-								
+				
 				$this->initMainParams();
 				$this->initItemParams(); 
 			break;
@@ -2061,13 +2057,16 @@ class UniteCreatorDialogParamWork{
 			case self::TYPE_MAIN_VARIABLE:
 				$this->initVariableMainParams();
 			break;
-			case self::TYPE_FORM_ITEM:
-				$this->initFormItemParams();
-			break;
 			default:
 				UniteFunctionsUC::throwError("Wrong param dialog type: $type");
 			break;
 		}
+		
+    	$isSortParams = HelperProviderCoreUC_EL::getGeneralSetting("alphabetic_attributes");
+		$isSortParams = UniteFunctionsUC::strToBool($isSortParams);
+    	
+		if($isSortParams == true)
+			$this->sortMainParams();
 		
 	}
 	

@@ -59,7 +59,7 @@
 				$targetWrapperContent.removeClass('animationPause').addClass('animationPlay');
 				$targetWrapperControlPlay.css({'display':'none', 'animation-play-state':'paused'});
 				$targetWrapperControlPause.css('display', 'inline-block');
-				
+
 				// Recharge l'animation reinitialisée par les boutons Gauche/Droite
 				$targetWrapperContent.css({
 					'-webkit-animation':'newsTickerHrz ' + settings.data_speed + 's' + ' linear infinite',
@@ -89,7 +89,7 @@
 				$targetWrapperContent.removeClass('animationPlay');
 				$targetWrapperControlPlay.css({'display':'none', 'display':'inline-block', 'animation-play-state':'running'});
 				$targetWrapperControlPause.css('display', 'none');
-				
+
 				// Restart de l'animation
 				$targetWrapperContent.css({'-webkit-animation':'restartNewsTickerHrz', 'animation':'restartNewsTickerHrz'});
 				

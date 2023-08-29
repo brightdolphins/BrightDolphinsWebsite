@@ -468,7 +468,7 @@ class InstagramAPINewUC{
 	 * get items data uf it's user or tag
 	 */
 	public function getItemsData($mixed, $lastID=null, $userID = null, $maxItems = null){
-				
+		
 		$type = "";
 		if(strpos($mixed,"@") === 0)
 			$type = "user";

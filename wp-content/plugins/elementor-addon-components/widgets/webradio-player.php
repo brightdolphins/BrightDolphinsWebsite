@@ -37,12 +37,10 @@ class Lecteur_Audio_Widget extends Widget_Base {
 	public function __construct( $data = array(), $args = null ) {
 		parent::__construct( $data, $args );
 
-		$suffix_js = EAC_SCRIPT_DEBUG ? '.js' : '.min.js';
+		wp_register_script( 'eac-player', EAC_Plugin::instance()->get_script_url( 'assets/js/audioplayer/player' ), array( 'jquery' ), '1.0.0', true );
+		wp_register_script( 'eac-webradio-player', EAC_Plugin::instance()->get_script_url( 'assets/js/elementor/eac-webradio-player' ), array( 'jquery', 'elementor-frontend', 'eac-player' ), '1.0.0', true );
 
-		wp_register_script( 'eac-player', EAC_ADDONS_URL . 'assets/js/audioplayer/player' . $suffix_js, array( 'jquery' ), '1.0.0', true );
-		wp_register_script( 'eac-webradio-player', EAC_Plugin::instance()->get_register_script_url( 'eac-webradio-player' ), array( 'jquery', 'elementor-frontend' ), '1.0.0', true );
-
-		wp_register_style( 'eac-webradio-player', EAC_Plugin::instance()->get_register_style_url( 'webradio-player' ), array( 'eac' ), '1.0.0' );
+		wp_register_style( 'eac-webradio-player', EAC_Plugin::instance()->get_style_url( 'assets/css/webradio-player' ), array( 'eac' ), '1.0.0' );
 	}
 
 	/**
@@ -363,5 +361,4 @@ class Lecteur_Audio_Widget extends Widget_Base {
 	}
 
 	protected function content_template() {}
-
 }

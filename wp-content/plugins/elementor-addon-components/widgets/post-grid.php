@@ -7,43 +7,8 @@
  * Description: Affiche les articles, les CPT et les pages
  * dans différents modes, masonry ou grille et avec différents filtres
  *
- * @since 0.0.9
- * @since 1.4.1 Forcer le chargement des images depuis le serveur
- * @since 1.6.0 Implémentation des balises dynamiques (Dynamic Tags)
- *              Filtres sur les Auteurs et les Champs personnalisés
- *              Ajout des listes (Select/Option) Auteurs/Champs personnalisés visibles pour les mobiles
- *              Gestion de l'avatar
- *              Utilisation de la méthode 'post_class' pour les articles
- * @since 1.6.8 Alignement des filtres
- * @since 1.7.0 Ajout de la liste des Custom Fields par leurs valeurs et activation des 'Dynamic Tags'
- *              Sélection des types de données des clés ou des valeurs
- *              Sélection de l'opérateur de comparaison pour les valeurs
- *              Sélection de la relation entre les clés
- *              Suppression du control 'al_content_metadata_display_values'
- *              Les champs personnalisés peuvent être aussi filtrés par les auteurs d'articles
- *              Simplifie le calcul et l'affichage des filtres
- *              Suppression de l'overlay sur les images
- *              Ajout de la liste des étiquettes pour sélection
- *              Ajout du ratio Image pour le mode Grid
- *              Remplace 'post_type' par l'ID du widget dans la class de l'article pour filtrer/paginer les articles
- * @since 1.7.1 Supprime les callbacks du filtre 'eac/tools/post_orderby'
- * @since 1.7.2 Ajout du control de positionnement vertical avec le ration de l'image
- *              Ajout du control pour afficher les arguments de la requête
- *              Fix: Les controls 'Texte à droite/gauche' ne sont pas cachés lorsque le control 'excerpt' est désactivé
- *              Fix: Alignement du filtre pour les mobiles
- *              Fix: ACF multiples valeurs d'une clé force 'get_post_meta' param $single = true pour renvoyer une chaine
- * @since 1.7.3 Recherche des meta_value avec la méthode 'get_post_custom_values'
- * @since 1.8.0 Le lien du post peut être ajouté à l'image
- *              Le bouton 'Read more' peut être caché
- * @since 1.8.2 Ajout de la propriété 'prefix_class' pour modifier le style sans recharger le widget
- * @since 1.8.4 Ajout des controles pour modifier le style du filtre
- *              Ajout du mode responsive pour les marges
- * @since 1.8.7 Support des custom breakpoints
- *              Suppression de la méthode 'init_settings'
- * @since 1.9.0 Intégration des scripts et des styles dans le constructeur de la class
- * @since 1.9.7 Ajout du traitement du mode 'slider'
- * @since 1.9.8 Le slider et les styles sont chargés à partir d'un trait
- * @since 2.0.0 Amélioration le chargement des images
+ * @since 1.0.0
+ * @since 2.1.1 Lazyload attribut
  */
 
 namespace EACCustomWidgets\Widgets;
@@ -64,6 +29,7 @@ use Elementor\Core\Schemes\Typography;
 use Elementor\Core\Schemes\Color;
 use Elementor\Group_Control_Border;
 use Elementor\Group_Control_Box_Shadow;
+use Elementor\Icons_Manager;
 use Elementor\Repeater;
 use Elementor\Modules\DynamicTags\Module as TagsModule;
 use Elementor\Core\Breakpoints\Manager as Breakpoints_manager;
@@ -72,31 +38,36 @@ use Elementor\Plugin;
 class Articles_Liste_Widget extends Widget_Base {
 	/** Le slider Trait */
 	use \EACCustomWidgets\Widgets\Traits\Slider_Trait;
+	use \EACCustomWidgets\Widgets\Traits\Button_Read_More_Trait;
 
 	/**
 	 * Constructeur de la class Articles_Liste_Widget
-	 *
-	 * Enregistre les scripts et les styles
-	 *
-	 * @since 1.9.0
-	 * @since 1.9.7 Ajout des styles/scripts du mode slider
 	 */
 	public function __construct( $data = array(), $args = null ) {
 		parent::__construct( $data, $args );
 
-		wp_register_script( 'swiper', 'https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js', array( 'jquery' ), '8.3.2', true );
-		wp_register_style( 'swiper', 'https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.css', array(), '8.3.2' );
-
+		wp_register_script( 'swiper', 'https://cdnjs.cloudflare.com/ajax/libs/Swiper/8.3.2/swiper-bundle.min.js', array( 'jquery' ), '8.3.2', true );
 		wp_register_script( 'isotope', EAC_ADDONS_URL . 'assets/js/isotope/isotope.pkgd.min.js', array( 'jquery' ), '3.0.6', true );
+		//wp_register_script( 'eac-fit-rows', EAC_Plugin::instance()->get_script_url( 'assets/js/isotope/fit-rows' ), array( 'isotope' ), '2.1.1', true );
+		wp_register_script( 'eac-imagesloaded', EAC_ADDONS_URL . 'assets/js/isotope/imagesloaded.pkgd.min.js', array( 'jquery' ), '4.1.4', true );
 		wp_register_script( 'eac-infinite-scroll', EAC_ADDONS_URL . 'assets/js/isotope/infinite-scroll.pkgd.min.js', array( 'jquery' ), '3.0.5', true );
-		wp_register_script( 'eac-post-grid', EAC_Plugin::instance()->get_register_script_url( 'eac-post-grid' ), array( 'jquery', 'elementor-frontend', 'isotope', 'eac-infinite-scroll', 'swiper' ), '1.0.0', true );
+		wp_register_script( 'eac-post-grid', EAC_Plugin::instance()->get_script_url( 'assets/js/elementor/eac-post-grid' ), array( 'jquery', 'elementor-frontend', 'isotope', 'eac-infinite-scroll', 'swiper', 'eac-imagesloaded' ), EAC_ADDONS_VERSION, true );
 
-		wp_register_style( 'eac-swiper', EAC_Plugin::instance()->get_register_style_url( 'swiper' ), array( 'eac', 'swiper' ), '1.9.7' );
-		wp_register_style( 'eac-post-grid', EAC_Plugin::instance()->get_register_style_url( 'post-grid' ), array( 'eac' ), '1.0.0' );
+		wp_register_style( 'swiper-bundle', 'https://cdnjs.cloudflare.com/ajax/libs/Swiper/8.3.2/swiper-bundle.min.css', array(), '8.3.2' );
+		wp_enqueue_style( 'eac-swiper', EAC_Plugin::instance()->get_style_url( 'assets/css/swiper' ), array(), '1.0.0' );
+		wp_enqueue_style( 'eac-post-grid', EAC_Plugin::instance()->get_style_url( 'assets/css/post-grid' ), array( 'eac-swiper' ), '1.0.0' );
 
 		// @since 1.7.1 Supprime les callbacks du filtre de la liste 'orderby'
 		remove_all_filters( 'eac/tools/post_orderby' );
 	}
+
+	/**
+	 * La taille de l'image par défaut
+	 *
+	 * @var IMAGE_SIZE
+	 *
+	 */
+	const IMAGE_SIZE = '640';
 
 	/**
 	 * Le nom de la clé du composant dans le fichier de configuration
@@ -172,7 +143,7 @@ class Articles_Liste_Widget extends Widget_Base {
 	 * @return CSS list.
 	 */
 	public function get_style_depends() {
-		return array( 'swiper', 'eac-swiper', 'eac-post-grid' );
+		return array( 'swiper-bundle' );
 	}
 
 	/**
@@ -237,7 +208,7 @@ class Articles_Liste_Widget extends Widget_Base {
 							'label'       => esc_html__( "Type d'article", 'eac-components' ),
 							'type'        => Controls_Manager::SELECT2,
 							'label_block' => true,
-							'options'     => Eac_Tools_Util::get_filter_post_types(),  // tools.php sous le rep. includes
+							'options'     => Eac_Tools_Util::get_filter_post_types(),
 							'default'     => array( 'post' ),
 							'multiple'    => true,
 						)
@@ -578,7 +549,7 @@ class Articles_Liste_Widget extends Widget_Base {
 					'options' => array(
 						'masonry' => esc_html__( 'Mosaïque', 'eac-components' ),
 						'fitRows' => esc_html__( 'Grille', 'eac-components' ),
-						'slider'  => esc_html__( 'Slider' ),
+						'slider'  => esc_html( 'Slider' ),
 					),
 				)
 			);
@@ -600,14 +571,18 @@ class Articles_Liste_Widget extends Widget_Base {
 			// @since 1.8.7 Add default values for all active breakpoints.
 			$columns_device_args = array();
 		foreach ( $active_breakpoints as $breakpoint_name => $breakpoint_instance ) {
-			if ( ! in_array( $breakpoint_name, array( Breakpoints_manager::BREAKPOINT_KEY_WIDESCREEN, Breakpoints_manager::BREAKPOINT_KEY_LAPTOP ) ) ) {
-				if ( $breakpoint_name === Breakpoints_manager::BREAKPOINT_KEY_MOBILE ) {
-					$columns_device_args[ $breakpoint_name ] = array( 'default' => '1' );
-				} elseif ( $breakpoint_name === Breakpoints_manager::BREAKPOINT_KEY_MOBILE_EXTRA ) {
-					$columns_device_args[ $breakpoint_name ] = array( 'default' => '1' );
-				} else {
-					$columns_device_args[ $breakpoint_name ] = array( 'default' => '2' );
-				}
+			if ( Breakpoints_manager::BREAKPOINT_KEY_WIDESCREEN === $breakpoint_name ) {
+				$columns_device_args[ $breakpoint_name ] = array( 'default' => '4' );
+			} elseif ( Breakpoints_manager::BREAKPOINT_KEY_LAPTOP === $breakpoint_name ) {
+				$columns_device_args[ $breakpoint_name ] = array( 'default' => '3' );
+			} elseif ( Breakpoints_manager::BREAKPOINT_KEY_TABLET_EXTRA === $breakpoint_name ) {
+					$columns_device_args[ $breakpoint_name ] = array( 'default' => '3' );
+			} elseif ( Breakpoints_manager::BREAKPOINT_KEY_TABLET === $breakpoint_name ) {
+					$columns_device_args[ $breakpoint_name ] = array( 'default' => '3' );
+			} elseif ( Breakpoints_manager::BREAKPOINT_KEY_MOBILE_EXTRA === $breakpoint_name ) {
+				$columns_device_args[ $breakpoint_name ] = array( 'default' => '2' );
+			} elseif ( Breakpoints_manager::BREAKPOINT_KEY_MOBILE === $breakpoint_name ) {
+				$columns_device_args[ $breakpoint_name ] = array( 'default' => '1' );
 			}
 		}
 
@@ -762,7 +737,6 @@ class Articles_Liste_Widget extends Widget_Base {
 						),
 					),
 					'default'   => 'left',
-					'toggle'    => true,
 					'selectors' => array(
 						'{{WRAPPER}} .al-filters__wrapper, {{WRAPPER}} .al-filters__wrapper-select' => 'text-align: {{VALUE}};',
 					),
@@ -818,12 +792,96 @@ class Articles_Liste_Widget extends Widget_Base {
 				)
 			);
 
+			/** @since 2.0.2 */
+			$this->add_responsive_control(
+				'al_content_align_v',
+				array(
+					'label'       => esc_html__( 'Alignement vertical', 'eac-components' ),
+					'type'        => Controls_Manager::CHOOSE,
+					'options'     => array(
+						'flex-start'    => array(
+							'title' => esc_html__( 'Haut', 'eac-components' ),
+							'icon'  => 'eicon-flex eicon-justify-start-v',
+						),
+						'center'        => array(
+							'title' => esc_html__( 'Centre', 'eac-components' ),
+							'icon'  => 'eicon-flex eicon-justify-center-v',
+						),
+						'flex-end'      => array(
+							'title' => esc_html__( 'Bas', 'eac-components' ),
+							'icon'  => 'eicon-flex eicon-justify-end-v',
+						),
+						'space-between' => array(
+							'title' => esc_html__( 'Espace entre', 'eac-components' ),
+							'icon'  => 'eicon-flex eicon-justify-space-between-v',
+						),
+						'space-around'  => array(
+							'title' => esc_html__( 'Espace autour', 'eac-components' ),
+							'icon'  => 'eicon-flex eicon-justify-space-around-v',
+						),
+						'space-evenly'  => array(
+							'title' => esc_html__( 'Espace uniforme', 'eac-components' ),
+							'icon'  => 'eicon-flex eicon-justify-space-evenly-v',
+						),
+					),
+					'default'     => 'flex-start',
+					'label_block' => true,
+					'selectors'   => array(
+						'{{WRAPPER}}.layout-text__right-yes .al-post__content-wrapper .al-post__text-wrapper,
+						{{WRAPPER}}.layout-text__left-yes .al-post__content-wrapper .al-post__text-wrapper,
+						{{WRAPPER}} .swiper-slide .al-post__content-wrapper .al-post__text-wrapper' => 'justify-content: {{VALUE}};',
+					),
+					'conditions'  => array(
+						'relation' => 'or',
+						'terms'    => array(
+							array(
+								'terms' => array(
+									array(
+										'name'     => 'al_layout_type',
+										'operator' => '===',
+										'value'    => 'slider',
+									),
+									array(
+										'name'     => 'al_content_image',
+										'operator' => '===',
+										'value'    => 'yes',
+									),
+									array(
+										'name'     => 'al_content_excerpt',
+										'operator' => '===',
+										'value'    => 'yes',
+									),
+								),
+							),
+							array(
+								'terms' => array(
+									array(
+										'name'     => 'al_layout_type',
+										'operator' => '===',
+										'value'    => 'slider',
+									),
+									array(
+										'name'     => 'al_content_image',
+										'operator' => '===',
+										'value'    => 'yes',
+									),
+									array(
+										'name'     => 'al_content_excerpt',
+										'operator' => '===',
+										'value'    => 'yes',
+									),
+								),
+							),
+						),
+					),
+				)
+			);
+
 			$this->add_control(
 				'al_button_heading',
 				array(
 					'label'     => esc_html__( 'Bouton', 'eac-components' ),
 					'type'      => Controls_Manager::HEADING,
-					'condition' => array( 'al_content_excerpt' => 'yes' ),
 					'separator' => 'before',
 				)
 			);
@@ -838,7 +896,6 @@ class Articles_Liste_Widget extends Widget_Base {
 					'label_off'    => esc_html__( 'non', 'eac-components' ),
 					'return_value' => 'yes',
 					'default'      => 'yes',
-					'condition'    => array( 'al_content_excerpt' => 'yes' ),
 				)
 			);
 
@@ -860,10 +917,11 @@ class Articles_Liste_Widget extends Widget_Base {
 					'label_off'    => esc_html__( 'non', 'eac-components' ),
 					'return_value' => 'yes',
 					'default'      => 'yes',
+					/*
 					'condition'    => array(
 						'al_layout_type!'           => 'slider',
 						'al_content_filter_display' => 'yes',
-					),
+					),*/
 				)
 			);
 
@@ -990,33 +1048,25 @@ class Articles_Liste_Widget extends Widget_Base {
 			$this->add_responsive_control(
 				'al_layout_image_width',
 				array(
-					'label'          => esc_html__( "Largeur de l'image (%)", 'eac-components' ),
-					'type'           => Controls_Manager::SLIDER,
-					'size_units'     => array( '%' ),
-					'default'        => array(
+					'label'      => esc_html__( "Largeur de l'image (%)", 'eac-components' ),
+					'type'       => Controls_Manager::SLIDER,
+					'size_units' => array( '%' ),
+					'default'    => array(
 						'unit' => '%',
 						'size' => 100,
 					),
-					'tablet_default' => array(
-						'unit' => '%',
-						'size' => 60,
-					),
-					'mobile_default' => array(
-						'unit' => '%',
-						'size' => 100,
-					),
-					'range'          => array(
+					'range'      => array(
 						'%' => array(
 							'min'  => 20,
 							'max'  => 100,
 							'step' => 10,
 						),
 					),
-					'selectors'      => array(
+					'selectors'  => array(
 						'{{WRAPPER}}.layout-text__right-yes .al-post__content-wrapper .al-post__image-wrapper,
 						{{WRAPPER}}.layout-text__left-yes .al-post__content-wrapper .al-post__image-wrapper' => 'width: {{SIZE}}%;',
 					),
-					'conditions'     => array(
+					'conditions' => array(
 						'relation' => 'or',
 						'terms'    => array(
 							array(
@@ -1059,7 +1109,6 @@ class Articles_Liste_Widget extends Widget_Base {
 							),
 						),
 					),
-					// 'render_type' => 'template',
 				)
 			);
 
@@ -1089,7 +1138,7 @@ class Articles_Liste_Widget extends Widget_Base {
 					'type'        => Controls_Manager::SLIDER,
 					'size_units'  => array( '%' ),
 					'default'     => array(
-						'size' => 0.6,
+						'size' => 1,
 						'unit' => '%',
 					),
 					'range'       => array(
@@ -1190,6 +1239,20 @@ class Articles_Liste_Widget extends Widget_Base {
 					'default' => apply_filters( 'excerpt_length', 25 ), /** Ce filtre est documenté dans wp-includes/formatting.php */
 				)
 			);
+
+		$this->end_controls_section();
+
+		$this->start_controls_section(
+			'al_readmore_settings',
+			array(
+				'label'     => esc_html__( "Bouton 'En savoir plus'", 'eac-components' ),
+				'tab'       => Controls_Manager::TAB_CONTENT,
+				'condition' => array( 'al_content_readmore' => 'yes' ),
+			)
+		);
+
+			// Trait du contenu du bouton read more
+			$this->register_button_more_content_controls();
 
 		$this->end_controls_section();
 
@@ -1389,6 +1452,15 @@ class Articles_Liste_Widget extends Widget_Base {
 				)
 			);
 
+			$this->add_group_control(
+				Group_Control_Border::get_type(),
+				array(
+					'name'      => 'al_image_border',
+					'selector'  => '{{WRAPPER}} .al-post__image-wrapper img',
+					'condition' => array( 'al_content_image' => 'yes' ),
+				)
+			);
+
 			$this->add_control(
 				'al_image_border_radius',
 				array(
@@ -1408,15 +1480,6 @@ class Articles_Liste_Widget extends Widget_Base {
 						'{{WRAPPER}} .al-post__image-wrapper img' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
 					),
 					'condition'          => array( 'al_content_image' => 'yes' ),
-				)
-			);
-
-			$this->add_group_control(
-				Group_Control_Border::get_type(),
-				array(
-					'name'      => 'al_image_border',
-					'selector'  => '{{WRAPPER}} .al-post__image-wrapper img',
-					'condition' => array( 'al_content_image' => 'yes' ),
 				)
 			);
 
@@ -1441,12 +1504,7 @@ class Articles_Liste_Widget extends Widget_Base {
 						'value' => Color::COLOR_4,
 					),
 					'selectors' => array(
-						'{{WRAPPER}} .al-post__excerpt-wrapper,
-						{{WRAPPER}} .al-post__meta-tags,
-						{{WRAPPER}} .al-post__meta-author,
-						{{WRAPPER}} .al-post__meta-date,
-						{{WRAPPER}} .al-post__meta-comment,
-						{{WRAPPER}} .al-post__button-readmore-wrapper' => 'color: {{VALUE}};',
+						'{{WRAPPER}} .al-post__excerpt-wrapper' => 'color: {{VALUE}};',
 					),
 					'condition' => array( 'al_content_excerpt' => 'yes' ),
 				)
@@ -1458,12 +1516,7 @@ class Articles_Liste_Widget extends Widget_Base {
 					'name'      => 'al_excerpt_typography',
 					'label'     => esc_html__( 'Typographie', 'eac-components' ),
 					'scheme'    => Typography::TYPOGRAPHY_4,
-					'selector'  => '{{WRAPPER}} .al-post__excerpt-wrapper,
-						{{WRAPPER}} .al-post__meta-tags,
-						{{WRAPPER}} .al-post__meta-author,
-						{{WRAPPER}} .al-post__meta-date,
-						{{WRAPPER}} .al-post__meta-comment,
-						{{WRAPPER}} .al-post__button-readmore-wrapper',
+					'selector'  => '{{WRAPPER}} .al-post__excerpt-wrapper',
 					'condition' => array( 'al_content_excerpt' => 'yes' ),
 				)
 			);
@@ -1493,6 +1546,28 @@ class Articles_Liste_Widget extends Widget_Base {
 				)
 			);
 
+			$this->add_group_control(
+				Group_Control_Border::get_type(),
+				array(
+					'name'           => 'al_avatar_image_border',
+					'fields_options' => array(
+						'border' => array( 'default' => 'solid' ),
+						'width'  => array(
+							'default' => array(
+								'top'      => 5,
+								'right'    => 5,
+								'bottom'   => 5,
+								'left'     => 5,
+								'isLinked' => true,
+							),
+						),
+						'color'  => array( 'default' => '#ededed' ),
+					),
+					'selector'       => '{{WRAPPER}} .al-post__avatar-wrapper img',
+					'condition'      => array( 'al_content_avatar' => 'yes' ),
+				)
+			);
+
 			$this->add_control(
 				'al_avatar_border_radius',
 				array(
@@ -1516,28 +1591,6 @@ class Articles_Liste_Widget extends Widget_Base {
 			);
 
 			$this->add_group_control(
-				Group_Control_Border::get_type(),
-				array(
-					'name'           => 'al_avatar_image_border',
-					'fields_options' => array(
-						'border' => array( 'default' => 'solid' ),
-						'width'  => array(
-							'default' => array(
-								'top'      => 5,
-								'right'    => 5,
-								'bottom'   => 5,
-								'left'     => 5,
-								'isLinked' => true,
-							),
-						),
-						'color'  => array( 'default' => '#ededed' ),
-					),
-					'selector'       => '{{WRAPPER}} .al-post__avatar-wrapper img',
-					'condition'      => array( 'al_content_avatar' => 'yes' ),
-				)
-			);
-
-			$this->add_group_control(
 				Group_Control_Box_Shadow::get_type(),
 				array(
 					'name'      => 'al_avatar_box_shadow',
@@ -1551,7 +1604,7 @@ class Articles_Liste_Widget extends Widget_Base {
 			$this->add_control(
 				'al_icone_style',
 				array(
-					'label'      => esc_html__( 'Pictogrammes', 'eac-components' ),
+					'label'      => esc_html__( 'Balises meta', 'eac-components' ),
 					'type'       => Controls_Manager::HEADING,
 					'conditions' => array(
 						'relation' => 'or',
@@ -1593,11 +1646,57 @@ class Articles_Liste_Widget extends Widget_Base {
 						'value' => Color::COLOR_4,
 					),
 					'selectors'  => array(
-						'{{WRAPPER}} .al-post__meta-author i,
+						'{{WRAPPER}} .al-post__meta-tags,
+						{{WRAPPER}} .al-post__meta-author,
+						{{WRAPPER}} .al-post__meta-date,
+						{{WRAPPER}} .al-post__meta-comment,
+						{{WRAPPER}} .al-post__meta-tags i,
+						{{WRAPPER}} .al-post__meta-author i,
 						{{WRAPPER}} .al-post__meta-date i,
-						{{WRAPPER}} .al-post__meta-comment i,
-						{{WRAPPER}} .al-post__meta-tags i' => 'color: {{VALUE}};',
+						{{WRAPPER}} .al-post__meta-comment i' => 'color: {{VALUE}};',
 					),
+					'conditions' => array(
+						'relation' => 'or',
+						'terms'    => array(
+							array(
+								'name'     => 'al_content_author',
+								'operator' => '===',
+								'value'    => 'yes',
+							),
+							array(
+								'name'     => 'al_content_date',
+								'operator' => '===',
+								'value'    => 'yes',
+							),
+							array(
+								'name'     => 'al_content_comment',
+								'operator' => '===',
+								'value'    => 'yes',
+							),
+							array(
+								'name'     => 'al_content_term',
+								'operator' => '===',
+								'value'    => 'yes',
+							),
+						),
+					),
+				)
+			);
+
+			$this->add_group_control(
+				Group_Control_Typography::get_type(),
+				array(
+					'name'       => 'al_icone_typography',
+					'label'      => esc_html__( 'Typographie', 'eac-components' ),
+					'scheme'     => Typography::TYPOGRAPHY_4,
+					'selector'   => '{{WRAPPER}} .al-post__meta-tags,
+						{{WRAPPER}} .al-post__meta-author,
+						{{WRAPPER}} .al-post__meta-date,
+						{{WRAPPER}} .al-post__meta-comment,
+						{{WRAPPER}} .al-post__meta-tags i,
+						{{WRAPPER}} .al-post__meta-author i,
+						{{WRAPPER}} .al-post__meta-date i,
+						{{WRAPPER}} .al-post__meta-comment i',
 					'conditions' => array(
 						'relation' => 'or',
 						'terms'    => array(
@@ -1677,6 +1776,20 @@ class Articles_Liste_Widget extends Widget_Base {
 			$this->register_slider_style_controls();
 
 		$this->end_controls_section();
+
+		$this->start_controls_section(
+			'al_readmore_style',
+			array(
+				'label'     => esc_html__( "Bouton 'En savoir plus'", 'eac-components' ),
+				'tab'       => Controls_Manager::TAB_STYLE,
+				'condition' => array( 'al_content_readmore' => 'yes' ),
+			)
+		);
+
+			// Trait Style du bouton read more
+			$this->register_button_more_style_controls();
+
+		$this->end_controls_section();
 	}
 
 	/**
@@ -1696,22 +1809,24 @@ class Articles_Liste_Widget extends Widget_Base {
 		$has_scrollbar  = $has_swiper && 'yes' === $settings['slider_scrollbar'] ? true : false;
 
 		if ( $has_swiper ) { ?>
-			<div id="<?php echo $id; ?>" class="eac-articles-liste swiper-container">
+		<div id="<?php echo esc_attr( $id ); ?>" class="eac-articles-liste swiper-container">
 		<?php } else { ?>
-			<div class="eac-articles-liste">
-		<?php }
-				$this->render_articles();
-				if ( $has_navigation ) { ?>
-					<div class="swiper-button-prev"></div>
-					<div class="swiper-button-next"></div>
-				<?php } ?>
-				<?php if ( $has_scrollbar ) { ?>
-					<div class="swiper-scrollbar"></div>
-				<?php } ?>
-				<?php if ( $has_pagination ) { ?>
-					<div class="swiper-pagination-bullet"></div>
-				<?php } ?>
-			</div>
+		<div class="eac-articles-liste">
+			<?php
+		}
+			$this->render_articles();
+		if ( $has_navigation ) {
+			?>
+			<div class="swiper-button-prev"></div>
+				<div class="swiper-button-next"></div>
+			<?php } ?>
+			<?php if ( $has_scrollbar ) { ?>
+				<div class="swiper-scrollbar"></div>
+			<?php } ?>
+			<?php if ( $has_pagination ) { ?>
+				<div class="swiper-pagination-bullet"></div>
+			<?php } ?>
+		</div>
 		<?php
 	}
 
@@ -1739,7 +1854,8 @@ class Articles_Liste_Widget extends Widget_Base {
 		$has_auteur         = 'yes' === $settings['al_content_author'] ? true : false;
 		$has_date           = 'yes' === $settings['al_content_date'] ? true : false;
 		$has_resum          = 'yes' === $settings['al_content_excerpt'] ? true : false;
-		$has_readmore       = $has_resum && 'yes' === $settings['al_content_readmore'] ? true : false;
+		$has_readmore       = 'yes' === $settings['al_content_readmore'] ? true : false;
+		$has_button_picto   = $has_readmore && 'yes' === $settings['button_add_more_picto'] ? true : false;
 		$has_comment        = 'yes' === $settings['al_content_comment'] ? true : false;
 
 		// Filtre Users. Champ TEXT
@@ -1800,7 +1916,7 @@ class Articles_Liste_Widget extends Widget_Base {
 		$this->add_render_attribute( 'content_wrapper', 'class', 'al-post__content-wrapper' );
 
 		// Bouton 'Load more'
-		$button_text = '<button class="al-more-button">' . esc_html__( "Plus d'articles", 'eac-components' ) . ' ' . '<span class="al-more-button-paged">' . $the_query->query_vars['paged'] . '</span>' . '/' . $the_query->max_num_pages . '</button>';
+		$button_text = '<button class="al-more-button" type="button">' . esc_html__( "Plus d'articles", 'eac-components' ) . ' <span class="al-more-button-paged">' . $the_query->query_vars['paged'] . '</span>/' . $the_query->max_num_pages . '</button>';
 
 		/** @since 1.7.2 Affiche les arguments de la requête */
 		if ( 'yes' === $settings['al_display_content_args'] && \Elementor\Plugin::$instance->editor->is_edit_mode() ) {
@@ -1813,26 +1929,20 @@ class Articles_Liste_Widget extends Widget_Base {
 
 		ob_start();
 		if ( $the_query->have_posts() ) {
-			/**
-			 * Création et affichage des filtres
-			 *
-			 * @since 1.9.7
-			 */
+			/** Création et affichage des filtres avant le widget */
 			if ( $has_filters ) {
-				// Champ user renseigné et pas de clé. Affiche les auteurs formatés
+				// phpcs:disable WordPress.Security.EscapeOutput
 				if ( $has_users && ! $has_keys ) {
-					echo Eac_Helpers_Util::get_user_filters( $user_filters ); }
-
-				// Filtre sélectionné et champ métadonnée renseigné. Affiche les metadonnées formatées
-				elseif ( $has_keys ) {
-					echo Eac_Helpers_Util::get_meta_query_filters( $post_args ); }
-
-				// Filtre sélectionné et champs catégories et étiquettes renseignés. Affiche les catégories/étiquettes formatées
-				elseif ( ! empty( $taxonomy_filters ) ) {
-					echo Eac_Helpers_Util::get_taxo_tag_filters( $taxonomy_filters, $term_slug_filters ); }
+					echo Eac_Helpers_Util::get_user_filters( $user_filters );
+				} elseif ( $has_keys ) {
+					echo Eac_Helpers_Util::get_meta_query_filters( $post_args );
+				} elseif ( ! empty( $taxonomy_filters ) ) {
+					echo Eac_Helpers_Util::get_taxo_tag_filters( $taxonomy_filters, $term_slug_filters );
+				}
+				// phpcs:enable WordPress.Security.EscapeOutput
 			}
 			?>
-			<div <?php echo $this->get_render_attribute_string( 'posts_wrapper' ); ?>>
+			<div <?php echo wp_kses_post( $this->get_render_attribute_string( 'posts_wrapper' ) ); ?>>
 				<?php if ( ! $has_swiper ) { ?>
 					<div class="al-posts__wrapper-sizer"></div>
 					<?php
@@ -1845,63 +1955,64 @@ class Articles_Liste_Widget extends Widget_Base {
 					$terms_name = array(); // Tableau du nom des slugs Concaténé pour les étiquettes
 
 					/** @since 1.9.7 */
-					if ( $has_filters ) {
+					// if ( $has_filters ) {
 						// @since 1.6.0 Champ user renseigné
-						if ( $has_users && ! $has_keys ) {
-							$user                = get_the_author_meta( $field = 'display_name' );
-							$terms_slug[ $user ] = sanitize_title( $user );
-							$terms_name[ $user ] = ucfirst( $user );
+					if ( $has_users && ! $has_keys ) {
+						$user                = get_the_author_meta( 'display_name' );
+						$terms_slug[ $user ] = sanitize_title( $user );
+						$terms_name[ $user ] = ucfirst( $user );
 
-							/**
-							 * @since 1.6.0 Champ meta keys renseigné
-							 * @since 1.7.0 Traitement des meta values
-							 * @since 1.7.2 'get_post_meta' param $single = true
-							 * @since 1.7.3 Méthode 'get_post_custom_values'
-							 */
-						} elseif ( $has_keys ) {
-							$array_post_meta_values = array();
+						/**
+						 * @since 1.6.0 Champ meta keys renseigné
+						 * @since 1.7.0 Traitement des meta values
+						 * @since 1.7.2 'get_post_meta' param $single = true
+						 * @since 1.7.3 Méthode 'get_post_custom_values'
+						 */
+					} elseif ( $has_keys ) {
+						$array_post_meta_values = array();
 
-							foreach ( $meta_query_list as $meta_query ) {
-								$term_tmp               = array();
-								$array_post_meta_values = get_post_custom_values( $meta_query['key'], get_the_ID() );
+						foreach ( $meta_query_list as $meta_query ) {
+							$term_tmp               = array();
+							$array_post_meta_values = get_post_custom_values( $meta_query['key'], get_the_ID() );
 
-								if ( ! is_wp_error( $array_post_meta_values ) && ! empty( $array_post_meta_values ) ) {
-									$term_tmp = Eac_Helpers_Util::compare_meta_values( $array_post_meta_values, $meta_query );
-									if ( ! empty( $term_tmp ) ) {
-										foreach ( $term_tmp as $idx => $tmp ) {
-											$terms_slug = array_replace( $terms_slug, array( $idx => sanitize_title( $tmp ) ) );
-											$terms_name = array_replace( $terms_name, array( $idx => ucfirst( $tmp ) ) );
-										}
+							if ( ! is_wp_error( $array_post_meta_values ) && ! empty( $array_post_meta_values ) ) {
+								$term_tmp = Eac_Helpers_Util::compare_meta_values( $array_post_meta_values, $meta_query );
+								if ( ! empty( $term_tmp ) ) {
+									foreach ( $term_tmp as $idx => $tmp ) {
+										$terms_slug = array_replace( $terms_slug, array( $idx => sanitize_title( $tmp ) ) );
+										$terms_name = array_replace( $terms_name, array( $idx => ucfirst( $tmp ) ) );
 									}
 								}
 							}
+						}
 
-							// Champ taxonomie renseigné
-						} elseif ( ! empty( $taxonomy_filters ) ) {
-							$terms_array = array();
-							foreach ( $taxonomy_filters as $post_term ) {
-								$terms_array = wp_get_post_terms( get_the_ID(), $post_term );
-								if ( ! is_wp_error( $terms_array ) && ! empty( $terms_array ) ) {
-									foreach ( $terms_array as $term ) {
-										if ( ! empty( $term_slug_filters ) ) {
-											if ( in_array( $term->slug, $term_slug_filters ) ) {
-												$terms_slug[ $term->slug ] = $term->slug;
-												$terms_name[ $term->name ] = ucfirst( $term->name );
-											}
-										} else {
+						// Champ taxonomie renseigné
+					} elseif ( ! empty( $taxonomy_filters ) ) {
+						$terms_array = array();
+						foreach ( $taxonomy_filters as $post_term ) {
+							$terms_array = wp_get_post_terms( get_the_ID(), $post_term );
+							if ( ! is_wp_error( $terms_array ) && ! empty( $terms_array ) ) {
+								foreach ( $terms_array as $term ) {
+									if ( ! empty( $term_slug_filters ) ) {
+										if ( in_array( $term->slug, $term_slug_filters, true ) ) {
 											$terms_slug[ $term->slug ] = $term->slug;
 											$terms_name[ $term->name ] = ucfirst( $term->name );
 										}
+									} else {
+										$terms_slug[ $term->slug ] = $term->slug;
+										$terms_name[ $term->name ] = ucfirst( $term->name );
 									}
 								}
 							}
 						}
 					}
+					// }
 
 					/**
 					 * @since 1.7.0 Ajout de l'ID Elementor du widget et de la liste des slugs dans la class pour gérer les filtres et le pagging.
 					 * Voir eac-post-grid.js:selectedItems
 					 * Surtout ne pas utiliser la fonction 'post_class'
+					 * @since 2.1.1 Ajout des attributs width et height pour le lazyload
 					 */
 					if ( ! $has_swiper ) {
 						$article_class = $unique_id . ' al-post__wrapper ' . implode( ' ', $terms_slug );
@@ -1909,79 +2020,101 @@ class Articles_Liste_Widget extends Widget_Base {
 						$article_class = $unique_id . ' al-post__wrapper swiper-slide';
 					}
 					?>
-					
-					<article id="<?php echo 'post-' . get_the_ID(); ?>" class="<?php echo $article_class; ?>">
+
+					<article id="<?php echo 'post-' . esc_attr( get_the_ID() ); ?>" class="<?php echo esc_attr( $article_class ); ?>">
 						<div class="al-post__inner-wrapper">
-							
-							<div <?php echo $this->get_render_attribute_string( 'content_wrapper' ); ?>>
+
+							<div <?php echo wp_kses_post( $this->get_render_attribute_string( 'content_wrapper' ) ); ?>>
 								<!-- L'image -->
 								<?php if ( $has_image && has_post_thumbnail() ) : ?>
 									<div class="al-post__image-wrapper">
-										<div class="al-post__image">
-											
+										<div class="al-post__image" role="img" aria-label="<?php echo esc_attr( the_title() ); ?>">
+
 											<?php
-											$image = wp_get_attachment_image_src( get_post_thumbnail_id( get_the_ID() ), $settings['al_image_dimension'], false );
+											$image = wp_get_attachment_image_src( get_post_thumbnail_id( get_the_ID() ), $settings['al_image_dimension'] );
 											if ( ! $image ) {
 												$image    = array();
 												$image[0] = plugins_url() . '/elementor/assets/images/placeholder.png';
+												$image[1] = self::IMAGE_SIZE;
+												$image[2] = self::IMAGE_SIZE;
 											}
 											?>
-											
+
 											<!-- @since 1.9.7 Fancybox sur l'image mais pas en mode 'slider' -->
 											<?php if ( ! $has_swiper && $has_image_lightbox ) : ?>
-											<a class="swiper-no-swiping" href="<?php echo get_the_post_thumbnail_url(); ?>" data-elementor-open-lightbox="no" data-fancybox="al-gallery-<?php echo $unique_id; ?>" data-caption="<?php echo esc_html( get_the_title() ); ?>">
+											<a class="swiper-no-swiping" href="<?php echo esc_url( get_the_post_thumbnail_url() ); ?>" data-elementor-open-lightbox="no" data-fancybox="al-gallery-<?php echo esc_attr( $unique_id ); ?>" data-caption="<?php echo esc_html( get_the_title() ); ?>">
 											<?php endif; ?>
-											
+
 											<!-- @since 1.8.0 Le lien du post est sur l'image -->
 											<?php if ( $has_image_link ) : ?>
-											<a class="swiper-no-swiping" href="<?php the_permalink(); ?>" target="_blank" rel="noopener noreferrer">
+											<a class="swiper-no-swiping" href="<?php esc_url( the_permalink() ); ?>" target="_blank" rel="noopener noreferrer">
 											<?php endif; ?>
-												
-												<!-- @since 2.0.0 Suppression du paramètre 'ver' de l'image -->
-												<img class="al-post__image-loaded" src="<?php echo esc_url( $image[0] ); ?>" alt="<?php echo esc_html( get_the_title() ); ?>" />
-											
+
+												<img class="al-post__image-loaded" src="<?php echo esc_url( $image[0] ); ?>" alt="<?php echo esc_html( get_the_title() ); ?>" width="<?php echo esc_attr( $image[1] ); ?>" height="<?php echo esc_attr( $image[2] ); ?>" loading="eager" />
+
 											<?php if ( ( ! $has_swiper && $has_image_lightbox ) || $has_image_link ) : ?>
 											</a>
 											<?php endif; ?>
 										</div>
 									</div>
 								<?php endif; ?>
-								
+
+								<?php if ( $has_titre || $has_resum || $has_readmore ) : ?>
 								<div class="al-post__text-wrapper">
+								<?php endif; ?>
 									<!-- Le titre -->
 									<?php if ( $has_titre ) : ?>
 										<!-- Affiche les IDs -->
 										<?php if ( $has_id ) : ?>
-											<?php echo $open_title; ?><a class="swiper-no-swiping" href="<?php the_permalink(); ?>" title="<?php the_title(); ?>" target="_blank" rel="noopener noreferrer"><?php echo get_the_ID() . ' : ' . esc_html( get_the_title() ); ?></a><?php echo $close_title; ?>
+											<?php echo $open_title; ?><a class="swiper-no-swiping" href="<?php esc_url( the_permalink() ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_attr( get_the_ID() ) . ' : ' . esc_html( get_the_title() ); ?></a><?php echo $close_title; ?>
 										<?php else : ?>
-											<?php echo $open_title; ?><a class="swiper-no-swiping" href="<?php the_permalink(); ?>" title="<?php the_title(); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( get_the_title() ); ?></a><?php echo $close_title; ?>
+											<?php echo $open_title; ?><a class="swiper-no-swiping" href="<?php esc_url( the_permalink() ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( get_the_title() ); ?></a><?php echo $close_title; ?>
 										<?php endif; ?>
 									<?php endif; ?>
-								
+
 									<!-- Le résumé de l'article. fonction dans helper.php -->
 									<?php if ( $has_resum ) : ?>
 										<span class="al-post__excerpt-wrapper">
-											<?php echo Eac_Tools_Util::get_post_excerpt( get_the_ID(), absint( $settings['al_excerpt_length'] ) ); ?>
+											<?php echo Eac_Tools_Util::get_post_excerpt( get_the_ID(), absint( $settings['al_excerpt_length'] ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 										</span>
 									<?php endif; ?>
-									
+
 									<!-- @since 1.8.0 Le lien pour ouvrir l'article/page -->
-									<?php if ( $has_readmore ) : ?>
-										<span class="al-post__button-readmore-wrapper">
-											<a class="swiper-no-swiping" href="<?php the_permalink(); ?>" title="<?php the_title(); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'En savoir plus', 'eac-components' ); ?></a>
-										</span>
+									<?php
+									if ( $has_readmore ) :
+										$label = ! empty( $settings['button_more_label'] ) ? sanitize_text_field( $settings['button_more_label'] ) : esc_html__( 'En savoir plus', 'eac-components' );
+										?>
+										<div class="buttons-wrapper">
+											<span class="button__readmore-wrapper">
+											<a href="<?php echo esc_url( the_permalink() ); ?>">
+												<button class="button-readmore" type="button" title="<?php echo esc_html( the_title() ); ?>">
+												<?php
+												if ( $has_button_picto && 'before' === $settings['button_more_position'] ) {
+													Icons_Manager::render_icon( $settings['button_more_picto'], array( 'aria-hidden' => 'true' ) );
+												}
+												echo wp_kses_post( $label );
+												if ( $has_button_picto && 'after' === $settings['button_more_position'] ) {
+													Icons_Manager::render_icon( $settings['button_more_picto'], array( 'aria-hidden' => 'true' ) );
+												}
+												?>
+												</button>
+											</a>
+											</span>
+										</div>
 									<?php endif; ?>
+								<?php if ( $has_titre || $has_resum || $has_readmore ) : ?>
 								</div>
+								<?php endif; ?>
 							</div>
-							
+
 							<?php if ( $has_avatar || $has_term || $has_auteur || $has_date || $has_comment ) : ?>
 								<div class="al-post__meta-wrapper">
-									<!-- @since 1.6.0 Avatar -->
+									<!-- @since 2.0.2 ajout de l'attribut 'loading' à l'avatar -->
 									<?php if ( $has_avatar ) : ?>
-										<?php $avatar = esc_url( get_avatar_url( get_the_author_meta( 'ID' ), array( 'size' => $avatar_size ) ) ); ?>
-										<div class="al-post__avatar-wrapper"><img class="avatar photo" src="<?php echo $avatar; ?>" alt="Avatar photo"/></div>
+										<?php $avatar_url = get_avatar_url( get_the_author_meta( 'ID' ), array( 'size' => $avatar_size ) ); ?>
+										<div class="al-post__avatar-wrapper"><img class="avatar photo" src="<?php echo esc_url( $avatar_url ); ?>" alt="Avatar photo" loading="lazy" /></div>
 									<?php endif; ?>
-											
+
 									<div class="al-post__meta">
 										<!-- Les étiquettes -->
 										<?php if ( $has_term ) : ?>
@@ -1989,29 +2122,29 @@ class Articles_Liste_Widget extends Widget_Base {
 												<i class="fa fa-tags" aria-hidden="true"></i><?php echo implode( '|', $terms_name ); ?>
 											</span>
 										<?php endif; ?>
-											
+
 										<!-- L'auteur de l'article -->
 										<?php if ( $has_auteur ) : ?>
 											<span class="al-post__meta-author">
-												<i class="fa fa-user" aria-hidden="true"></i><?php echo the_author_meta( 'display_name' ); ?>
+												<i class="fa fa-user" aria-hidden="true"></i><?php echo esc_html( the_author_meta( 'display_name' ) ); ?>
 											</span>
 										<?php endif; ?>
-												
+
 										<!-- Le date de création ou de dernière modification -->
 										<?php if ( $has_date ) : ?>
 											<span class="al-post__meta-date">
 												<?php if ( 'modified' === $settings['al_article_orderby'] ) : ?>
-													<i class="fa fa-calendar" aria-hidden="true"></i><?php echo get_the_modified_date( get_option( 'date_format' ) ); ?>
+													<i class="fa fa-calendar" aria-hidden="true"></i><?php echo esc_html( get_the_modified_date( get_option( 'date_format' ) ) ); ?>
 												<?php else : ?>
-													<i class="fa fa-calendar" aria-hidden="true"></i><?php echo get_the_date( get_option( 'date_format' ) ); ?>
+													<i class="fa fa-calendar" aria-hidden="true"></i><?php echo esc_html( get_the_date( get_option( 'date_format' ) ) ); ?>
 												<?php endif; ?>
 											</span>
 										<?php endif; ?>
-											
+
 										<!-- Le nombre de commentaire -->
 										<?php if ( $has_comment ) : ?>
 											<span class="al-post__meta-comment">
-												<i class="fa fa-comments" aria-hidden="true"></i><?php echo get_comments_number(); ?>
+												<i class="fa fa-comments" aria-hidden="true"></i><?php echo esc_attr( get_comments_number() ); ?>
 											</span>
 										<?php endif; ?>
 									</div>
@@ -2024,7 +2157,7 @@ class Articles_Liste_Widget extends Widget_Base {
 				?>
 			</div>
 			<?php if ( $has_pagging && $the_query->post_count < $the_query->found_posts ) : ?>
-				<div class="al-post__pagination" id="<?php echo $pagination_id; ?>">
+				<div class="al-post__pagination" id="<?php echo esc_attr( $pagination_id ); ?>">
 					<div class="al-pagination-next"><a href="#"><?php echo $button_text; ?></a></div>
 					<div class="al-page-load-status">
 						<div class="infinite-scroll-request eac__loader-spin"></div>
@@ -2039,7 +2172,7 @@ class Articles_Liste_Widget extends Widget_Base {
 		}
 		$output = ob_get_contents();
 		ob_end_clean();
-		echo $output;
+		echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
@@ -2058,44 +2191,48 @@ class Articles_Liste_Widget extends Widget_Base {
 	 * @updated   1.7.0 Ajout de l'unique ID
 	 */
 	protected function get_settings_json( $unique_id, $dataid, $pagingid, $dmp ) {
-		$module_settings = $this->get_settings_for_display();
+		$settings = $this->get_settings_for_display();
 
-		$effect = $module_settings['slider_effect'];
+		$effect = $settings['slider_effect'];
 		if ( in_array( $effect, array( 'fade', 'creative' ), true ) ) {
 			$nb_images = 1;
-		} elseif ( empty( $module_settings['slider_images_number'] ) || absint( $module_settings['slider_images_number'] ) === 0 ) {
+		} elseif ( isset( $settings['slider_images_centered'] ) && 'yes' === $settings['slider_images_centered'] ) {
+			$nb_images = 2;
+		} elseif ( empty( $settings['slider_images_number'] ) ) {
+			$nb_images = 3;
+		} elseif ( 0 === absint( $settings['slider_images_number'] ) ) {
 			$nb_images = 'auto';
 			$effect    = 'slide';
 		} else {
-			$nb_images = absint( $module_settings['slider_images_number'] );
+			$nb_images = absint( $settings['slider_images_number'] );
 		}
-		$has_swiper = 'slider' === $module_settings['al_layout_type'] ? true : false;
+
+		$has_swiper = 'slider' === $settings['al_layout_type'] ? true : false;
 
 		$settings = array(
 			'data_id'                  => $dataid,
 			'data_pagination_id'       => $pagingid,
-			'data_layout'              => $module_settings['al_layout_type'],
+			'data_layout'              => $settings['al_layout_type'],
 			'data_article'             => $unique_id,
-			'data_filtre'              => ! $has_swiper && 'yes' === $module_settings['al_content_filter_display'] ? true : false,
-			'data_fancybox'            => 'yes' === $module_settings['al_image_lightbox'] ? true : false,
+			'data_filtre'              => ! $has_swiper && 'yes' === $settings['al_content_filter_display'] ? true : false,
+			'data_fancybox'            => 'yes' === $settings['al_image_lightbox'] ? true : false,
 			'data_max_pages'           => $dmp,
 			'data_sw_id'               => 'eac_post_grid_' . $unique_id,
 			'data_sw_swiper'           => $has_swiper,
-			'data_sw_autoplay'         => 'yes' === $module_settings['slider_autoplay'] ? true : false,
-			'data_sw_loop'             => 'yes' === $module_settings['slider_loop'] ? true : false,
-			'data_sw_delay'            => $module_settings['slider_delay'],
+			'data_sw_autoplay'         => 'yes' === $settings['slider_autoplay'] ? true : false,
+			'data_sw_loop'             => 'yes' === $settings['slider_loop'] ? true : false,
+			'data_sw_delay'            => absint( $settings['slider_delay'] ),
 			'data_sw_imgs'             => $nb_images,
+			'data_sw_centered'         => 'yes' === $settings['slider_images_centered'] ? true : false,
 			'data_sw_dir'              => 'horizontal',
-			'data_sw_rtl'              => $module_settings['slider_rtl'] === 'right' ? true : false,
+			'data_sw_rtl'              => 'right' === $settings['slider_rtl'] ? true : false,
 			'data_sw_effect'           => $effect,
 			'data_sw_free'             => true,
-			'data_sw_pagination_click' => 'yes' === $module_settings['slider_pagination'] && 'yes' === $module_settings['slider_pagination_click'] ? true : false,
+			'data_sw_pagination_click' => 'yes' === $settings['slider_pagination'] && 'yes' === $settings['slider_pagination_click'] ? true : false,
 		);
 
-		$settings = wp_json_encode( $settings );
-		return $settings;
+		return wp_json_encode( $settings );
 	}
 
 	protected function content_template() {}
-
 }

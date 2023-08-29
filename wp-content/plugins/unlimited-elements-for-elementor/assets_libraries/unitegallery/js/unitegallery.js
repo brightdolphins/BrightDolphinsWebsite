@@ -1,4 +1,4 @@
-//Unite Gallery, Version: 1.7.70, released 15 December 2022
+//Unite Gallery, Version: 1.7.71, released 20 April 2023
 
 //------ ug-common-libraries.js------ 
 
@@ -12602,8 +12602,13 @@ function UGAviaControl(){
     
     //get height of the thumb
     var thumbSize = g_parent.getSizes().thumbSize; 
-    
     var areaSize = g_temp.area_thumb_sizes * thumbSize;
+
+    //add limit in 200px to scroll area
+    var areaSizeLimit = 200;
+
+    if(areaSize > areaSizeLimit)
+    areaSize = areaSizeLimit;
     
     //for horizontal
     if(g_isVertical == false){
@@ -21980,7 +21985,7 @@ function UniteGalleryMain(){
 		}
 		
 		g_objGallery.trigger(t.events.START_PLAY);
-		
+				
 		//check if there is a need to pause
 		if(g_objSlider && g_objSlider.isCurrentSlideLoadingImage() == true){
 			t.pausePlaying();
@@ -22006,10 +22011,10 @@ function UniteGalleryMain(){
 	 * pause playing slideshow
 	 */
 	this.pausePlaying = function(){
-		
+					
 		if(g_temp.isPlayModePaused == true)
 			return(true);
-		
+				
 		g_temp.isPlayModePaused = true;
 		clearInterval(g_temp.playHandle);
 		
@@ -22046,7 +22051,7 @@ function UniteGalleryMain(){
 			var objElement = g_temp.objProgress.getElement();
 			objElement.hide();
 		}
-		
+				
 		g_objGallery.trigger(t.events.STOP_PLAY);
 	}
 	
@@ -25781,6 +25786,7 @@ function UG_API(gallery){
 	}
 	
 	
+	
 	/**
 	 * toggle playing
 	 */
@@ -25894,6 +25900,16 @@ function UG_API(gallery){
 		var output = convertItemDataForOutput(data);
 		
 		return(output);
+	}
+	
+	/**
+	 * is playing
+	 */
+	this.isPlaying = function(){
+		
+		var isPlaying = g_gallery.isPlayMode();
+
+		return(isPlaying);
 	}
 	
 	

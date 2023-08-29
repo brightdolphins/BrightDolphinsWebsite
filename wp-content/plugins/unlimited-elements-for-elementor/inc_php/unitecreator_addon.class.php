@@ -511,9 +511,6 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 		        	case UniteCreatorDialogParam::PARAM_INSTAGRAM:
 		        		return("instagram");
 		        	break;
-		        	case UniteCreatorDialogParam::PARAM_FORM:
-		        		return self::ITEMS_TYPE_FORM;
-		        	break;
 		        	case UniteCreatorDialogParam::PARAM_DATASET:
 		        		return self::ITEMS_TYPE_DATASET;
 		        	break;
@@ -542,7 +539,7 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 		 * modify after init settings
 		 */
 		protected function modifyAfterInit(){
-		    
+		    			
 			//set spacial items type if exists
 			$specialType = $this->getItemsSpecialType();
 			
@@ -566,6 +563,7 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 			    }
 				
 			}
+			
 			
 			//add image fields			
 			if($specialType == self::ITEMS_TYPE_IMAGE){
@@ -1171,8 +1169,29 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 		 */
 		public function getItemsType(){
 			
-			
 			return($this->itemsType);
+		}
+		
+		/**
+		 * return if has simple items, or multisource not with post list
+		 */
+		public function isHasSimpleItems(){
+			
+			if($this->hasItems == false)
+				return(false);
+			
+			//has items
+				
+			if($this->specialType == "multisource")
+				return(true);
+			
+			//other types - false
+			
+			if(!empty($this->specialType))
+				return(false);
+				
+			
+			return(true);
 		}
 		
 		
@@ -1890,31 +1909,48 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 				$objSettings->addGlobalParam("source", "addon", UniteSettingsUC::TYPE_IMAGE);
 			}
 			
+		
 			//choose if add items chooser
 			
 			if(!empty($this->params) || $this->hasItems){
 				
-				$objSettings->addSap(esc_html__("General","unlimited-elements-for-elementor"),"config",true);
+				if(empty($this->paramsCats))
+					$objSettings->addSap(esc_html__("General","unlimited-elements-for-elementor"),"config",true);
 				
 				if($this->hasItems == true){
-															
-					//$this->itemsType == self::ITEMS_TYPE_IMAGE
-					$objSettings->addItemsPanel($this, $source);
-					$objSettings->addHr("after_items_hr");
+					
+					if($this->itemsType == self::ITEMS_TYPE_IMAGE && $isOutputSidebar == true){
+						
+						$objSettings->addGallery("uc_items","",__("Select Images","unlimited-elements-for-elementor"));
+						
+					}else{
+						
+						//for wide settings - add items panel
+						
+						if($isOutputSidebar == false){
+							$objSettings->addItemsPanel($this, $source);
+							$objSettings->addHr("after_items_hr");
+						}
+						
+						
+					}
+										
 				}
 				
-				$objSettings->initByCreatorParams($arrParams);
+				$objSettings->initByCreatorParams($arrParams, $this->paramsCats);
 			}
 			
-			//add repeater
-			/*
-			 * add repeater
-			if($this->hasItems == true){
-				$objSettings->addSap(esc_html__("Edit Items","unlimited-elements-for-elementor"),"items");
-				$objSettings->addItemsPanelRepeater($this, $source);
-			}
-			*/
+			
+			//add items repeater
+			
+			if($this->hasItems == true && $isOutputSidebar == true){
 				
+				$objSettings->addSap(esc_html__("Items","unlimited-elements-for-elementor"),"items");
+				$objSettings->addItemsPanelRepeater($this, $source);
+				
+			}
+			
+			
 			//add fonts
 			$isFontsPanelEnabled = $this->objProcessor->isFontsPanelEnabled();
 			$arrFontParamNames = $this->objProcessor->getAllParamsNamesForFonts();

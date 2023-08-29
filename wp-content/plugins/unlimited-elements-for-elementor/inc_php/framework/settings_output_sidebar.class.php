@@ -12,7 +12,6 @@ class UniteSettingsOutputSidebarUC extends UniteCreatorSettingsOutput{
     
     private $isAccordion = true;
     private $accordionItemsSpaceBetween = 0;	//space between accoridion items
-    private $accordionTitleHeight = 30;
     private $showTips = true;
     private $showSapTitle = true;
     
@@ -42,6 +41,8 @@ class UniteSettingsOutputSidebarUC extends UniteCreatorSettingsOutput{
 		protected function drawSettingsAfter(){
 		
 			?></ul><?php
+			
+			parent::drawSettingsAfter();
 		}
      
 		/**
@@ -52,7 +53,6 @@ class UniteSettingsOutputSidebarUC extends UniteCreatorSettingsOutput{
 			
 			$arrOptions = parent::getOptions();
 			$arrOptions["accordion_sap"] = $this->accordionItemsSpaceBetween;
-			$arrOptions["accordion_title_height"] = $this->accordionTitleHeight;
 			
 			return($arrOptions);
 		}
@@ -73,11 +73,45 @@ class UniteSettingsOutputSidebarUC extends UniteCreatorSettingsOutput{
 		 * draw before settings row
 		 */
 		protected function drawSettings_before(){
-						
+		  
+			parent::drawSettings_before();
+			
 		  ?>
 		  	  <ul class="unite-list-settings">
 		  <?php 
+		  
 		}
+		
+		/**
+		 * add responsive html icons selector
+		 */
+		private function addResponsiveIconsHtml($type){
+			
+			$orderDesktop = 1;
+			$orderTablet = 2;
+			$orderMobile = 3;
+			
+			if($type == "tablet")
+				$orderTablet = 0;
+			
+			if($type == "mobile")
+				$orderMobile = 0;
+			
+			//unite-settings-responsive-wrapper__open
+			
+			?>
+			
+			<div class="unite-settings-responsive-wrapper">
+				<div class="unite-settings-responsive-holder">
+					<a href="javascript:void(0)" style="order:<?php echo $orderDesktop?>" class="unite-settings-responsive-icon unite-settings-responsive-icon__desktop" data-device="desktop">Desktop</a>
+					<a href="javascript:void(0)" style="order:<?php echo $orderTablet?>" class="unite-settings-responsive-icon unite-settings-responsive-icon__tablet" data-device="tablet">Tablet</a>
+					<a href="javascript:void(0)" style="order:<?php echo $orderMobile?>" class="unite-settings-responsive-icon unite-settings-responsive-icon__mobile" data-device="mobile">Mobile</a>
+				</div>
+			</div>
+			
+			<?php 
+		}
+		
 		
 		
 		/**
@@ -86,19 +120,20 @@ class UniteSettingsOutputSidebarUC extends UniteCreatorSettingsOutput{
 		 */
 		protected function drawSettingRow($setting, $mode=""){
 		    
+			
 		    //set cellstyle:
 		    $cellStyle = "";
 		    if(isset($setting[UniteSettingsUC::PARAM_CELLSTYLE])){
 		        $cellStyle .= $setting[UniteSettingsUC::PARAM_CELLSTYLE];
 		    }
-		    
+		    		    
 		    if($cellStyle != "")
 		        $cellStyle = "style='".$cellStyle."'";
 		        
 		        $textStyle = $this->drawSettingRow_getTextStyle($setting);
+		       	
+		        $baseClass = "unite-setting-row";
 		        		        
-		        $rowClass = $this->drawSettingRow_getRowClass($setting, "unite-setting-row");
-		        
 		        $text = $this->drawSettingRow_getText($setting);
 		        
 		        $description = UniteFunctionsUC::getVal($setting,"description");
@@ -118,12 +153,37 @@ class UniteSettingsOutputSidebarUC extends UniteCreatorSettingsOutput{
 		        if($this->showTips == true)
 		            $textClassAdd = " uc-tip";
 
+		        $isResponsive = UniteFunctionsUC::getVal($setting, "is_responsive");
+		        $isResponsive = UniteFunctionsUC::strToBool($isResponsive);
 		        
+		        $responsiveType = UniteFunctionsUC::getVal($setting, "responsive_type");
+		        
+		        if($isResponsive == true && $responsiveType != "desktop"){
+		        	$baseClass .= " uc-responsive-hidden";
+		        }
+		        
+		        $addAttr = "";
+		        
+		        if($isResponsive == true){
+		      		$responsiveName = UniteFunctionsUC::getVal($setting, "responsive_name");
+		        	$baseClass .= " unite-setting-row__".$responsiveType;
+		        	
+		        	$addAttr = "data-responsiveid='{$responsiveName}'";
+		        }
+		       		       
+		        $rowClass = $this->drawSettingRow_getRowClass($setting, $baseClass);
+		        		        
+		        	
 		        ?>
-				<li id="<?php echo esc_attr($settingID)?>_row" <?php echo UniteProviderFunctionsUC::escAddParam($rowClass)?>>
+				<li id="<?php echo esc_attr($settingID)?>_row" <?php echo $addAttr?>  <?php echo UniteProviderFunctionsUC::escAddParam($rowClass)?>>
 					
 					<?php if($toDrawText == true):?>
-						<div id="<?php echo esc_attr($settingID)?>_text" class='unite-setting-text<?php echo esc_attr($textClassAdd)?>' title="<?php echo esc_attr($description)?>" <?php echo UniteProviderFunctionsUC::escAddParam($attribsText)?>><?php echo esc_html($text) ?></div>
+						<div class="unite-setting-text-wrapper">
+							<div id="<?php echo esc_attr($settingID)?>_text" class='unite-setting-text<?php echo esc_attr($textClassAdd)?>' title="<?php echo esc_attr($description)?>" <?php echo UniteProviderFunctionsUC::escAddParam($attribsText)?>><?php echo esc_html($text) ?></div>
+							<?php if($isResponsive)
+									$this->addResponsiveIconsHtml($responsiveType);
+							?>						
+						</div>
 					<?php endif?>
 					
 					<?php if(!empty($addHtmlBefore)):?>
@@ -197,74 +257,80 @@ class UniteSettingsOutputSidebarUC extends UniteCreatorSettingsOutput{
 		 * @param  $sap
 		 */
 		protected function drawSapBefore($sap, $key){
-		   	
+			
 		    //set class
 		    $class = "unite-postbox";
 		    if(!empty($this->addClass))
 		        $class .= " ".$this->addClass;
 		    
-		        //set accordion closed
-		        $style = "";
-		        if($this->isAccordion == false){
-		            $h3Class = " unite-no-accordion";
-		        }else{
-		            $h3Class = "";
-		            if($key>0){
-		                $style = "style='display:none;'";
-		                $h3Class = " unite-closed";
-		            }
-		        }
-		        
-		        //set text and icon class
-		        $text = UniteFunctionsUC::getVal($sap, "text");
-		        $classIcon = UniteFunctionsUC::getVal($sap, "icon");
-		        $text = esc_html__($text,"unlimited-elements-for-elementor");
-		    	
-		        $classIcon = null;	//disable icons for now
-		    	
-		        //postbox style
-		        $addStyle = "";
-		        
-		        if($key > 0)
-		        	$addStyle .= "margin-top:".$this->accordionItemsSpaceBetween."px";
-		        
-		        
-		        if(!empty($addStyle)){
-		        	$addStyle = esc_attr($addStyle);
-		        	$addStyle = " style='$addStyle'";
-		        }
-		        
-		        //title style
-		        $styleTitle = "";
-		        $styleTitle .= "height:".$this->accordionTitleHeight."px;";
-		        
-		        if(!empty($styleTitle)){
-		        	$styleTitle = esc_attr($styleTitle);
-		        	$styleTitle = " style='$styleTitle'";
-		        }
+		    $tab = UniteFunctionsUC::getVal($sap, "tab");
+		    
+		    if(empty($tab))
+		    	$tab = UniteSettingsUC::TAB_CONTENT;
+		    
+		    $class .= " uctab-$tab";
+		    
+	        //set accordion closed
+	        $style = "";
+	        if($this->isAccordion == false){
+	            $h3Class = " unite-no-accordion";
+	        }else{
+	            $h3Class = "";
+	            if($key>0){
+	                $style = "style='display:none;'";
+	                $h3Class = " unite-closed";
+	            }
+	        }
+	        
+	        //set text and icon class
+	        $text = UniteFunctionsUC::getVal($sap, "text");
+	        $classIcon = UniteFunctionsUC::getVal($sap, "icon");
+	        $text = esc_html__($text,"unlimited-elements-for-elementor");
+	    	
+	        $classIcon = null;	//disable icons for now
+	    	
+	        //postbox style
+	        $addStyle = "";
+	        
+	        if($key > 0)
+	        	$addStyle .= "margin-top:".$this->accordionItemsSpaceBetween."px";
+	        
+	        
+	        if(!empty($addStyle)){
+	        	$addStyle = esc_attr($addStyle);
+	        	$addStyle = " style='$addStyle'";
+	        }
+	        
+	        //title style
+	        $styleTitle = "";
+	        
+	        if(!empty($styleTitle)){
+	        	$styleTitle = esc_attr($styleTitle);
+	        	$styleTitle = " style='$styleTitle'";
+	        }
 		        
 		        ?>
-					<div class="<?php echo esc_attr($class)?>" <?php echo UniteProviderFunctionsUC::escAddParam($addStyle)?>>
-						
-						<?php if($this->showSapTitle == true): ?>
-						
-							<div class="unite-postbox-title<?php echo esc_attr($h3Class)?>" <?php echo UniteProviderFunctionsUC::escAddParam($styleTitle)?> >
-							
-							<?php if(!empty($classIcon)):?>
-							<i class="unite-postbox-icon <?php echo esc_attr($classIcon)?>"></i>
-							<?php endif?>
-							
-							<?php if($this->isAccordion == true):?>
-							    <div class="unite-postbox-arrow-wrapper">
-									<div class="unite-postbox-arrow"></div>
-								</div>
-							<?php endif?>
-							
-								<span><?php echo esc_html($text) ?></span>
-							</div>			
-						<?php endif?>
-						
-						<div class="unite-postbox-inside" <?php echo UniteProviderFunctionsUC::escAddParam($style)?> > 
+			<div class="<?php echo esc_attr($class)?>" <?php echo UniteProviderFunctionsUC::escAddParam($addStyle)?>>
+				
+				<?php if($this->showSapTitle == true): ?>
+				
+					<div class="unite-postbox-title<?php echo esc_attr($h3Class)?>" <?php echo UniteProviderFunctionsUC::escAddParam($styleTitle)?> >
+					
+					<?php if(!empty($classIcon)):?>
+					<i class="unite-postbox-icon <?php echo esc_attr($classIcon)?>"></i>
+					<?php endif?>
+					
+					<?php if($this->isAccordion == true):?>
+					    <div class="unite-postbox-arrow-wrapper">
+							<div class="unite-postbox-arrow"></div>
+						</div>
+					<?php endif?>
+					
+						<span><?php echo esc_html($text) ?></span>
+					</div>			
+				<?php endif?>
+				
+				<div class="unite-postbox-inside" <?php echo UniteProviderFunctionsUC::escAddParam($style)?> > 
 			<?php
 			
 		}

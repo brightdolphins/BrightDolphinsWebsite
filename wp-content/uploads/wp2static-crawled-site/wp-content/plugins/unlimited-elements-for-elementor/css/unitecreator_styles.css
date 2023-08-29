@@ -248,25 +248,24 @@
 	text-decoration:underline;
 }
 
-.uc-tabcontent-table .uc-row-expanded{
-}
+
+/* expanded */
 
 .uc-tabcontent-table .uc-row-expanded .CodeMirror{
-	height:500px !important;
+	height:80vh !important;
 }
 
 .uc-tabcontent-table .uc-row-expanded .CodeMirror-scroll{
-	height:500px !important;
+	height:80vh !important;
 }
 
 .uc-tabcontent-table .uc-row-expanded .uc-params-panel{
-	height:425px;
+	height:calc(80vh - 75px);
 }
 
 .uc-tabcontent-table .uc-row-expanded .uc-params-panel-main{
-	height:467px !important;
+	height:calc(80vh - 33px) !important;
 }
-
 
 
 
@@ -1447,6 +1446,13 @@
 	display:inline-block;
 	width:150px;
 }
+
+
+.uc-testaddon-new-panel a.unite-button-secondary{
+	margin-right:10px;
+}
+
+
 
 .----------------NO_ADDON_TEXT------------- {}
 

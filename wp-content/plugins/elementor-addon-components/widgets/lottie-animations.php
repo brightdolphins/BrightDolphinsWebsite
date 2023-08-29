@@ -7,6 +7,7 @@
  * Description: Implémente les animations Lottie
  *
  * @since 1.9.3
+ * @since 2.1.1 L'option de format des médias de type JSON est activée
  */
 
 namespace EACCustomWidgets\Widgets;
@@ -37,8 +38,9 @@ class Lottie_Animations_Widget extends Widget_Base {
 		parent::__construct( $data, $args );
 
 		wp_register_script( 'lottie-animation', 'https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.8.1/lottie.min.js', array(), '5.8.1', true );
-		wp_register_script( 'eac-lottie-anim', EAC_Plugin::instance()->get_register_script_url( 'eac-lottie-animations' ), array( 'jquery', 'elementor-frontend' ), '1.9.3', true );
-		wp_register_style( 'eac-lottie-anim', EAC_Plugin::instance()->get_register_style_url( 'lottie-animations' ), array( 'eac' ), '1.9.3' );
+		wp_register_script( 'eac-lottie-anim', EAC_Plugin::instance()->get_script_url( 'assets/js/elementor/eac-lottie-animations' ), array( 'jquery', 'elementor-frontend', 'lottie-animation' ), '1.9.3', true );
+
+		wp_register_style( 'eac-lottie-anim', EAC_Plugin::instance()->get_style_url( 'assets/css/lottie-animations' ), array( 'eac' ), '1.9.3' );
 	}
 
 	/**
@@ -178,6 +180,7 @@ class Lottie_Animations_Widget extends Widget_Base {
 						),
 					),
 					'default' => 'file',
+					'toggle'  => false,
 				)
 			);
 
@@ -192,24 +195,37 @@ class Lottie_Animations_Widget extends Widget_Base {
 				)
 			);
 
-			$this->add_control(
-				'lottie_settings_media_url',
-				array(
-					'label'         => esc_html__( 'URL', 'eac-components' ),
-					'type'          => Controls_Manager::URL,
-					'description'   => __( "Obtenez l'URL de l'animation <a href='https://lottiefiles.com/' target='_blank' rel='nofollow noopener noreferrer'>ici</a>", 'eac-components' ),
-					'placeholder'   => 'https://lottiefiles.com/anim.json/',
-					'show_external' => true,
-					'default'       => array(
-						'is_external' => true,
-						'nofollow'    => true,
-					),
-					'dynamic'       => array(
-						'active' => true,
-					),
-					'condition'     => array( 'lottie_settings_source' => 'url' ),
-				)
-			);
+			/** @since 2.1.1 Le filtre des médias est actif */
+			if ( Eac_Config_Elements::is_feature_active( 'unfiltered-medias' ) ) {
+				$this->add_control(
+					'lottie_settings_media_url',
+					array(
+						'label'         => esc_html__( 'URL', 'eac-components' ),
+						'type'          => Controls_Manager::URL,
+						'description'   => __( "Obtenez l'URL de l'animation <a href='https://lottiefiles.com/' target='_blank' rel='nofollow noopener noreferrer'>ici</a>", 'eac-components' ),
+						'placeholder'   => 'https://lottiefiles.com/anim.json/',
+						'show_external' => true,
+						'default'       => array(
+							'is_external' => true,
+							'nofollow'    => true,
+						),
+						'dynamic'       => array(
+							'active' => true,
+						),
+						'condition'     => array( 'lottie_settings_source' => 'url' ),
+					)
+				);
+			} else {
+				$this->add_control(
+					'lottie_settings_media_url_info',
+					array(
+						'type'            => Controls_Manager::RAW_HTML,
+						'content_classes' => 'elementor-panel-alert elementor-panel-alert-warning',
+						'raw'             => esc_html__( 'Activer la fonctionnalité "Télécharger les fichiers non filtrés" pour lire un flux JSON', 'eac-components' ),
+						'condition'       => array( 'lottie_settings_source' => 'url' ),
+					)
+				);
+			}
 
 			$this->add_responsive_control(
 				'lottie_settings_animation_size',
@@ -297,6 +313,7 @@ class Lottie_Animations_Widget extends Widget_Base {
 						),
 					),
 					'default'   => 'no',
+					'toggle'  => false,
 					'separator' => 'before',
 				)
 			);
@@ -345,6 +362,7 @@ class Lottie_Animations_Widget extends Widget_Base {
 						),
 					),
 					'default'     => 'yes',
+					'toggle'  => false,
 					'render_type' => 'template',
 				)
 			);
@@ -365,6 +383,7 @@ class Lottie_Animations_Widget extends Widget_Base {
 						),
 					),
 					'default'     => 'no',
+					'toggle'  => false,
 					'render_type' => 'template',
 				)
 			);
@@ -424,7 +443,7 @@ class Lottie_Animations_Widget extends Widget_Base {
 				)
 			);
 
-			/*
+			/**
 			$this->add_control('lottie_settings_viewport',
 				[
 					'label'     => esc_html__('Viewport', 'eac-components'),
@@ -480,11 +499,31 @@ class Lottie_Animations_Widget extends Widget_Base {
 				)
 			);
 
+			$this->add_responsive_control(
+				'lottie_style_padding',
+				array(
+					'label'              => esc_html__( 'Marges internes', 'eac-components' ),
+					'type'               => Controls_Manager::DIMENSIONS,
+					'allowed_dimensions' => array( 'top', 'right', 'bottom', 'left' ),
+					'default'            => array(
+						'top'      => 0,
+						'right'    => 0,
+						'bottom'   => 0,
+						'left'     => 0,
+						'unit'     => 'px',
+						'isLinked' => true,
+					),
+					'separator' => 'before',
+					'selectors'          => array(
+						'{{WRAPPER}} .lottie-anim_wrapper' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+					),
+				)
+			);
+
 			$this->add_group_control(
 				Group_Control_Border::get_type(),
 				array(
 					'name'      => 'lottie_style_border',
-					'separator' => 'before',
 					'selector'  => '{{WRAPPER}} .lottie-anim_wrapper',
 				)
 			);
@@ -519,26 +558,6 @@ class Lottie_Animations_Widget extends Widget_Base {
 				)
 			);
 
-			$this->add_responsive_control(
-				'lottie_style_padding',
-				array(
-					'label'              => esc_html__( 'Marges internes', 'eac-components' ),
-					'type'               => Controls_Manager::DIMENSIONS,
-					'allowed_dimensions' => array( 'top', 'right', 'bottom', 'left' ),
-					'default'            => array(
-						'top'      => 0,
-						'right'    => 0,
-						'bottom'   => 0,
-						'left'     => 0,
-						'unit'     => 'px',
-						'isLinked' => true,
-					),
-					'selectors'          => array(
-						'{{WRAPPER}} .lottie-anim_wrapper' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
-					),
-				)
-			);
-
 		$this->end_controls_section();
 	}
 
@@ -565,27 +584,35 @@ class Lottie_Animations_Widget extends Widget_Base {
 	protected function render_lottie() {
 		$settings = $this->get_settings_for_display();
 		$has_link = false;
-		$url      = 'file' === $settings['lottie_settings_source'] ? $settings['lottie_settings_media_file'] : $settings['lottie_settings_media_url']['url'];
+		$url = '';
 
-				$this->add_render_attribute(
-					'lottie_anime',
-					array(
-						'class'         => 'lottie-anim_wrapper',
-						'data-src'      => $url,
-						'data-autoplay' => $settings['lottie_settings_trigger'] === 'none' ? 'true' : 'false', // Pas d'autoplay pour 'hover' et 'viewport'
-						'data-loop'     => $settings['lottie_settings_loop'] === 'yes' ? 'true' : 'false',
-						'data-speed'    => $settings['lottie_settings_speed'],
-						'data-reverse'  => $settings['lottie_settings_reverse'] === 'yes' ? '-1' : '1',
-						'data-renderer' => $settings['lottie_settings_render'],
-						'data-trigger'  => $settings['lottie_settings_trigger'],
-						'data-name'     => 'lottie_' . $this->get_id(),
-						'data-elem-id'  => $this->get_id(),
-					// 'data-start'    => isset($settings['lottie_settings_viewport']['sizes']['start']) ? $settings['lottie_settings_viewport']['sizes']['start'] : '0',
-					// 'data-end'      => isset($settings['lottie_settings_viewport']['sizes']['end']) ? 100 - $settings['lottie_settings_viewport']['sizes']['end'] : '100',
-					)
-				);
+		if ( 'file' === $settings['lottie_settings_source'] ) {
+			$url = esc_url( $settings['lottie_settings_media_file'] );
+		} elseif ( Eac_Config_Elements::is_feature_active( 'unfiltered-medias' ) && 'url' === $settings['lottie_settings_source'] ) {
+			$url = esc_url( $settings['lottie_settings_media_url']['url'] );
+		} else {
+			return;
+		}
 
-		if ( $settings['lottie_settings_link_display'] === 'yes' && ! empty( $settings['lottie_settings_link']['url'] ) ) {
+		$this->add_render_attribute(
+			'lottie_anime',
+			array(
+				'class'         => 'lottie-anim_wrapper',
+				'data-src'      => $url,
+				'data-autoplay' => 'none' === $settings['lottie_settings_trigger'] ? 'true' : 'false', // Pas d'autoplay pour 'hover' et 'viewport'
+				'data-loop'     => 'yes' === $settings['lottie_settings_loop'] ? 'true' : 'false',
+				'data-speed'    => $settings['lottie_settings_speed'],
+				'data-reverse'  => 'yes' === $settings['lottie_settings_reverse'] ? '-1' : '1',
+				'data-renderer' => $settings['lottie_settings_render'],
+				'data-trigger'  => $settings['lottie_settings_trigger'],
+				'data-name'     => 'lottie_' . $this->get_id(),
+				'data-elem-id'  => $this->get_id(),
+				// 'data-start'    => isset($settings['lottie_settings_viewport']['sizes']['start']) ? $settings['lottie_settings_viewport']['sizes']['start'] : '0',
+				// 'data-end'      => isset($settings['lottie_settings_viewport']['sizes']['end']) ? 100 - $settings['lottie_settings_viewport']['sizes']['end'] : '100',
+			)
+		);
+
+		if ( 'yes' === $settings['lottie_settings_link_display'] && ! empty( $settings['lottie_settings_link']['url'] ) ) {
 			$has_link = true;
 
 			$link_url = esc_url( $settings['lottie_settings_link']['url'] );
@@ -600,9 +627,11 @@ class Lottie_Animations_Widget extends Widget_Base {
 			}
 		}
 		?>
-		<div <?php echo $this->get_render_attribute_string( 'lottie_anime' ); ?>>
+		<div <?php echo wp_kses_post( $this->get_render_attribute_string( 'lottie_anime' ) ); ?>>
 			<?php if ( $has_link ) : ?>
-				<a <?php echo wp_kses_post( $this->get_render_attribute_string( 'lottie_url' ) ); ?>><span class="lottie-anim_wrapper-url"></span></a>
+				<a <?php echo wp_kses_post( $this->get_render_attribute_string( 'lottie_url' ) ); ?>>
+					<span class="lottie-anim_wrapper-url"></span>
+				</a>
 			<?php endif; ?>
 		</div>
 		<?php

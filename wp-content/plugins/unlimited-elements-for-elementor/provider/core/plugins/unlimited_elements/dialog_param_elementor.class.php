@@ -468,7 +468,10 @@ class UniteCreatorDialogParamElementor extends UniteCreatorDialogParam{
 			</div>
 		
 		</div>
-				
+		<div class="unite-dialog-description-left">
+			<?php _e("* In case of multiple units, the min, max apply to px unit only.", "unlimited-elements-for-elementor")?>
+		</div>
+		
 		<?php 
 		
 		$this->addResponsiveInputs("slider");
@@ -895,6 +898,10 @@ class UniteCreatorDialogParamElementor extends UniteCreatorDialogParam{
 		$arrTypes["entrance_animation"] = __("Entrance Animation","unlimited-elements-for-elementor");
 		$arrTypes["items_image_size"] = __("Items Image Size","unlimited-elements-for-elementor");
 		$arrTypes["schema"] = __("Schema","unlimited-elements-for-elementor");
+		$arrTypes["dynamic_popup"] = __("Dynamic Popup","unlimited-elements-for-elementor");
+		$arrTypes["contact_form7"] = __("Contact Form 7","unlimited-elements-for-elementor");
+		$arrTypes["ucform_conditions"] = __("Unite Form Conditions","unlimited-elements-for-elementor");
+		$arrTypes["sort_filter_fields"] = __("Sort Filter Fields","unlimited-elements-for-elementor");
 		
 		
 		$optionsClass = "uc-special-attribute-options";
@@ -955,6 +962,21 @@ class UniteCreatorDialogParamElementor extends UniteCreatorDialogParam{
 	 		    
 				<div class="unite-dialog-description-left">
 					<?php _e("* If leave empty, then the image size chooser will affect the first item image attribute.", "unlimited-elements-for-elementor")?>
+				</div>
+	 		    
+	 		    
+			</div>
+
+ 		    <div class="<?php echo $optionsClass?>" data-control="dynamic_popup" style="display:none">
+				
+				<div class="unite-inputs-label">
+			 		    <?php _e("Attribute Suffix","unlimited-elements-for-elementor")?>		
+				</div>
+ 		    	
+ 		    	<input type="text" name="dynamic_popup_suffix" value="" placeholder="Example: title">
+	 		    
+				<div class="unite-dialog-description-left">
+					<?php _e("For the button leave it empty.", "unlimited-elements-for-elementor")?>
 				</div>
 	 		    
 	 		    

@@ -38,7 +38,13 @@ class GlobalsProviderUC{
 	public static $isUnderRenderPostItem = false;
 	public static $isUnderItem = false;
 	public static $lastItemParams = array();
+	public static $lastObjectID = null;
+	public static $isUnderDynamicTemplateLoop = false;
+	public static $isUnderNoWidgetsToDisplay = false;
 	
+	
+	public static $isInsideEditor = false;	//tells that it's inside editor
+	public static $isInsideEditorBackend = false;	//tells that it's inside editor
 	
 	
 	public static $arrTestTermIDs = null;	//test term id's for render taxonomies under ajax
@@ -51,6 +57,8 @@ class GlobalsProviderUC{
 	
 	public static $arrFetchedPostIDs = array();	
 	public static $arrPostTermsCache = array();	
+	public static $arrFetchedPostsObjectsCache = array();	
+	
 	public static $isUnderAjaxDynamicTemplate = false;
 	public static $isUnderAjax = false;
 	

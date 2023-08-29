@@ -15,7 +15,43 @@ $data["term"] = "a";
 $data["q"] = "a";
 $data["_type"] = "query";
 
-dmp("test settings");
+
+function wpmlAutoTranslationTest(){
+	
+	$arrWidgets = apply_filters("wpml_elementor_widgets_to_translate",array());
+	
+	//test the class
+	
+	$testWidgetClass = "UE_WPML_INTEGRATION__content_accordion_elementor";
+	
+	foreach($arrWidgets as $widget){
+		
+		
+		$class = UniteFunctionsUC::getVal($widget, "integration-class");
+				
+		if(empty($class))
+			continue;			
+		
+		if(!empty($testWidgetClass) && $class != $testWidgetClass)
+			continue;
+			
+		dmp($class);
+		
+		$objIntegration = new $testWidgetClass();
+
+		$objIntegration->printTest();
+			
+	}
+	
+}
+
+if(GlobalsUC::$inDev == true){
+
+	wpmlAutoTranslationTest();
+	
+}
+
+
 
 /*
 $manager = new UniteFontManagerUC();

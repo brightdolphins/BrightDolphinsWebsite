@@ -1,6 +1,11 @@
 /*--------------------------------------------------------------
 == Library - Predefined Styles
 --------------------------------------------------------------*/
+.wpr-tplib-popup-overlay * {
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
 #wpr-library-btn {
     display: -webkit-inline-box;
     display: -ms-inline-flexbox;
@@ -199,19 +204,26 @@
 }
 
 .wpr-tplib-sidebar {
-    padding: 30px 30px 20px 30px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: justify;
+        -ms-flex-pack: justify;
+            justify-content: space-between;
+    padding: 30px 37px 30px;
 }
 
 .wpr-tplib-sidebar .wpr-tplib-search {
-    display: none;
     position: relative;
-    margin: 30px 0;
+    width: 250px;
+    -webkit-box-shadow: 0 2px 5px 0 rgb(0 0 0 / 5%);
+            box-shadow: 0 2px 5px 0 rgb(0 0 0 / 5%);
 }
 
 .wpr-tplib-sidebar .wpr-tplib-search i {
     position: absolute;
     top: 50%;
-    right: 10px;
+    right: 15px;
     font-size: 12px;
     -webkit-transform: translateY(-50%);
         -ms-transform: translateY(-50%);
@@ -220,9 +232,12 @@
 
 .wpr-tplib-sidebar .wpr-tplib-search input {
     width: 100%;
-    padding: 8px 10px;
+    padding: 7px 15px;
     border: 0;
     border-bottom: 1px solid #efefef;
+    font-size: 14px;
+    line-height: 23px;
+    border-radius: 3px;
 }
 
 .wpr-tplib-sidebar .wpr-tplib-search input::-webkit-input-placeholder {
@@ -281,7 +296,8 @@
     color: #fff;
 }
 
-.wpr-tplib-filters {
+.wpr-tplib-filters,
+.wpr-tplib-price {
     -webkit-box-sizing: border-box;
             box-sizing: border-box;
     display: -webkit-box;
@@ -302,7 +318,12 @@
     color: #6d7882;
 }
 
-.wpr-tplib-filters h3 {
+.wpr-tplib-price i {
+    margin-top: 3px;
+}
+
+.wpr-tplib-filters h3,
+.wpr-tplib-price h3 {
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
@@ -318,11 +339,13 @@
     border-radius: 3px;
 }
 
-.wpr-tplib-filters h3 span {
+.wpr-tplib-filters h3 span,
+.wpr-tplib-price h3 span {
     width: 100%;
 }
 
-.wpr-tplib-filters-list {
+.wpr-tplib-filters-list,
+.wpr-tplib-price-list {
     visibility: hidden;
     opacity: 0;
     position: absolute;
@@ -339,7 +362,8 @@
     border-radius: 3px;
 }
 
-.wpr-tplib-filters-list ul {
+.wpr-tplib-filters-list ul,
+.wpr-tplib-price-list ul {
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
@@ -347,9 +371,11 @@
         flex-wrap: wrap;
     list-style: none;
     padding-left: 0;
+    margin: 0;
 }
 
-.wpr-tplib-filters-list ul li {
+.wpr-tplib-filters-list ul li,
+.wpr-tplib-price-list ul li {
     width: 25%;
     padding: 12px;
     color: #6d7882;
@@ -359,9 +385,44 @@
     cursor: pointer;
 }
 
-.wpr-tplib-filters-list ul li:hover {
+.wpr-tplib-filters-list ul li:hover,
+.wpr-tplib-price-list ul li:hover {
     background: #f9f9f9;
     color: #222;
+}
+
+.wpr-tplib-price {
+    width: 120px;
+}
+
+.wpr-tplib-search + .wpr-tplib-filters-wrap .wpr-tplib-filters-list {
+    right: 0;
+    width: 100%;
+}
+
+.wpr-tplib-search + .wpr-tplib-filters-wrap .wpr-tplib-filters-list ul {
+    flex-direction: column
+}
+
+.wpr-tplib-search + .wpr-tplib-filters-wrap .wpr-tplib-filters-list ul li {
+    width: 100%;
+}
+
+.wpr-tplib-price-list {
+    width: 120px;
+    padding: 10px;
+}
+
+.wpr-tplib-price-list ul {
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+        -ms-flex-direction: column;
+            flex-direction: column;
+}
+
+.wpr-tplib-price-list ul li {
+    width: 100%;
+    padding: 8px 12px;
 }
 
 .wpr-tplib-template-gird {
@@ -408,6 +469,10 @@
 .wpr-tplib-pro-wrap:not(.wpr-tplib-pro-active):before {
     content: 'Pro';
     background: #6A4BFF;
+}
+
+.wpr-tplib-sidebar[data-license="premium"] + .wpr-tplib-template-gird .wpr-tplib-template-wrap:before {
+    display: none !important;
 }
 
 @media screen and ( max-width: 1364px ) {
@@ -512,6 +577,9 @@
 }
 
 .wpr-tplib-template-footer h3 {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
     overflow: hidden;
     color: #6d7882;
     font-family: "Roboto",Arial,Helvetica,Verdana,sans-serif;
@@ -520,6 +588,28 @@
     white-space: nowrap;
     -o-text-overflow: ellipsis;
        text-overflow: ellipsis;
+}
+
+@media screen and ( max-width: 1919px ) {
+    .wpr-tplib-template-footer h3 span:first-child {
+        -o-text-overflow: ellipsis;
+           text-overflow: ellipsis;
+        overflow: hidden; 
+        max-width: 130px; 
+        white-space: nowrap;
+    } 
+}
+
+@media screen and ( max-width: 1366px ) {
+    .wpr-tplib-template-footer h3 span:first-child {
+        max-width: 109px; 
+    } 
+}
+
+@media screen and ( max-width: 1280px ) {
+    .wpr-tplib-template-footer h3 span:first-child {
+        max-width: 90px; 
+    } 
 }
 
 .wpr-tplib-template-footer .wpr-tplib-insert-template {
@@ -538,7 +628,6 @@
     -o-transition: all 0.1s ease-in;
     transition: all 0.1s ease-in;
 }
-
 
 #masonry-effect {
     display: -webkit-box;
@@ -560,6 +649,79 @@
             flex-direction: column;
     position: relative;
     width: calc(33.3%);
+}
+
+.wpr-tplib-template-gird-loading {
+    text-align: center;
+}
+
+.wpr-tplib-template-gird-loading .wpr-wave {
+  width: 50px;
+  height: 25px;
+  text-align: center;
+  margin: 0 auto;
+  font-size: 0;
+}
+
+.wpr-wave .wpr-rect {
+  height: 100%;
+  width: 4px;
+  margin-right: 2px;
+  display: inline-block;
+  -webkit-animation: wpr-waveStretchDelay 1.2s infinite ease-in-out;
+  animation: wpr-waveStretchDelay 1.2s infinite ease-in-out;
+  background-color: gray;
+}
+
+.wpr-wave .wpr-rect1 {
+  -webkit-animation-delay: -1.2s;
+  animation-delay: -1.2s;
+}
+
+.wpr-wave .wpr-rect2 {
+  -webkit-animation-delay: -1.1s;
+  animation-delay: -1.1s;
+}
+
+.wpr-wave .wpr-rect3 {
+  -webkit-animation-delay: -1s;
+  animation-delay: -1s;
+}
+
+.wpr-wave .wpr-rect4 {
+  -webkit-animation-delay: -0.9s;
+  animation-delay: -0.9s;
+}
+
+.wpr-wave .wpr-rect5 {
+  -webkit-animation-delay: -0.8s;
+  animation-delay: -0.8s;
+}
+
+@-webkit-keyframes wpr-waveStretchDelay {
+  0%,
+  40%,
+  100% {
+    -webkit-transform: scaleY(0.4);
+    transform: scaleY(0.4);
+  }
+  20% {
+    -webkit-transform: scaleY(1);
+    transform: scaleY(1);
+  }
+}
+
+@keyframes wpr-waveStretchDelay {
+  0%,
+  40%,
+  100% {
+    -webkit-transform: scaleY(0.4);
+    transform: scaleY(0.4);
+  }
+  20% {
+    -webkit-transform: scaleY(1);
+    transform: scaleY(1);
+  }
 }
 
 

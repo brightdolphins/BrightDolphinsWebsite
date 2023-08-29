@@ -231,14 +231,16 @@ class OutputBuffer {
 
     public function closeOutputBuffers() {
 
-        $handlers = ob_list_handlers();
-        $callback = self::class . '::outputCallback';
-        if (in_array($callback, $handlers)) {
-            for ($i = count($handlers) - 1; $i >= 0; $i--) {
-                ob_end_flush();
+        if (!defined('WC_DOING_AJAX') || !WC_DOING_AJAX) {
+            $handlers = ob_list_handlers();
+            $callback = self::class . '::outputCallback';
+            if (in_array($callback, $handlers)) {
+                for ($i = count($handlers) - 1; $i >= 0; $i--) {
+                    ob_end_flush();
 
-                if ($handlers[$i] === $callback) {
-                    break;
+                    if ($handlers[$i] === $callback) {
+                        break;
+                    }
                 }
             }
         }

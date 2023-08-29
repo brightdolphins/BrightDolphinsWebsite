@@ -196,6 +196,17 @@ class Shortcode {
             }
         });
 
+        /**
+         * @see SSDEV-3871
+         */
+        add_filter('render_block_nextend/smartslider3', function ($block_content, $parsed_block) {
+            if (!empty($parsed_block['attrs']['slider'])) {
+                return self::render(array('slider' => $parsed_block['attrs']['slider']));
+            }
+
+            return '';
+        }, 10, 2);
+
     }
 
     public static function forceIframe($reason, $disablePointer = false) {
@@ -356,8 +367,8 @@ class Shortcode {
                     $slideTo = Request::$GET->getInt($parameters['get']);
                 }
 
-                if ($slideTo) {
-                    echo wp_kses("<script>window['ss" . $parameters['slider'] . "'] = " . ($slideTo - 1) . ";</script>", Sanitize::$assetTags);
+                if ($slideTo && is_numeric($parameters['slider']) && intval($parameters['slider']) > 0) {
+                    echo wp_kses("<script>window['ss" . intval($parameters['slider']) . "'] = " . ($slideTo - 1) . ";</script>", Sanitize::$assetTags);
                 }
 
                 $applicationTypeFrontend = ApplicationSmartSlider3::getInstance()

@@ -38,6 +38,17 @@ class AssetInjector {
 
             $this->addInjectCSSComment();
 
+            add_filter('block_editor_settings_all', function ($settings) {
+                $this->removeInjectCSSComment();
+
+                return $settings;
+            }, -1);
+            add_filter('block_editor_settings_all', function ($settings) {
+                $this->addInjectCSSComment();
+
+                return $settings;
+            }, 1000000);
+
             add_filter('wordpress_prepare_output', array(
                 $this,
                 'prepareOutput'

@@ -23,6 +23,7 @@ class WPR_Conditions_Manager {
         // Custom
         if ( wpr_fs()->can_use_premium_code() && defined('WPR_ADDONS_PRO_VERSION') ) {
 	        if ( !empty($conditions) ) {
+                $conditions['caller-header-footer'] = ['true'];
 
 				// Archive Pages (includes search)
 				if ( !is_null( \WprAddonsPro\Classes\Pro_Modules::archive_templates_conditions( $conditions ) ) ) {
@@ -45,6 +46,10 @@ class WPR_Conditions_Manager {
         	if ( 'header' === $template_type || 'footer' === $template_type || is_singular('wpr_mega_menu') ) {
         		$template = NULL;
         	}
+        }
+
+        if ( !current_user_can('administrator') && ('maintenance' == get_option('elementor_maintenance_mode_mode') || 'coming_soon' == get_option('elementor_maintenance_mode_mode')) ) {
+            $template = NULL;
         }
 
 	    return $template;

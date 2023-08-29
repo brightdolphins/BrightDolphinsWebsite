@@ -42,10 +42,11 @@ class Images_Comparison_Widget extends Widget_Base {
 	public function __construct( $data = array(), $args = null ) {
 		parent::__construct( $data, $args );
 
-		wp_register_script( 'images-comparison', EAC_ADDONS_URL . 'assets/js/comparison/images-comparison.min.js', array( 'jquery' ), '1.0.0', true );
-		wp_register_script( 'eac-images-comparison', EAC_Plugin::instance()->get_register_script_url( 'eac-images-comparison' ), array( 'jquery', 'elementor-frontend' ), '1.0.0', true );
+		wp_register_script( 'eac-imagesloaded', EAC_ADDONS_URL . 'assets/js/isotope/imagesloaded.pkgd.min.js', array( 'jquery' ), '4.1.4', true );
+		wp_register_script( 'images-comparison', EAC_Plugin::instance()->get_script_url( 'assets/js/comparison/images-comparison' ), array( 'jquery' ), '1.0.0', true );
+		wp_register_script( 'eac-images-comparison', EAC_Plugin::instance()->get_script_url( 'assets/js/elementor/eac-images-comparison' ), array( 'jquery', 'elementor-frontend', 'eac-imagesloaded', 'images-comparison' ), '1.0.0', true );
 
-		wp_register_style( 'eac-images-comparison', EAC_Plugin::instance()->get_register_style_url( 'images-comparison' ), array( 'eac' ), '1.0.0' );
+		wp_register_style( 'eac-images-comparison', EAC_Plugin::instance()->get_style_url( 'assets/css/images-comparison' ), array( 'eac' ), '1.0.0' );
 	}
 
 	/**
@@ -251,12 +252,12 @@ class Images_Comparison_Widget extends Widget_Base {
 				array(
 					'name'    => 'ic_image_size',
 					'default' => 'medium',
-					'exclude' => array( 'medium_large' ),
+					//'exclude' => array( 'medium_large' ),
 				)
 			);
 
 			// @since 1.8.7 Ajout de l'alignement du container
-			/*
+			/**
 			$this->add_control('ic_image_alignement',
 				[
 					'label' => esc_html__('Alignement', 'eac-components'),
@@ -361,30 +362,26 @@ class Images_Comparison_Widget extends Widget_Base {
 
 		$id = 'a' . uniqid();
 		$this->add_render_attribute( 'data_diff', 'class', 'images-comparison' );
-		$this->add_render_attribute( 'data_diff', 'data-diff', $id );
+		$this->add_render_attribute( 'data_diff', 'data-diff', esc_attr( $id ) );
 		$this->add_render_attribute( 'data_diff', 'data-settings', $this->get_settings_json( $id ) );
 		?>
-		<div class="eac-images-comparison">
-			<div <?php echo $this->get_render_attribute_string( 'data_diff' ); ?>>
+		<div class="eac-images-comparison" role="img" aria-label="Image comparison">
+			<div <?php echo wp_kses_post( $this->get_render_attribute_string( 'data_diff' ) ); ?>>
 				<?php $this->render_galerie(); ?>
 			</div>
 		</div>
-		
+
 		<?php
 	}
 
 	protected function render_galerie() {
 		$settings = $this->get_settings_for_display();
-
-		/*
-		if($settings['ic_image_size_size'] === 'custom') { console_log($settings['ic_image_size_custom_dimension']['width']); }
-		else { console_log($settings['ic_image_size_size']); }*/
 		?>
 		<div>
-			<?php echo Group_Control_Image_Size::get_attachment_image_html( $settings, 'ic_image_size', 'ic_img_content_original' ); ?>
+			<?php echo Group_Control_Image_Size::get_attachment_image_html( $settings, 'ic_image_size', 'ic_img_content_original' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 		</div>
 		<div>
-			<?php echo Group_Control_Image_Size::get_attachment_image_html( $settings, 'ic_image_size', 'ic_img_content_modified' ); ?>
+			<?php echo Group_Control_Image_Size::get_attachment_image_html( $settings, 'ic_image_size', 'ic_img_content_modified' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 		</div>
 		<?php
 	}
@@ -395,7 +392,7 @@ class Images_Comparison_Widget extends Widget_Base {
 	 * Retrieve fields values to pass at the widget container
 	 * Convert on JSON format
 	 *
-	 * @uses      json_encode()
+	 * @uses      wp_json_encode()
 	 *
 	 * @return    JSON oject
 	 *
@@ -413,8 +410,7 @@ class Images_Comparison_Widget extends Widget_Base {
 			'data_title_right' => sanitize_text_field( $module_settings['ic_img_name_modified'] ),
 		);
 
-		$settings = json_encode( $settings );
-		return $settings;
+		return wp_json_encode( $settings );
 	}
 
 	protected function content_template() {}

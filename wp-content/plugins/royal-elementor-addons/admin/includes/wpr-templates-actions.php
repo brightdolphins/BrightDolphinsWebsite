@@ -184,7 +184,53 @@ class WPR_Templates_Actions {
 			'kit_id' => $kit
         ]);
         
-        echo json_encode($data);
+		$template = '' !== $kit ? $kit : $slug;
+		if ( $this->vts($slug) ) {
+			echo json_encode($data);
+		}
+	}
+
+	/**
+	** Validate Template
+	*/
+	public function vts( $template ) {
+		// Avoid Cache
+		$randomNum = substr(str_shuffle("0123456789abcdefghijklmnopqrstvwxyzABCDEFGHIJKLMNOPQRSTVWXYZ"), 0, 7);
+
+		$remote_file_url = 'https://royal-elementor-addons.com/library/vts.json?='. $randomNum;
+
+		$tmp_file = download_url( $remote_file_url );
+
+		$file_args = [
+			'name'     => 'vts.json',
+			'tmp_name' => $tmp_file,
+			'error'    => 0,
+			'size'     => filesize( $tmp_file ),
+		];
+
+		$defaults = array(
+			'test_form' => false,
+			'test_size' => true,
+			'test_upload' => true,
+			'mimes'  => [
+				'xml'  => 'text/xml',
+				'json' => 'text/plain',
+			],
+			'wp_handle_sideload' => 'upload',
+		);
+
+		$local_file = wp_handle_sideload( $file_args, $defaults );
+
+		if ( isset( $local_file['error'] ) ) {
+			return false;
+		}
+
+		$tmps = json_decode(file_get_contents($local_file['file']));
+
+		// Delete Import File
+		unlink( $local_file['file'] );
+
+		return in_array($template, $tmps) && !wpr_fs()->can_use_premium_code() ? false : true;
 	}
 
 	/**
@@ -291,7 +337,7 @@ class WPR_Templates_Actions {
 		    ] );
 		} );
 
-		// Elementor Search Data
+		// Templates Library Pages Search Data
 		$ajax->register_ajax_action( 'wpr_templates_library_search_data', function( $data ) {
 			// Freemius OptIn
 			if ( ! (wpr_fs()->is_registered() && wpr_fs()->is_tracking_allowed() || wpr_fs()->is_pending_activation() )) {
@@ -310,7 +356,26 @@ class WPR_Templates_Actions {
 		    ] );
 		} );
 
-		// Regenerate Extra Image Sizes
+		// Templates Library Blocks Search Data
+		$ajax->register_ajax_action( 'wpr_templates_library_blocks_search_data', function( $data ) {
+			// Freemius OptIn
+			if ( ! (wpr_fs()->is_registered() && wpr_fs()->is_tracking_allowed() || wpr_fs()->is_pending_activation() )) {
+				return;
+			}
+
+			if ( strlen($data['search_query']) > 25 ) {
+				return;
+			}
+
+			// Send Search Query
+		    wp_remote_post( 'https://reastats.kinsta.cloud/wp-json/templates-library-blocks-search/data', [
+		        'body' => [
+		            'search_query' => $data['search_query']
+		        ]
+		    ] );
+		} );
+
+		// Library Template Import Finished
 		$ajax->register_ajax_action( 'wpr_library_template_import_finished', function( $data ) {
 			Utilities::regenerate_extra_image_sizes();
 
@@ -319,14 +384,21 @@ class WPR_Templates_Actions {
 				return;
 			}
 
+			// Templates Library Import Block
+		    wp_remote_post( 'https://reastats.kinsta.cloud/wp-json/templates-library-blocks-import/data', [
+		        'body' => [
+		            'imported_block' => $data['block']
+		        ]
+		    ] );
+
 			if ( ! isset($data['kit']) ) {
 				return;
 			}
 
-			// Send Search Query
+			// Templates Library Import Template
 		    wp_remote_post( 'https://reastats.kinsta.cloud/wp-json/templates-library-import/data', [
 		        'body' => [
-		            'imported_template' => $data['kit'] .'-'. $data['template']
+		            'imported_template' => $data['kit'] .'-'. $data['template'] . ' *'. WPR_ADDONS_VERSION .'*'
 		        ]
 		    ] );
 		} );

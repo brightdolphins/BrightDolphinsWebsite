@@ -18,6 +18,7 @@ class UniteCreatorWpmlIntegrate{
 	private $isInited = false;
 	public $activeLanguage;
 	private static $objWpmlSingleton;
+	public static $arrWidgetItemsData = array();
 	
 	
 	/**
@@ -129,5 +130,151 @@ class UniteCreatorWpmlIntegrate{
 		
 		return($alternateThumbID);
 	}
+	
+	
+	/**
+	 * get addon params translatable fields
+	 */
+	private function getTranslatableParamsFields($widgetTitle, $params, $isItems = false){
+		
+		$arrFields = array();
+				
+		foreach($params as $param){
+			
+			$type = UniteFunctionsUC::getVal($param, "type");
+			
+			$editorType = null;
+						
+			switch($type){
+				case UniteCreatorDialogParam::PARAM_TEXTFIELD:
+					$editorType = "LINE";
+				break;
+				case UniteCreatorDialogParam::PARAM_EDITOR:
+					$editorType = "VISUAL";
+				break;
+				case UniteCreatorDialogParam::PARAM_TEXTAREA:
+					$editorType = "AREA";
+				break;
+				case UniteCreatorDialogParam::PARAM_LINK:
+					$editorType = "LINK";		//this code makes a fatal error
+				break;
+			}
+			
+			if(empty($editorType))
+				continue;
+			
+			//add field 
+			
+			$paramTitle = UniteFunctionsUC::getVal($param, "title");
+			
+			$fieldType = $widgetTitle." - ".$paramTitle;
+			
+			if($isItems == true)
+				$fieldType = $widgetTitle." - Items - ".$paramTitle;
+			
+			$fieldName = UniteFunctionsUC::getVal($param, "name");
+			
+			if($editorType == "LINK")
+				$fieldName .= ">url";
+			
+			$arrField = array();
+			$arrField["field"] = $fieldName;
+			$arrField["type"] = $fieldType;
+			$arrField["editor_type"] = $editorType;
+			
+			$arrFields[] = $arrField;
+			
+		}
+		
+		return($arrFields);
+	}
+	
+	
+	/**
+	 * get translatable fields
+	 */
+	public function getTranslatableElementorWidgetsFields($arrAddonsRecords){
+				
+		$arrOutput = array();
+		
+		if(empty($arrAddonsRecords))
+			return(false);
+		
+		
+		foreach($arrAddonsRecords as $record){
+			
+			$addon = new UniteCreatorAddon();
+			$addon->initByDBRecord($record);
+						
+			$params = $addon->getParams();
+			
+			if(empty($params))
+				continue;
+			
+			$widgetName = "ucaddon_".$addon->getAlias();
+			
+			$widgetTitle = $addon->getTitle();
+			
+			$arrFields = $this->getTranslatableParamsFields($widgetTitle, $params);
+			
+			$hasItems = $addon->isHasSimpleItems();
+			
+			$arrItemsFields = null;
+			
+			if($hasItems == true){
+				
+				$paramsItems = $addon->getParamsItems();
+				
+				$arrItemsFields = $this->getTranslatableParamsFields($widgetTitle, $paramsItems, true);
+				
+			}
+			
+			if(empty($arrFields) && empty($arrItemsFields))
+				continue;
+
+			//prepare the output
+			
+			$output = array();
+			
+			if(!empty($arrFields))
+				$output["fields"] = $arrFields;
+
+			//translation module - for items
+			
+			$isWPMLExists = self::isWpmlExists();
+			
+			if(!empty($arrItemsFields)){
+				
+				if($isWPMLExists == true)
+					require_once 'wpml_translation_module.class.php';
+				
+				$addonName = $addon->getName();
+				
+				self::$arrWidgetItemsData[$addonName] = $arrItemsFields;
+				
+				$className = "UE_WPML_INTEGRATION__".$addonName;
+				
+				if($isWPMLExists == true){
+					$code = "class {$className} extends UNITE_CREATOR_WPML_Translation_Module{}";
+					eval($code);
+				}
+				
+				$output["integration-class"] = $className;
+				
+			}
+			
+			if(empty($output))
+				continue;
+			
+			$output["conditions"] = array("widgetType" => $widgetName);
+							
+			$arrOutput[$widgetName] = $output;
+			
+		}
+		
+		
+		return($arrOutput);
+	}
+	
 	
 }

@@ -46,6 +46,19 @@ class UniteCreatorViewElementorSettings extends UniteCreatorSettingsView{
 		if(GlobalsUC::$inDev == true)	//dynamic visibility
 			$objSettings->updateSettingProperty("enable_dynamic_visibility", "hidden", "false");
 		
+		$isWpmlExists = UniteCreatorWpmlIntegrate::isWpmlExists();
+
+		if(GlobalsUC::$inDev == true)
+			$isWpmlExists = true;
+		
+		//enable wpml integration settings
+		if($isWpmlExists == true){
+			
+			$objSettings->updateSettingProperty("wpml_heading", "hidden", "false");
+			$objSettings->updateSettingProperty("wpml_button", "hidden", "false");
+			
+		}
+			
 		return($objSettings);
 	}
 	

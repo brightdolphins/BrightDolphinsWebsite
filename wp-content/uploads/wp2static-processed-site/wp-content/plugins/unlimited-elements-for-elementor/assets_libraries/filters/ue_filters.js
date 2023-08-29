@@ -6,6 +6,7 @@ function UEDynamicFilters(){
 	var g_remote = null, g_lastSyncGrids;
 	
 	var g_showDebug = false;
+	var g_debugInitMode = false;
 	
 	var g_types = {
 		PAGINATION:"pagination",
@@ -13,7 +14,8 @@ function UEDynamicFilters(){
 		TERMS_LIST:"terms_list",
 		SEARCH: "search",
 		SELECT: "select",
-		SUMMARY: "summary"
+		SUMMARY: "summary",
+		GENERAL: "general"
 	};
 	
 	var g_vars = {
@@ -31,9 +33,14 @@ function UEDynamicFilters(){
 		EVENT_BEFORE_REFRESH: "uc_before_ajax_refresh",	   //on grid
 		EVENT_AJAX_REFRESHED: "uc_ajax_refreshed",	   //on grid
 		EVENT_AJAX_REFRESHED_BODY: "uc_ajax_refreshed_body",	   //on grid
+		
 		EVENT_INIT_FILTER:"init_filter",
+		EVENT_INIT_FILTER_TYPE:"init_filter_type",
+		EVENT_GET_FILTER_DATA:"get_filter_data",
+		
 		ACTION_REFRESH_GRID: "uc_refresh",	//listen on grid
 		ACTION_GET_FILTERS_URL: "uc_get_filters_url",	//listen on grid
+		ACTION_FILTER_CHANGE: "uc_filter_change",	//listen on grid
 		
 		REFRESH_MODE_PAGINATION: "pagination",
 		REFRESH_MODE_LOADMORE: "loadmore",
@@ -253,7 +260,7 @@ function UEDynamicFilters(){
 		
 		//in case there are nothing:
 		var objGrids = getAllGrids();
-				
+		
 		if(objGrids.length == 0)
 			return(null);
 		
@@ -456,7 +463,7 @@ function UEDynamicFilters(){
 	/**
 	 * get element layout data
 	 */
-	function getElementLayoutData(objElement){
+	function getElementLayoutData(objElement, addSyncedGrids){
 		
 		if(!objElement || objElement.length == 0)
 			throw new Error("Element not found");
@@ -474,15 +481,26 @@ function UEDynamicFilters(){
 			throw new Error("widget id not found");
 		
 		//get synced grids
+		var objSyncedData = null;
 		
-		var objSyncedData = getSyncedWidgetData(objElement);
+		//add sync if allowed and available
 		
-		if(g_showDebug && objSyncedData){
+		if(addSyncedGrids){
 			
-			trace("sync data");
-			trace(objSyncedData);
+			var objSyncedData = getSyncedWidgetData(objElement);
+			
+			if(g_showDebug && objSyncedData){
+				
+				trace("sync data");
+				trace(objSyncedData);
+			}
+		}else{
+			
+			if(g_showDebug)
+				trace("skip sync grid");
+			
 		}
-		
+
 		//get layout id
 		var objLayout = objWidget.parents(".elementor");
 		
@@ -543,6 +561,23 @@ function UEDynamicFilters(){
 	
 	function ________FILTERS_______________(){}
 	
+	/**
+	 * get the parent
+	 */
+	function getFiltersParent(objFilters){
+		
+		//init the events
+		var objParent = objFilters.parents(".elementor");
+		
+		if(objParent.length > 1)
+			objParent = jQuery(objParent[0]);
+		
+		if(objParent.length == 0)
+			objParent = objFilters.parents("body");
+		
+		return(objParent);
+	}
+	
 	
 	/**
 	 * get filter type
@@ -570,7 +605,7 @@ function UEDynamicFilters(){
 	 * clear non main grid filters
 	 * hide children and just clear the main filters
 	 */
-	function clearChildFilters(objGrid, objCurrentFilter, isHideChildren){
+	function clearChildFilters(objGrid, objCurrentFilter, isHideChildren, termID){
 		
 		var objFilters = objGrid.data("filters");
 		
@@ -581,7 +616,7 @@ function UEDynamicFilters(){
 			return(false);
 		
 		var currentFilterID = objCurrentFilter.attr("id");
-		
+				
 		jQuery.each(objFilters, function(index, filter){
 			
 			var objFilter = jQuery(filter);
@@ -591,31 +626,51 @@ function UEDynamicFilters(){
 				return(true);
 						
 			var role = objFilter.data("role");
-			
-			if(role != "child" && role != "main")
+						
+			if(role != "child" && role != "main" && role != "term_child")
 				return(true);
 			
+			var isHide = false;
+			var isShow = false;
+			
 			switch(role){
+				case "term_child":
+					if(isHideChildren == true)
+						isHide = true;
+						
+					var linkedTermID = objFilter.data("childterm");
+					
+					if(linkedTermID == termID){		//show the filter
+						
+						objFilter.removeClass(g_vars.CLASS_HIDDEN);
+						objFilter.removeClass(g_vars.CLASS_INITING);
+						objFilter.removeClass(g_vars.CLASS_INITING_HIDDEN);
+					}else{
+						isHide = true;
+					}
+						
+				break;
 				case "child":
 					
-					if(isHideChildren == true){
-						
-						//hide the child filters and not refresh
-						
-						objFilter.addClass(g_vars.CLASS_HIDDEN);	
-					}
+					if(isHideChildren == true)
+						isHide = true;
 					else{
-						
 						//hide the filters and refresh
 						
 						objFilter.removeClass(g_vars.CLASS_HIDDEN);
 						
 						objFilter.addClass(g_vars.CLASS_INITING);
 						objFilter.addClass(g_vars.CLASS_INITING_HIDDEN);
+						
 					}
 					
 				break;
 			}
+						
+			//hide the child filters and not refresh
+			
+			if(isHide == true)
+				objFilter.addClass(g_vars.CLASS_HIDDEN);	
 						
 			clearFilter(objFilter);
 						
@@ -645,7 +700,9 @@ function UEDynamicFilters(){
 				objSelect.val("");
 				
 			break;
-
+			case g_types.GENERAL:
+				objFilter.trigger("clear_filter");
+			break;
 		}
 		
 	}
@@ -764,9 +821,15 @@ function UEDynamicFilters(){
 		if(!numItems)
 			numItems = null;
 		
+		//affect only single grids
+		
+		var isSingleGridOnly = objFilter.data("affect_single_grid");
+		
+			
 		var data = {};
 		data.offset = nextOffset;
 		data.numItems = numItems;
+		data.singlegrid = isSingleGridOnly;
 		
 		return(data);
 	}
@@ -849,7 +912,7 @@ function UEDynamicFilters(){
 		var className = "uc-selected";
 		
 		event.preventDefault();
-				
+		
 		var objLink = jQuery(this);
 		
 		if(objLink.hasClass("uc-grid-filter")){
@@ -887,6 +950,7 @@ function UEDynamicFilters(){
 			throw new Error("Grid not found");
 		
 		//if main filter - clear other filters
+		
 		var filterRole = objTermsFilter.data("role");
 		
 		var termID = objLink.data("id");
@@ -894,9 +958,9 @@ function UEDynamicFilters(){
 		var isHideChildren = false;
 		if(!termID)
 			isHideChildren = true;
-				
+		
 		if(filterRole == "main")
-			clearChildFilters(objGrid, objTermsFilter, isHideChildren);
+			clearChildFilters(objGrid, objTermsFilter, isHideChildren, termID);
 		
 		//refresh grid		
 		refreshAjaxGrid(objGrid);
@@ -952,20 +1016,9 @@ function UEDynamicFilters(){
 		if(objSelected.length > 1)
 			objSelected = jQuery(objSelected[0]);
 		
-		var id = objSelected.data("id");
-		var slug = objSelected.data("slug");
-		var taxonomy = objSelected.data("taxonomy");
+		var objTerm = getFilterElementData(objSelected);
 		
-		if(!taxonomy)
-			return(null);
-		
-		var objTerm = {
-			"id": id,
-			"slug": slug,
-			"taxonomy": taxonomy
-		};
-		
-		return(objTerm);
+		return(objTerm);		
 	}
 
 	/**
@@ -996,15 +1049,28 @@ function UEDynamicFilters(){
 	
 	function ________GENERAL_FILTER_______________(){}
 	
+	/**
+	 * init general filter
+	 */
+	function initGeneralFilter(objFilter){
+		
+		objFilter.on(g_vars.ACTION_FILTER_CHANGE, onGeneralFilterChange);
+		
+		
+	}
+	
 	
 	/**
 	 * on general filter change
 	 */
-	function onFilterChange(){
+	function onGeneralFilterChange(obj, params){
+		
+		var isRefresh = getVal(params, "refresh");
 		
 		var objFilter = jQuery(this);
 		
-		setNoRefreshFilter(objFilter);
+		if(isRefresh !== true)
+			setNoRefreshFilter(objFilter);
 		
 		var objGrid = objFilter.data("grid");
 				
@@ -1054,6 +1120,11 @@ function UEDynamicFilters(){
 			case g_types.TERMS_LIST:
 				
 				termListSelectItems(objFilter, arrTerms);
+				
+			break;
+			case g_types.GENERAL:
+				
+				objFilter.trigger("uc_select_items", arrTerms);
 				
 			break;
 		}
@@ -1116,65 +1187,170 @@ function UEDynamicFilters(){
 	
 	function ________DATA_______________(){}
 	
+	
+	/**
+	 * handle term, add to taxonomy array
+	 */
+	function buildTermsQuery_handleTerm(objTerm, arrTax1){
+		
+		var taxonomy = objTerm["taxonomy"];
+		var slug = objTerm["slug"];
+		
+		var objTax = getVal(arrTax1, taxonomy);
+		if(!objTax)
+			objTax = {};
+		
+		objTax[slug] = true;
+		arrTax1[taxonomy] = objTax;
+		
+		return(arrTax1);
+	}
 	 	
+	/**
+	 * get slugs string
+	 */
+	function buildTermsQuery_getStrSlugs(objSlugs, isGroup){
+				
+		var strSlugs = "";
+		
+		var moreThenOne = false;
+		var isEndSlugFound = false;
+		
+		for (var slug in objSlugs){
+						
+			if(slug === "__ucand__"){
+				isEndSlugFound = true;
+				continue
+			}
+			
+			if(strSlugs){
+				moreThenOne = true;
+				strSlugs += ".";
+			}
+					
+			strSlugs += slug;
+		}
+				
+		//add "and"
+		
+		var addAnd = (moreThenOne == true && isGroup !== true || isEndSlugFound);
+		
+		if(addAnd)
+			strSlugs += ".*";
+		
+		return(strSlugs);
+	}
+	
+	
 	/**
 	 * build terms query
 	 * ucterms=product_cat~shoes.dress;cat~123.43;
 	 */
 	function buildTermsQuery(arrTerms){
 		
+		var isDebug = false;
+		
 		var query = "";
 				
 		//break by taxonomy
+		
 		var arrTax = {};
+		var arrGroupTax = {};
+		
+		if(isDebug == true){
+			trace("arr terms");
+			trace(arrTerms);
+		}
+		
 		jQuery.each(arrTerms, function(index, objTerm){
-			
-			var taxonomy = objTerm["taxonomy"];
-			var slug = objTerm["slug"];
-			
-			var objTax = getVal(arrTax, taxonomy);
-			if(!objTax)
-				objTax = {};
-			
-			objTax[slug] = true;
-			arrTax[taxonomy] = objTax;
-			
+						
+			//group term
+			if(jQuery.isArray(objTerm) && objTerm.length != 0){
+				
+				jQuery.each(objTerm, function(index, groupTerm){
+					
+					arrGroupTax = buildTermsQuery_handleTerm(groupTerm, arrGroupTax);
+					
+				});
+				
+			}else{	//single term
+				
+				arrTax = buildTermsQuery_handleTerm(objTerm, arrTax);
+			}
+						
 		});
+		
+		if(isDebug == true){
+			trace("first arr tax");
+			trace(arrTax);
+		}
 		
 		//combine the query
 		
-		if(!arrTax)
+		if(jQuery.isEmptyObject(arrTax) && jQuery.isEmptyObject(arrGroupTax))
 			return(null);
 		
-		jQuery.each(arrTax,function(taxonomy,objSlugs){
-			
-			var strSlugs = "";
+		
+		//build group slugs
+		jQuery.each(arrGroupTax,function(taxonomy, objSlugs){
 						
-			var moreThenOne = false;
-			for (var slug in objSlugs){
+			var strSlugs = buildTermsQuery_getStrSlugs(objSlugs, true);
+			
+			strAdd = "|"+strSlugs+"|";
+			
+			var objTax = getVal(arrTax, taxonomy);
+			if(!objTax){
+				objTax = {};
 				
-				if(strSlugs){
-					moreThenOne = true;
-					strSlugs += ".";
-				}
-				
-				strSlugs += slug;
+				strAdd = strSlugs;	
 			}
 			
-			//add "and"
-			if(moreThenOne == true)
-				strSlugs += ".*";
+			objTax[strSlugs] = true;
+			
+			arrTax[taxonomy] = objTax;
+		});
+		
+		
+		jQuery.each(arrTax,function(taxonomy, objSlugs){
+			
+			var strSlugs = buildTermsQuery_getStrSlugs(objSlugs);
 			
 			var strTax = taxonomy+"~"+strSlugs;
-						
+			
 			if(query)
 				query += ";";
 			
 			query += strTax;
 			
 		});
-				
+		
+		if(isDebug == true){
+			trace("query");
+			trace(arrTax);
+		}
+		
 		return(query);
+	}
+	
+	/**
+	 * get selected filter element data
+	 */
+	function getFilterElementData(objElement){
+		
+		var id = objElement.data("id");
+		var slug = objElement.data("slug");
+		var taxonomy = objElement.data("taxonomy");
+		
+		if(!taxonomy)
+			return(null);
+		
+		var objTerm = {
+			"id": id,
+			"slug": slug,
+			"taxonomy": taxonomy
+		};
+		
+		return(objTerm);
 	}
 	
 	
@@ -1272,12 +1448,33 @@ function UEDynamicFilters(){
 	 */
 	function operateAjax_setHtmlGrid(response, objGrid, isLoadMore){
 		
+		if(g_showDebug == true){
+			trace("set html grid, response: ");
+			trace(response);
+			
+			trace("obj grid:");
+			trace(objGrid);
+		}
+		
 		if(objGrid.length == 0)
 			return(false);
-				
+						
 		var objItemsWrapper = getGridItemsWrapper(objGrid);
 		var objItemsWrapper2 = getGridItemsWrapper(objGrid, true);
 		
+		if(g_showDebug == true){
+			trace("items wrapper 1: ");
+			trace(objItemsWrapper);
+			
+			trace("items wrapper 2:");
+			trace(objItemsWrapper2);
+		}
+		
+		
+		if(!objItemsWrapper || objItemsWrapper.length == 0)
+			throw new Error("Missing items wrapper: .uc-items-wrapper");
+		
+	
 		operateAjax_setHtmlDebug(response, objGrid);
 		
 		//set grid items
@@ -1285,7 +1482,7 @@ function UEDynamicFilters(){
 		//if init filters mode, and no items response - don't set
 		if(response.hasOwnProperty("html_items") == false)
 			return(false);
-		
+				
 		var htmlItems = getVal(response, "html_items");
 		
 		var htmlItems2 = null;
@@ -1305,7 +1502,7 @@ function UEDynamicFilters(){
 		
 		//show / hide empty message if available and empty response
 		var objEmptyMessage = getGridEmptyMessage(objGrid);
-		
+				
 		if(objEmptyMessage){
 			if(htmlItems == "")
 				objEmptyMessage.show();
@@ -1314,19 +1511,21 @@ function UEDynamicFilters(){
 		}
 		
 		//set the query data
-		var queryData = getVal(response, "query_data");
+		var queryDataOriginal = getVal(response, "query_data");
 		var queryIDs = getVal(response,"query_ids");
 		
-		//add to old data
+		var queryData = jQuery.extend({}, queryDataOriginal);
 		
+		//add to old data
+				
 		if(isLoadMore == true){
-						
+			
 			var currentQueryData = objGrid.attr("querydata");
+			
 			var objCurrentData = jQuery.parseJSON(currentQueryData);
 			var currentNumPosts = getVal(objCurrentData, "count_posts");
 			
 			queryData.count_posts += currentNumPosts;
-			
 			
 			var currentQueryIDs = objGrid.data("postids");
 			
@@ -1334,12 +1533,11 @@ function UEDynamicFilters(){
 				queryIDs = currentQueryIDs + "," + queryIDs;
 		}
 		
-		
 		//query data replace
 		
-		objGrid.removeAttr("querydata");
-		
 		if(queryData){
+			
+			objGrid.removeAttr("querydata");
 			
 			var jsonData = JSON.stringify(queryData);
 			objGrid.attr("querydata", jsonData);
@@ -1361,10 +1559,15 @@ function UEDynamicFilters(){
 			return(false);
 		}
 		
+		
 		if(!htmlItems2)
 			htmlItems2 = "";
 		
 		if(isLoadMore === true){
+			
+			if(g_showDebug == true){
+				trace("append load more");
+			}
 			
 			objItemsWrapper.append(htmlItems);
 			
@@ -1372,9 +1575,10 @@ function UEDynamicFilters(){
 				objItemsWrapper.append(htmlItems2);
 			
 		}else{
+			
 			objItemsWrapper.html(htmlItems);
 			
-			if(objItemsWrapper2)
+			if(objItemsWrapper2 && objItemsWrapper2.length)
 				objItemsWrapper2.html(htmlItems2);
 			
 		}
@@ -1386,13 +1590,20 @@ function UEDynamicFilters(){
 	 * refresh synced grids
 	 */
 	function operateAjax_setHtmlSyngGrids(response, objGrid, isLoadMore){
-		
-		var objSyncWidgetsResponse = getVal(response, "html_sync_widgets");
 				
+		var objSyncWidgetsResponse = getVal(response, "html_sync_widgets");
+		
+		if(g_showDebug == true){
+			trace("set html sync grids");
+			trace(objSyncWidgetsResponse);
+		}
+		
+		var queryData = getVal(response,"query_data");
+		
 		if(!objSyncWidgetsResponse)
 			return(false);
 		
-		jQuery.each(objSyncWidgetsResponse, function(elementID, response){
+		jQuery.each(objSyncWidgetsResponse, function(elementID, childResponse){
 			
 			var objGridWidget = getGridFromElementorElementID(elementID);
 			
@@ -1401,11 +1612,13 @@ function UEDynamicFilters(){
 			
 			objGridWidget.removeClass(g_vars.CLASS_REFRESH_SOON);
 			
-			operateAjax_setHtmlGrid(response, objGridWidget, isLoadMore);
+			childResponse.query_data = queryData;
 			
-			objGrid.trigger(g_vars.EVENT_AJAX_REFRESHED);
+			operateAjax_setHtmlGrid(childResponse, objGridWidget, isLoadMore);
+						
+			objGridWidget.trigger(g_vars.EVENT_AJAX_REFRESHED);
 			g_objBody.trigger(g_vars.EVENT_AJAX_REFRESHED_BODY, [objGridWidget]);
-			
+						
 		});
 		
 	}
@@ -1643,6 +1856,13 @@ function UEDynamicFilters(){
 	 * small ajax request
 	 */
 	function ajaxRequest(ajaxUrl, action, objData, onSuccess){
+		
+		
+		if(g_debugInitMode === true){
+			
+			trace("debug init mode - skip request");
+			return(false);
+		}
 		
 		if(g_showDebug == true){
 			trace("ajax request");
@@ -1933,8 +2153,8 @@ function UEDynamicFilters(){
 		});
 		
 		showMultipleAjaxLoaders(objFiltersToReload, true);
-		
-		if(g_lastSyncGrids)
+				
+		if(g_lastSyncGrids && isLoadMore !== true)
 			showMultipleAjaxLoaders(g_lastSyncGrids, true);
 		
 		
@@ -2129,13 +2349,18 @@ function UEDynamicFilters(){
 		var objTaxIDs = {};
 		var strSelectedTerms = "";
 		var search = "";
+		var orderby = null;
+		var orderby_metaname = null;
+		var orderby_metatype = null;
+		var orderdir = null;
+		var addSyncedGrids = true;
 		
 		
 		//get ajax options
 		jQuery.each(objFilters, function(index, objFilter){
 			
 			var isNoRefresh = objFilter.data("uc_norefresh");
-			
+						
 			var type = getFilterType(objFilter);
 			
 			if(g_showDebug == true){
@@ -2183,6 +2408,11 @@ function UEDynamicFilters(){
 						offset = loadMoreData.offset;
 						numItems = loadMoreData.numItems;
 						
+						var isSingleGrid = loadMoreData.singlegrid;
+						
+						if(isSingleGrid == true)
+							addSyncedGrids = false;
+												
 						if(!offset)
 							urlAjax = null;
 						
@@ -2242,10 +2472,62 @@ function UEDynamicFilters(){
 					search = search.trim();
 					
 				break;
+				case g_types.GENERAL:
+					
+					var filterDataObj = {};
+					objFilter.trigger(g_vars.EVENT_GET_FILTER_DATA, filterDataObj);
+					
+					var filterData = getVal(filterDataObj,"output");
+					
+					//add terms
+					var dataTerms = getVal(filterData,"terms");
+					
+					if(dataTerms && dataTerms.length){
+						
+						if(dataTerms.length == 1)		//single term
+							arrTerms.push(dataTerms[0]);
+						else{
+							
+							var operator = getVal(filterData,"operator");
+							
+							if(operator == "and"){
+								
+								var firstTerm = dataTerms[0];
+								
+								var objOperatorTerm = {
+										taxonomy: firstTerm.taxonomy,
+										slug: "__ucand__",
+										id:null
+								};
+								
+								dataTerms.push(objOperatorTerm);
+							}
+																				
+							arrTerms.push(dataTerms);	//multiple (grouping)
+							
+						}
+						
+					}
+					
+					//handle sort
+					var argOrderby = getVal(filterData,"orderby");
+					if(argOrderby && argOrderby != "default"){
+						orderby = argOrderby;
+						
+						orderby_metaname = getVal(filterData,"metaname");
+						orderby_metatype = getVal(filterData,"metatype");
+					}
+					
+					var argOrderDir = getVal(filterData,"orderdir");
+					if(argOrderDir && argOrderDir != "default")
+						orderdir = argOrderDir;
+					
+				break;
 				default:
 					throw new Error("Unknown filter type: "+type);
 				break;
 			}
+			
 			
 			//handle filters init mode
 			
@@ -2257,26 +2539,30 @@ function UEDynamicFilters(){
 					isNoRefresh = true;
 			}
 			
+			
 			//if hidden - no refresh
 			var isFilterHidden = objFilter.hasClass(g_vars.CLASS_HIDDEN);
 			if(isFilterHidden == true)
 				isNoRefresh = true;
+			
 			
 			objFilter.data("uc_norefresh",false);
 			
 			var filterRole = objFilter.data("role");
 			
 			var isMainFilter = (filterRole == "main");
+			var isTermChild = (filterRole == "term_child");
 			
 			//add to refresh filter if it's qualify
 			
 			var isRefresh = true;
 			
-			if(isFiltersInitMode == false && isMainFilter === true)
+			if(isFiltersInitMode == false && (isMainFilter === true || isTermChild == true))
 				isRefresh = false;
 			
 			if(isNoRefresh === true)
 				isRefresh = false;
+			
 			
 			if(isRefresh == true){
 				
@@ -2327,13 +2613,24 @@ function UEDynamicFilters(){
 		if(urlAjax == null)
 			return(null);
 		
-		var dataLayout = getElementLayoutData(objGrid);
+		var dataLayout = getElementLayoutData(objGrid, addSyncedGrids);
 		
 		var widgetID = dataLayout["widgetid"];
 		var layoutID = dataLayout["layoutid"];
 		
-		var syncedWidgetIDs = getVal(dataLayout,"synced_widgetids");
-		g_lastSyncGrids = getVal(dataLayout,"synced_grids");
+		//disable synced
+		
+		if(addSyncedGrids == false){
+			
+			var syncedWidgetIDs = false;
+			g_lastSyncGrids = null;
+			
+		}else{
+			
+			var syncedWidgetIDs = getVal(dataLayout,"synced_widgetids");
+			g_lastSyncGrids = getVal(dataLayout,"synced_grids");
+		}
+		
 		
 		var urlFilterString = "";
 		
@@ -2369,6 +2666,30 @@ function UEDynamicFilters(){
 			urlFilterString = addUrlParam(urlFilterString, "ucterms="+strTerms);
 		}
 		
+		if(orderby){
+			
+			urlAjax += "&ucorderby="+orderby;
+			urlReplace = addUrlParam(urlReplace, "ucorderby="+orderby);
+			
+			if(orderby_metaname){
+				urlAjax += "&ucorderby_meta="+orderby_metaname;
+				urlReplace = addUrlParam(urlReplace, "ucorderby_meta="+orderby_metaname);				
+			}
+			
+			if(orderby_metatype){
+				urlAjax += "&ucorderby_metatype="+orderby_metatype;
+				urlReplace = addUrlParam(urlReplace, "ucorderby_metatype="+orderby_metatype);				
+			}
+			
+		}
+		
+		if(orderdir){
+			urlAjax += "&ucorderdir="+orderdir;
+			
+			urlReplace = addUrlParam(urlReplace, "ucorderdir="+orderdir);
+		}
+			
+		
 		if(isFiltersInitMode && strSelectedTerms)
 			urlAjax += "&ucinitselectedterms="+strSelectedTerms;
 		
@@ -2382,7 +2703,7 @@ function UEDynamicFilters(){
 		//search
 		if(search){
 			search = encodeURIComponent(search);
-			search = escape(search);
+			//search = escape(search);
 			urlAjax += "&ucs=" + search;
 			
 			urlFilterString = addUrlParam(urlFilterString, "ucs=" + search);
@@ -2390,7 +2711,7 @@ function UEDynamicFilters(){
 		
 		//avoid duplicates - exclude, disable the offset
 		
-		if(objGrid.hasClass("uc-avoid-duplicates")){
+		if(objGrid.hasClass("uc-avoid-duplicates") && isLoadMoreMode == true){
 			
 			var strExcludePostIDs = getExcludePostIDs();
 			
@@ -2430,10 +2751,7 @@ function UEDynamicFilters(){
 	function getExcludePostIDs(){
 		
 		var objGrids = jQuery(".uc-avoid-duplicates");
-		
-		if(objGrids.length == 0)
-			return("");
-		
+				
 		var strIDs = "";
 		
 		jQuery.each(objGrids, function(index, grid){
@@ -2528,7 +2846,7 @@ function UEDynamicFilters(){
 	function initFilter(objFilter, type){
 		
 		var objGrid = getClosestGrid(objFilter);
-				
+		
 		var error = "Filter Parent not found! Please put the posts element on the page, and turn on 'Enable Post Filtering' option on it";
 		
 		if(!objGrid){			
@@ -2554,7 +2872,11 @@ function UEDynamicFilters(){
 			case g_types.SELECT:
 				initSelectFilter(objFilter);
 			break;
+			case g_types.GENERAL:		//general filter events
+				initGeneralFilter(objFilter);
+			break;
 		}
+		
 		
 		objFilter.trigger(g_vars.EVENT_INIT_FILTER);
 		
@@ -2564,17 +2886,11 @@ function UEDynamicFilters(){
 	/**
 	 * init filter events by types
 	 */
-	function initFilterEventsByTypes(arrTypes, objFilters){
+	function initFilterEventsByTypes(arrTypes, arrGeneralTypes, objFilters, objParent){
 		
 		if(!arrTypes || arrTypes.length == 0)
 			return(false);
-		
-		//init the events
-		var objParent = objFilters.parents(".elementor");
-		
-		if(objParent.length > 1)
-			objParent = jQuery(objParent[0]);
-		
+				
 		for(var type in arrTypes){
 						
 			switch(type){
@@ -2604,16 +2920,32 @@ function UEDynamicFilters(){
 					
 				break;
 				case g_types.SUMMARY:
-					
 					//do nothing for now
-					
+				break;
+				case g_types.GENERAL:
+					//the init is from the general types
 				break;
 				default:
 					trace("init by type - unrecognized type: "+type);
 				break;
 			}
 		}
-				
+		
+		if(!arrGeneralTypes || arrGeneralTypes.length == 0)
+			return(false);
+		
+		
+		//init the general types
+		
+		for(var generalType in arrGeneralTypes){
+			
+			var objFirstFilter = arrGeneralTypes[generalType];
+			
+			objFirstFilter.trigger(g_vars.EVENT_INIT_FILTER_TYPE,[objParent]);
+			
+		}
+		
+		
 	}
 	
 	
@@ -2633,25 +2965,50 @@ function UEDynamicFilters(){
 			else
 				trace(objFilters);
 		}
+
+		var numFilters = objFilters.length;
 		
-		if(objFilters.length == 0)
+		if(numFilters == 0)
 			return(false);
 		
 		var arrTypes = {};
+		var arrGeneralTypes = {};
 		
+		var objParent = getFiltersParent(objFilters);
+				
 		jQuery.each(objFilters, function(index, filter){
 			
 			var objFilter = jQuery(filter);
 			var type = getFilterType(objFilter);
 			
+			//set single filter
+			if(numFilters === 1){
+				objFilter.attr("data-singlefilter",true);
+			}
+			
 			initFilter(objFilter, type);
-						
+			
+			//collect the general type
+			
 			arrTypes[type] = true;
+			
+			if(type == g_types.GENERAL){
+				var generalType = objFilter.data("generaltype");
+				
+				if(!generalType){
+					trace(objFilter);
+					throw new Error("The filter is missing generaltype data");
+				}
+				
+				if(arrGeneralTypes.hasOwnProperty(generalType) == false)
+					arrGeneralTypes[generalType] = objFilter;
+				
+			}
 			
 		});
 		
 		
-		initFilterEventsByTypes(arrTypes, objFilters);
+		initFilterEventsByTypes(arrTypes, arrGeneralTypes, objFilters, objParent);
 		
 	}
 	
@@ -2709,7 +3066,6 @@ function UEDynamicFilters(){
 		});
 		
 		
-		
 		objGrids.on(g_vars.ACTION_GET_FILTERS_URL,function(){
 			
 			var objGrid = jQuery(this);
@@ -2759,6 +3115,37 @@ function UEDynamicFilters(){
 		
 		
 	}
+
+	/**
+	 * validate the grids
+	 */
+	function validateGrid(objGrid){
+		
+		//check for |raw absence
+		
+		var isAjax = objGrid.data("ajax");
+		
+		if(isAjax === "'true'")
+			showElementError(objGrid, "This grid configured wrong way, missing |raw in html attributes");
+		
+	}
+	
+	
+	/**
+	 * add some validation to the grids
+	 */
+	function validateGrids(){
+		
+		var objGrids = getAllGrids();
+		
+		jQuery.each(objGrids, function(index, grid){
+			
+			var objGrid = jQuery(grid);
+			
+			validateGrid(objGrids);
+		});
+	}
+	
 	
 	/**
 	 * init
@@ -2790,8 +3177,10 @@ function UEDynamicFilters(){
 		//init remote object if exists
 		if(typeof UERemoteConnection == "function")
 			g_remote = window.ueRemoteConnection;
-			
-		//init the grid object
+		
+		validateGrids();
+		
+		//init the single grid object
 		initGridObject();
 		
 		initFilters();
@@ -2832,6 +3221,42 @@ function UEDynamicFilters(){
 		
 	};
 	
+	/**
+	 * get filter element data
+	 */
+	this.getFilterElementData = function(objElement){
+		
+		var objData = getFilterElementData(objElement);
+		
+		return(objData);
+	}
+	
+	/**
+	 * get filter parent query data
+	 */
+	this.getFilterGridQueryData = function(objFilter){
+		 
+     	 var objGrid = objFilter.data("grid");
+      	 if(!objGrid)
+           	return(null);
+      	  
+         var queryData = objGrid.attr("querydata");
+      	  if(!queryData)
+            return(null);
+      
+      	 var objData = jQuery.parseJSON(queryData);
+		
+		return(objData);
+	}
+	
+	/**
+	 * get value
+	 */
+	this.getVal = function(obj, name, defaultValue){
+		
+		return getVal(obj, name, defaultValue);
+	}
+	
 	
 	/**
 	 * init the class
@@ -2843,11 +3268,14 @@ function UEDynamicFilters(){
 			return(false);
 		}
 		
-		jQuery("document").ready(init);
+		jQuery("document").ready(function(){
+			setTimeout(init, 200);
+		});
 		
 	}
 	
 	construct();
+	
 }
 
 g_ucDynamicFilters = new UEDynamicFilters();

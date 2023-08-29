@@ -7,7 +7,9 @@
  * Description: Affiche un fichier PDF avec des otions dans une iFrame ou dans la Fancybox
  *
  * @since 1.8.9
- * @since 1.9.3 Envoie le nonce dans un champ 'input hidden'
+ * @since 2.1.1 Fix: L'icone bouton ne s'affiche pas
+ *              Fix: alignement bouton/texte
+ *              Ajout de l'attribut lazy load dans l'iframe
  */
 
 namespace EACCustomWidgets\Widgets;
@@ -35,14 +37,12 @@ class Simple_PDF_Viewer_Widget extends Widget_Base {
 	 * Constructeur de la class Simple_PDF_Viewer_Widget
 	 *
 	 * Enregistre les scripts et les styles
-	 *
-	 * @since 1.8.9
 	 */
 	public function __construct( $data = array(), $args = null ) {
 		parent::__construct( $data, $args );
 
-		wp_register_script( 'eac-pdf-viewer', EAC_Plugin::instance()->get_register_script_url( 'eac-pdf-viewer' ), array( 'jquery', 'elementor-frontend' ), '1.8.9', true );
-		wp_register_style( 'eac-pdf-viewer', EAC_Plugin::instance()->get_register_style_url( 'pdf-viewer' ), array( 'eac' ), '1.8.9' );
+		wp_register_script( 'eac-pdf-viewer', EAC_Plugin::instance()->get_script_url( 'assets/js/elementor/eac-pdf-viewer' ), array( 'jquery', 'elementor-frontend' ), '1.8.9', true );
+		wp_register_style( 'eac-pdf-viewer', EAC_Plugin::instance()->get_style_url( 'assets/css/pdf-viewer' ), array( 'eac' ), '1.8.9' );
 	}
 
 	/**
@@ -307,6 +307,7 @@ class Simple_PDF_Viewer_Widget extends Widget_Base {
 				)
 			);
 
+			/** @since 2.1.1 */
 			$this->add_control(
 				'fv_align_trigger',
 				array(
@@ -326,8 +327,13 @@ class Simple_PDF_Viewer_Widget extends Widget_Base {
 							'icon'  => 'eicon-h-align-right',
 						),
 					),
+					'selectors_dictionary' => array(
+						'left'   => '0 auto 0 0',
+						'center' => '0 auto',
+						'right'  => '0 0 0 auto',
+					),
 					'default'   => 'center',
-					'selectors' => array( '{{WRAPPER}} .fv-viewer__wrapper' => 'text-align: {{VALUE}};' ),
+					'selectors' => array( '{{WRAPPER}} .fv-viewer__wrapper-btn, {{WRAPPER}} .fv-viewer__wrapper-text' => 'margin: {{VALUE}};' ),
 				)
 			);
 
@@ -512,22 +518,30 @@ class Simple_PDF_Viewer_Widget extends Widget_Base {
 			$this->add_responsive_control(
 				'fv_modal_box_width',
 				array(
-					'label'       => esc_html__( 'Largeur (%)', 'eac-components' ),
-					'type'        => Controls_Manager::SLIDER,
-					'size_units'  => array( '%' ),
-					'default'     => array(
+					'label'          => esc_html__( 'Largeur (%)', 'eac-components' ),
+					'type'           => Controls_Manager::SLIDER,
+					'size_units'     => array( '%' ),
+					'default'        => array(
 						'unit' => '%',
 						'size' => 75,
 					),
-					'range'       => array(
+					'tablet_default' => array(
+						'unit' => '%',
+						'size' => 75,
+					),
+					'mobile_default' => array(
+						'unit' => '%',
+						'size' => 100,
+					),
+					'range'          => array(
 						'%' => array(
 							'min'  => 20,
 							'max'  => 100,
 							'step' => 5,
 						),
 					),
-					'label_block' => true,
-					'selectors'   => array(
+					'label_block'    => true,
+					'selectors'      => array(
 						'.modalbox-visible-{{ID}} .fancybox-content' => 'width: {{SIZE}}% !important; height: 100% !important',
 						'.fancybox-slide.modalbox-visible-{{ID}}' => 'padding: 0 6px;',
 					),
@@ -655,15 +669,6 @@ class Simple_PDF_Viewer_Widget extends Widget_Base {
 			);
 
 			$this->add_group_control(
-				Group_Control_Box_Shadow::get_type(),
-				array(
-					'name'     => 'fv_button_shadow',
-					'label'    => esc_html__( 'Ombre', 'eac-components' ),
-					'selector' => '{{WRAPPER}} .fv-viewer__wrapper-btn',
-				)
-			);
-
-			$this->add_group_control(
 				Group_Control_Border::get_type(),
 				array(
 					'name'      => 'fv_button_border',
@@ -690,7 +695,15 @@ class Simple_PDF_Viewer_Widget extends Widget_Base {
 					'selectors'          => array(
 						'{{WRAPPER}} .fv-viewer__wrapper-btn' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
 					),
-					'separator'          => 'before',
+				)
+			);
+
+			$this->add_group_control(
+				Group_Control_Box_Shadow::get_type(),
+				array(
+					'name'     => 'fv_button_shadow',
+					'label'    => esc_html__( 'Ombre', 'eac-components' ),
+					'selector' => '{{WRAPPER}} .fv-viewer__wrapper-btn',
 				)
 			);
 
@@ -750,7 +763,7 @@ class Simple_PDF_Viewer_Widget extends Widget_Base {
 		/** @since 1.9.3 'input hidden' */
 		?>
 		<div class="eac-pdf-viewer">
-			<input type="hidden" id="pdf_nonce" name="pdf_nonce" value="<?php echo wp_create_nonce( 'eac_file_viewer_nonce_' . $this->get_id() ); ?>" />
+			<input type="hidden" id="pdf_nonce" name="pdf_nonce" value="<?php echo wp_create_nonce( 'eac_file_viewer_nonce_' . $this->get_id() ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>" />
 			<?php $this->render_viewer(); ?>
 		</div>
 		<?php
@@ -770,16 +783,19 @@ class Simple_PDF_Viewer_Widget extends Widget_Base {
 		$link_file = ! empty( $settings['fv_settings_media_file'] ) ? $settings['fv_settings_media_file'] : '';
 		$link_url  = ! empty( $settings['fv_settings_media_url']['url'] ) ? esc_url( $settings['fv_settings_media_url']['url'] ) : '';
 
-		$link         = $origine === 'file' ? $link_file : $link_url;
+		$link         = 'file' === $origine ? $link_file : $link_url;
 		$display_type = $settings['fv_settings_display_type'];
 		$icon_button  = false;
 
 		// Unique ID du widget
 		$id = $this->get_id();
 
-		// Le déclencheur est un bouton
+		/**
+		 * Le déclencheur est un bouton
+		 * @since 2.1.1 Affichage de l'icone
+		 */
 		if ( 'button' === $trigger ) {
-			if ( $settings['fv_icon_activated'] === 'yes' && ! empty( $settings['fv_display_icon_button'] ) ) {
+			if ( 'yes' === $settings['fv_icon_activated'] && ! empty( $settings['fv_display_icon_button'] ) ) {
 				$icon_button = true;
 			}
 			$this->add_render_attribute( 'trigger', 'type', 'button' );
@@ -794,36 +810,37 @@ class Simple_PDF_Viewer_Widget extends Widget_Base {
 		$this->add_render_attribute( 'fv_wrapper', 'data-settings', $this->get_settings_json( $link ) );
 
 		// Il y a un lien fichier ou url
-		if ( $link !== '' ) {
+		if ( '' !== $link ) {
 			?>
-			<div <?php echo $this->get_render_attribute_string( 'fv_wrapper' ); ?>>
-				<?php if ( $display_type === 'fancybox' ) : ?>
-				
-					<a id="fancybox-<?php echo $id; ?>" data-fancybox data-type="iframe" data-src="" data-options={"slideClass":"modalbox-visible-<?php echo $id; ?>"} href="javascript:;">
+			<div <?php echo wp_kses_post( $this->get_render_attribute_string( 'fv_wrapper' ) ); ?>>
+				<?php if ( 'fancybox' === $display_type ) : ?>
+
+					<a id="fancybox-<?php echo esc_attr( $id ); ?>" data-fancybox data-type="iframe" data-src="" data-options={"slideClass":"modalbox-visible-<?php echo esc_attr( $id ); ?>"} href="javascript:;">
 						<?php if ( 'button' === $trigger ) : ?>
-							<button <?php echo $this->get_render_attribute_string( 'trigger' ); ?>>
+							<button <?php echo wp_kses_post( $this->get_render_attribute_string( 'trigger' ) ); ?>>
 							<?php
-							if ( $icon_button && $settings['fv_position_icon_button'] === 'before' ) {
+							if ( $icon_button && 'before' === $settings['fv_position_icon_button'] ) {
 								Icons_Manager::render_icon( $settings['fv_display_icon_button'], array( 'aria-hidden' => 'true' ) );
 							}
 								echo sanitize_text_field( $settings['fv_display_text_button'] );
-							if ( $icon_button && $settings['fv_position_icon_button'] === 'after' ) {
+							if ( $icon_button && 'after' === $settings['fv_position_icon_button'] ) {
 								Icons_Manager::render_icon( $settings['fv_display_icon_button'], array( 'aria-hidden' => 'true' ) );
 							}
 							?>
 							</button>
 						<?php elseif ( 'text' === $trigger ) : ?>
-							<div <?php echo $this->get_render_attribute_string( 'trigger' ); ?>>
+							<div <?php echo wp_kses_post( $this->get_render_attribute_string( 'trigger' ) ); ?>>
 								<span><?php echo sanitize_text_field( $settings['fv_display_text'] ); ?></span>
 							</div>
 						<?php endif; ?>
 					</a>
-					
+
 				<?php else : ?>
-					
+
 					<div id="fv-viewer_loader-wheel" class="eac__loader-spin"></div>
-					<iframe id="iframe-<?php echo $id; ?>" class="fv-viewer__wrapper-iframe" src="" type="application/pdf"></iframe>
-					
+					<!-- @since 2.1.2 attribut 'allow -->
+					<iframe id="iframe-<?php echo esc_attr( $id ); ?>" class="fv-viewer__wrapper-iframe" src="" loading="lazy" type="application/pdf" allow="fullscreen"></iframe>
+
 				<?php endif; ?>
 			</div>
 			<?php
@@ -837,7 +854,7 @@ class Simple_PDF_Viewer_Widget extends Widget_Base {
 	 * Convert on JSON format
 	 * Modification de la règles 'data_filtre'
 	 *
-	 * @uses         json_encode()
+	 * @uses         wp_json_encode()
 	 *
 	 * @return   JSON oject
 	 *
@@ -852,17 +869,15 @@ class Simple_PDF_Viewer_Widget extends Widget_Base {
 			'data_mobile'    => wp_is_mobile(),
 			'data_url'       => $url,
 			'data_display'   => $module_settings['fv_settings_display_type'],
-			'data_toolleft'  => $module_settings['fv_settings_content_toolbar_left'] === 'yes' ? true : false,
-			'data_toolright' => $module_settings['fv_settings_content_toolbar_right'] === 'yes' ? true : false,
-			'data_download'  => $module_settings['fv_settings_content_download'] === 'yes' ? true : false,
-			'data_print'     => $module_settings['fv_settings_content_print'] === 'yes' ? true : false,
+			'data_toolleft'  => 'yes' === $module_settings['fv_settings_content_toolbar_left'] ? true : false,
+			'data_toolright' => 'yes' === $module_settings['fv_settings_content_toolbar_right'] ? true : false,
+			'data_download'  => 'yes' === $module_settings['fv_settings_content_download'] ? true : false,
+			'data_print'     => 'yes' === $module_settings['fv_settings_content_print'] ? true : false,
 			'data_zoom'      => $module_settings['fv_settings_content_zoom'],
 		);
 
-		$settings = json_encode( $settings );
-		return $settings;
+		return wp_json_encode( $settings );
 	}
 
 	protected function content_template() {}
-
 }

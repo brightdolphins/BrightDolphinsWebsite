@@ -59,7 +59,7 @@ class UniteProviderFrontUC{
 		
 		if(is_singular() == false)
 			return($template);
-			
+		
 		$renderTemplateID = UniteFunctionsUC::getGetVar("ucrendertemplate","",UniteFunctionsUC::SANITIZE_ID);
 		
 		if(empty($renderTemplateID))
@@ -73,7 +73,39 @@ class UniteProviderFrontUC{
 		return($pathTemplate);
 	}
 	
+	/**
+	 * disable some services according to settings
+	 */
+	private function checkDisableServices(){
+
+		//disable short pixel on render template
+		$renderTemplateID = UniteFunctionsUC::getGetVar("ucrendertemplate","",UniteFunctionsUC::SANITIZE_ID);
+
+		if(empty($renderTemplateID))
+			return(false);
+		
+		//disable short pixel
+		
+		if(defined("SHORTPIXEL_AI_VERSION")){
+			if(!defined("DONOTCDN"))
+				define("DONOTCDN",true);
+		}
+		
+		//disable doubly
+		
+		if(!defined("DISABLE_DOUBLY"))		
+			define("DISABLE_DOUBLY", true);
+	}
 	
+	
+	/**
+	 * on plugins loaded
+	 */
+	public function onPluginsLoaded(){
+		
+		$this->checkDisableServices();
+		
+	}
 	
 	/**
 	 *
@@ -86,7 +118,7 @@ class UniteProviderFrontUC{
 		do_action("addon_library_before_front_init");
 		
 		HelperProviderUC::globalInit();
-	   
+	   	
 		$this->addAction(self::ACTION_FOOTER_SCRIPTS, "onPrintFooterStyles", 1);
 		$this->addAction(self::ACTION_FOOTER_SCRIPTS, "onPrintFooterScripts");
 		
@@ -97,7 +129,12 @@ class UniteProviderFrontUC{
 		
 		//set elementor canvas accorging "GET" variable
 		$this->addFilter("template_include", "onTemplateInclude",12);	//after elementor and woo
-				
+
+		$this->addAction( 'plugins_loaded', 'onPluginsLoaded' );
+		
+		
+		//$this->checkDisableShortPixel();
+		
 	}
 	
 	

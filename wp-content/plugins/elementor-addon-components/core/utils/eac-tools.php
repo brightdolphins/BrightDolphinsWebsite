@@ -4,44 +4,9 @@
  *
  * Description: Met à disposition un ensemble de méthodes utiles pour les composants
  *
- * @since 0.0.9
- * @since 1.6.0 Filtre sur les métadonnées. Query 'meta_query'
- *              La méthode 'get_taxonomies' de 'get_all_taxonomies' retourne un object
- *              Filtre sur la taxonomie
- *              Filtre sur les post_type
- * @since 1.6.4 Ajout de la méthode 'get_palette_colors'
- * @since 1.7.0 Ajout de la méthode 'get_pages_by_id'
- *              Ajout de la méthode 'get_all_post_types'
- *              Ajour de la méthode 'get_all_taxonomies_by_name'
- *              Ajout de la méthode 'set_meta_value_date'
- *              Ajour de la méthode 'set_wp_format_date'
- *              Implémente 'Type de données' et 'Opérateur de comparaison' pour les valeurs
- *              Ajout de la méthode 'get_operateurs_comparaison'
- *              Ajout de la méthode 'get_all_terms'
- * @since 1.7.2 Décomposition de la class 'Eac_Helper_Utils' en deux class 'Eac_Helpers_Util' et 'Eac_Tools_Util'
- *              Ajout de la méthode 'get_wp_format_date'
- *              Fix: Renvoie la liste complète des post_types
- * @since 1.7.3 Ajout de la méthode 'get_unwanted_char' + filtre
- *              Ajout des opérateurs de comparaison REGEXP et NOT REGEXP
- *              Ajout d'un filtre pour les métadonnées d'un Auteur/User
- * @since 1.7.5 Ajout de la liste des champs ACF supportés pour le composant 'Post Grid'
- *              Ajout de la méthode 'get_acf_supported_fields'
- * @since 1.7.6 Ajout de la méthode 'get_all_social_networks'
- * @since 1.8.4 Ajout de la méthode 'get_menus_list'
- *              Transfert de la méthode 'get_elementor_templates' de l'objet 'Eac_Dynamic_Tags'
- * @since 1.8.5 Ajout de la méthode 'get_widgets_list' ainsi que du tableau des widgets utiles
- * @since 1.9.1 Ajout de l'e-mail et du website (url) array $social_networks
- *              Ajout de la méthode 'get_all_posts_by_id'
- * @since 1.9.5 Ajout de la liste des animations d'un widget/container
- *              Ajout de la méthode 'get_directory_files_list'
- * @since 1.9.6 Ajout de la méthode 'get_menus_location_list'
- * @since 1.9.8 Ajout de la méthode 'get_product_taxonomies' pour la taxonomie des produits
- *              Ajout de la méthode 'get_product_terms' pour les terms des produits
- *              Ajout de la méthode 'get_product_types' pour les types de produits
- *              Ajout de la méthode 'wc_get_meta_key_to_props' pour les produits
- *              Ajout de la méthode 'is_timestamp' pour checker si la date est un timestamp unix
- *              Ajout de la méthode 'get_formated_date_value' pour formatter les dates
- *              Traitement de la description/short description d'un produit
+ * @since 1.0.0
+ * @since 2.1.0 Création des méthodes de gestion des réseaux sociaux
+ * @since 2.1.2 Fix: vérifie si la fonction 'wc_get_product' existe
  */
 
 namespace EACCustomWidgets\Core\Utils;
@@ -50,6 +15,8 @@ namespace EACCustomWidgets\Core\Utils;
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+use EACCustomWidgets\Core\Eac_Config_Elements;
 
 class Eac_Tools_Util {
 
@@ -97,30 +64,25 @@ class Eac_Tools_Util {
 	 * @since 1.6.0
 	 */
 	private static $filtered_taxonomies = array(
-		// CORE
 		'nav_menu',
 		'link_category',
 		'post_format',
-		// ELEMENTOR
 		'elementor_library_type',
-		'elementor_library_category',
+		// 'elementor_library_category',
 		'elementor_font_type',
-		// YOAST
 		'yst_prominent_words',
-		// WOOCOMMERCE
+		'product_type',
 		'product_shipping_class',
 		'product_visibility',
 		'action-group',
-		// LOCO
 		'translation_priority',
-		// FLAMINGO
 		'flamingo_contact_tag',
 		'flamingo_inbound_channel',
-		// SDM
 		'sdm_categories',
 		'sdm_tags',
-		// WPForms
 		'wpforms_log_type',
+		'wp_theme',
+		'wp_template_part_area',
 	);
 
 	/**
@@ -179,7 +141,6 @@ class Eac_Tools_Util {
 	 * Les options des opérateurs de comparaison
 	 *
 	 * @since 1.7.0
-	 * @since 1.7.3 Ajout des opérateurs REGEXP et NOT REGEXP
 	 */
 	private static $operateurs_comparaison = array(
 		'IN'          => 'IN',
@@ -308,28 +269,83 @@ class Eac_Tools_Util {
 	/**
 	 * @var $social_networks
 	 *
-	 * La liste des réseaux sociaux
+	 * La liste des réseaux sociaux et de leurs icones
 	 *
-	 * @since 1.7.6
-	 * @since 1.9.1
+	 * @since 2.1.0
 	 */
 	private static $social_networks = array(
-		'email'     => 'Email',
-		'url'       => 'Website',
-		'twitter'   => 'Twitter',
-		'facebook'  => 'Facebook',
-		'instagram' => 'Instagram',
-		'linkedin'  => 'Linkedin',
-		'youtube'   => 'Youtube',
-		'pinterest' => 'Pinterest',
-		'tumblr'    => 'Tumblr',
-		'flickr'    => 'Flickr',
-		'reddit'    => 'Reddit',
-		'tiktok'    => 'TikTok',
-		'telegram'  => 'Telegram',
-		'quora'     => 'Quora',
-		'twitch'    => 'Twitch',
-		'github'    => 'Github',
+		'email'     => array(
+			'name' => 'Email',
+			'icon' => '<i class="fa fa-envelope" aria-hidden="true"></i>',
+		),
+		'url'       => array(
+			'name' => 'Website',
+			'icon' => '<i class="fa fa-globe" aria-hidden="true"></i>',
+		),
+		'twitter'   => array(
+			'name' => 'Twitter',
+			'icon' => '<i class="fa fa-twitter" aria-hidden="true"></i>',
+		),
+		'facebook'  => array(
+			'name' => 'Facebook',
+			'icon' => '<i class="fa fa-facebook-f" aria-hidden="true"></i>',
+		),
+		'instagram' => array(
+			'name' => 'Instagram',
+			'icon' => '<i class="fa fa-instagram" aria-hidden="true"></i>',
+		),
+		'linkedin'  => array(
+			'name' => 'Linkedin',
+			'icon' => '<i class="fa fa-linkedin" aria-hidden="true"></i>',
+		),
+		'youtube'   => array(
+			'name' => 'Youtube',
+			'icon' => '<i class="fa fa-youtube" aria-hidden="true"></i>',
+		),
+		'pinterest' => array(
+			'name' => 'Pinterest',
+			'icon' => '<i class="fa fa-pinterest" aria-hidden="true"></i>',
+		),
+		'tumblr'    => array(
+			'name' => 'Tumblr',
+			'icon' => '<i class="fa fa-tumblr" aria-hidden="true"></i>',
+		),
+		'flickr'    => array(
+			'name' => 'Flickr',
+			'icon' => '<i class="fa fa-flickr" aria-hidden="true"></i>',
+		),
+		'reddit'    => array(
+			'name' => 'Reddit',
+			'icon' => '<i class="fa fa-reddit" aria-hidden="true"></i>',
+		),
+		'tiktok'    => array(
+			'name' => 'TikTok',
+			'icon' => '<i class="fab fa-tiktok" aria-hidden="true"></i>',
+		),
+		'telegram'  => array(
+			'name' => 'Telegram',
+			'icon' => '<i class="fa fa-telegram" aria-hidden="true"></i>',
+		),
+		'quora'     => array(
+			'name' => 'Quora',
+			'icon' => '<i class="fa fa-quora" aria-hidden="true"></i>',
+		),
+		'twitch'    => array(
+			'name' => 'Twitch',
+			'icon' => '<i class="fa fa-twitch" aria-hidden="true"></i>',
+		),
+		'github'    => array(
+			'name' => 'Github',
+			'icon' => '<i class="fab fa-github" aria-hidden="true"></i>',
+		),
+		'spotify'   => array(
+			'name' => 'Spotify',
+			'icon' => '<i class="fa fa-spotify" aria-hidden="true"></i>',
+		),
+		'mastodon'  => array(
+			'name' => 'Mastodon',
+			'icon' => '<i class="fab fa-mastodon" aria-hidden="true"></i>',
+		),
 	);
 
 	/**
@@ -484,16 +500,19 @@ class Eac_Tools_Util {
 	}
 
 	/**
+	 * 'wp_check_filetype' retourne null si ce n'est pas un type mime de fichier activé (JSON)
+	 * 
+	 * @var $relative_path Le chemin d'accès aux fichiers de configuration JSON
+	 * @var $mimes Le type mime des fichiers recherchés
 	 * @return la liste des fichiers d'un répertoire sous forme [url] => filename
-	 *
-	 * @since 1.9.5
 	 */
 	public static function get_directory_files_list( $relative_path = 'includes/config', $mimes = 'application/json' ) {
 		$files_list = array( 'none' => esc_html__( 'Aucun', 'eac-components' ) );
-		$path       = EAC_ADDONS_PATH . $relative_path;
+
+		$path = EAC_ADDONS_PATH . $relative_path;
 		if ( $dir = opendir( $path ) ) {
 			while ( $file = readdir( $dir ) ) {
-				if ( $file != '.' && $file != '..' ) {
+				if ( '.' !== $file && '..' !== $file ) {
 					if ( ! is_dir( $path . '/' . $file ) ) {
 						$filetype = wp_check_filetype( basename( $file ), null );
 						if ( $filetype['type'] === $mimes ) {
@@ -541,7 +560,7 @@ class Eac_Tools_Util {
 		if ( ! empty( $posts ) && ! is_wp_error( $posts ) ) {
 			foreach ( $posts as $index => $value ) {
 				// Ajoute l'index du tableau pour conserver le tri sur le titre
-				$post_list[ $index . '::' . $value->ID ] = esc_html( $value->post_title );
+				$post_list[ $index . '::' . $value->ID ] = $value->post_title;
 			}
 		}
 
@@ -577,7 +596,7 @@ class Eac_Tools_Util {
 
 		if ( ! empty( $data ) && ! is_wp_error( $data ) ) {
 			foreach ( $data as $key ) {
-				$post_list[ $key->ID ] = esc_html( $key->post_title );
+				$post_list[ $key->ID ] = $key->post_title;
 			}
 			ksort( $post_list );
 		}
@@ -603,7 +622,7 @@ class Eac_Tools_Util {
 
 		// Boucle sur les Wigets standards
 		foreach ( $wp_widget_factory->widgets as $key => $widget ) {
-			if ( in_array( $key, $widgets ) ) {
+			if ( in_array( $key, $widgets, true ) ) {
 				// $options[$key . "::" . $widget->widget_options['description']] = $widget->name;
 				$options[ $key ] = $widget->name;
 			}
@@ -616,9 +635,9 @@ class Eac_Tools_Util {
 		foreach ( $sidebars as $sidebar_id => $sidebar_widgets ) {
 			if ( 'wp_inactive_widgets' !== $sidebar_id && is_array( $sidebar_widgets ) && ! empty( $sidebar_widgets ) ) {
 				$sidebar_name                                  = isset( $wp_registered_sidebars[ $sidebar_id ]['name'] ) ? $wp_registered_sidebars[ $sidebar_id ]['name'] : 'No name';
-				$options[ $sidebar_id . '::' . $sidebar_name ] = 'Sidebar' . '::' . $sidebar_name;
+				$options[ $sidebar_id . '::' . $sidebar_name ] = 'Sidebar::' . $sidebar_name;
 
-				/*
+				/**
 				foreach ($sidebar_widgets as $widget) {
 					$name = $wp_registered_widgets[$widget]['callback'][0]->name;
 					$option_name = $wp_registered_widgets[$widget]['callback'][0]->option_name;
@@ -630,7 +649,8 @@ class Eac_Tools_Util {
 					$title = ! empty($data['title']) ? $data['title'] : 'Empty title';
 					//console_log($title."::".$widget."::".$name."::".$option_name."::".$id_base);
 					//console_log($wp_registered_widgets[$widget]);
-				}*/
+				}
+				*/
 			}
 		}
 
@@ -655,14 +675,15 @@ class Eac_Tools_Util {
 		foreach ( $locations as $key => $location_name ) {
 			if ( isset( $menus[ $key ] ) && (int) $menus[ $key ] > 0 ) {
 				$options[ $key ] = $locations[ $key ];
-				/*
+				/**
 				$menu_object = wp_get_nav_menu_object($menus[$key]);
 				if ($menu_object) {
 					$slug =  $menu_object->slug;
 					$name = $menu_object->name;
 					//$options[$key . "::" . $slug] = $locations[$key] . "::" . $name;
 					$options[$key] = $locations[$key];
-				}*/
+				}
+				*/
 			}
 		}
 		return $options;
@@ -700,25 +721,48 @@ class Eac_Tools_Util {
 	}
 
 	/**
-	 * @return la liste des réseaux sociaux
+	 * @return la liste des noms des réseaux sociaux
 	 *
-	 * @since 1.7.6
+	 * @since 2.1.0
 	 */
-	public static function get_all_social_networks() {
-		$options = self::$social_networks;
+	public static function get_all_social_medias_name() {
+		$networks = self::$social_networks;
+		$options  = array();
 
-		/**
-		 * Liste des réseaux sociaux
-		 *
-		 * Filtrer la liste des réseaux sociaux
-		 *
-		 * @since 1.7.6
-		 *
-		 * @param array $options Liste des réseaux sociaux
-		 */
-		$options = apply_filters( 'eac/tools/social_networks', $options );
+		foreach ( $networks as $index => $value ) {
+			$options[ $index ] = $value['name'];
+		}
 
 		return $options;
+	}
+
+	/**
+	 * @return la liste des icones des réseaux sociaux
+	 *
+	 * @since 2.1.0
+	 */
+	public static function get_all_social_medias_icon() {
+		$networks = self::$social_networks;
+		$options  = array();
+
+		foreach ( $networks as $index => $value ) {
+			$options[ $index ] = $value['icon'];
+		}
+
+		return $options;
+	}
+
+	/**
+	 * @return l'icone d'un réseaux social
+	 *
+	 * @since 2.1.0
+	 */
+	public static function get_social_media_icon( $media = null ) {
+		$networks = self::$social_networks;
+		if ( array_key_exists( $media, $networks ) ) {
+			return $networks[ $media ]['icon'];
+		}
+		return null;
 	}
 
 	/**
@@ -885,8 +929,8 @@ class Eac_Tools_Util {
 		$post_types = get_post_types( '', 'objects' );
 
 		foreach ( $post_types as $post_type ) {
-			if ( is_array( $posttypes ) && ! in_array( esc_attr( $post_type->name ), $posttypes ) ) {
-				$options[ esc_attr( $post_type->name ) ] = esc_attr( $post_type->name ) . '::' . esc_attr( $post_type->label );
+			if ( is_array( $posttypes ) && ! in_array( $post_type->name, $posttypes, true ) ) {
+				$options[ $post_type->name ] = $post_type->name . '::' . $post_type->label;
 			}
 		}
 		ksort( $options );
@@ -903,7 +947,7 @@ class Eac_Tools_Util {
 		$post_types = get_post_types( '', 'objects' );
 
 		foreach ( $post_types as $post_type ) {
-			$options[ esc_attr( $post_type->name ) ] = esc_attr( $post_type->name ) . '::' . esc_attr( $post_type->label );
+			$options[ $post_type->name ] = $post_type->name . '::' . $post_type->label;
 		}
 		return $options;
 	}
@@ -923,8 +967,11 @@ class Eac_Tools_Util {
 		$the_excerpt   = null;
 		$the_post_type = $the_post->post_type;
 
-		/* Intégration du type produit */
-		if ( $the_post_type === 'product' ) {
+		/**
+		 * Intégration du type produit
+		 * @since 2.1.2 Fix test si la fonction existe
+		 */
+		if ( 'product' === $the_post_type && function_exists( 'wc_get_product' ) ) {
 			$product     = wc_get_product( $post_id );
 			$the_excerpt = $product->get_description() ? $product->get_description() : $product->get_short_description();
 		} elseif ( $the_post ) {
@@ -933,25 +980,15 @@ class Eac_Tools_Util {
 			return "Error... 'get_post_excerpt'";
 		}
 
-		if ( strlen( $the_excerpt ) == 0 ) {
+		if ( 0 === strlen( $the_excerpt ) ) {
 			return;
 		}
 
 		// On supprime tous les tags html ou shortcode du résumé
-		$the_excerpt = strip_tags( strip_shortcodes( $the_excerpt ) );
+		$the_excerpt = wp_strip_all_tags( strip_shortcodes( $the_excerpt ) );
 
 		/** 1.9.8  */
 		return wp_trim_words( $the_excerpt, $excerpt_length, '[...]' );
-
-		/*
-		$words = explode(' ', $the_excerpt, $excerpt_length + 1);
-		if (count($words) > $excerpt_length) {
-			 array_pop($words);
-			 $the_excerpt = implode(' ', $words);
-			 $the_excerpt .= '[...]';	 // Aucun espace avant
-		}
-
-		return $the_excerpt;*/
 	}
 
 	/**
@@ -1013,8 +1050,8 @@ class Eac_Tools_Util {
 
 		// Boucle sur les taxonomies
 		foreach ( $taxonomies as $taxonomy ) {
-			if ( is_array( $filtered_taxo ) && ! in_array( esc_attr( $taxonomy->name ), $filtered_taxo ) ) {
-				$taxos[] = esc_attr( $taxonomy->name );
+			if ( is_array( $filtered_taxo ) && ! in_array( $taxonomy->name, $filtered_taxo, true ) ) {
+				$taxos[] = $taxonomy->name;
 			}
 		}
 
@@ -1030,7 +1067,7 @@ class Eac_Tools_Util {
 
 				if ( ! is_wp_error( $terms ) && count( $terms ) > 0 ) {
 					foreach ( $terms as $term ) {
-						$all_terms[ $taxo . '::' . $term->slug ] = $taxo . '::' . esc_attr( $term->name );
+						$all_terms[ $taxo . '::' . $term->slug ] = $taxo . '::' . $term->name;
 					}
 				}
 			}
@@ -1047,16 +1084,17 @@ class Eac_Tools_Util {
 		$options  = array();
 		$products = array(
 			'product' => esc_html__( 'Produits', 'eac-components' ),
-			/*
+			/**
 			'product_variation' => esc_html__('Variations', 'eac-components'),
 			'shop_coupon' => esc_html__('Codes promo', 'eac-components'),
 			'shop_order' => esc_html__('Commandes', 'eac-components'),
 			'shop_order_placehold' => esc_html__('Articles', 'eac-components'),
-			'shop_order_refund' => esc_html__('Remboursements', 'eac-components'),*/
+			'shop_order_refund' => esc_html__('Remboursements', 'eac-components'),
+			*/
 		);
 
 		foreach ( $products as $key => $val ) {
-			$options[ esc_attr( $key ) ] = esc_attr( $key ) . '::' . esc_attr( $val );
+			$options[ $key ] = $key . '::' . $val;
 		}
 		return $options;
 	}
@@ -1073,7 +1111,7 @@ class Eac_Tools_Util {
 		$taxonomies = get_taxonomies( array( 'object_type' => array( 'product' ) ), 'objects' );
 
 		foreach ( $taxonomies as $taxonomy ) {
-			$options[ esc_attr( $taxonomy->name ) ] = esc_attr( $taxonomy->name ) . '::' . esc_attr( $taxonomy->label );
+			$options[ $taxonomy->name ] = $taxonomy->name . '::' . $taxonomy->label;
 		}
 		return $options;
 	}
@@ -1092,7 +1130,7 @@ class Eac_Tools_Util {
 
 		/** Boucle sur les taxonomies */
 		foreach ( $taxonomies as $taxonomy ) {
-			$taxos[] = esc_attr( $taxonomy->name );
+			$taxos[] = $taxonomy->name;
 		}
 
 		/** Boucle sur les terms d'une taxonomie */
@@ -1107,7 +1145,7 @@ class Eac_Tools_Util {
 
 				if ( ! is_wp_error( $terms ) && count( $terms ) > 0 ) {
 					foreach ( $terms as $term ) {
-						$all_terms[ $taxo . '::' . $term->slug ] = $taxo . '::' . esc_attr( $term->name );
+						$all_terms[ $taxo . '::' . $term->slug ] = $taxo . '::' . $term->name;
 					}
 				}
 			}
@@ -1144,8 +1182,8 @@ class Eac_Tools_Util {
 		$taxonomies = get_taxonomies( '', 'objects' ); // Retourne un objet
 
 		foreach ( $taxonomies as $taxonomy ) {
-			if ( is_array( $filtered_taxo ) && ! in_array( esc_attr( $taxonomy->name ), $filtered_taxo ) ) {
-				$options[ esc_attr( $taxonomy->name ) ] = esc_attr( $taxonomy->name ) . '::' . esc_attr( $taxonomy->label );
+			if ( is_array( $filtered_taxo ) && ! in_array( $taxonomy->name, $filtered_taxo, true ) ) {
+				$options[ $taxonomy->name ] = $taxonomy->name . '::' . $taxonomy->label;
 			}
 		}
 		return $options;
@@ -1174,8 +1212,8 @@ class Eac_Tools_Util {
 		$taxonomies = get_taxonomies( '', 'objects' ); // Retourne un objet
 
 		foreach ( $taxonomies as $taxonomy ) {
-			if ( is_array( $filtered_taxo ) && ! in_array( esc_attr( $taxonomy->name ), $filtered_taxo ) ) {
-				$options[] = esc_attr( $taxonomy->name );
+			if ( is_array( $filtered_taxo ) && ! in_array( $taxonomy->name, $filtered_taxo, true ) ) {
+				$options[] = $taxonomy->name;
 			}
 		}
 		return $options;
@@ -1195,7 +1233,7 @@ class Eac_Tools_Util {
 		$pages        = get_pages( $args );
 
 		foreach ( $pages as $page ) {
-			$select_pages[ $page->post_title ] = esc_html( ucfirst( $page->post_title ) );
+			$select_pages[ $page->post_title ] = ucfirst( $page->post_title );
 		}
 		return $select_pages;
 	}
@@ -1214,7 +1252,7 @@ class Eac_Tools_Util {
 		$pages        = get_pages( $args );
 
 		foreach ( $pages as $page ) {
-			$select_pages[ $page->ID ] = esc_html( ucfirst( $page->post_title ) );
+			$select_pages[ $page->ID ] = ucfirst( $page->post_title );
 		}
 		return $select_pages;
 	}
@@ -1269,7 +1307,7 @@ class Eac_Tools_Util {
 
 		$$date_maj = date_create_from_format( $wp_format_entree, $ori_date );
 
-		if ( $$date_maj == false ) {
+		if ( false === $date_maj ) {
 			return $ori_date;
 		}
 

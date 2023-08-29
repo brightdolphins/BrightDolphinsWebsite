@@ -11,18 +11,23 @@ class Wpr_Particles {
 
 	private static $_instance = null;
 
-	public $default_particles = '{"particles":{"number":{"value":80,"density":{"enable":true,"value_area":800}},"color":{"value":"#000000"},"shape":{"type":"circle","stroke":{"width":0,"color":"#000000"},"polygon":{"nb_sides":5},"image":{"src":"img/github.svg","width":100,"height":100}},"opacity":{"value":0.5,"random":false,"anim":{"enable":false,"speed":1,"opacity_min":0.1,"sync":false}},"size":{"value":3,"random":true,"anim":{"enable":false,"speed":40,"size_min":0.1,"sync":false}},"line_linked":{"enable":true,"distance":150,"color":"#000000","opacity":0.4,"width":1},"move":{"enable":true,"speed":6,"direction":"none","random":false,"straight":false,"out_mode":"out","bounce":false,"attract":{"enable":false,"rotateX":600,"rotateY":1200}}},"interactivity":{"detect_on":"canvas","events":{"onhover":{"enable":true,"mode":"repulse"},"onclick":{"enable":true,"mode":"push"},"resize":true},"modes":{"grab":{"distance":400,"line_linked":{"opacity":1}},"bubble":{"distance":400,"size":40,"duration":2,"opacity":8,"speed":3},"repulse":{"distance":200,"duration":0.4},"push":{"particles_nb":4},"remove":{"particles_nb":2}}},"retina_detect":true}' ;
+	public $default_particles = '{"particles":{"number":{"value":80,"density":{"enable":true,"value_area":800}},"color":{"value":"#000000"},"shape":{"type":"circle","stroke":{"width":0,"color":"#000000"},"polygon":{"nb_sides":5},"image":{"src":"img/github.svg","width":100,"height":100}},"opacity":{"value":0.5,"random":false,"anim":{"enable":false,"speed":1,"opacity_min":0.1,"sync":false}},"size":{"value":3,"random":true,"anim":{"enable":false,"speed":40,"size_min":0.1,"sync":false}},"line_linked":{"enable":true,"distance":150,"color":"#000000","opacity":0.4,"width":1},"move":{"enable":true,"speed":6,"direction":"none","random":false,"straight":false,"out_mode":"out","bounce":false,"attract":{"enable":false,"rotateX":600,"rotateY":1200}}},"interactivity":{"detect_on":"window","events":{"onhover":{"enable":true,"mode":"repulse"},"onclick":{"enable":true,"mode":"push"},"resize":true},"modes":{"grab":{"distance":400,"line_linked":{"opacity":1}},"bubble":{"distance":400,"size":40,"duration":2,"opacity":8,"speed":3},"repulse":{"distance":200,"duration":0.4},"push":{"particles_nb":4},"remove":{"particles_nb":2}}},"retina_detect":true}' ;
 
 	public function __construct() {
 		add_action( 'elementor/element/section/section_background/after_section_end', [ $this, 'register_controls' ], 10 );
-		add_action( 'elementor/section/print_template', [ $this, '_print_template' ], 10, 2 );
 		add_action( 'elementor/frontend/section/before_render', [ $this, '_before_render' ], 10, 1 );
+		add_action( 'elementor/section/print_template', [ $this, '_print_template' ], 10, 2 );
         add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_scripts' ] );
+
+        // FLEXBOX
+        add_action( 'elementor/element/container/section_layout/after_section_end', [$this, 'register_controls'], 10 );
+        add_action( 'elementor/frontend/container/before_render', [$this, '_before_render'], 10, 1 );
+        add_action( 'elementor/container/print_template', [ $this, '_print_template' ], 10, 2 );
 	}
 
 	public function register_controls( $element ) {
 
-		if ( ( 'section' === $element->get_name() ) ) {
+		if ( ( 'section' === $element->get_name() || 'container' === $element->get_name() ) ) {
 
 		$element->start_controls_section (
 			'wpr_section_particles',
@@ -126,7 +131,7 @@ class Wpr_Particles {
 	}
 
 	public function _print_template( $template, $widget ) {
-		if ( $widget->get_name() !== 'section' ) {
+		if ( $widget->get_name() !== 'section' && $widget->get_name() !== 'container' ) {
 			return $template;
 		}
 	
@@ -142,7 +147,7 @@ class Wpr_Particles {
 	}
 
 	public function _before_render( $element ) {
-		if ( $element->get_name() !== 'section' ) {
+		if ( $element->get_name() !== 'section' && $element->get_name() !== 'container' ) {
 			return;
 		}
 

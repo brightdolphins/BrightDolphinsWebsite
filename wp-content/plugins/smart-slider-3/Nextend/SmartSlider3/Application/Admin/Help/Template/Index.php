@@ -45,6 +45,8 @@ $conflicts = $this->getConflicts();
                         <?php n2_e('Test connection'); ?>
                     </a>
                 </div>
+                <?php
+                ?>
                 <?php if (empty($conflicts)): ?>
                     <div class="n2_help_center__no_conflicts_detected"><?php n2_e('No conflicts detected.'); ?></div>
                 <?php else: ?>
@@ -132,6 +134,9 @@ $conflicts = $this->getConflicts();
                         <?php n2_e('Test connection'); ?>
                     </a>
                 </div>
+                <?php
+                ?>
+
                 <?php if (empty($conflicts)): ?>
                     <div class="n2_help_center__no_conflicts_detected"><?php n2_e('No conflicts detected.'); ?></div>
                 <?php else: ?>

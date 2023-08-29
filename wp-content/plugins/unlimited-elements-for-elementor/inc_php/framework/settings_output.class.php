@@ -36,6 +36,8 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 		protected $sapsType = null;
 		protected $activeSap = 0;		
 		
+		protected $isTypographyExists = false;
+		
 		const SAPS_TYPE_INLINE = "saps_type_inline";	//inline sapts type
 		const SAPS_TYPE_CUSTOM = "saps_type_custom";	//custom saps tyle
 	    const SAPS_TYPE_ACCORDION = "saps_type_accordion";
@@ -136,12 +138,19 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 			
 			$addHtml = " data-default=\"{$defaultValue}\" data-initval=\"{$value}\" ";
 			
+	        $addAttrSelectors = $this->getSelectorsAddAttr($setting);
+	        
+	        if(!empty($addAttrSelectors))
+	        	$addHtml .= " ".$addAttrSelectors;
+			
 			$addParams = UniteFunctionsUC::getVal($setting, UniteSettingsUC::PARAM_ADDPARAMS);
 			if(!empty($addParams))
 				$addHtml .= " ".$addParams;
 			
+				
 			return($addHtml);
 		}
+		
 		
 		
 		/**
@@ -157,12 +166,14 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 				
 			// prevent line break (convert spaces to nbsp)
 			$text = str_replace(" ","&nbsp;",$text);
-		
+			
+			/*
 			switch($setting["type"]){
 				case UniteSettingsUC::TYPE_CHECKBOX:
 					$text = "<label for='".$setting["id"]."' style='cursor:pointer;'>$text</label>";
 					break;
 			}
+			*/
 		
 			return($text);
 		}
@@ -525,7 +536,7 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 		 * @param $setting
 		 */
 		protected function drawIconPickerInput($setting){
-			 
+			
 			$previewStyle = "display:none";
 			$iconsType = UniteFunctionsUC::getVal($setting, "icons_type");
 				
@@ -545,11 +556,15 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 				$addClassWrapper = " unite-icon-type-".$iconsType;
 			}
 			
+			$enableSvg = UniteFunctionsUC::getVal($setting, "enable_svg");
+			$enableSvg = UniteFunctionsUC::strToBool($enableSvg);
+			
 			?>
 		      <div class="unite-settings-iconpicker<?php echo esc_attr($addClassWrapper)?>">
 					<input type="text" id="<?php echo esc_attr($setting["id"])?>" name="<?php echo esc_attr($setting["name"])?>" <?php echo UniteProviderFunctionsUC::escAddParam($class)?> value="<?php echo esc_attr($value)?>" <?php echo UniteProviderFunctionsUC::escAddParam($addHtml)?> />
 		        	<span class="unite-iconpicker-button"></span>
 		        	<div class="unite-iconpicker-title"></div>
+		        	<span class="unite-iconpicker-button-svg">SVG</span>
 			  </div>
 			<?php
 		}
@@ -657,11 +672,72 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 			
 		}
 		
+		private function ___________SELECTORS________________(){}
+		
+		
+		/**
+		 * get selectors add attributes
+		 */
+		private function getSelectorsAddAttr($setting){
+			
+			$selector = UniteFunctionsUC::getVal($setting, "selector");
+			$selector1 = UniteFunctionsUC::getVal($setting, "selector1");
+			
+			if(empty($selector) && empty($selector1))
+				return(null);
+						
+			$arrData = array();
+			
+			foreach($setting as $key=>$value){
+				
+				if(strpos($key, "selector") !== false)
+					$arrData[$key] = $value;
+			}
+						
+			if(empty($arrData))
+				return(null);
+				
+			$strAttr = UniteFunctionsUC::jsonEncodeForHtmlData($arrData);
+			
+			$output = "data-selectors='{$strAttr}'";
+						
+			return($output);			
+		}
+		
+		
 		
 		/**
 		 * special inputs
 		 */
 		private function a______SPECIAL_INPUTS_____(){}
+		
+		
+		/**
+		 * draw galler setting
+		 */
+		protected function drawGallerySetting($setting){
+			
+			$value = UniteFunctionsUC::getVal($setting, "value");
+			
+			?>
+		      <div id="<?php echo esc_attr($setting["id"])?>" data-settingtype="gallery" class="unite-settings-gallery unite-setting-input-object" data-name="<?php echo esc_attr($setting["name"])?>" >
+							<div class="unite-setting-gallery-wrapper">
+								<div class="unite-setting-gallery-status">
+									<span class="unite-setting-gallery-status-title"></span>
+									<span class="unite-setting-gallery-status-clear-icon" title="Delete All Images"><i class="fa fa-trash"></i></span>
+								</div>
+								<div class="unite-setting-gallery-content">
+									<div class="unite-setting-gallery-thumbnails"></div>
+									<div class="unite-setting-gallery-edit">
+										<span class="unite-setting-gallery-edit-icon" title="Add Images"><i class="fa fa-plus"></i></span>
+									</div>
+								</div>
+							</div>
+			  	</div>
+
+			<?php
+						
+		}
 		
 		
 		/**
@@ -788,7 +864,7 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 		 * draw setting input by type
 		 */
 		protected function drawInputs($setting){
-			
+						
 			switch($setting["type"]){
 				case UniteSettingsUC::TYPE_TEXT:
 					$this->drawTextInput($setting);
@@ -860,6 +936,11 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 				case UniteCreatorSettings::TYPE_DIMENTIONS:
 					
 					$this->drawDimentionsSetting($setting);
+					
+				break;
+				case UniteCreatorSettings::TYPE_GALLERY:
+					
+					$this->drawGallerySetting($setting);
 					
 				break;
 				case UniteSettingsUC::TYPE_CUSTOM:
@@ -1045,6 +1126,7 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 				if($unit == "px")
 					$typeNumber = true;
 			}
+			
 			
 			$class = $this->getInputClassAttr($setting, $defaultClass);
 			
@@ -1300,11 +1382,11 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 		 * draw select input
 		 */
 		protected function drawSelectInput($setting){
-			
+						
 			$type = UniteFunctionsUC::getVal($setting, "type");
 			
 			$name = UniteFunctionsUC::getVal($setting, "name");
-						
+		
 			$isMultiple = false;
 			if($type == "multiselect")
 				$isMultiple = true;
@@ -1319,19 +1401,45 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 						
 			if(is_array($settingValue) == false && strpos($settingValue,",") !== false)
 				$settingValue = explode(",", $settingValue);
-						
+			
 			$addHtml = $this->getDefaultAddHtml($setting, true);
-						
+			
 			if($isMultiple == true){
 				$addHtml .= " multiple";
 			}
 			
-			$class = $this->getInputClassAttr($setting);
+			//set this flag for true to enable select2
+			
+			$setSelect2 = false;
+			if($isMultiple == true)
+				$setSelect2 = true;
+			
+			$isPostSelect = UniteFunctionsUC::getVal($setting, "post_select");
+			$isPostSelect = UniteFunctionsUC::strToBool($isPostSelect);
+			
+			if($isPostSelect == true){
+				$setSelect2 = true;
+				
+				$postSelectType = UniteFunctionsUC::getVal($setting, "post_select_type");
+				
+				$addHtml .= " data-settingtype='post_select' data-postselecttype='$postSelectType'";
+				
+			}
+			
+			$defaultClass = "";
+				
+			if($setSelect2 == true){
+			
+					$defaultClass = "select2";
+			}
+				
+			$class = $this->getInputClassAttr($setting, $defaultClass);
 			
 			$arrItems = UniteFunctionsUC::getVal($setting, "items",array());
 			if(empty($arrItems))
 				$arrItems = array();
 			
+				
 			?>
 			<select id="<?php echo esc_attr($setting["id"])?>" name="<?php echo esc_attr($setting["name"])?>" <?php echo UniteProviderFunctionsUC::escAddParam($disabled)?> <?php echo UniteProviderFunctionsUC::escAddParam($class)?> <?php echo UniteProviderFunctionsUC::escAddParam($args)?> <?php echo UniteProviderFunctionsUC::escAddParam($addHtml)?>>
 			<?php
@@ -1350,7 +1458,7 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 				}
 				
 				?>
-					<option <?php echo UniteProviderFunctionsUC::escAddParam($addition)?> value="<?php echo esc_attr($value)?>" <?php echo UniteProviderFunctionsUC::escAddParam($selected)?>><?php echo UniteProviderFunctionsUC::escAddParam($text)?></option>
+					<option <?php echo $addition?> value="<?php echo esc_attr($value)?>" <?php echo UniteProviderFunctionsUC::escAddParam($selected)?>><?php echo UniteProviderFunctionsUC::escAddParam($text)?></option>
 				<?php
 			endforeach
 			?>
@@ -1385,14 +1493,7 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 		}
 		
 		
-		/**
-		 * draw typography setting
-		 */
-		protected function drawTypographySetting($setting){
-			?>
-			<?php _e("The typography setting will be visible in Elementor Page Builder","unlimited-elements-for-elementor");?>
-			<?php 
-		}
+		
 		
 		/**
 		 * draw dimentions setting
@@ -1403,6 +1504,7 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 			// function for override
 			
 		}
+		
 		
 		
 		/**
@@ -1493,8 +1595,58 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 		    return($arrSaps);
 		}
 		
+		private function a______TYPOGRAPHY_SETTING_____(){}
 		
-		private function a______DRAW_GENENRAL_____(){}
+		
+		/**
+		 * draw typography setting
+		 */
+		protected function drawTypographySetting($setting){
+			
+			if($this->isSidebar == false){
+				dmp("the typography attribute will be available in elementor");
+				return(false);
+			}
+			
+			$addHtml = $this->getDefaultAddHtml($setting);
+			
+			$this->isTypographyExists = true;
+			
+			?>
+		      <div id="<?php echo esc_attr($setting["id"])?>" data-settingtype="typography" class="unite-setting-input-object unite-settings-typography" data-name="<?php echo esc_attr($setting["name"])?>" <?php echo $addHtml?> >
+			  
+		        	<span class="unite-button-secondary unite-button-typography"><?php _e("Choose Styles","unlimited-elements-for-elementor") ?></span>
+			  	
+			  </div>
+
+			<?php
+		}
+		
+		/**
+		 * draw typography dialog
+		 */
+		protected function drawTypographyDialog(){
+			
+			$settings = new UniteCreatorSettings();
+		   
+			$settings->addTypographyDialogSettings();
+			
+			$output = new UniteSettingsOutputSidebarUC();
+			
+			$output->init($settings);
+		    
+		   ?>
+				<div class="uc-dialog-typgoraphy unite-settings-exclude">
+		      	 
+		   			<?php $output->draw("settings_typography_dialog", false); ?>
+					
+				</div>
+			<?php 
+						
+		}
+		
+		
+		private function a______DRAW_GENERAL_____(){}
 		
 		
 		/**
@@ -1593,6 +1745,8 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 			if(empty($this->settings))
 				UniteFunctionsUC::throwError("No settings are inited. Please init the settings in output class");
 			
+			$this->wrapperID = $formID."_".self::$serial;
+			
 			$this->setDrawOptions();
 				
 			$this->setFormID($formID);
@@ -1647,6 +1801,7 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 		* draw wrapper end after settings
 		*/
 		protected function drawSettingsAfter(){
+				
 		}
 		
 
@@ -1723,7 +1878,8 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 		 * draw settings - all together
 		 */
 		private function drawSettings_settings($filterSapID = null, $mode=null, $arrSettings = null){
-		    
+
+			
 			if(is_null($arrSettings))
 				$arrSettings = $this->arrSettings;
 			
@@ -1762,18 +1918,56 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 		    dmp("function for override");
 		}
 		
+		/**
+		 * draw the bottom of the settings
+		 */
+		protected function drawSettingsBottom(){
+			
+			if($this->isTypographyExists && $this->isSidebar == true)
+				$this->drawTypographyDialog();
+			
+		}
+		
+		/**
+		 * draw the tabs
+		 */
+		private function drawSettings_saps_accordion_tabs(){
+			
+			?>
+			<div class="unite-settings-accordion-saps-tabs">
+				
+				<a href="javascript:void(0)" class="unite-settings-tab unite-settings-tab__content unite-tab-selected"><?php _e("Content","unlimited-elements-for-elementor")?></a>
+				<a href="javascript:void(0)" class="unite-settings-tab unite-settings-tab__style"><?php _e("Style","unlimited-elements-for-elementor")?></a>
+				
+			</div>
+			<?php 
+		}
 		
 		/**
 		 * draw settings - all together
 		 */
 		private function drawSettings_saps($filterSapID = null, $mode=null){
+
+			 $isHasStyleTab = false;
 		    
-		    $arrSaps = $this->groupSettingsIntoSaps();
-		    
+			 $arrSaps = $this->groupSettingsIntoSaps();
+			 
+			 
+		     foreach($arrSaps as $key=>$sap){
+		     	
+		     	$tab = UniteFunctionsUC::getVal($sap, "tab");
+		     	
+		     	if($tab == UniteSettingsUC::TAB_STYLE)
+		     		$isHasStyleTab = true;
+		     }
+			
+			if($isHasStyleTab == true)
+				$this->drawSettings_saps_accordion_tabs();
+			
 		        //draw settings - advanced - with sections
 		        foreach($arrSaps as $key=>$sap):
 		        		
-		        		$arrSettings = $sap["settings"];
+		        		$arrSettings = UniteFunctionsUC::getVal($sap, "settings");
 		        		
 		        		$nodraw = UniteFunctionsUC::getVal($sap, "nodraw");
 		        		if($nodraw === true)
@@ -1781,13 +1975,15 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 		        		
 		                $this->drawSapBefore($sap, $key);
 						
-						$this->drawSettings_settings($filterSapID, $mode, $arrSettings);
+		                if(!empty($arrSettings))
+							$this->drawSettings_settings($filterSapID, $mode, $arrSettings);
 						
 						$this->drawSapAfter();
-						
-		        
+		        		
 		        endforeach;
 		    
+		   $this->drawSettingsBottom();
+		        
 		}
 		
 		
@@ -1811,8 +2007,10 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 			    $mode = "single_editor";
 			
 			
-			if($this->showSaps == true && $this->sapsType == self::SAPS_TYPE_ACCORDION)
+			if($this->showSaps == true && $this->sapsType == self::SAPS_TYPE_ACCORDION){
+				
 			    $this->drawSettings_saps($filterSapID, $mode);
+			}
 			else			     
 			    $this->drawSettings_settings($filterSapID, $mode);
 			

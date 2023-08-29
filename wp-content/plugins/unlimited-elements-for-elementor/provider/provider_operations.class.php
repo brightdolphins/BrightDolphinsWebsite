@@ -126,14 +126,22 @@ class ProviderOperationsUC extends UCOperations{
 		
 		$search = $this->getSearchFromData($data);
 		$taxonomy = UniteFunctionsUC::getVal($data, "taxonomy");
-				
+
 		$query = array();
 		$query["number"] = $limit;
 		$query["search"] = $search;
 		$query["hide_empty"] = false;
 		
-		if(!empty($taxonomy))
+		$arrTaxNames = array();
+		
+		$isSingleTax = true;
+		
+		if(!empty($taxonomy)){
 			$query["taxonomy"] = $taxonomy;
+		}
+		
+		if(is_array($taxonomy) && count($taxonomy) > 1)
+			$isSingleTax = false;
 		
 		$response = get_terms($query);
 		
@@ -146,7 +154,7 @@ class ProviderOperationsUC extends UCOperations{
 		if(empty($response))
 			return(null);
 		
-			
+		
 		$arrResult = array();
 		foreach($response as $term){
 			
@@ -155,7 +163,13 @@ class ProviderOperationsUC extends UCOperations{
 			$taxonomy = $term->taxonomy;
 			$count = $term->count;
 			
-			$title = $name." ({$count} items)";
+			if($taxonomy == "post_tag")
+				$taxonomy = "tag";
+			
+			if($isSingleTax == false)
+				$title = $name.", ($taxonomy, {$count} items)";
+			else
+				$title = $name.", ({$count} items)";
 			
 			$arr = array();
 			$arr["id"] = $termID;
@@ -214,9 +228,9 @@ class ProviderOperationsUC extends UCOperations{
 		
 		$whereRegular = $where." and post_title like '%$search%'";
 		
-		$sqlStartWord = "select * from $tablePosts where $whereStartWord limit $limit";
+		$sqlStartWord = "select * from $tablePosts where $whereStartWord order by post_date desc limit $limit";
 		
-		$sql = "select * from $tablePosts where $whereRegular limit $limit";
+		$sql = "select * from $tablePosts where $whereRegular order by post_date desc limit $limit ";
 		
 		if($isStartWord == true){
 			
@@ -231,6 +245,7 @@ class ProviderOperationsUC extends UCOperations{
 			//regular only
 			$response = $db->fetchSql($sql);
 		}
+		
 		
 		if(empty($response))
 			return(array());

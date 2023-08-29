@@ -14,6 +14,10 @@
  * @since 1.9.5 Intégration de la configuration des tuiles
  *              Intégration de la configuration des marqueurs
  *              Intégration de l'import de données d'un fichier geoJSON
+ * @since 2.0.2 Test du retour de la fonction json_decode erroné
+ * @since 2.1.0 Ajout du mode plein écran
+ *              Fix remplacement 'file_get_contents' par 'wp_remote_get'
+ * @since 2.1.1 Fonctionnalité upload des fichiers JSON est active
  */
 
 namespace EACCustomWidgets\Widgets;
@@ -54,7 +58,7 @@ class Open_Streetmap_Widget extends Widget_Base {
 	 *
 	 * @since 1.9.5
 	 */
-	private $layer_default = 'Basic';
+	private $layer_default = 'osm_basic';
 
 
 	/**
@@ -172,8 +176,6 @@ class Open_Streetmap_Widget extends Widget_Base {
 	 * Constructeur de la class Open_Streetmap_Widget
 	 *
 	 * Enregistre les scripts et les styles
-	 *
-	 * @since 1.9.0
 	 */
 	public function __construct( $data = array(), $args = null ) {
 		parent::__construct( $data, $args );
@@ -184,13 +186,14 @@ class Open_Streetmap_Widget extends Widget_Base {
 		// @since 1.9.5 Valorise la liste des icones
 		$this->setIconsConfig();
 
-		wp_register_script( 'leaflet', 'https://unpkg.com/leaflet@1.7.1/dist/leaflet.js', array(), '1.7.1', true );
-		wp_register_script( 'marker-cluster', 'https://unpkg.com/leaflet.markercluster@1.5.0/dist/leaflet.markercluster.js', array(), '1.5.0', true );
-		wp_register_script( 'eac-openstreetmap', EAC_Plugin::instance()->get_register_script_url( 'eac-openstreetmap' ), array( 'jquery', 'elementor-frontend' ), '1.8.8', true );
+		wp_register_script( 'leaflet', 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js', array(), '1.7.1', true );
+		wp_register_script( 'marker-cluster', 'https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.0/leaflet.markercluster.js', array( 'leaflet' ), '1.5.0', true );
+		wp_register_script( 'fullscreen', EAC_Plugin::instance()->get_script_url( 'assets/js/elementor/eac-openstreetmap-fullscreen' ), array( 'leaflet' ), '2.1.0', true );
+		wp_register_script( 'eac-openstreetmap', EAC_Plugin::instance()->get_script_url( 'assets/js/elementor/eac-openstreetmap' ), array( 'jquery', 'elementor-frontend', 'leaflet', 'marker-cluster', 'fullscreen' ), '1.8.8', true );
 
-		wp_register_style( 'marker-cluster', 'https://unpkg.com/leaflet.markercluster@1.5.0/dist/MarkerCluster.css', array(), '1.5.0' );
-		wp_register_style( 'marker-cluster-default', 'https://unpkg.com/leaflet.markercluster@1.5.0/dist/MarkerCluster.Default.css', array(), '1.5.0' );
-		wp_register_style( 'eac-leaflet', EAC_Plugin::instance()->get_register_style_url( 'leaflet' ), array( 'eac' ), '1.8.8' );
+		wp_register_style( 'marker-cluster', 'https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.0/MarkerCluster.min.css', array(), '1.5.0' );
+		wp_register_style( 'marker-cluster-default', 'https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.0/MarkerCluster.Default.min.css', array(), '1.5.0' );
+		wp_register_style( 'eac-leaflet', EAC_Plugin::instance()->get_style_url( 'assets/css/open-streetmap' ), array( 'eac', 'marker-cluster', 'marker-cluster-default' ), '1.8.8' );
 	}
 
 	/**
@@ -255,7 +258,7 @@ class Open_Streetmap_Widget extends Widget_Base {
 	 * @return libraries list.
 	 */
 	public function get_script_depends() {
-		return array( 'leaflet', 'marker-cluster', 'eac-openstreetmap' );
+		return array( 'leaflet', 'marker-cluster', 'fullscreen', 'eac-openstreetmap' );
 	}
 
 	/**
@@ -313,7 +316,7 @@ class Open_Streetmap_Widget extends Widget_Base {
 			)
 		);
 
-			/*
+			/**
 			$this->add_control('osm_settings_client_geolocate',
 				[
 					'label' => esc_html__("Localiser le visiteur (Géolocaliser)", 'eac-components'),
@@ -330,7 +333,8 @@ class Open_Streetmap_Widget extends Widget_Base {
 						],
 					],
 				]
-			);*/
+			);
+			*/
 
 			$this->add_control(
 				'osm_settings_client_ip',
@@ -344,7 +348,6 @@ class Open_Streetmap_Widget extends Widget_Base {
 					'default'      => '',
 					'conditions'   => array(
 						'terms' => array(
-							// ['name' => 'osm_settings_client_geolocate', 'operator' => '!==', 'value' => 'yes'],
 							array(
 								'name'     => 'osm_settings_search',
 								'operator' => '!==',
@@ -376,7 +379,6 @@ class Open_Streetmap_Widget extends Widget_Base {
 					'default'      => '',
 					'conditions'   => array(
 						'terms' => array(
-							// ['name' => 'osm_settings_client_geolocate', 'operator' => '!==', 'value' => 'yes'],
 							array(
 								'name'     => 'osm_settings_client_ip',
 								'operator' => '!==',
@@ -390,7 +392,7 @@ class Open_Streetmap_Widget extends Widget_Base {
 			$this->add_control(
 				'osm_settings_search_help',
 				array(
-					'label'     => esc_html__( '', 'eac-components' ),
+					'label'     => '',
 					'type'      => Controls_Manager::RAW_HTML,
 					'raw'       => __( "<span style='font-size:10px;'>Entrer l'adresse puis bouton 'Search'</span>", 'eac-components' ),
 					'condition' => array( 'osm_settings_search' => 'yes' ),
@@ -433,7 +435,7 @@ class Open_Streetmap_Widget extends Widget_Base {
 			$this->add_control(
 				'osm_settings_center_help',
 				array(
-					'label'     => esc_html__( '', 'eac-components' ),
+					'label'     => '',
 					'type'      => Controls_Manager::RAW_HTML,
 					'raw'       => __( '<span style="font-size:10px;">Cliquez <a href="https://www.coordonnees-gps.fr/" target="_blank" rel="nofollow noopener noreferrer" >ici</a> pour obtenir des coordonnées de localisation</span>', 'eac-components' ),
 					'condition' => array( 'osm_settings_search' => 'yes' ),
@@ -487,7 +489,7 @@ class Open_Streetmap_Widget extends Widget_Base {
 					$repeater->add_control(
 						'osm_markers_search_help',
 						array(
-							'label' => esc_html__( '', 'eac-components' ),
+							'label' => '',
 							'type'  => Controls_Manager::RAW_HTML,
 							'raw'   => __( "<span style='font-size:10px;'>Entrer l'adresse puis bouton 'Search'</span>", 'eac-components' ),
 						)
@@ -526,7 +528,7 @@ class Open_Streetmap_Widget extends Widget_Base {
 					$repeater->add_control(
 						'osm_markers_tooltip_help',
 						array(
-							'label' => esc_html__( '', 'eac-components' ),
+							'label' => '',
 							'type'  => Controls_Manager::RAW_HTML,
 							'raw'   => __( '<span style="font-size:10px;">Cliquez <a href="https://www.coordonnees-gps.fr/" target="_blank" rel="nofollow noopener noreferrer" >ici</a> pour obtenir des coordonnées de localisation</span>', 'eac-components' ),
 						)
@@ -560,7 +562,6 @@ class Open_Streetmap_Widget extends Widget_Base {
 							'placeholder' => esc_html__( "Contenu de l'infobulle", 'eac-components' ),
 							'dynamic'     => array( 'active' => true ),
 							'label_block' => true,
-							// 'render_type' => 'none',
 						)
 					);
 
@@ -595,7 +596,6 @@ class Open_Streetmap_Widget extends Widget_Base {
 				'osm_markers_import_type',
 				array(
 					'label'       => esc_html__( 'Type de lien', 'eac-components' ),
-					'description' => esc_html__( "Local = le fichier est dans le répertoire '/includes/config/osm/markers'.", 'eac-components' ),
 					'type'        => Controls_Manager::SELECT,
 					'default'     => 'none',
 					'options'     => array(
@@ -608,19 +608,39 @@ class Open_Streetmap_Widget extends Widget_Base {
 			);
 
 			$this->add_control(
-				'osm_markers_import_url',
+				'osm_markers_import_file_info',
 				array(
-					'label'       => esc_html__( 'URL', 'eac-components' ),
-					'description' => esc_html__( "Coller le chemin absolu du fichier 'geoJSON'", 'eac-components' ),
-					'type'        => Controls_Manager::URL,
-					'placeholder' => 'http://your-link.com/file-geojson.json',
+					'type'            => Controls_Manager::RAW_HTML,
+					'content_classes' => 'elementor-panel-alert elementor-panel-alert-info',
+					'raw'             => esc_html__( "Local = le fichier est dans le répertoire '/includes/config/osm/markers'.", 'eac-components' ),
 					'condition'   => array(
 						'osm_markers_import_list' => 'yes',
-						'osm_markers_import_type' => 'url',
+						'osm_markers_import_type' => 'file',
 					),
 				)
 			);
 
+			/** @since 2.1.1 */
+			if ( Eac_Config_Elements::is_feature_active( 'unfiltered-medias' ) ) {
+				$this->add_control(
+					'osm_markers_import_url',
+					array(
+						'label'       => esc_html__( 'URL', 'eac-components' ),
+						'description' => esc_html__( "Coller le chemin absolu du fichier 'geoJSON'", 'eac-components' ),
+						'type'        => Controls_Manager::URL,
+						'placeholder' => 'http://your-link.com/file-geojson.json',
+						'condition'   => array(
+							'osm_markers_import_list' => 'yes',
+							'osm_markers_import_type' => 'url',
+						),
+					)
+				);
+			}
+
+			/**
+			 * La fonction 'get_directory_files_list' de l'objet 'Eac_Tools_Util' utilise une fonction WP
+			 * Cette fonction vérifie les droits sur le mime type 'json' activé ou non
+			 */
 			$this->add_control(
 				'osm_markers_import_file',
 				array(
@@ -637,17 +657,35 @@ class Open_Streetmap_Widget extends Widget_Base {
 				)
 			);
 
+			/** @since 2.1.1 */
+			if ( ! Eac_Config_Elements::is_feature_active( 'unfiltered-medias' ) ) {
+				$this->add_control(
+					'osm_markers_import_url_info',
+					array(
+						'type'            => Controls_Manager::RAW_HTML,
+						'content_classes' => 'elementor-panel-alert elementor-panel-alert-warning',
+						'raw'             => esc_html__( 'Activer la fonctionnalité "Télécharger les fichiers non filtrés" pour lire un flux JSON', 'eac-components' ),
+						'condition'   => array(
+							'osm_markers_import_list' => 'yes',
+							'osm_markers_import_type!' => 'none',
+						),
+					)
+				);
+			}
+
 			$this->add_control(
 				'osm_markers_import_keywords',
 				array(
 					'label'       => esc_html__( 'Mots-clés', 'eac-components' ),
 					'description' => esc_html__( "Liste de 'propriété|label' séparée par le caractère '|' avec une paire par ligne.", 'eac-components' ),
 					'placeholder' => 'property|label' . chr( 13 ) . 'property|label' . chr( 13 ) . 'property|label',
-					// 'default' => 'com_nom|Town'.chr(13).'name|Name'.chr(13).'marque|Brands'.chr(13).'cinema3d|3D'.chr(13).'nb_screens|Number of screens'.chr(13).'capacity|Capacity'.chr(13).'wheelchair|Wheelchair'.chr(13).'phone|Phone'.chr(13).'website|Web site',
 					'type'        => Controls_Manager::TEXTAREA,
 					'dynamic'     => array( 'active' => true ),
 					'label_block' => true,
-					'condition'   => array( 'osm_markers_import_list' => 'yes' ),
+					'condition'   => array(
+						'osm_markers_import_list'  => 'yes',
+						'osm_markers_import_type!' => 'none',
+					),
 				)
 			);
 
@@ -659,7 +697,10 @@ class Open_Streetmap_Widget extends Widget_Base {
 					'options'     => $this->base_icons,
 					'default'     => 'default.png',
 					'label_block' => true,
-					'condition'   => array( 'osm_markers_import_list' => 'yes' ),
+					'condition'   => array(
+						'osm_markers_import_list'  => 'yes',
+						'osm_markers_import_type!' => 'none',
+					),
 				)
 			);
 
@@ -789,7 +830,7 @@ class Open_Streetmap_Widget extends Widget_Base {
 					),
 					'range'       => array(
 						'px' => array(
-							'min'  => 150,
+							'min'  => 120,
 							'max'  => 1000,
 							'step' => 50,
 						),
@@ -820,17 +861,18 @@ class Open_Streetmap_Widget extends Widget_Base {
 			)
 		);
 
-			/*
-			$this->add_control('osm_content_tiles_control',
-				[
-					'label' => esc_html__("Réduire le menu des tuiles", 'eac-components'),
-					'type' => Controls_Manager::SWITCHER,
-					'label_on' => esc_html__('oui', 'eac-components'),
-					'label_off' => esc_html__('non', 'eac-components'),
+			/** @since 2.1.0 */
+			$this->add_control(
+				'osm_content_fullscreen_control',
+				array(
+					'label'        => esc_html__( 'Mode plein écran', 'eac-components' ),
+					'type'         => Controls_Manager::SWITCHER,
+					'label_on'     => esc_html__( 'oui', 'eac-components' ),
+					'label_off'    => esc_html__( 'non', 'eac-components' ),
 					'return_value' => 'yes',
-					'default' => 'yes',
-				]
-			);*/
+					'default'      => 'false',
+				)
+			);
 
 			$this->add_control(
 				'osm_content_zoom_position',
@@ -880,10 +922,23 @@ class Open_Streetmap_Widget extends Widget_Base {
 				)
 			);
 
+			/** @since 2.1.0 */
+			$this->add_control(
+				'osm_content_open_popup',
+				array(
+					'label'        => esc_html__( 'Défaut infobulle ouverte', 'eac-components' ),
+					'type'         => Controls_Manager::SWITCHER,
+					'label_on'     => esc_html__( 'oui', 'eac-components' ),
+					'label_off'    => esc_html__( 'non', 'eac-components' ),
+					'return_value' => 'yes',
+					'default'      => 'yes',
+				)
+			);
+
 			$this->add_control(
 				'osm_content_click_popup',
 				array(
-					'label'        => esc_html__( 'Clicker pour fermer les info-bulles', 'eac-components' ),
+					'label'        => esc_html__( 'Clicker pour fermer les infobulles', 'eac-components' ),
 					'type'         => Controls_Manager::SWITCHER,
 					'label_on'     => esc_html__( 'oui', 'eac-components' ),
 					'label_off'    => esc_html__( 'non', 'eac-components' ),
@@ -1046,7 +1101,7 @@ class Open_Streetmap_Widget extends Widget_Base {
 	protected function render() {
 		?>
 		<div class="eac-open-streetmap">
-			<input type="hidden" id="osm_nonce" name="osm_nonce" value="<?php echo wp_create_nonce( 'eac_file_osm_nonce_' . $this->get_id() ); ?>" />
+			<input type="hidden" id="osm_nonce" name="osm_nonce" value="<?php echo esc_attr( wp_create_nonce( 'eac_file_osm_nonce_' . $this->get_id() ) ); ?>" />
 			<?php $this->render_map(); ?>
 		</div>
 		<?php
@@ -1078,38 +1133,43 @@ class Open_Streetmap_Widget extends Widget_Base {
 		// Les valeurs par défaut: Paris
 		$center_lat     = 48.8579;
 		$center_lng     = 2.3491;
-		$center_title   = ! empty( $settings['osm_settings_center_title'] ) ? wp_kses_post( $settings['osm_settings_center_title'] ) : esc_html__( "Titre de l'infobulle", 'eac-components' );
-		$center_content = ! empty( $settings['osm_settings_center_content'] ) ? wp_kses( $settings['osm_settings_center_content'], $allowed_content ) : '';
+		$center_title   = ! empty( $settings['osm_settings_center_title'] ) ? $settings['osm_settings_center_title'] : esc_html__( "Titre de l'infobulle", 'eac-components' );
+		$center_content = ! empty( $settings['osm_settings_center_content'] ) ? $settings['osm_settings_center_content'] : '';
 
 		// @since 1.9.5
-		$has_mapmarkers = $settings['osm_markers_import_list'] === 'yes' ? false : true;
+		$has_mapmarkers = 'yes' === $settings['osm_markers_import_list'] ? false : true;
 
 		// La liste des marqueurs
-		$map_markers = $has_mapmarkers === true ? $settings['osm_markers_list'] : array();
+		$map_markers = true === $has_mapmarkers ? $settings['osm_markers_list'] : array();
 
 		// Coordonnées à partir de l'adresse IP
-		$client_ip = $settings['osm_settings_client_ip'] === 'yes' ? true : false;
+		$client_ip = 'yes' === $settings['osm_settings_client_ip'] ? true : false;
 
 		// Le moteur de recherche
-		$client_search = $settings['osm_settings_search'] === 'yes' ? true : false;
+		$client_search = 'yes' === $settings['osm_settings_search'] ? true : false;
 
 		if ( $client_search && ! empty( $settings['osm_settings_center_lat'] ) && ! empty( $settings['osm_settings_center_lng'] ) ) {
 				$center_lat = ! empty( $settings['osm_settings_center_lat'] ) ? $settings['osm_settings_center_lat'] : $center_lat;
 				$center_lng = ! empty( $settings['osm_settings_center_lng'] ) ? $settings['osm_settings_center_lng'] : $center_lng;
-
-			// Calcule de l'adresse IP du client
 		} elseif ( $client_ip && isset( $_SERVER['REMOTE_ADDR'] ) && ! empty( $_SERVER['REMOTE_ADDR'] ) ) {
-			$ip_address = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
-			// $ip = unserialize(file_get_contents('http://ip-api.com/json/'. $ip_address));
-			$ip = unserialize( file_get_contents( "http://www.geoplugin.net/php.gp?ip=$ip_address" ) );
-			if ( $ip['geoplugin_status'] === 200 ) {
-				$center_lat   = isset( $ip['geoplugin_latitude'] ) ? $ip['geoplugin_latitude'] : $center_lat;
-				$center_lng   = isset( $ip['geoplugin_longitude'] ) ? $ip['geoplugin_longitude'] : $center_lng;
-				$center_title = isset( $ip['geoplugin_city'] ) ? wp_kses_post( $ip['geoplugin_city'] ) : $center_title;
-				if ( isset( $ip['geoplugin_countryName'] ) ) {
-					$center_title .= ', ' . wp_kses_post( $ip['geoplugin_countryName'] ); }
+			/**
+			 * Calcule de l'adresse IP du client
+			 * @since 2.1.0
+			 */
+			$ip_address    = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
+			$get_geoplugin = wp_remote_get( "http://www.geoplugin.net/json.gp?ip=$ip_address" );
+
+			if ( ! is_wp_error( $get_geoplugin ) && ! empty( wp_remote_retrieve_body( $get_geoplugin ) ) ) {
+				$ip = json_decode( wp_remote_retrieve_body( $get_geoplugin ), true );
+				//console_log( $ip['geoplugin_status'] );
+				if ( 200 === $ip['geoplugin_status'] ) {
+					$center_lat   = isset( $ip['geoplugin_latitude'] ) ? $ip['geoplugin_latitude'] : $center_lat;
+					$center_lng   = isset( $ip['geoplugin_longitude'] ) ? $ip['geoplugin_longitude'] : $center_lng;
+					$center_title = isset( $ip['geoplugin_city'] ) ? $ip['geoplugin_city'] : $center_title;
+					if ( isset( $ip['geoplugin_countryName'] ) ) {
+						$center_title .= ', ' . $ip['geoplugin_countryName']; }
+				}
 			}
-			// console_log($ip);
 		}
 
 		// La div wrapper
@@ -1121,14 +1181,14 @@ class Open_Streetmap_Widget extends Widget_Base {
 		$this->add_render_attribute( 'osm_marker', 'data-lat', sanitize_text_field( $center_lat ) );
 		$this->add_render_attribute( 'osm_marker', 'data-lng', sanitize_text_field( $center_lng ) );
 		?>
-		<div <?php echo $this->get_render_attribute_string( 'osm_wrapper' ); ?>>
+		<div <?php echo wp_kses_post( $this->get_render_attribute_string( 'osm_wrapper' ) ); ?>>
 			<!-- La div de la carte -->
-			<div id="<?php echo $id; ?>" class="osm-map_wrapper-map"></div>
-			
+			<div id="<?php echo esc_attr( $id ); ?>" class="osm-map_wrapper-map"></div>
+
 			<!-- Le marqueur central -->
-			<div <?php echo $this->get_render_attribute_string( 'osm_marker' ); ?>>
-				<div class="osm-map_marker-title"><?php echo $center_title; ?></div>
-				<div class="osm-map_marker-content"><?php echo $center_content; ?></div>
+			<div <?php echo wp_kses_post( $this->get_render_attribute_string( 'osm_marker' ) ); ?>>
+				<div class="osm-map_marker-title"><?php echo wp_kses_post( $center_title ); ?></div>
+				<div class="osm-map_marker-content"><?php echo wp_kses( $center_content, $allowed_content ); ?></div>
 			</div>
 			<?php
 			/** Les marqueurs du repeater */
@@ -1147,8 +1207,8 @@ class Open_Streetmap_Widget extends Widget_Base {
 						)
 					);
 					?>
-					<div <?php echo $this->get_render_attribute_string( $key ); ?>>
-						<div class="osm-map_marker-title"><?php echo wp_kses_post( $marker['osm_markers_tooltip_title'] ); ?></div>
+					<div <?php echo wp_kses_post( $this->get_render_attribute_string( $key ) ); ?>>
+						<div class="osm-map_marker-title"><?php echo sanitize_text_field( $marker['osm_markers_tooltip_title'] ); ?></div>
 						<div class="osm-map_marker-content"><?php echo wp_kses( $marker['osm_markers_tooltip_content'], $allowed_content ); ?></div>
 					</div>
 					<?php
@@ -1166,7 +1226,7 @@ class Open_Streetmap_Widget extends Widget_Base {
 	 * Convert on JSON format
 	 * Read by 'openstreetmap.js' file when the component is loaded on the frontend
 	 *
-	 *  @uses      json_encode()
+	 *  @uses      wp_json_encode()
 	 *
 	 * @return    JSON oject
 	 *
@@ -1176,39 +1236,50 @@ class Open_Streetmap_Widget extends Widget_Base {
 	 */
 	protected function get_settings_json() {
 		$module_settings = $this->get_settings_for_display();
-		$locate          = false; // $module_settings['osm_settings_client_geolocate'] === 'yes' ? true : false;
-		$zoomauto        = $module_settings['osm_settings_zoom_auto'] === 'yes' ? true : false;
-		$layer           = isset( $this->base_layers[ $module_settings['osm_settings_layers'] ] ) ? $this->base_layers[ $module_settings['osm_settings_layers'] ] : $this->layer_default;
-		$has_import      = $module_settings['osm_markers_import_list'] === 'yes' ? true : false;
-		$file_import     = '';
-		if ( $has_import === true && $module_settings['osm_markers_import_type'] === 'url' && ! empty( $module_settings['osm_markers_import_url']['url'] ) ) {
-			$file_import = $module_settings['osm_markers_import_url']['url'];
-		} elseif ( $has_import === true && $module_settings['osm_markers_import_type'] === 'file' && ! empty( $module_settings['osm_markers_import_file'] ) && $module_settings['osm_markers_import_file'] !== 'none' ) {
-			$file_import = $module_settings['osm_markers_import_file'];
+
+		/** @since 2.1.1 */
+		$is_json_actif     = Eac_Config_Elements::is_feature_active( 'unfiltered-medias' );
+		$locate            = false; // 'yes' === $module_settings['osm_settings_client_geolocate'] ? true : false;
+		$zoomauto          = 'yes' === $module_settings['osm_settings_zoom_auto'] ? true : false;
+		$layer             = isset( $this->base_layers[ $module_settings['osm_settings_layers'] ] ) ? $this->base_layers[ $module_settings['osm_settings_layers'] ] : $this->layer_default;
+		$has_import        = 'yes' === $module_settings['osm_markers_import_list'] ? true : false;
+		$has_import_url    = $has_import && $is_json_actif && 'url' === $module_settings['osm_markers_import_type'];
+		$has_import_file   = $has_import && 'file' === $module_settings['osm_markers_import_type'] && 'none' !== $module_settings['osm_markers_import_file'];
+		$file_import       = '';
+		$import_icon_sizes = $this->sizes_icons_default;
+
+		if ( $has_import_url && ! empty( $module_settings['osm_markers_import_url']['url'] ) ) {
+			$file_import = esc_url( $module_settings['osm_markers_import_url']['url'] );
+		} elseif ( $has_import_file && ! empty( $module_settings['osm_markers_import_file'] ) ) {
+			$file_import = esc_url( $module_settings['osm_markers_import_file'] );
 		}
-		$importIconSizes = ! empty( $this->base_icons_sizes ) && isset( $this->base_icons_sizes[ $module_settings['osm_markers_import_marker'] ] ) ? $this->base_icons_sizes[ $module_settings['osm_markers_import_marker'] ] : $this->sizes_icons_default;
+
+		if ( $has_import && ! empty( $this->base_icons_sizes ) && isset( $this->base_icons_sizes[ $module_settings['osm_markers_import_marker'] ] ) ) {
+			$import_icon_sizes = $this->base_icons_sizes[ $module_settings['osm_markers_import_marker'] ];
+		}
 
 		$settings = array(
 			'data_id'            => $this->get_id(),
 			'data_geolocate'     => $locate,
-			'data_zoom'          => $zoomauto ? 12 : $module_settings['osm_settings_zoom'],
-			'data_zoompos'       => $module_settings['osm_content_zoom_position'] === 'yes' ? true : false,
+			'data_zoom'          => $zoomauto ? 12 : absint( $module_settings['osm_settings_zoom'] ),
+			'data_zoompos'       => 'yes' === $module_settings['osm_content_zoom_position'] ? true : false,
 			'data_zoomauto'      => $zoomauto,
 			'data_layer'         => $layer,
-			'data_wheelzoom'     => $module_settings['osm_content_zoom'] === 'yes' ? true : false,
-			'data_dblclick'      => $module_settings['osm_content_dblclick'] === 'yes' ? true : false,
-			'data_draggable'     => $module_settings['osm_content_draggable'] === 'yes' ? true : false,
-			'data_clickpopup'    => $module_settings['osm_content_click_popup'] === 'yes' ? true : false,
+			'data_fullscreen'    => 'yes' === $module_settings['osm_content_fullscreen_control'] ? true : false,
+			'data_wheelzoom'     => 'yes' === $module_settings['osm_content_zoom'] ? true : false,
+			'data_dblclick'      => 'yes' === $module_settings['osm_content_dblclick'] ? true : false,
+			'data_draggable'     => 'yes' === $module_settings['osm_content_draggable'] ? true : false,
+			'data_openpopup'     => 'yes' === $module_settings['osm_content_open_popup'] ? true : false,
+			'data_clickpopup'    => 'yes' === $module_settings['osm_content_click_popup'] ? true : false,
 			'data_import'        => $has_import,
 			'data_import_url'    => $file_import,
-			'data_import_icon'   => $module_settings['osm_markers_import_marker'],
-			'data_import_sizes'  => $importIconSizes,
+			'data_import_icon'   => isset( $module_settings['osm_markers_import_marker'] ) ? $module_settings['osm_markers_import_marker'] : 'default.png',
+			'data_import_sizes'  => $import_icon_sizes,
 			'data_keywords'      => ! empty( $module_settings['osm_markers_import_keywords'] ) ? preg_replace( "/\r|\n/", ',', $module_settings['osm_markers_import_keywords'] ) : '',
-			'data_collapse_menu' => true, // $module_settings['osm_content_tiles_control'] === 'yes' ? true : false,
+			'data_collapse_menu' => true, // 'yes' === $module_settings['osm_content_tiles_control'] ? true : false,
 		);
 
-		$settings = json_encode( $settings );
-		return $settings;
+		return wp_json_encode( $settings );
 	}
 
 	/**
@@ -1218,16 +1289,29 @@ class Open_Streetmap_Widget extends Widget_Base {
 	 * et affecte les variables nécessaires à la constitution de la liste
 	 *
 	 * @since 1.9.5
+	 * @since 2.0.2 changer wp_remote_get vs file_get_content
 	 */
 	private function setTilesConfig() {
 		$filename = $this->config_layers;
-		$layers   = array();
+		$layers;
 
-		$json   = @file_get_contents( $filename );
-		$layers = json_decode( $json, true );
-		if ( $layers == true ) {
-			foreach ( $layers as $code => $args ) {
-				$this->base_layers[ $code ] = isset( $args['options']['title'] ) ? $args['options']['title'] : $this->title_default;
+		$json = wp_remote_get(
+			$filename,
+			array(
+				'timeout' => 10,
+				'headers' => array( 'Accept' => 'application/json' ),
+			)
+		);
+		//error_log(json_encode(wp_remote_retrieve_response_code($json)));
+		if ( ! is_wp_error( $json ) && 200 === wp_remote_retrieve_response_code( $json ) && ! empty( wp_remote_retrieve_body( $json ) ) ) {
+			$body   = wp_remote_retrieve_body( $json );
+			$layers = json_decode( $body, true );
+			if ( is_array( $layers ) ) {
+				foreach ( $layers as $code => $args ) {
+					$this->base_layers[ esc_attr( $code ) ] = isset( $args['options']['title'] ) ? esc_html( $args['options']['title'] ) : esc_html( $this->title_default );
+				}
+			} else {
+				$this->base_layers = $this->base_layers_default;
 			}
 		} else {
 			$this->base_layers = $this->base_layers_default;
@@ -1241,17 +1325,30 @@ class Open_Streetmap_Widget extends Widget_Base {
 	 * et affecte les variables nécessaires à la constitution de la liste
 	 *
 	 * @since 1.9.5
+	 * @since 2.0.2 changer wp_remote_get vs file_get_content
 	 */
 	private function setIconsConfig() {
 		$filename = $this->config_icons;
-		$icons    = array();
+		$icons;
 
-		$json  = @file_get_contents( $filename );
-		$icons = json_decode( $json, true );
-		if ( $icons == true ) {
-			foreach ( $icons as $code => $args ) {
-				$this->base_icons[ $code ]       = isset( $args['title'] ) ? $args['title'] : $this->title_default;
-				$this->base_icons_sizes[ $code ] = isset( $args['sizes'] ) ? $args['sizes'] : $this->sizes_icons_default;
+		$json = wp_remote_get(
+			$filename,
+			array(
+				'timeout' => 10,
+				'headers' => array( 'Accept' => 'application/json' ),
+			)
+		);
+
+		if ( ! is_wp_error( $json ) && 200 === wp_remote_retrieve_response_code( $json ) && ! empty( wp_remote_retrieve_body( $json ) ) ) {
+			$body  = wp_remote_retrieve_body( $json );
+			$icons = json_decode( $body, true );
+			if ( is_array( $icons ) ) {
+				foreach ( $icons as $code => $args ) {
+					$this->base_icons[ esc_attr( $code ) ]       = isset( $args['title'] ) ? esc_html( $args['title'] ) : esc_html( $this->title_default );
+					$this->base_icons_sizes[ esc_attr( $code ) ] = isset( $args['sizes'] ) ? $args['sizes'] : $this->sizes_icons_default;
+				}
+			} else {
+				$this->base_icons = $this->base_icons_default;
 			}
 		} else {
 			$this->base_icons = $this->base_icons_default;

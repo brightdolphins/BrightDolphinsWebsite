@@ -1247,16 +1247,16 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 			$objManager = $setting["items_manager"];
 
 			$source = UniteFunctionsUC::getVal($setting, "source");
+			
 			if(!empty($source))
 				$objManager->setSource($source);
-			
 			
 			?>
 			<div id="<?php echo esc_attr($id)?>" class='uc-setting-items-panel'  data-name='<?php echo esc_attr($name)?>'>
 			<?php 
 				
 				if($this->isSidebar == true): ?>
-					<a href="javascript:void(0)" class="unite-button-secondary uc-setting-items-panel-button"><?php esc_html_e("Edit Addon Items", "unlimited-elements-for-elementor")?></a>
+					<a href="javascript:void(0)" class="unite-button-secondary uc-setting-items-panel-button"><?php esc_html_e("Edit Widget Items", "unlimited-elements-for-elementor")?></a>
 					
 					<div id='<?php echo esc_attr($idDialog)?>' class='uc-settings-items-panel-dialog' title="<?php esc_html_e("Edit Addon Items", "unlimited-elements-for-elementor")?>" style='display:none'>
 				<?php endif;

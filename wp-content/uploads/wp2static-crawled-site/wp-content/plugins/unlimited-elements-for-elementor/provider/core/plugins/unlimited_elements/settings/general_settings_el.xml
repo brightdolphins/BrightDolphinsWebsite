@@ -30,6 +30,15 @@
 					label="		Js Always in Footer"
 					description="Put addon javascript always in the footer of the page. If no, it will be put right after the body">	
 				</field>
+
+				<field name="js_saparate" 
+					type="boolean"
+					default="false" 
+					label="		Each JS in saparate tag"
+					description="if yes, each js will be put in saparate tag with it's own id. good for optimization plugins">	
+				</field>
+	
+				<field type="control" parent="js_in_footer" child="js_saparate" ctype="show" value="true" />
 				
 				<field name="css_includes_to" 
 					type="list"
@@ -92,6 +101,14 @@
 						<option value="enable" text="Load Normally"></option>
 						<option value="disable" text="Force Disable"></option>
 				</field>
+			
+				<field name="alphabetic_attributes" 
+					type="boolean"
+					default="false" 
+					label="Sort Attributes in Widgets Editor by A-Z"
+					description="Sort the order of the attributes in widgets editor alphabetically">
+				</field>
+			
 				
 				<field type="bulk_control_end"/>
 								
@@ -107,16 +124,7 @@
 					<option value="admin" text="Admin"></option>
 					<option value="editor" text="Editor"></option>
 			</field>
-			
-			<!--  
-			<field name="disable_autop_filters" 
-				type="boolean"
-				default="false" 
-				label="Disable Autop Filters"
-				description="Wordpress has some filters that can modify output html. disabling those filters will make the output exactly like in the addons demo">	
-			</field>
-			-->
-		
+					
 		</fieldset>	
 		<fieldset name="instagram" label="Instagram">
 			
@@ -164,6 +172,20 @@
 				description="Used to output a map in google maps related widget. &lt;a href='https://unlimited-elements.com/docs/google-map-api-key/' target='_blank'&gt;Read this article&lt;/a&gt; for instructions: "
 				default="">
 			</field>
+			
+			<field name="wpml_heading" 
+				type="statictext"
+				hidden="true"
+				label="&lt;b&gt;---- WPML Automatic Translation ----&lt;/b&gt;">
+			</field>
+		
+			<field name="wpml_button" 
+				type="button"
+				value="Check Widgets Fields"
+				hidden="true"
+				gotoview="wpml-fields"
+				label="Check widgets fields that are ready for wpml automatic translation."
+			></field>
 		
 		</fieldset>
 		<fieldset name="troubleshooting" label="Troubleshooting">

@@ -15,6 +15,7 @@
  * @since 1.9.8 Intégration de la configuration avec l'objet 'Eac_Config_Elements'
  * @since 2.0.1 Gestion du contenu de l'onglet 'tab-5' pour l'intégration WooCommerce
  *              Création d'une seule instance de la class
+ * @since 2.1.1 Ajout de la boîte de dialogue d'upload des fichiers JSON et SVG
  */
 
 namespace EACCustomWidgets\Admin\Settings;
@@ -87,8 +88,8 @@ class EAC_Admin_Settings {
 		$option      = '';
 
 		$current_user = wp_get_current_user();
-		if ( $current_user->has_cap( EAC_Plugin::instance()->get_manage_options_name() ) ) {
-			$option = EAC_Plugin::instance()->get_manage_options_name();
+		if ( $current_user->has_cap( Eac_Config_Elements::get_manage_options_name() ) ) {
+			$option = Eac_Config_Elements::get_manage_options_name();
 		} elseif ( $current_user->has_cap( 'manage_options' ) ) {
 			$option = 'manage_options';
 		}
@@ -104,20 +105,20 @@ class EAC_Admin_Settings {
 	 * Charge le css 'eac-admin' et le script 'eac-admin' d'administration des composants
 	 * Lance le chargement des options
 	 *
-	 * @since 0.0.9
+	 * @since 1.0.0
 	 * @since 1.8.4 Simplification du chargement des options
 	 * @since 1.8.7 Chargement du script de la boîte de dialogue 'acf-json'
 	 */
 	public function admin_page_scripts() {
 
+		/** Le script de la page de configuration du plugin */
+		wp_enqueue_script( 'eac-admin', EAC_Plugin::instance()->get_script_url( 'admin/js/eac-admin' ), array( 'jquery', 'jquery-ui-dialog' ), '1.0.0', true );
+
 		/** Le style de la page de configuration du plugin */
-		wp_enqueue_style( 'eac-admin', EAC_Plugin::instance()->get_register_style_url( 'eac-admin', true ), array(), EAC_ADDONS_VERSION );
+		wp_enqueue_style( 'eac-admin', EAC_Plugin::instance()->get_style_url( 'admin/css/eac-admin' ), array(), '1.0.0' );
 
 		/** @since 1.8.7 */
 		wp_enqueue_style( 'wp-jquery-ui-dialog' );
-
-		/** Le script de la page de configuration du plugin */
-		wp_enqueue_script( 'eac-admin', EAC_Plugin::instance()->get_register_script_url( 'eac-admin', true ), array( 'jquery', 'jquery-ui-dialog' ), EAC_ADDONS_VERSION, true );
 	}
 
 	/**
@@ -160,21 +161,23 @@ class EAC_Admin_Settings {
 		 *
 		 * @since 1.9.2 Ajout des attributs "noopener noreferrer" dans les formulaires
 		 * @since 2.0.1 Chargement du fichier 'tab-5'
+		 * @since 2.1.1 Ajout de la boîte de dialogue d'upload des fichiers JSON
 		 */
 		require_once 'eac-components-header.php';
 		require_once 'eac-components-tabs-nav.php';
 		?>
 		<div class="tabs-stage">
 			<?php require_once 'eac-components-tab1.php'; ?>
-			<?php require_once 'eac-components-tab2.php'; ?>
+			<?php require_once 'eac-components-tab4.php'; ?>
 			<?php
 			if ( Eac_Config_Elements::is_widget_active( 'woo-product-grid' ) ) {
-				require_once 'eac-components-tab5.php';
+				require_once 'eac-components-tab6.php';
 			}
 			?>
 		</div>
 		<?php require_once 'eac-admin-popup-acf.php'; ?>
 		<?php require_once 'eac-admin-popup-grant-option.php'; ?>
+		<?php require_once 'eac-admin-popup-grant-medias.php'; ?>
 		<?php
 	}
 
@@ -190,7 +193,7 @@ class EAC_Admin_Settings {
 	 */
 	public function save_features() {
 		// @since 1.8.7 Vérification du nonce pour cette action
-		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], $this->features_nonce ) ) {
+		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), $this->features_nonce ) ) {
 			wp_send_json_error( esc_html__( "Les réglages n'ont pu être enregistrés (nonce)", 'eac-components' ) );
 		}
 
@@ -198,7 +201,7 @@ class EAC_Admin_Settings {
 			wp_send_json_error( esc_html__( 'Vous ne pouvez pas modifier les réglages', 'eac-components' ) );
 		}
 
-		// Les champs 'fields' sélectionnés 'on' sont serialiés dans 'eac-admin.js'
+		// Les champs 'fields' sélectionnés 'on' sont serialisés dans 'eac-admin.js'
 		if ( isset( $_POST['fields'] ) ) {
 			parse_str( $_POST['fields'], $settings_on );
 		} else {
@@ -235,7 +238,7 @@ class EAC_Admin_Settings {
 	 */
 	public function save_settings() {
 		// @since 1.8.7 Vérification du nonce pour cette action
-		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], $this->widgets_nonce ) ) {
+		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), $this->widgets_nonce ) ) {
 			wp_send_json_error( esc_html__( "Les réglages n'ont pu être enregistrés (nonce)", 'eac-components' ) );
 		}
 
@@ -243,7 +246,7 @@ class EAC_Admin_Settings {
 			wp_send_json_error( esc_html__( 'Vous ne pouvez pas modifier les réglages', 'eac-components' ) );
 		}
 
-		// Les champs 'fields' sélectionnés 'on' sont serializés dans 'eac-admin.js'
+		// Les champs 'fields' sélectionnés 'on' sont serialisés dans 'eac-admin.js'
 		if ( isset( $_POST['fields'] ) ) {
 			parse_str( $_POST['fields'], $settings_on );
 		} else {
@@ -280,7 +283,7 @@ class EAC_Admin_Settings {
 		$woo_shop_args = Eac_Config_Elements::get_woo_hooks_option_args();
 
 		/** Vérification du nonce pour cette action */
-		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( $_POST['nonce'], $this->wc_integration_nonce ) ) {
+		if ( ! isset( $_POST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['nonce'] ) ), $this->wc_integration_nonce ) ) {
 			wp_send_json_error( esc_html__( "Les réglages n'ont pu être enregistrés (nonce)", 'eac-components' ) );
 		}
 
@@ -288,7 +291,7 @@ class EAC_Admin_Settings {
 			wp_send_json_error( esc_html__( 'Vous ne pouvez pas modifier les réglages', 'eac-components' ) );
 		}
 
-		/** Les champs 'fields' sont serializés dans 'eac-admin.js' */
+		/** Les champs 'fields' sont serialisés dans 'eac-admin.js' */
 		if ( isset( $_POST['fields'] ) ) {
 			parse_str( $_POST['fields'], $settings_on );
 		} else {

@@ -2,6 +2,8 @@
 
 	"use strict";
 
+	var actionTargetProductId;
+
 	var WprElements = {
 
 		init: function() {
@@ -15,6 +17,7 @@
 				'wpr-media-grid.default' : WprElements.widgetGrid,
 				'wpr-woo-grid.default' : WprElements.widgetGrid,
 				'wpr-woo-category-grid-pro.default' : WprElements.widgetGrid,
+				'wpr-category-grid-pro.default' : WprElements.widgetGrid,
 				'wpr-featured-media.default' : WprElements.widgetFeaturedMedia,
 				'wpr-countdown.default' : WprElements.widgetCountDown,
 				'wpr-google-maps.default' : WprElements.widgetGoogleMaps,
@@ -34,6 +37,9 @@
 				'wpr-lottie-animations.default': WprElements.widgetLottieAnimations,
 				'wpr-posts-timeline.default' : WprElements.widgetPostsTimeline,
 				'wpr-sharing-buttons.default' : WprElements.widgetSharingButtons,
+				'wpr-twitter-feed.default' : WprElements.widgetTwitterFeed,
+				'wpr-instagram-feed.default' : WprElements.widgetInstagramFeed,
+				'wpr-facebook-feed.default' : WprElements.widgetFacebookFeed,
 				'wpr-flip-carousel.default': WprElements.widgetFlipCarousel,
 				'wpr-feature-list.default' : WprElements.widgetFeatureList,
 				'wpr-advanced-accordion.default' : WprElements.widgetAdvancedAccordion,
@@ -47,6 +53,15 @@
 				'wpr-reading-progress-bar.default' : WprElements.widgetReadingProgressBar,
 				'wpr-data-table.default' : WprElements.widgetDataTable,
 				'wpr-charts.default': WprElements.widgetCharts,
+				'wpr-taxonomy-list.default': WprElements.widgetTaxonomyList,
+				'wpr-offcanvas.default': WprElements.widgetOffcanvas,
+				'wpr-wishlist-button-pro.default' : WprElements.widgetWishlistButton,
+				'wpr-mini-wishlist-pro.default' : WprElements.widgetMiniWishlist,
+				'wpr-wishlist-pro.default' : WprElements.widgetWishlist,
+				'wpr-compare-button-pro.default' : WprElements.widgetCompareButton,
+				'wpr-mini-compare-pro.default' : WprElements.widgetMiniCompare,
+				'wpr-compare-pro.default' : WprElements.widgetCompare,
+				'wpr-form-builder.default': WprElements.widgetFormBuilder,
 				'global': WprElements.widgetSection,
 
 				// Single
@@ -129,7 +144,10 @@
 			}
 
 			if ( $scope.hasClass('wpr-sticky-section-yes') ) {
-						
+				stickySection();
+			}
+
+			function stickySection() {
 			    var positionType = !WprElements.editorCheck() ? $scope.attr('data-wpr-position-type') : $scope.find('.wpr-sticky-section-yes-editor').attr('data-wpr-position-type'),
 				    positionLocation = !WprElements.editorCheck() ? $scope.attr('data-wpr-position-location') : $scope.find('.wpr-sticky-section-yes-editor').attr('data-wpr-position-location'),
 				    positionOffset = !WprElements.editorCheck() ? $scope.attr('data-wpr-position-offset') : $scope.find('.wpr-sticky-section-yes-editor').attr('data-wpr-position-offset'),
@@ -137,10 +155,41 @@
 				    availableDevices = !WprElements.editorCheck() ? $scope.attr('data-wpr-sticky-devices') : $scope.find('.wpr-sticky-section-yes-editor').attr('data-wpr-sticky-devices'),
 				    activeDevices = !WprElements.editorCheck() ? $scope.attr('data-wpr-active-breakpoints') : $scope.find('.wpr-sticky-section-yes-editor').attr('data-wpr-active-breakpoints'),
 				    stickySectionExists = $scope.hasClass('wpr-sticky-section-yes') || $scope.find('.wpr-sticky-section-yes-editor') ? true : false,
-				    positionStyle, 
+				    positionStyle,
                     adminBarHeight,
-				    stickyHeaderFooter = $scope.closest('div[data-elementor-type="wp-post"]').length ? $scope.closest('div[data-elementor-type="wp-post"]') : '',
-					headerFooterZIndex = !WprElements.editorCheck() ? $scope.attr('data-wpr-z-index') : $scope.find('.wpr-sticky-section-yes-editor').attr('data-wpr-z-index');
+					stickyEffectsOffset = 0,
+					stickyHideDistance = 0,
+					$window = $(window),
+					prevScrollPos = $window.scrollTop(),
+				    stickyHeaderFooter = '',
+					stickyAnimation = 'none',
+					stickyAnimationHide = '',
+					headerFooterZIndex = !WprElements.editorCheck() ? $scope.attr('data-wpr-z-index') : $scope.find('.wpr-sticky-section-yes-editor').attr('data-wpr-z-index'),
+					stickType = !WprElements.editorCheck() ? $scope.attr('data-wpr-sticky-type') : $scope.find('.wpr-sticky-section-yes-editor').attr('data-wpr-sticky-type');
+
+					var distanceFromTop = $scope.offset().top;
+
+					if ( $scope.data('settings').sticky_animation ) {
+						stickyAnimation = $scope.data('settings').sticky_animation;
+					} else {
+						stickyAnimation = $scope.find('.wpr-sticky-section-yes-editor').attr('data-wpr-sticky-animation');
+					}
+
+					var stickyAnimDuration = $scope.attr('data-wpr-animation-duration') ? $scope.attr('data-wpr-animation-duration') + 's' : 500 + 's';
+
+					// if ( WprElements.editorCheck() ) { // needs different approach
+					// 	if ( $scope.next('section').length > 0 && ($scope.next('section').offset().top < ($scope.offset().top + $scope.height())) ) {
+					// 		$scope.next('section').css('margin-top', $scope.offset().top + $scope.height() + 'px');
+					// 	}
+					// }
+
+				if ( $scope.closest('div[data-elementor-type="wp-post"]').length > 0 ) {
+					stickyHeaderFooter = $scope.closest('div[data-elementor-type="wp-post"]');
+				} else if ( $scope.closest('div[data-elementor-type="header"]').length > 0 ) {
+					stickyHeaderFooter = $scope.closest('div[data-elementor-type="header"]');
+				} else if ( $scope.closest('div[data-elementor-type="footer"]').length > 0 ) {
+					stickyHeaderFooter = $scope.closest('div[data-elementor-type="footer"]');
+				}
 
 			    if ( !$scope.find('.wpr-sticky-section-yes-editor').length) {
 			        positionType = $scope.attr('data-wpr-position-type');
@@ -159,7 +208,7 @@
                 }
 
 			    if ( 0 == availableDevices.length ) {
-			        positionType = 'static';
+			        positionType = 'relative';
 			    }
 
 			    if ( WprElements.editorCheck() && availableDevices ) {
@@ -172,17 +221,18 @@
 			    changeAdminBarOffset();
 
 			    $(window).resize(function() { 
+					distanceFromTop = $scope.offset().top;
 			        viewportWidth = $('body').prop('clientWidth') + 17,
 			        changePositionType();
 			    });
 			    
 			    if (!stickySectionExists) {
-			        positionStyle = 'static';
+			        positionStyle = 'relative';
 			    }
 
 			    function changePositionType() {
-			        if ( !$scope.hasClass('wpr-sticky-section-yes') || !$scope.find('.wpr-sticky-section-yes-editor') ) {
-			            positionStyle = 'static';
+			        if ( !$scope.hasClass('wpr-sticky-section-yes') && !$scope.find('.wpr-sticky-section-yes-editor') ) {
+			            positionStyle = 'relative';
 			            return;
 			        }
 
@@ -194,47 +244,166 @@
 			        }).reverse();
 			        
 			        checkedDevices.forEach((device, index) => {
-			            if ( (device[1] > viewportWidth) && availableDevices.indexOf(device[0]) === -1 ) {
-			                positionStyle = activeDevices?.indexOf(device[0]) !== -1 ? 'static' : (emptyVariables[index - 1] ? emptyVariables[index - 1] : positionType);
-			                // positionStyle = activeDevices && activeDevices.indexOf(device[0]) !== -1 ? 'static' : (emptyVariables[index - 1] ? emptyVariables[index - 1] : positionType);
-			                emptyVariables[index] = positionStyle;
-			            } else if ( ( device[1] > viewportWidth) && availableDevices.indexOf(device[0]) !== -1 ) {
-			                positionStyle = positionType;
-			            }
+						if ( device[1] > viewportWidth ) {
+							var deviceName = device[0].replace("_sticky", "");
+
+							if ( 'desktop' == deviceName ) {
+								if ( $scope.data('settings') ) {
+									stickyEffectsOffset = distanceFromTop + $scope.data('settings').wpr_sticky_effects_offset;
+								} else {
+									stickyEffectsOffset = distanceFromTop + $scope.find('.wpr-sticky-section-yes-editor').attr('data-wpr-offset-settings');
+								}
+							} else {
+								if ( $scope.data('settings') ) {
+									stickyEffectsOffset = distanceFromTop + $scope.data('settings')['wpr_sticky_effects_offset_' + deviceName];
+								} else {
+									stickyEffectsOffset = distanceFromTop + $scope.find('.wpr-sticky-section-yes-editor').attr('data-wpr-offset-settings');
+								}
+							}
+
+							if ( availableDevices.indexOf(device[0]) === -1 ) {
+								positionStyle = activeDevices?.indexOf(device[0]) !== -1 ? 'relative' : (emptyVariables[index - 1] ? emptyVariables[index - 1] : positionType);
+								// positionStyle = activeDevices && activeDevices.indexOf(device[0]) !== -1 ? 'static' : (emptyVariables[index - 1] ? emptyVariables[index - 1] : positionType);
+								emptyVariables[index] = positionStyle;
+							} else if ( availableDevices.indexOf(device[0]) !== -1 ) {
+								positionStyle = positionType;
+							}
+						}
 			        });
-			        
-			        applyPosition();
+
+					var handleScroll = function() {
+						let scrollPos = $window.scrollTop();
+						
+						if ( 'fixed' != positionStyle ) {
+							if ( scrollPos > distanceFromTop) {
+								applyPosition();
+							} else if ( scrollPos <= distanceFromTop ) {
+								$scope.css({'position': 'relative' });
+							}
+						}
+
+						if ( 'relative' !== positionStyle ) {
+							if ( scrollPos > stickyEffectsOffset ) {
+								if ( 'yes' == $scope.data('wpr-replace-header') ) {
+
+									if ( 'yes' === $scope.data('wpr-sticky-hide') ) {
+
+										if ( scrollPos >= distanceFromTop ) {
+											$scope.addClass('wpr-visibility-hidden');
+										}
+
+										if ( scrollPos < prevScrollPos) {
+											$scope.next().addClass('wpr-hidden-header').addClass('wpr-' + stickyAnimation + '-in');
+										}
+									} else {
+										$scope.addClass('wpr-visibility-hidden');
+										$scope.next().addClass('wpr-hidden-header').addClass('wpr-' + stickyAnimation + '-in');
+									}
+								} else {
+									$scope.addClass('wpr-sticky-header');
+								}
+							} else if ( scrollPos <= stickyEffectsOffset ) {
+								if ( 'yes' == $scope.data('wpr-replace-header') ) {
+									$scope.next().removeClass('wpr-hidden-header');
+									$scope.removeClass('wpr-visibility-hidden');
+									$scope.next().removeClass('wpr-' + stickyAnimation + '-in');
+								} else {
+									$scope.removeClass('wpr-sticky-header');
+								}
+							}
+						}
+
+						if ( 'yes' === $scope.data('wpr-sticky-hide') ) {
+							if ( scrollPos >= distanceFromTop ) {
+								if ( scrollPos < prevScrollPos ) {
+									// Scrolling up
+									if ( 'yes' === $scope.data('wpr-replace-header') ) {
+										$scope.next().removeClass('wpr-' + stickyAnimation + '-out');
+										$scope.next().addClass('wpr-' + stickyAnimation + '-in');
+									} else {
+										$scope.removeClass('wpr-' + stickyAnimation + '-out');
+										$scope.addClass('wpr-' + stickyAnimation + '-in');
+									}
+								} else {
+									// Scrolling down or no direction change
+									if ( 'yes' === $scope.data('wpr-replace-header') ) {
+										$scope.next().removeClass('wpr-' + stickyAnimation + '-in');
+										$scope.next().addClass('wpr-' + stickyAnimation + '-out');
+									} else {
+										$scope.removeClass('wpr-' + stickyAnimation + '-in');
+										$scope.addClass('wpr-' + stickyAnimation + '-out');
+									}
+								}
+							}
+							
+							// else if ( scrollPos <= stickyHideDistance ) {
+							// 	// At or above the top
+							// 	$scope.removeClass('wpr-sticky-hide');
+							// }	
+						}
+
+						// Clear any previous timeout
+						clearTimeout(scrollEndTimeout);
+					  
+						// Set a new timeout to update prevScrollPos after 150 milliseconds (adjust the delay as needed)
+						scrollEndTimeout = setTimeout(() => {
+						  prevScrollPos = scrollPos;
+						}, 10);
+					}
+
+					// const debouncedHandleScroll = _.debounce(handleScroll, 50);
+					
+					if ( 'sticky' == positionStyle ) {
+						// $(window).scroll(debouncedHandleScroll);
+						$(window).scroll(handleScroll);
+						
+						// $(window).scroll(function() {
+						// 	debounceScroll(handleScroll, 50);
+						// });
+					} else if ( 'fixed' == positionStyle ) {
+						applyPosition();
+						$(window).scroll(handleScroll);
+					}
+
+					if ( 'yes' == $scope.data('wpr-replace-header') ) {
+  						$scope.next().get(0).style.setProperty('--wpr-animation-duration', stickyAnimDuration);
+					}
+					
+					function debounceScroll(method, delay) {
+						clearTimeout(method._tId);
+						method._tId= setTimeout(function(){
+							method();
+						}, delay);
+					}
+
+					let scrollEndTimeout;
 			    }
 			    
 			    function applyPosition() {
 			        var bottom = +window.innerHeight - (+$scope.css('top').slice(0, -2) + $scope.height());
 			        var top = +window.innerHeight - (+$scope.css('bottom').slice(0, -2) + $scope.height());
-			        if ( 'top'  ===  positionLocation ) {
-			            $scope.css({'position': positionStyle });
-			            if ( '' !== stickyHeaderFooter ) {
-			                // stickyHeaderFooter = stickyHeaderFooter.find('.wpr-sticky-section-yes');
-			                stickyHeaderFooter.css({'position': positionStyle, 'top': positionOffset + 'px', 'bottom': 'auto', 'z-index': headerFooterZIndex, 'width': '100%' });
-			            }
-			        }
-			        else {
-			            $scope.css({'position': positionStyle });
-			            if ( '' !== stickyHeaderFooter ) {
-			                stickyHeaderFooter = stickyHeaderFooter.find('.wpr-sticky-section-yes');
-			                stickyHeaderFooter.css({'position': positionStyle, 'bottom': positionOffset + 'px', 'top': 'auto', 'z-index': headerFooterZIndex, 'width': '100%' }); 
-			            }
-			        }
+
+					if ( 'yes' === $scope.data('wpr-sticky-hide') && prevScrollPos < $window.scrollTop() ) {
+						return;
+					}
+
+					if ( '' == stickType ) {
+						stickType = 'fixed';
+					}
+					
+					$scope.css({'position': stickType });
 			    }
 
 			    function changeAdminBarOffset() {	
 			        if ( $('#wpadminbar').length ) {
 			            adminBarHeight = $('#wpadminbar').css('height').slice(0, $('#wpadminbar').css('height').length - 2);
-			            if ( 'top'  ===  positionLocation && ( 'fixed' == $scope.css('position')  || 'sticky' == $scope.css('position') ) ) {
+			            // if ( 'top'  ===  positionLocation && ( 'fixed' == $scope.css('position')  || 'sticky' == $scope.css('position') ) ) {
+			            if ( 'top'  ===  positionLocation && ( 'fixed' == $scope.css('position') ) ) {
 			                $scope.css('top', +adminBarHeight + offsetTop + 'px');
 			                $scope.css('bottom', 'auto');
 			            } 
 			        }
 			    }
-
 			}
 
 			function particlesEffect() {
@@ -242,12 +411,20 @@
 					sectionID = $scope.data('id'),
 					particlesJSON = ! WprElements.editorCheck() ? $scope.attr('data-wpr-particles') : $scope.find('.wpr-particle-wrapper').attr('data-wpr-particles-editor');
 
-				if ( 'section' === elementType && undefined !== particlesJSON ) {
+				if ( ('section' === elementType || 'container' === elementType) && undefined !== particlesJSON ) {
 					// Frontend
 					if ( ! WprElements.editorCheck() ) {
 						$scope.prepend('<div class="wpr-particle-wrapper" id="wpr-particle-'+ sectionID +'"></div>');
 	
 						particlesJS('wpr-particle-'+ sectionID, $scope.attr('particle-source') == 'wpr_particle_json_custom' ? JSON.parse(particlesJSON) : modifyJSON(particlesJSON));
+
+						setTimeout(function() {
+							window.dispatchEvent(new Event('resize'));
+						}, 500);
+
+						setTimeout(function() {
+							window.dispatchEvent(new Event('resize'));
+						}, 1500);
 					// Editor
 					} else {
 						if ( $scope.hasClass('wpr-particle-yes') ) {
@@ -255,7 +432,13 @@
 	
 							$scope.find('.elementor-column').css('z-index', 9);
 	
-							$(window).trigger('resize');
+							setTimeout(function() {
+								window.dispatchEvent(new Event('resize'));
+							}, 500);
+
+							setTimeout(function() {
+								window.dispatchEvent(new Event('resize'));
+							}, 1500);
 						} else {
 							$scope.find('.wpr-particle-wrapper').remove();
 						}
@@ -349,6 +532,14 @@
 			// Menu
 			var subMenuFirst = $navMenu.find( '.wpr-nav-menu > li.menu-item-has-children' ),
 				subMenuDeep = $navMenu.find( '.wpr-sub-menu li.menu-item-has-children' );
+
+			if ( $scope.find('.wpr-mobile-toggle').length ) {
+				$scope.find('a').on('click', function() {
+					if (this.pathname == window.location.pathname && !($(this).parent('li').children().length > 1)) {
+						$scope.find('.wpr-mobile-toggle').trigger('click');
+					}
+				});
+			}
 
 			if ( $navMenu.attr('data-trigger') === 'click' ) {
 				// First Sub
@@ -540,8 +731,17 @@
 			var subMenuFirst = $navMenu.find( '.wpr-nav-menu > li.menu-item-has-children' ),
 				subMenuDeep = $navMenu.find( '.wpr-sub-menu li.menu-item-has-children' );
 
+			if ( $scope.find('.wpr-mobile-toggle').length ) {
+				$scope.find('a').on('click', function() {
+					if (this.pathname == window.location.pathname && !($(this).parent('li').children().length > 1)) {
+						$scope.find('.wpr-mobile-toggle').trigger('click');
+					}
+				});
+			}
+
 			// Click
 			if ( $navMenu.attr('data-trigger') === 'click' ) {
+
 				// First Sub
 				subMenuFirst.children('a').on( 'click', function(e) {
 					var currentItem = $(this).parent(),
@@ -642,6 +842,7 @@
 
 				// Show Menu
 				if ( $scope.hasClass('wpr-mobile-menu-display-offcanvas') ) {
+					$(this).closest('.elementor-top-section').addClass('wpr-section-full-height');
 					$('body').css('overflow', 'hidden');
 					$(this).parent().siblings('.wpr-mobile-mega-menu-wrap').toggleClass('wpr-mobile-mega-menu-open');
 				} else {
@@ -652,10 +853,12 @@
 				$scope.find('.mobile-mega-menu-close').on('click', function() {
 					$(this).closest('.wpr-mobile-mega-menu-wrap').removeClass('wpr-mobile-mega-menu-open');
 					$('body').css('overflow', 'visible');
+					$(this).closest('.elementor-top-section').removeClass('wpr-section-full-height');
 				});
 				$scope.find('.wpr-mobile-mega-menu-overlay').on('click', function() {
 					$(this).siblings('.wpr-mobile-mega-menu-wrap').removeClass('wpr-mobile-mega-menu-open');
 					$('body').css('overflow', 'visible');
+					$(this).closest('.elementor-top-section').removeClass('wpr-section-full-height');
 				});
 
 				// Fix Width
@@ -781,7 +984,7 @@
 						megaSubMenu.css({
 							'max-width' : $(window).width() +'px',
 							'left' : - $scope.find('.wpr-nav-menu-container').offset().left +'px'
-						});	
+						});	// conditions for sticky replace needed
 					} else if ( $(this).hasClass('wpr-mega-menu-width-stretch') ) {
 						let elContainer = $(this).closest('.elementor-section');
 							elContainer = elContainer.hasClass('elementor-inner-section') ? elContainer : elContainer.children('.elementor-container');
@@ -853,49 +1056,164 @@
 		}, // End widgetMegaMenu
 
 		OnepageNav: function( $scope ) {
-			$scope.find( '.wpr-onepage-nav-item' ).on( 'click', function(event) {
-				event.preventDefault();
-
-				var section = $( $(this).find( 'a' ).attr( 'href' ) ),
-					scrollSpeed = parseInt( $(this).parent().attr( 'data-speed' ), 10 );
-
-				$( 'html, body' ).animate({ scrollTop: section.offset().top }, scrollSpeed );
-				// $( 'body' ).animate({ scrollTop: section.offset().top }, scrollSpeed );
-
-				// Active Class
-				getSectionOffset( $(window).scrollTop() );
-			});
-
-			// Trigger Fake Scroll
-			if ( 'yes' === $scope.find( '.wpr-onepage-nav' ).attr( 'data-highlight' ) ) {
-				setTimeout(function() {
-					$(window).scroll();
-				}, 10 );
-			}
 			
-			// Active Class
-			$(window).scroll(function() {
-				getSectionOffset( $(this).scrollTop() );
-			});
+			// GOGA - remove extra code before update
+			$(document).ready(function(){
+				// Get all the links with the class "nav-link"
+				var $navLinks = $scope.find( '.wpr-onepage-nav-item' ),
+					scrollSpeed = parseInt( $scope.find('.wpr-onepage-nav').attr( 'data-speed' ), 10 ),
+					// sections = $( '.elementor-section' );
+					getSections = [];
+					$navLinks.each(function() {
+						getSections.push($($(this).find('a').attr('href')));
+					});
 
-			// Get Offset
-			function getSectionOffset( scrollTop ) {
-				if ( 'yes' !== $scope.find( '.wpr-onepage-nav' ).attr( 'data-highlight' ) ) {
-					return;
+					var sections = $(getSections);
+
+				var currentUrl = window.location.href;
+				var sectionId = currentUrl.split("#")[1];
+				
+				// Check if the URL contains a section id
+				if(sectionId) {
+					// Get the section element
+					var $section = $("#" + sectionId);
+				
+					// Get the offset position of the section
+					var sectionPos = $section.offset().top;
+				
+					// Smoothly scroll to the section
+					$('html, body').animate({
+					scrollTop: sectionPos
+					}, scrollSpeed);
 				}
-				// Reset Active
-				$scope.find( '.wpr-onepage-nav-item' ).children( 'a' ).removeClass( 'wpr-onepage-active-item' );
 
-				// Set Active
-				$( '.elementor-section' ).each(function() {
-					var secOffTop = $(this).offset().top,
-						secOffBot = secOffTop + $(this).outerHeight();
-
-					if ( scrollTop >= secOffTop && scrollTop < secOffBot ) {
-						$scope.find( '.wpr-onepage-nav-item' ).children( 'a[href="#'+ $(this).attr('id') +'"]' ).addClass( 'wpr-onepage-active-item' );
+				$navLinks.each(function() {
+					if(currentUrl.indexOf($(this).find('a').attr('href')) !== -1){
+						$(this).addClass('wpr-onepage-active-item');
 					}
 				});
-			}
+			
+				// Iterate over each link
+				$navLinks.each(function() {
+					// Add a click event to each link
+					$(this).click(function(event) {
+						event.preventDefault();
+						// Remove the active class from all links
+						$navLinks.removeClass('wpr-onepage-active-item');
+						// Add the active class to the clicked link
+						$(this).addClass('wpr-onepage-active-item');
+						// Get the id of the section the link points to
+						var sectionId = $(this).find('a').attr('href');
+						// Get the section element
+						var $section = $(sectionId);
+						// Get the offset position of the section
+						var sectionPos = $section.offset().top;
+						// Smoothly scroll to the section
+						$('html, body').animate({
+							scrollTop: sectionPos
+						}, scrollSpeed);
+					});
+				});
+			
+				$(window).on("scroll", function() {
+					// Get the current scroll position
+					var scrollPos = $(this).scrollTop();
+
+					if ( !$.isEmptyObject(sections) ) {
+						// Iterate over each section
+						sections.each(function() {
+							if ( $(this).length > 0 ) {
+								// Get the offset position of the section
+								var sectionPos = $(this).offset().top;
+								// Get the height of the section
+								var sectionHeight = sectionPos + $(this).outerHeight();
+							
+								// Check if the section is in view
+								if (scrollPos >= sectionPos - 50 && scrollPos < sectionPos + sectionHeight - 50) {
+								// if ( scrollPos >= sectionPos && scrollPos < sectionPos + sectionHeight ) {
+									// Get the id of the section
+									var sectionId = "#" + $(this).attr("id");
+							
+									// Remove the active class from all links
+									$navLinks.removeClass("wpr-onepage-active-item");
+							
+									// Add the active class to the corresponding link
+									$navLinks.filter(function(){
+										return $(this).find('a[href=' + sectionId + ']').length;
+									}).addClass("wpr-onepage-active-item");
+								}
+							}
+						});
+					}
+				});
+				
+						// // Old Code
+						// $scope.find( '.wpr-onepage-nav-item' ).on( 'click', function(event) {
+						// 	event.preventDefault();
+
+						// 	var section = $( $(this).find( 'a' ).attr( 'href' ) ),
+						// 		scrollSpeed = parseInt( $(this).parent().attr( 'data-speed' ), 10 );
+
+						// 	if (section) {
+						// 		$( 'html, body' ).animate({ scrollTop: section.offset().top }, scrollSpeed );
+						// 	}
+						// 	// $( 'body' ).animate({ scrollTop: section.offset().top }, scrollSpeed );
+
+						// 	// Active Class
+						// 	getSectionOffset( $(window).scrollTop() );
+						// });
+
+						// // Trigger Fake Scroll
+						// if ( 'yes' === $scope.find( '.wpr-onepage-nav' ).attr( 'data-highlight' ) ) {
+						// 	setTimeout(function() {
+						// 		$(window).scroll();
+						// 	}, 10 );
+						// }
+						
+						// // Active Class
+						// $(window).scroll(function() {
+						// 	getSectionOffset( $(this).scrollTop() );
+						// });
+
+						// // // Get Offset
+						// // function getSectionOffset( scrollTop ) {
+						// // 	if ( 'yes' !== $scope.find( '.wpr-onepage-nav' ).attr( 'data-highlight' ) ) {
+						// // 		return;
+						// // 	}
+						// // 	// Reset Active
+						// // 	$scope.find( '.wpr-onepage-nav-item' ).children( 'a' ).removeClass( 'wpr-onepage-active-item' );
+			
+						// // 	// Set Active
+						// // 	$( '.elementor-section' ).each(function() {
+						// // 		var secOffTop = $(this).offset().top,
+						// // 			secOffBot = secOffTop + $(this).outerHeight();
+			
+						// // 		if ( scrollTop >= secOffTop && scrollTop < secOffBot ) {
+						// // 			$scope.find( '.wpr-onepage-nav-item' ).children( 'a[href="#'+ $(this).attr('id') +'"]' ).addClass( 'wpr-onepage-active-item' );
+						// // 		}
+						// // 	});
+						// // }
+
+						// // Get Offset
+						// function getSectionOffset( scrollTop ) {
+						// 	if ( 'yes' !== $scope.find( '.wpr-onepage-nav' ).attr( 'data-highlight' ) ) {
+						// 		return;
+						// 	}
+						// 	// Reset Active
+						// 	$scope.find( '.wpr-onepage-nav' ).find( 'a' ).removeClass( 'wpr-onepage-active-item' );
+
+						// 	// Set Active
+						// 	$( '.elementor-section' ).each(function() {
+						// 		var secOffTop = $(this).offset().top,
+						// 			secOffBot = secOffTop + $(this).outerHeight();
+
+						// 		if ( scrollTop >= secOffTop && scrollTop < secOffBot ) {
+						// 			$scope.find( '.wpr-onepage-nav' ).find( 'a[href="#'+ $(this).attr('id') +'"]' ).addClass( 'wpr-onepage-active-item' );
+						// 		}
+						// 	});
+						// }
+
+			});
 
 		}, // End OnepageNav
 
@@ -944,6 +1262,12 @@
 				}
 
 				$( window ).on( 'load', function() {
+					setTimeout(function() {
+						isotopeLayout( settings );
+					}, 100 );
+				});
+
+				$(document).ready(function() {
 					setTimeout(function() {
 						isotopeLayout( settings );
 					}, 100 );
@@ -1016,8 +1340,11 @@
 					initialItems = filteredItems.length;
 				});
 
+				// iGrid.imagesLoaded().progress( function( instance, image ) {
+				// });
+
 				// Grid Images Loaded
-				iGrid.imagesLoaded().progress( function( instance, image ) {
+				iGrid.imagesLoaded(function() {
 					if ( '1' !== iGrid.css( 'opacity' ) ) {
 						iGrid.css( 'opacity', '1' );
 					}
@@ -1025,6 +1352,9 @@
 					setTimeout(function() {
 						iGrid.addClass( 'grid-images-loaded' );
 					}, 500 );
+
+					// Equal Heights
+					setEqualHeight(settings);
 				});
 
 				// Infinite Scroll / Load More
@@ -1075,7 +1405,7 @@
 							var updatedResultCount = resultCount.replace( /\d\u2013\d+/, '1\u2013' + ( $scope.find('.wpr-grid-item').length + items.length ) );
 							$scope.find('.woocommerce-result-count').text(updatedResultCount);
 						}
-
+						
 						iGrid.infiniteScroll( 'appendItems', items );
 						iGrid.isotopewpr( 'appended', items );
 
@@ -1100,19 +1430,23 @@
 							if ( 'load-more' === settings.pagination_type ) {
 								pagination.find( '.wpr-load-more-btn' ).fadeIn();
 
-								if ( '*' !== $scope.find('.wpr-active-filter').attr('data-filter') ) {
-									let dataFilterClass = $scope.find('.wpr-active-filter').attr('data-filter').substring(1);
-									items.each(function() {
-										if ( !$(this).hasClass(dataFilterClass) ) {
-											loadedItems = false;
-										} else {
-											loadedItems = true;
-											return false;
+								if ( $scope.find('.wpr-grid-filters').length ) {
+									if ( '*' !== $scope.find('.wpr-active-filter').attr('data-filter') ) {
+										if ( 0 < $scope.find('.wpr-active-filter').length ) {
+											let dataFilterClass = $scope.find('.wpr-active-filter').attr('data-filter').substring(1);
+											items.each(function() {
+												if ( !$(this).hasClass(dataFilterClass) ) {
+													loadedItems = false;
+												} else {
+													loadedItems = true;
+													return false;
+												}
+											});
+				
+											if ( !loadedItems ) {
+												$scope.find( '.wpr-grid' ).infiniteScroll( 'loadNextPage' );
+											}
 										}
-									});
-		
-									if ( !loadedItems ) {
-										$scope.find( '.wpr-grid' ).infiniteScroll( 'loadNextPage' );
 									}
 								}
 							}
@@ -1125,9 +1459,10 @@
 						}
 
 						// Init Likes
-						setTimeout(function() {
-							postLikes( settings );
-						}, 300 );
+						// No need for this anymore
+						// setTimeout(function() {
+						// 	postLikes( settings );
+						// }, 300 );
 
 						// Init Lightbox
 						lightboxPopup( settings );
@@ -1141,6 +1476,10 @@
 
 						// Init Post Sharing
 						postSharing();
+
+						lazyLoadObserver();
+						// Maybe there is some other way
+						window.dispatchEvent(new Event('resize'));
 					});
 
 					pagination.find( '.wpr-load-more-btn' ).on( 'click', function() {
@@ -1154,18 +1493,23 @@
 			} else {
 				iGrid.animate({ 'opacity': '1' }, 1000);
 
+				settings = JSON.parse( iGrid.attr( 'data-slick' ) );
+
 				var sliderClass = $scope.attr('class'),
 					sliderColumnsDesktop = sliderClass.match(/wpr-grid-slider-columns-\d/) ? sliderClass.match(/wpr-grid-slider-columns-\d/).join().slice(-1) : 2,
 					sliderColumnsWideScreen = sliderClass.match(/columns--widescreen\d/) ? sliderClass.match(/columns--widescreen\d/).join().slice(-1) : sliderColumnsDesktop,
 					sliderColumnsLaptop = sliderClass.match(/columns--laptop\d/) ? sliderClass.match(/columns--laptop\d/).join().slice(-1) : sliderColumnsDesktop,
-					sliderColumnsTabletExtra = sliderClass.match(/columns--tablet_extra\d/) ? sliderClass.match(/columns--tablet_extra\d/).join().slice(-1) : sliderColumnsTablet,
 					sliderColumnsTablet = sliderClass.match(/columns--tablet\d/) ? sliderClass.match(/columns--tablet\d/).join().slice(-1) : 2,
+					sliderColumnsTabletExtra = sliderClass.match(/columns--tablet_extra\d/) ? sliderClass.match(/columns--tablet_extra\d/).join().slice(-1) : sliderColumnsTablet,
 					sliderColumnsMobileExtra = sliderClass.match(/columns--mobile_extra\d/) ? sliderClass.match(/columns--mobile_extra\d/).join().slice(-1) : sliderColumnsTablet,
 					sliderColumnsMobile = sliderClass.match(/columns--mobile\d/) ? sliderClass.match(/columns--mobile\d/).join().slice(-1) : 1,
-					sliderSlidesToScroll = sliderClass.match(/wpr-grid-slides-to-scroll-\d/) ? +(sliderClass.match(/wpr-grid-slides-to-scroll-\d/).join().slice(-1)) : 1;
+					sliderRows = settings.sliderRows,
+					sliderSlidesToScroll = settings.sliderSlidesToScroll;
 
+				// GOGA - add rows control and vertical gutter maybe
 				iGrid.slick({
 					appendDots : $scope.find( '.wpr-grid-slider-dots' ),
+					rows: sliderRows,
 					customPaging : function ( slider, i ) {
 						var slideNumber = (i + 1),
 							totalSlides = slider.slideCount;
@@ -1226,6 +1570,31 @@
 					],
 				});
 
+				var gridNavPrevArrow = $scope.find('.wpr-grid-slider-prev-arrow');
+				var gridNavNextArrow = $scope.find('.wpr-grid-slider-next-arrow');
+
+				if ( gridNavPrevArrow.length > 0 && gridNavNextArrow.length > 0 ) {
+					var positionSum = gridNavPrevArrow.position().left * -2;
+					if ( positionSum > 0 ) {
+						$(window).on('load', function() {
+							if ( $(window).width() <= ($scope.outerWidth() + gridNavPrevArrow.outerWidth() + gridNavNextArrow.outerWidth() + positionSum) ) {
+								gridNavPrevArrow.addClass('wpr-adjust-slider-prev-arrow');
+								gridNavNextArrow.addClass('wpr-adjust-slider-next-arrow');
+							}
+						});
+		
+						$(window).smartresize(function() {
+							if ( $(window).width() <= ($scope.outerWidth() + gridNavPrevArrow.outerWidth() + gridNavNextArrow.outerWidth() + positionSum) ) {
+								gridNavPrevArrow.addClass('wpr-adjust-slider-prev-arrow');
+								gridNavNextArrow.addClass('wpr-adjust-slider-next-arrow');
+							} else {
+								gridNavPrevArrow.removeClass('wpr-adjust-slider-prev-arrow');
+								gridNavNextArrow.removeClass('wpr-adjust-slider-next-arrow');
+							}
+						});
+					}
+				}
+
 				// Adjust Horizontal Pagination
 				if ( $scope.find( '.slick-dots' ).length && $scope.hasClass( 'wpr-grid-slider-dots-horizontal') ) {
 					// Calculate Width
@@ -1247,9 +1616,22 @@
 						}, 300 );
 					});
 				}
-
-				settings = JSON.parse( iGrid.attr( 'data-slick' ) );
 			}
+			
+			checkWishlistAndCompare();
+			addRemoveCompare();
+			addRemoveWishlist();
+	
+			var mutationObserver = new MutationObserver(function(mutations) {
+				// checkWishlistAndCompare();
+				addRemoveCompare();
+				addRemoveWishlist();
+			});
+
+			mutationObserver.observe($scope[0], {
+				childList: true,
+				subtree: true,
+			});
 
 			// Add To Cart AJAX
 			if ( iGrid.find( '.wpr-grid-item-add-to-cart' ).length ) {
@@ -1265,9 +1647,11 @@
 				});
 
 				$( 'body' ).on( 'added_to_cart', function(ev, fragments, hash, button) {
-						button.next().fadeTo( 700, 1 );
+					var product_id = button.data('product_id');
 
-						button.css('display', 'none');
+					button.next().fadeTo( 700, 1 );
+
+					button.css('display', 'none');
 
 					if ( 'sidebar' === button.data('atc-popup') ) {
 						if ( $('.wpr-mini-cart-toggle-wrap a').length ) {
@@ -1310,15 +1694,17 @@
 						} else {
 							popupImage = '';
 						}
+						
+						if ( !($scope.find('.wpr-grid').find('#wpr-added-to-cart-'+product_id).length > 0) ) {
+							$scope.find('.wpr-grid').append('<div id="wpr-added-to-cart-'+product_id+'" class="wpr-added-to-cart-popup ' + animationClass + '">'+ popupImage +'<div class="wpr-added-tc-title"><p>'+ popupText +' was added to cart</p><p><a href='+popupLink+'>View Cart</a></p></div></div>');
 
-						$(this).find('.wpr-grid').append('<div class="wpr-added-to-cart-popup ' + animationClass + '">'+ popupImage +'<div class="wpr-added-tc-title"><p>'+ popupText +' was added to cart</p><p><a href='+popupLink+'>View Cart</a></p></div></div>');
-
-						setTimeout(() => {
-							$(this).find('.wpr-added-to-cart-popup').addClass(removeAnimationClass);
 							setTimeout(() => {
-								$(this).find('.wpr-added-to-cart-popup').remove();
-							}, animTime * 1000);
-						}, fadeOutIn * 1000);
+								$(this).find('#wpr-added-to-cart-'+product_id).addClass(removeAnimationClass);
+								setTimeout(() => {
+									$(this).find('#wpr-added-to-cart-'+product_id).remove();
+								}, animTime * 1000);
+							}, fadeOutIn * 1000);
+						}
 					}
 
 					if ( addCartIcon.length ) {
@@ -1462,6 +1848,49 @@
 
 			// Media Hover Link
 			function mediaHoverLink() {
+				// console.log(iGrid.find('.wpr-grid-media-wrap').find('img').length);
+				if ( 'yes' === $scope.find('.wpr-grid-image-wrap').data('img-on-hover') ) {
+					var img;
+					var thisImgSrc;
+					let secondaryImg;
+					iGrid.find('.wpr-grid-media-wrap').on('mouseover', function() {
+							// img = $(this).find( 'img' );
+							// thisImgSrc = img.attr('src');
+							
+							// secondaryImg = $(this).find('.wpr-grid-image-wrap').data('src-secondary');
+							
+							// if ( isValidHttpUrl(secondaryImg) ) {
+							// 	img.attr( 'src', secondaryImg );
+							// }
+							
+							if ( $(this).find('img:nth-of-type(2)').attr('src') !== undefined && $(this).find('img:nth-of-type(2)').attr('src') !== '' ) {
+								$(this).find('img:first-of-type').addClass('wpr-hidden-img');
+								$(this).find('img:nth-of-type(2)').removeClass('wpr-hidden-img');
+							}
+						});
+		
+						iGrid.find('.wpr-grid-media-wrap').on('mouseleave', function() {
+							// if ( secondaryImg == img.attr('src') ) {
+							// 	img.attr('src', thisImgSrc);
+							// }
+		
+							if ( $(this).find('img:nth-of-type(2)').attr('src') !== undefined && $(this).find('img:nth-of-type(2)').attr('src') !== '' ) {
+								$(this).find('img:nth-of-type(2)').addClass('wpr-hidden-img');
+								$(this).find('img:first-of-type').removeClass('wpr-hidden-img');
+							}
+						});
+				}
+				
+				function isValidHttpUrl(string) {
+					let url;
+					try {
+					  url = new URL(string);
+					} catch (_) {
+					  return false;
+					}
+					return url.protocol === "http:" || url.protocol === "https:";
+				}
+
 				if ( 'yes' === iGrid.find( '.wpr-grid-media-wrap' ).attr( 'data-overlay-link' ) && ! WprElements.editorCheck() ) {
 					iGrid.find( '.wpr-grid-media-wrap' ).css('cursor', 'pointer');
 
@@ -1486,7 +1915,7 @@
 			}
 
 			// Init Lightbox
-			if ( !$scope.hasClass('elementor-widget-wpr-woo-category-grid-pro') ) {
+			if ( !$scope.hasClass('elementor-widget-wpr-woo-category-grid-pro') && !$scope.hasClass('elementor-widget-wpr-category-grid-pro') ) {
 				lightboxPopup( settings );
 			}
 
@@ -1603,8 +2032,10 @@
 				if ( ! $scope.find( '.wpr-post-like-button' ).length ) {
 					return;
 				}
+				
+				$scope.on('click', '.wpr-post-like-button', function(e) {
+					e.preventDefault();
 
-				$scope.find( '.wpr-post-like-button' ).on( 'click', function() {
 					var current = $(this);
 
 					if ( '' !== current.attr( 'data-post-id' ) ) {
@@ -1641,7 +2072,7 @@
 							if ( current.hasClass( 'wpr-already-liked' ) ) {
 								current.prop( 'title', 'Like' );
 								current.removeClass( 'wpr-already-liked' );
-								current.html( '<i class="'+ iconClass +'"></i>' + countHTML );
+								current.html( '<i class="'+ iconClass.replace( 'fas', 'far' ) +'"></i>' + countHTML );
 							} else {
 								current.prop( 'title', 'Unlike' );
 								current.addClass( 'wpr-already-liked' );
@@ -1664,6 +2095,7 @@
 					item = grid.find( '.wpr-grid-item' ),
 					itemVisible = item.filter( ':visible' ),
 					layout = settings.layout,
+					defaultLayout = settings.layout,
 					mediaAlign = settings.media_align,
 					mediaWidth = settings.media_width,
 					mediaDistance = settings.media_distance,
@@ -1677,8 +2109,22 @@
 					columnsWideScreen,
 					gutterHr = settings.gutter_hr,
 					gutterVr = settings.gutter_vr,
+					gutterHrMobile = settings.gutter_hr_mobile,
+					gutterVrMobile = settings.gutter_vr_mobile,
+					gutterHrMobileExtra = settings.gutter_hr_mobile_extra,
+					gutterVrMobileExtra = settings.gutter_vr_mobile_extra,
+					gutterHrTablet = settings.gutter_hr_tablet,
+					gutterVrTablet = settings.gutter_vr_tablet,
+					gutterHrTabletExtra = settings.gutter_hr_tablet_extra,
+					gutterVrTabletExtra = settings.gutter_vr_tablet_extra,
+					gutterHrWideScreen = settings.gutter_hr_widescreen,
+					gutterVrWideScreen = settings.gutter_vr_widescreen,
+					gutterHrLaptop = settings.gutter_hr_laptop,
+					gutterVrLaptop = settings.gutter_vr_laptop,
 					contWidth = grid.width() + gutterHr - 0.3,
-					viewportWidth = $( 'body' ).prop( 'clientWidth' ),
+					// viewportWidth = $( 'body' ).prop( 'clientWidth' ),
+					viewportWidth = $(window).outerWidth(),
+					defaultLayout,
 					transDuration = 400;
 
 				// Get Responsive Columns
@@ -1712,37 +2158,54 @@
 					}
 				}
 
+				var MobileResp = +elementorFrontend.config.responsive.breakpoints.mobile.value;
+				var MobileExtraResp = +elementorFrontend.config.responsive.breakpoints.mobile_extra.value;
+				var TabletResp = +elementorFrontend.config.responsive.breakpoints.tablet.value;
+				var TabletExtraResp = +elementorFrontend.config.responsive.breakpoints.tablet_extra.value;
+				var LaptopResp = +elementorFrontend.config.responsive.breakpoints.laptop.value;
+				var wideScreenResp = +elementorFrontend.config.responsive.breakpoints.widescreen.value;
+
+				var activeBreakpoints = elementorFrontend.config.responsive.activeBreakpoints;
+
 				// Mobile
-				if ( 440 >= viewportWidth ) {
+				if ( MobileResp >= viewportWidth && activeBreakpoints.mobile != null ) {
 					columns = columnsMobile;
+					gutterHr = gutterHrMobile;
+					gutterVr = gutterVrMobile;
+
 				// Mobile Extra
-				} else if ( 768 >= viewportWidth ) {
+				} else if ( MobileExtraResp >= viewportWidth && activeBreakpoints.mobile_extra != null ) {
 					columns = (columnsMobileExtra) ? columnsMobileExtra : columnsTablet;
+					gutterHr = gutterHrMobileExtra;
+					gutterVr = gutterVrMobileExtra;
 
 				// Tablet
-				} else if ( 881 >= viewportWidth ) {
+				} else if ( TabletResp >= viewportWidth && activeBreakpoints.tablet != null ) {
 					columns = columnsTablet;
+					gutterHr = gutterHrTablet;
+					gutterVr = gutterVrTablet;
+
 				// Tablet Extra
-				} else if ( 1025 >= viewportWidth ) {
+				} else if ( TabletExtraResp >= viewportWidth && activeBreakpoints.tablet_extra != null ) {
 					columns = (columnsTabletExtra) ? columnsTabletExtra : columnsTablet;
+					gutterHr = gutterHrTabletExtra;
+					gutterVr = gutterVrTabletExtra;
 
 				// Laptop
-				} else if ( 1201 >= viewportWidth ) {
+				} else if ( LaptopResp >= viewportWidth && activeBreakpoints.laptop != null ) {
 					columns = (columnsLaptop) ? columnsLaptop : columnsDesktop;
+					gutterHr = gutterHrLaptop;
+					gutterVr = gutterVrLaptop;
 
 				// Desktop
-				} else if ( 1920 >= viewportWidth ) {
+				} else if ( wideScreenResp > viewportWidth ) {
 					columns = columnsDesktop;
-
-				// Larger Screens
-				} else if ( 2300 >= viewportWidth ) {
-					columns = columnsDesktop;
-				} else if ( 2650 >= viewportWidth ) {
+					gutterHr = settings.gutter_hr;
+					gutterVr = settings.gutter_vr;
+				}  else {
 					columns = (columnsWideScreen) ? columnsWideScreen : columnsDesktop;
-				} else if ( 3000 >= viewportWidth ) {
-					columns = (columnsWideScreen) ? columnsWideScreen : columnsDesktop;
-				} else {
-					columns = (columnsWideScreen) ? columnsWideScreen : columnsDesktop;
+					gutterHr = gutterHrWideScreen;
+					gutterVr = gutterVrWideScreen;
 				}
 
 				// Limit Columns for Higher Screens
@@ -1753,6 +2216,8 @@
 				if ( 'string' == typeof(columns) && -1 !== columns.indexOf('pro') ) {
 					columns = 3;
 				}
+
+				contWidth = grid.width() + gutterHr - 0.3;
 
 				// Calculate Item Width
 				item.outerWidth( Math.floor( contWidth / columns - gutterHr ) );
@@ -1912,6 +2377,7 @@
 				}
 
 				// Set Layout
+				defaultLayout = layout;
 				if ( 'list' === layout ) {
 					layout = 'fitRows';
 				}
@@ -1925,19 +2391,56 @@
 				var iGrid = grid.isotopewpr({
 					layoutMode: layout,
 					masonry: {
-						comlumnWidth: contWidth / columns,
+						// columnWidth: contWidth / columns,
 						gutter: gutterHr
 					},
 					fitRows: {
-						comlumnWidth: contWidth / columns,
+						// columnWidth: contWidth / columns,
 						gutter: gutterHr
 					},
 					transitionDuration: transDuration,
   					percentPosition: true
 				});
-
-				// return iGrid;//tmp
 			}
+
+			// Set equal height to all grid-items
+			function setEqualHeight( settings ) {
+				let iGrid = $scope.find( '.wpr-grid' ),
+					items = iGrid.children('article'),
+					columns = Math.floor(iGrid.outerWidth() / items.outerWidth());
+
+				if ( 'fitRows' === settings.layout && columns > 1 ) {
+					let maxHeight = Math.max.apply(null, items.map(function(item) {
+						return $(this).outerHeight();
+					}));
+
+					items.each(function() {
+						$(this).css('height', maxHeight + 'px');
+					});
+				}
+			}
+
+			function lazyLoadObserver() {
+				setTimeout(function() {
+					let lazyLoadObserver = new IntersectionObserver((entries, observer) => {
+						entries.forEach(entry => {
+							if(entry.isIntersecting && entry.target.src.includes('icon-256x256')) {
+								setTimeout(function() {
+									entry.target.src = entry.target.parentElement.dataset.src;
+									entry.target.classList.toggle('wpr-hidden-image');
+									$(window).trigger('resize');
+								}, 100);
+							}
+						});
+					}, {});
+					
+					$scope.find('.wpr-grid-image-wrap img:first-of-type').each(function() {
+						lazyLoadObserver.observe($(this)[0]);
+					});
+				}, 100);
+			}
+
+			lazyLoadObserver();
 
 			// Isotope Filters
 			function isotopeFilters( settings ) {
@@ -2012,7 +2515,7 @@
 				}
 
 				// Set a Default Filter
-				if ( !$scope.hasClass('elementor-widget-wpr-woo-category-grid-pro') ) {
+				if ( !$scope.hasClass('elementor-widget-wpr-woo-category-grid-pro') && !$scope.hasClass('elementor-widget-wpr-category-grid-pro') ) {
 					if ( '' !== settings.filters_default_filter ) {
 						setTimeout(function() {
 							$scope.find( '.wpr-grid-filters' ).find('span[data-filter*="-'+ settings.filters_default_filter +'"]')[0].click();
@@ -2104,6 +2607,374 @@
 
 			}
 
+			// function checkWishlistAndCompare() {
+			// 	if ( iGrid.find('.wpr-wishlist-add').length ) {
+			// 		iGrid.find('.wpr-wishlist-add').each(function() {
+			// 			var wishlistBtn = $(this);
+			// 			$.ajax({
+			// 				url: WprConfig.ajaxurl,
+			// 				type: 'POST',
+			// 				data: {
+			// 					action: 'check_product_in_wishlist',
+			// 					product_id: wishlistBtn.data('product-id')
+			// 				},
+			// 				success: function(response) {
+			// 					if ( true == response ) {
+			// 						if ( !wishlistBtn.hasClass('wpr-button-hidden') ) {
+			// 							wishlistBtn.addClass('wpr-button-hidden');
+			// 						}
+
+			// 						if ( wishlistBtn.next().hasClass('wpr-button-hidden') ) {
+			// 							wishlistBtn.next().removeClass('wpr-button-hidden');
+			// 						}
+			// 					}
+			// 				},
+			// 				error: function(error) {
+			// 					console.log(error);
+			// 				}
+			// 			});
+			// 		});
+			// 	}
+
+			// 	if ( iGrid.find('.wpr-compare-add').length ) {
+			// 		iGrid.find('.wpr-compare-add').each(function() {
+			// 			var compareBtn = $(this);
+			// 			$.ajax({
+			// 				url: WprConfig.ajaxurl,
+			// 				type: 'POST',
+			// 				data: {
+			// 					action: 'check_product_in_compare',
+			// 					product_id: compareBtn.data('product-id')
+			// 				},
+			// 				success: function(response) {
+			// 					if ( true == response ) {
+			// 						if ( !compareBtn.hasClass('wpr-button-hidden') ) {
+			// 							compareBtn.addClass('wpr-button-hidden');
+			// 						}
+
+			// 						if ( compareBtn.next().hasClass('wpr-button-hidden') ) {
+			// 							compareBtn.next().removeClass('wpr-button-hidden');
+			// 						}
+			// 					}
+			// 				},
+			// 				error: function(error) {
+			// 					console.log(error);
+			// 				}
+			// 			});
+			// 		});
+			// 	}
+			// }
+
+			function checkWishlistAndCompare() {
+				var wishlistArray;
+				
+				if ( iGrid.find('.wpr-wishlist-add').length ) {
+
+					$.ajax({
+							url: WprConfig.ajaxurl,
+							type: 'POST',
+							data: {
+								action: 'check_product_in_wishlist_grid',
+							},
+							success: function(response) {
+									wishlistArray = response;
+							}
+					});
+					
+					
+					iGrid.find('.wpr-wishlist-add').each(function() {
+						var wishlistBtn = $(this);
+						
+						if ( $.inArray(wishlistBtn.data('product-id'), wishlistArray) !== -1 ) {
+							if ( !wishlistBtn.hasClass('wpr-button-hidden') ) {
+								wishlistBtn.addClass('wpr-button-hidden');
+							}
+
+							if ( wishlistBtn.next().hasClass('wpr-button-hidden') ) {
+								wishlistBtn.next().removeClass('wpr-button-hidden');
+							}
+						}
+					});
+				}
+
+				if ( iGrid.find('.wpr-compare-add').length > 0 ) {
+					var compareArray = [];
+					
+					$.ajax({
+							url: WprConfig.ajaxurl,
+							type: 'POST',
+							data: {
+								action: 'check_product_in_compare_grid',
+							},
+							success: function(response) {
+								compareArray = response;
+							},
+							error: function(error) {
+								console.log(error);
+							}
+					});
+				
+					
+					iGrid.find('.wpr-compare-add').each(function() {
+						var compareBtn = $(this);
+						
+						if ( $.inArray(compareBtn.data('product-id'), compareArray) !== -1 ) {
+							if ( !compareBtn.hasClass('wpr-button-hidden') ) {
+								compareBtn.addClass('wpr-button-hidden');
+							}
+
+							if ( compareBtn.next().hasClass('wpr-button-hidden') ) {
+								compareBtn.next().removeClass('wpr-button-hidden');
+							}
+						}
+					});
+					
+				}
+			}
+
+			function addRemoveCompare() {
+				if ( iGrid.find('.wpr-compare-add').length ) {
+					$scope.find('.wpr-compare-add').click(function(e) {
+						e.preventDefault();
+						var event_target = $(this);
+						var product_id = $(this).data('product-id');
+
+						event_target.fadeTo(500, 0);
+
+						$.ajax({
+							url: WprConfig.ajaxurl,
+							type: 'POST',
+							data: {
+								action: 'add_to_compare',
+								product_id: product_id
+							},
+							success: function() {
+								$scope.find('.wpr-compare-add[data-product-id="' + product_id + '"]').hide();
+								$scope.find('.wpr-compare-remove[data-product-id="' + product_id + '"]').show();
+								$scope.find('.wpr-compare-remove[data-product-id="' + product_id + '"]').fadeTo(500, 1);
+								WprElements.changeActionTargetProductId(product_id);
+								$(document).trigger('added_to_compare');
+	
+								if ( 'sidebar' === event_target.data('atcompare-popup') ) {
+									// GOGA - configure after adding compare dropdown functinality
+									if ( $('.wpr-compare-toggle-btn').length ) {
+										$('.wpr-compare-toggle-btn').each(function() {
+											if ( 'none' === $(this).next('.wpr-compare').css('display') ) {
+												$(this).trigger('click');
+											}
+										});
+									}
+								} else if ( 'popup' === event_target.data('atcompare-popup') ) {
+									// Popup Link needs wishlist
+									var popupItem = event_target.closest('.wpr-grid-item'),
+										popupText = popupItem.find('.wpr-grid-item-title').text(),
+										popupLink = WprConfig.comparePageURL,
+										popupTarget = 'yes' == event_target.data('open-in-new-tab') ? '_blank' : '_self',
+										popupImageSrc = popupItem.find('.wpr-grid-image-wrap').length ? popupItem.find('.wpr-grid-image-wrap').data('src') : '',
+										popupAnimation = event_target.data('atcompare-animation'),
+										fadeOutIn = event_target.data('atcompare-fade-out-in'),
+										animTime = event_target.data('atcompare-animation-time'),
+										popupImage,
+										animationClass = 'wpr-added-to-compare-default',
+										removeAnimationClass;
+			
+									if ( 'slide-left' === popupAnimation ) {
+										animationClass = 'wpr-added-to-compare-slide-in-left';
+										removeAnimationClass = 'wpr-added-to-compare-slide-out-left';
+									} else if ( 'scale-up' === popupAnimation ) {
+										animationClass = 'wpr-added-to-compare-scale-up';
+										removeAnimationClass = 'wpr-added-to-compare-scale-down';
+									} else if ( 'skew' === popupAnimation ) {
+										animationClass = 'wpr-added-to-compare-skew';
+										removeAnimationClass = 'wpr-added-to-compare-skew-off';
+									} else if ( 'fade' === popupAnimation ) {
+										animationClass = 'wpr-added-to-compare-fade';
+										removeAnimationClass = 'wpr-added-to-compare-fade-out';
+									} else {
+										removeAnimationClass = 'wpr-added-to-compare-popup-hide';
+									}
+			
+									if ( '' !== popupImageSrc ) {
+										popupImage = '<div class="wpr-added-tcomp-popup-img"><img src='+popupImageSrc+' alt="" /></div>';
+									} else {
+										popupImage = '';
+									}
+									
+									if ( !($scope.find('.wpr-grid').find('#wpr-added-to-comp-'+product_id).length > 0) ) {
+										$scope.find('.wpr-grid').append('<div id="wpr-added-to-comp-'+product_id+'" class="wpr-added-to-compare-popup ' + animationClass + '">'+ popupImage +'<div class="wpr-added-tc-title"><p>'+ popupText +' was added to Compare</p><p><a target='+ popupTarget +' href='+popupLink+'>View Compare</a></p></div></div>');
+			
+										setTimeout(() => {
+											$scope.find('#wpr-added-to-comp-'+product_id).addClass(removeAnimationClass);
+											setTimeout(() => {
+												$scope.find('#wpr-added-to-comp-'+product_id).remove();
+											}, animTime * 1000);
+										}, fadeOutIn * 1000);
+									}
+								}
+							},
+							error: function(response) {
+								var error_message = response.responseJSON.message;
+								// Display error message
+								alert(error_message);
+							}
+						});
+					});
+	
+					$scope.find('.wpr-compare-remove').click(function(e) {
+						e.preventDefault();
+						var product_id = $(this).data('product-id');
+						$(this).fadeTo(500, 0);
+
+						$.ajax({
+							url: WprConfig.ajaxurl,
+							type: 'POST',
+							data: {
+								action: 'remove_from_compare',
+								product_id: product_id
+							},
+							success: function() {
+								$scope.find('.wpr-compare-remove[data-product-id="' + product_id + '"]').hide();
+								$scope.find('.wpr-compare-add[data-product-id="' + product_id + '"]').show();
+								$scope.find('.wpr-compare-add[data-product-id="' + product_id + '"]').fadeTo(500, 1);
+								WprElements.changeActionTargetProductId(product_id);
+								$(document).trigger('removed_from_compare');
+							}
+						});
+					});
+	
+					$(document).on('removed_from_compare', function() {
+						$scope.find('.wpr-compare-remove[data-product-id="' + actionTargetProductId + '"]').hide();
+						$scope.find('.wpr-compare-add[data-product-id="' + actionTargetProductId + '"]').show();
+						$scope.find('.wpr-compare-add[data-product-id="' + actionTargetProductId + '"]').fadeTo(500, 1);
+					});
+	
+				}
+			}
+
+			function addRemoveWishlist() {
+				let isPopupActive = false;
+				if ( iGrid.find('.wpr-wishlist-add').length ) {
+					$scope.find('.wpr-wishlist-add').click(function(e) {
+						e.preventDefault();
+						var event_target = $(this);
+						var product_id = $(this).data('product-id');
+
+						event_target.fadeTo(500, 0);
+
+						$.ajax({
+							url: WprConfig.ajaxurl,
+							type: 'POST',
+							data: {
+								action: 'add_to_wishlist',
+								product_id: product_id
+							},
+							success: function() {
+								$scope.find('.wpr-wishlist-add[data-product-id="' + product_id + '"]').hide();
+								$scope.find('.wpr-wishlist-remove[data-product-id="' + product_id + '"]').show();
+								$scope.find('.wpr-wishlist-remove[data-product-id="' + product_id + '"]').fadeTo(500, 1);
+								WprElements.changeActionTargetProductId(product_id);
+								$(document).trigger('added_to_wishlist');
+	
+								if ( 'sidebar' === event_target.data('atw-popup') ) {
+									// GOGA - configure after adding wishlist dropdown functinality
+									if ( $('.wpr-wishlist-toggle-btn').length ) {
+										$('.wpr-wishlist-toggle-btn').each(function() {
+											if ( 'none' === $(this).next('.wpr-wishlist').css('display') ) {
+												$(this).trigger('click');
+											}
+										});
+									}
+								} else if ( 'popup' === event_target.data('atw-popup') ) {
+									// Popup Link needs wishlist
+									var popupItem = event_target.closest('.wpr-grid-item'),
+										popupText = popupItem.find('.wpr-grid-item-title').text(),
+										popupLink = WprConfig.wishlistPageURL,
+										popupTarget = 'yes' == event_target.data('open-in-new-tab') ? '_blank' : '_self',
+										popupImageSrc = popupItem.find('.wpr-grid-image-wrap').length ? popupItem.find('.wpr-grid-image-wrap').data('src') : '',
+										popupAnimation = event_target.data('atw-animation'),
+										fadeOutIn = event_target.data('atw-fade-out-in'),
+										animTime = event_target.data('atw-animation-time'),
+										popupImage,
+										animationClass = 'wpr-added-to-wishlist-default',
+										removeAnimationClass;
+			
+									if ( 'slide-left' === popupAnimation ) {
+										animationClass = 'wpr-added-to-wishlist-slide-in-left';
+										removeAnimationClass = 'wpr-added-to-wishlist-slide-out-left';
+									} else if ( 'scale-up' === popupAnimation ) {
+										animationClass = 'wpr-added-to-wishlist-scale-up';
+										removeAnimationClass = 'wpr-added-to-wishlist-scale-down';
+									} else if ( 'skew' === popupAnimation ) {
+										animationClass = 'wpr-added-to-wishlist-skew';
+										removeAnimationClass = 'wpr-added-to-wishlist-skew-off';
+									} else if ( 'fade' === popupAnimation ) {
+										animationClass = 'wpr-added-to-wishlist-fade';
+										removeAnimationClass = 'wpr-added-to-wishlist-fade-out';
+									} else {
+										removeAnimationClass = 'wpr-added-to-wishlist-popup-hide';
+									}
+			
+									if ( '' !== popupImageSrc ) {
+										popupImage = '<div class="wpr-added-tw-popup-img"><img src='+popupImageSrc+' alt="" /></div>';
+									} else {
+										popupImage = '';
+									}
+									if (!isPopupActive) {
+										isPopupActive = true;
+										
+										if ( !($scope.find('.wpr-grid').find('#wpr-added-to-wish-'+product_id).length > 0) ) {
+											$scope.find('.wpr-grid').append('<div id="wpr-added-to-wish-'+product_id+'" class="wpr-added-to-wishlist-popup ' + animationClass + '">'+ popupImage +'<div class="wpr-added-tw-title"><p>'+ popupText +' was added to Wishlist</p><p><a target="'+ popupTarget +'" href='+popupLink+'>View Wishlist</a></p></div></div>');
+				
+											setTimeout(() => {
+												$scope.find('#wpr-added-to-wish-'+product_id).addClass(removeAnimationClass);
+												setTimeout(() => {
+													$scope.find('#wpr-added-to-wish-'+product_id).remove();
+												}, animTime * 1000);
+											}, fadeOutIn * 1000);
+										}
+									}
+								}
+							},
+							error: function(response) {
+								var error_message = response.responseJSON.message;
+								// Display error message
+								alert(error_message);
+							}
+						});
+					});
+	
+					$scope.find('.wpr-wishlist-remove').on('click', function(e) {
+						e.preventDefault();
+						var product_id = $(this).data('product-id');
+
+						$(this).fadeTo(500, 0);
+
+						$.ajax({
+							url: WprConfig.ajaxurl,
+							type: 'POST',
+							data: {
+								action: 'remove_from_wishlist',
+								product_id: product_id
+							},
+							success: function() {
+								$scope.find('.wpr-wishlist-remove[data-product-id="' + product_id + '"]').hide();
+								$scope.find('.wpr-wishlist-add[data-product-id="' + product_id + '"]').show();
+								$scope.find('.wpr-wishlist-add[data-product-id="' + product_id + '"]').fadeTo(500, 1);
+								WprElements.changeActionTargetProductId(product_id);
+								$(document).trigger('removed_from_wishlist');
+							}
+						});
+					});
+	
+					$(document).on('removed_from_wishlist', function() {
+						$scope.find('.wpr-wishlist-remove[data-product-id="' + actionTargetProductId + '"]').hide();
+						$scope.find('.wpr-wishlist-add[data-product-id="' + actionTargetProductId + '"]').show();
+						$scope.find('.wpr-wishlist-add[data-product-id="' + actionTargetProductId + '"]').fadeTo(500, 1);
+					});
+	
+				}	
+			}
+
 		}, // End widgetGrid
 
 		widgetMagazineGrid: function( $scope ) {
@@ -2119,6 +2990,20 @@
 				});
 			}
 
+			$(document).ready(function() {
+				iGrid.css('opacity', 1);
+			});
+
+			var iGridLength = iGrid.find('.wpr-mgzn-grid-item').length;
+
+			// $(window).smartresize(function() {
+			// 	if (window.matchMedia("(max-width: 767px)").matches) { // If media query matches
+			// 		iGrid.find('.wpr-magazine-grid.wpr-mgzn-grid-3-h')[0].style.gridTemplateRows = 'repeat('+ iGridLength +', 1fr)';
+			// 	} else {
+			// 		iGrid.find('.wpr-magazine-grid.wpr-mgzn-grid-3-h').removeAttr('style');
+			// 	}
+			// });
+
 			// Media Hover Link
 			if ( 'yes' === iGrid.find( '.wpr-grid-media-wrap' ).attr( 'data-overlay-link' ) && ! WprElements.editorCheck() ) {
 				iGrid.find( '.wpr-grid-media-wrap' ).css('cursor', 'pointer');
@@ -2129,7 +3014,17 @@
 					if ( -1 !== targetClass.indexOf( 'inner-block' ) || -1 !== targetClass.indexOf( 'wpr-cv-inner' ) || 
 						 -1 !== targetClass.indexOf( 'wpr-grid-media-hover' ) ) {
 						event.preventDefault();
-						window.location.href = $(this).find( '.wpr-grid-media-hover-bg' ).attr( 'data-url' );
+
+						var itemUrl = $(this).find( '.wpr-grid-media-hover-bg' ).attr( 'data-url' );
+						
+						// GOGA - leave if necessary
+						if ( iGrid.find( '.wpr-grid-item-title a' ).length ) {
+							if ( '_blank' === iGrid.find( '.wpr-grid-item-title a' ).attr('target') ) {
+								window.open(itemUrl, '_blank').focus();
+							} else {
+								window.location.href = itemUrl;
+							}
+						}
 					}
 				});
 			}
@@ -2296,7 +3191,7 @@
 							if ( current.hasClass( 'wpr-already-liked' ) ) {
 								current.prop( 'title', 'Like' );
 								current.removeClass( 'wpr-already-liked' );
-								current.html( '<i class="'+ iconClass +'"></i>' + countHTML );
+								current.html( '<i class="'+ iconClass.replace( 'fas', 'far' ) +'"></i>' + countHTML );
 							} else {
 								current.prop( 'title', 'Unlike' );
 								current.addClass( 'wpr-already-liked' );
@@ -2462,11 +3357,6 @@
 				var slideCount = 0;
 	
 				$scope.find('.wpr-thumbnail-slider-next-arrow').on('click', function() {
-					console.log(
-						'works',
-						slideCount + thumbsToScroll,
-						$scope.find('.flex-control-nav li').length - 1
-						);
 						// var currTrans =  $scope.find('.flex-control-nav').css('transform') != 'none' ? $scope.find('.flex-control-nav').css('transform').split(/[()]/)[1] : 0;
 						// posx = currTrans ? currTrans.split(',')[4] : 0;
 						if ( (slideCount + thumbsToScroll) < $scope.find('.flex-control-nav li').length - 1 ) {
@@ -2613,13 +3503,14 @@
 				localStorage.setItem( 'WprCountDownSettings', JSON.stringify( settings ) );
 			}
 
+			// Start CountDown
+			if ( ! WprElements.editorCheck() ) { //tmp
+			}
 			// Init on Load
 			initCountDown();
 
 			// Start CountDown
-			if ( ! WprElements.editorCheck() ) { //tmp
-				countDownInterval = setInterval( initCountDown, 1000 );
-			}
+			countDownInterval = setInterval( initCountDown, 1000 );
 
 			function initCountDown() {
 				var timeLeft = endTime - new Date();
@@ -2698,7 +3589,8 @@
 					}
 
 					if ( dataActions.hasOwnProperty( 'load-template' ) ) {
-						countDownWrap.parent().find( '.elementor-inner' ).parent().show();
+						// countDownWrap.parent().find( '.elementor-inner' ).parent().show();
+						countDownWrap.next('.elementor').show();
 					}
 
 				}
@@ -3035,10 +3927,15 @@
 					data: {
 						action: 'mailchimp_subscribe',
 						fields: $(this).serialize(),
-						apiKey: mailchimpForm.data( 'api-key' ),
 						listId: mailchimpForm.data( 'list-id' )
 					},
 					success: function(data) {
+						if ( 'yes' == mailchimpForm.data('clear-fields') ) {
+							mailchimpForm.find('input').each(function() {
+								$(this).val('');
+							});
+						}
+
 						mailchimpForm.find('button').text( buttonText );
 
 						if ( 'subscribed' === data.status ) {
@@ -3057,15 +3954,20 @@
 
 		widgetAdvancedSlider: function( $scope ) {
 			var $advancedSlider = $scope.find( '.wpr-advanced-slider' ),
-			sliderData = $advancedSlider.data('slick');
+			sliderData = $advancedSlider.data('slick'),
+			videoBtnSize = $advancedSlider.data('video-btn-size');
+			
+			// customPaging: function(slider, i) { 
+			// 	return '<span class="wpr-slider-dot" style="background-image:url('+ $(slider.$slides[i]).find('.wpr-slider-item-bg').css('background-image').replace('url(','').replace(')','').replace(/\"/gi, "") +')"></span>';
+			// },
 
 			// Slider Columns
 			var sliderClass = $scope.attr('class'),
 				sliderColumnsDesktop = sliderClass.match(/wpr-adv-slider-columns-\d/) ? sliderClass.match(/wpr-adv-slider-columns-\d/).join().slice(-1) : 2,
 				sliderColumnsWideScreen = sliderClass.match(/columns--widescreen\d/) ? sliderClass.match(/columns--widescreen\d/).join().slice(-1) : sliderColumnsDesktop,
 				sliderColumnsLaptop = sliderClass.match(/columns--laptop\d/) ? sliderClass.match(/columns--laptop\d/).join().slice(-1) : sliderColumnsDesktop,
-				sliderColumnsTabletExtra = sliderClass.match(/columns--tablet_extra\d/) ? sliderClass.match(/columns--tablet_extra\d/).join().slice(-1) : sliderColumnsTablet,
 				sliderColumnsTablet = sliderClass.match(/columns--tablet\d/) ? sliderClass.match(/columns--tablet\d/).join().slice(-1) : 2,
+				sliderColumnsTabletExtra = sliderClass.match(/columns--tablet_extra\d/) ? sliderClass.match(/columns--tablet_extra\d/).join().slice(-1) : sliderColumnsTablet,
 				sliderColumnsMobileExtra = sliderClass.match(/columns--mobile_extra\d/) ? sliderClass.match(/columns--mobile_extra\d/).join().slice(-1) : sliderColumnsTablet,
 				sliderColumnsMobile = sliderClass.match(/columns--mobile\d/) ? sliderClass.match(/columns--mobile\d/).join().slice(-1) : 1,
 				sliderSlidesToScroll = +(sliderClass.match(/wpr-adv-slides-to-scroll-\d/).join().slice(-1)),
@@ -3140,64 +4042,164 @@
 				],
 			});
 
+			$(document).ready(function() {
+                
+                $scope.find('.slick-current').addClass('wpr-slick-visible');
+
+				var maxHeight = -1;
+				// $scope.find('.slick-slide').each(function() {
+				// if ($(this).height() > maxHeight) {
+				// 	maxHeight = $(this).height();
+				// }
+				// });
+				// $scope.find('.slick-slide').each(function() {
+				// if ($(this).height() < maxHeight) {
+				// 	console.log(Math.ceil((maxHeight-$(this).height())/2) + 'px 0');
+				// 	$(this).css('margin', Math.ceil((maxHeight-$(this).height())/2) + 'px 0');
+				// 	// $(this).css('transform', 'translateY(-50%)');
+				// }
+				// });
+
+				// GOGA - needs condition check if there are any images
+				if ( $scope.find('.wpr-slider-img').length !== 0 ) {
+					$scope.find('.wpr-advanced-slider').css('height', $scope.find('.slick-current').outerHeight());
+				
+					$scope.find('.wpr-slider-arrow').on('click', function() {
+						console.log('works resize');
+						$scope.find('.wpr-advanced-slider').css('height', $scope.find('.slick-current').outerHeight());
+					});
+		
+					$(window).smartresize(function() {
+						$scope.find('.wpr-advanced-slider').css('height', $scope.find('.slick-current').outerHeight());
+					});
+				}
+			});
+			
 			function sliderVideoSize(){
 				  
-				var sliderWidth = $advancedSlider.find('.wpr-slider-item').outerWidth(),
-					sliderHeight = $advancedSlider.find('.wpr-slider-item').outerHeight(),
-					sliderRatio = sliderWidth / sliderHeight,
-					iframeRatio = (16/9),
-					iframeHeight,
-					iframeWidth,
-					iframeTopDistance = 0,
-					iframeLeftDistance = 0;
+				// var sliderWidth = $advancedSlider.find('.wpr-slider-item').outerWidth(),
+				// 	sliderHeight = $advancedSlider.find('.wpr-slider-item').outerHeight(),
+				// 	sliderRatio = sliderWidth / sliderHeight,
+				// 	iframeRatio = (16/9),
+				// 	iframeHeight,
+				// 	iframeWidth,
+				// 	iframeTopDistance = 0,
+				// 	iframeLeftDistance = 0;
 
-				if ( sliderRatio > iframeRatio ) {
-					iframeWidth = sliderWidth;
-					iframeHeight = iframeWidth / iframeRatio;
-					iframeTopDistance = '-'+ ( iframeHeight - sliderHeight ) / 2 +'px';
-				} else {
-					iframeHeight = sliderHeight;
-					iframeWidth = iframeHeight * iframeRatio;
-					iframeLeftDistance = '-'+ ( iframeWidth - sliderWidth ) / 2 +'px';
-				}
+				// if ( sliderRatio > iframeRatio ) {
+				// 	iframeWidth = sliderWidth;
+				// 	iframeHeight = iframeWidth / iframeRatio;
+				// 	iframeTopDistance = '-'+ ( iframeHeight - sliderHeight ) / 2 +'px';
+				// } else {
+				// 	iframeHeight = sliderHeight;
+				// 	iframeWidth = iframeHeight * iframeRatio;
+				// 	iframeLeftDistance = '-'+ ( iframeWidth - sliderWidth ) / 2 +'px';
+				// }
 
-				$advancedSlider.find('iframe').css({
-					'width': iframeWidth +'px',
-					'height': iframeHeight +'px',
-					'max-width': 'none',
-					'position': 'absolute',
-					'left': iframeLeftDistance +'',
-					'top': iframeTopDistance +'',
-					'display': 'block',
-					'text-align': 'inherit',
-					'line-height':'0px',
-					'border-width': '0px',
-					'margin': '0px',
-					'padding': '0px',
+				// $advancedSlider.find('iframe').css({
+				// 	'display': 'block',
+				// 	'width': iframeWidth +'px',
+				// 	'height': iframeHeight +'px',
+				// 	'max-width': 'none',
+				// 	'position': 'absolute',
+				// 	'left': iframeLeftDistance +'',
+				// 	'top': iframeTopDistance +'',
+				// 	'text-align': 'inherit',
+				// 	'line-height':'0px',
+				// 	'border-width': '0px',
+				// 	'margin': '0px',
+				// 	'padding': '0px',
+				// });
+				
+				$advancedSlider.find('iframe').attr('width', $scope.find('.wpr-slider-item').width());
+				$advancedSlider.find('iframe').attr('height', $scope.find('.wpr-slider-item').height());
+
+				var viewportWidth = $(window).outerWidth();
+
+				var MobileResp = +elementorFrontend.config.responsive.breakpoints.mobile.value;
+				var MobileExtraResp = +elementorFrontend.config.responsive.breakpoints.mobile_extra.value;
+				var TabletResp = +elementorFrontend.config.responsive.breakpoints.tablet.value;
+				var TabletExtraResp = +elementorFrontend.config.responsive.breakpoints.tablet_extra.value;
+				var LaptopResp = +elementorFrontend.config.responsive.breakpoints.laptop.value;
+				var wideScreenResp = +elementorFrontend.config.responsive.breakpoints.widescreen.value;
+
+				var activeBreakpoints = elementorFrontend.config.responsive.activeBreakpoints;
+
+				[...$scope[0].classList].forEach(className => {
+					if (className.startsWith('wpr-slider-video-icon-size-')) {
+						$scope[0].classList.remove(className);
+					}
 				});
+
+				// Mobile
+				if ( MobileResp >= viewportWidth && activeBreakpoints.mobile != null ) {
+					$scope.addClass('wpr-slider-video-icon-size-'+videoBtnSize.mobile);
+				// Mobile Extra
+				} else if ( MobileExtraResp >= viewportWidth && activeBreakpoints.mobile_extra != null ) {
+					$scope.addClass('wpr-slider-video-icon-size-'+videoBtnSize.mobile_extra);
+				// Tablet
+				} else if ( TabletResp >= viewportWidth && activeBreakpoints.tablet != null ) {
+					$scope.addClass('wpr-slider-video-icon-size-'+videoBtnSize.tablet);
+				// Tablet Extra
+				} else if ( TabletExtraResp >= viewportWidth && activeBreakpoints.tablet_extra != null ) {
+					$scope.addClass('wpr-slider-video-icon-size-'+videoBtnSize.tablet_extra);
+				// Laptop
+				} else if ( LaptopResp >= viewportWidth && activeBreakpoints.laptop != null ) {
+					$scope.addClass('wpr-slider-video-icon-size-'+videoBtnSize.laptop);
+				// Desktop
+				} else if ( wideScreenResp > viewportWidth ) {
+					$scope.addClass('wpr-slider-video-icon-size-'+videoBtnSize.desktop);
+				}  else {
+					$scope.addClass('wpr-slider-video-icon-size-'+videoBtnSize.widescreen);
+				}
+				// wpr-slider-video-icon-size-
 			}
 
 			$(window).on('load resize', function(){
 				sliderVideoSize();
 			});
 
+			$(document).ready(function () {
+				// Handler when all assets (including images) are loaded
+				if ( $scope.find('.wpr-advanced-slider').length ) {
+					$scope.find('.wpr-advanced-slider').css('opacity', 1);
+					autoplayVideo();
+				}
+			});
+
 			function autoplayVideo() {
-				$advancedSlider.find('.slick-active').each(function() {
-					var videoSrc = $(this).attr('data-video-src'),
-						videoAutoplay = $(this).attr('data-video-autoplay');
+				$advancedSlider.find('.slick-current').each(function() {
+
+					var videoSrc = $(this).find('.wpr-slider-item').attr('data-video-src'),
+					videoAutoplay = $(this).find('.wpr-slider-item').attr('data-video-autoplay');
 					
 					if ( $(this).find( '.wpr-slider-video' ).length !== 1 && videoAutoplay === 'yes' ) {
-						if ( sliderColumnsDesktop == 1 ) {
-							$(this).find('.wpr-cv-inner').prepend('<div class="wpr-slider-video"><iframe src="'+ videoSrc +'" width="100%" height="100%"  frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>');  
+						if ( videoSrc.includes('vimeo') || videoSrc.includes('youtube') ) {
+							if ( sliderColumnsDesktop == 1 ) {
+								// $(this).find('.wpr-cv-inner').prepend('<div class="wpr-slider-video"><iframe src="'+ videoSrc +'" width="100%" height="100%"  frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>');
+								$(this).find('.wpr-cv-inner').prepend('<div class="wpr-slider-video"><iframe src="'+ videoSrc +'"  frameborder="0" allow="autoplay" allowfullscreen></iframe></div>');
+							} else {
+								$(this).find('.wpr-cv-container').prepend('<div class="wpr-slider-video"><iframe src="'+ videoSrc +'" width="100%" height="100%"  frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>'); 
+							}
+							sliderVideoSize();
 						} else {
-							$(this).find('.wpr-cv-container').prepend('<div class="wpr-slider-video"><iframe src="'+ videoSrc +'" width="100%" height="100%"  frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>');  
+							var videoMute = $(this).find('.wpr-slider-item').attr('data-video-mute');
+							var videoControls = $(this).find('.wpr-slider-item').attr('data-video-controls');
+							var videoLoop = $(this).find('.wpr-slider-item').attr('data-video-loop');
+
+							$(this).find('.wpr-cv-inner').prepend('<div class="wpr-slider-video wpr-custom-video"><video autoplay '+ videoLoop + ' ' + videoMute + ' ' + videoControls + ' ' +  'src="'+ videoSrc +'" width="100%" height="100%"></video></div>');
+							
+							$advancedSlider.find('video').attr('width', $scope.find('.wpr-slider-item').width());
+							$advancedSlider.find('video').attr('height', $scope.find('.wpr-slider-item').height());
 						}
-						sliderVideoSize();
+
+						// GOGA - remove condition if not necessary
+						if ( $(this).find('.wpr-slider-content') ) {
+							$(this).find('.wpr-slider-content').fadeOut(300);
+						}
 					}
 				});
 			}
-
-			autoplayVideo();
 
 			function slideAnimationOff() {
 				if ( sliderColumnsDesktop == 1 ) {
@@ -3207,6 +4209,8 @@
 
 			function slideAnimationOn() {
 				$advancedSlider.find('.slick-active').find('.wpr-slider-content').fadeIn(0);
+				$advancedSlider.find('.slick-cloned').find('.wpr-slider-content').fadeIn(0);
+				$advancedSlider.find('.slick-current').find('.wpr-slider-content').fadeIn(0);
 				if ( sliderColumnsDesktop == 1 ) {
 					$advancedSlider.find('.slick-active').find('.wpr-slider-animation').addClass( 'wpr-animation-enter' );
 				}
@@ -3214,19 +4218,50 @@
 			
 			slideAnimationOn();
 
-			$advancedSlider.find('.wpr-slider-video-btn').on( 'click', function() {
+			$advancedSlider.on( 'click', '.wpr-slider-video-btn', function() {
 
-				var currentSlide = $(this).closest('.slick-active'),
-					videoSrc = currentSlide.attr('data-video-src');
+				var currentSlide = $(this).closest('.slick-slide'),
+					videoSrc = currentSlide.find('.wpr-slider-item').attr('data-video-src');
 
-				if ( currentSlide.find( '.wpr-slider-video' ).length !== 1 ) {
-					currentSlide.find('.wpr-cv-container').prepend('<div class="wpr-slider-video"><iframe src="'+ videoSrc +'" width="100%" height="100%"  frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>');  
-					sliderVideoSize();
-					currentSlide.find('.wpr-slider-content').fadeOut(300); 
-				}
-			   
-			});
+					console.log(videoSrc);
 			
+				console.log(currentSlide, videoSrc);
+			
+				var allowFullScreen = '';
+			
+				if ( videoSrc.includes('youtube') ) {
+					videoSrc += "&autoplay=1"; // Tell YouTube to autoplay
+					allowFullScreen = 'allowfullscreen="allowfullscreen"';
+				} else if ( videoSrc.includes('vimeo') ) {
+					allowFullScreen = 'allowfullscreen';
+				} else {
+					var videoMute = currentSlide.find('.wpr-slider-item').attr('data-video-mute');
+					var videoControls = currentSlide.find('.wpr-slider-item').attr('data-video-controls');
+					var videoLoop = currentSlide.find('.wpr-slider-item').attr('data-video-loop');
+					
+					if ( currentSlide.find( '.wpr-slider-video' ).length !== 1 ) {
+						currentSlide.find('.wpr-cv-container').prepend('<div class="wpr-slider-video wpr-custom-video"><video '+ videoLoop + ' ' + videoMute + ' ' + videoControls + ' ' + 'src="'+ videoSrc +'" width="100%" height="100%"></video></div>');
+
+						$advancedSlider.find('video').attr('width', $scope.find('.wpr-slider-item').width());
+						$advancedSlider.find('video').attr('height', $scope.find('.wpr-slider-item').height());
+
+						currentSlide.find('.wpr-slider-content').fadeOut(300);
+
+						currentSlide.find('video')[0].play();
+					}
+					return;
+				}
+			
+				if ( currentSlide.find( '.wpr-slider-video' ).length !== 1 ) {
+					// currentSlide.find('.wpr-cv-container').prepend('<div class="wpr-slider-video"><iframe src="'+ videoSrc +'" width="100%" height="100%"  frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture;"></iframe></div>');
+					currentSlide.find('.wpr-cv-container').prepend('<div class="wpr-slider-video"><iframe src="'+ videoSrc +'" width="100%" height="100%"  frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture;"'+ allowFullScreen +'></iframe></div>');
+
+					sliderVideoSize();
+					currentSlide.find('.wpr-slider-content').fadeOut(300);
+				}
+			
+			});
+
 			$advancedSlider.on( {
 				beforeChange: function() {
 					$advancedSlider.find('.wpr-slider-item').not('.slick-active').find('.wpr-slider-video').remove();
@@ -3236,6 +4271,10 @@
 				afterChange: function( event, slick, currentSlide ) {
 					slideAnimationOn();
 					autoplayVideo();
+					$scope.find('.slick-slide').removeClass('wpr-slick-visible');
+					$scope.find('.slick-current').addClass('wpr-slick-visible');
+					$scope.find('.slick-current').nextAll().slice(0, sliderColumnsDesktop - 1).addClass('wpr-slick-visible');
+					$scope.find('.wpr-advanced-slider').css('height', $scope.find('.slick-current').outerHeight());
 				}
 			});
 
@@ -3265,16 +4304,18 @@
 
 		widgetTestimonialCarousel: function( $scope ) {
 			var testimonialCarousel = $scope.find( '.wpr-testimonial-carousel' );
+			var settings = JSON.parse( testimonialCarousel.attr( 'data-slick' ) );
+			
 			// Slider Columns
 			var sliderClass = $scope.attr('class'),
 				sliderColumnsDesktop = sliderClass.match(/wpr-testimonial-slider-columns-\d/) ? sliderClass.match(/wpr-testimonial-slider-columns-\d/).join().slice(-1) : 2,
 				sliderColumnsWideScreen = sliderClass.match(/columns--widescreen\d/) ? sliderClass.match(/columns--widescreen\d/).join().slice(-1) : sliderColumnsDesktop,
 				sliderColumnsLaptop = sliderClass.match(/columns--laptop\d/) ? sliderClass.match(/columns--laptop\d/).join().slice(-1) : sliderColumnsDesktop,
-				sliderColumnsTabletExtra = sliderClass.match(/columns--tablet_extra\d/) ? sliderClass.match(/columns--tablet_extra\d/).join().slice(-1) : sliderColumnsTablet,
 				sliderColumnsTablet = sliderClass.match(/columns--tablet\d/) ? sliderClass.match(/columns--tablet\d/).join().slice(-1) : 2,
+				sliderColumnsTabletExtra = sliderClass.match(/columns--tablet_extra\d/) ? sliderClass.match(/columns--tablet_extra\d/).join().slice(-1) : sliderColumnsTablet,
 				sliderColumnsMobileExtra = sliderClass.match(/columns--mobile_extra\d/) ? sliderClass.match(/columns--mobile_extra\d/).join().slice(-1) : sliderColumnsTablet,
 				sliderColumnsMobile = sliderClass.match(/columns--mobile\d/) ? sliderClass.match(/columns--mobile\d/).join().slice(-1) : 1,
-				sliderSlidesToScroll = +(sliderClass.match(/wpr-adv-slides-to-scroll-\d/).join().slice(-1)),
+				sliderSlidesToScroll = settings.sliderSlidesToScroll,
 				dataSlideEffect = testimonialCarousel.attr('data-slide-effect');
 
 			testimonialCarousel.slick({
@@ -3386,6 +4427,8 @@
 
 		widgetSearch: function( $scope ) {
 
+			var isFound = false;
+
 			$scope.find('.wpr-search-form-input').on( {
 				focus: function() {
 					$scope.addClass( 'wpr-search-form-input-focus' );
@@ -3394,6 +4437,56 @@
 					$scope.removeClass( 'wpr-search-form-input-focus' );
 				}
 			} );
+            
+            if ( $scope.find('.wpr-category-select').length > 0 ) {
+                // Set the selected value on page load
+                $(document).ready(function() {
+                    var wprSelectedCategory = localStorage.getItem('wprSelectedCategory');
+                    if (wprSelectedCategory) {
+						$scope.find('.wpr-category-select option').each(function() {
+							console.log($(this).val());
+							if ($(this).val() === wprSelectedCategory) {
+								isFound = true;
+								$scope.find('.wpr-category-select').val(wprSelectedCategory);
+								return false; // Breaks out of the .each() loop
+							} else {
+								$scope.find('.wpr-category-select').val(0);
+							}
+						});
+                    }
+                });
+
+                $scope.find('.wpr-category-select').on('change', function(e) {
+                    
+                    var selectedValue = $(this).val();
+                    localStorage.setItem('wprSelectedCategory', selectedValue);
+
+			        if ($scope.find('.wpr-search-form-input').attr('ajax-search') === 'yes') {
+                        postsOffset = 0;
+                        $scope.find('.wpr-data-fetch').hide();
+                        $scope.find('.wpr-data-fetch ul').html('');
+                        ajaxSearchCall($scope.find('.wpr-search-form-input'), postsOffset, e);
+                    }
+                });
+            }
+
+			// if ( $scope.find('.wpr-search-input-hidden') ) {
+			// 	$scope.find('.wpr-search-form-submit').on('click', function(e) {
+			// 		e.preventDefault();
+			// 		if ($scope.find('input').hasClass('wpr-search-input-hidden')) {
+			// 			$scope.find('input').removeClass('wpr-search-input-hidden');
+			// 		} else {
+			// 			$scope.find('input').addClass('wpr-search-input-hidden');
+			// 			$scope.find('.wpr-search-form-input').val('');
+			// 			$scope.find('.wpr-data-fetch').slideUp(200);
+			// 			setTimeout(function() {
+			// 				$scope.find('.wpr-data-fetch ul').html('');
+			// 				$scope.find('.wpr-no-results').remove();
+			// 			}, 400);
+			// 			postsOffset = 0;
+			// 		}
+			// 	});
+			// }
 
 			var prevData;
 			var searchTimeout = null;
@@ -3406,6 +4499,8 @@
 				if (searchTimeout != null) {
 					clearTimeout(searchTimeout);
 				}
+				var optionPostType = ($scope.find('.wpr-category-select').length > 0 && $scope.find('.wpr-category-select').find('option:selected').data('post-type'));
+
 				searchTimeout = setTimeout(() => {
 					var thisValue = thisObject.val();
 					$.ajax({
@@ -3416,17 +4511,22 @@
 							nonce: WprConfig.nonce,
 							wpr_keyword: $scope.find('.wpr-search-form-input').val(),
 							wpr_query_type: $scope.find('.wpr-search-form-input').attr('wpr-query-type'),
+							wpr_option_post_type: optionPostType ? $scope.find('.wpr-category-select').find('option:selected').data('post-type') : '',
+							wpr_category: $scope.find('.wpr-category-select').length > 0 ? $scope.find('.wpr-category-select').val() : '',
 							wpr_number_of_results: $scope.find('.wpr-search-form-input').attr('number-of-results'),
 							wpr_search_results_offset: postsOffset,
+							wpr_show_description: $scope.find('.wpr-search-form-input').attr('show-description'),
 							wpr_number_of_words: $scope.find('.wpr-search-form-input').attr('number-of-words'),
 							wpr_show_ajax_thumbnail: $scope.find('.wpr-search-form-input').attr('show-ajax-thumbnails'),
 							wpr_show_view_result_btn: $scope.find('.wpr-search-form-input').attr('show-view-result-btn'),
 							wpr_view_result_text: $scope.find('.wpr-search-form-input').attr('view-result-text'),
+							wpr_no_results: $scope.find('.wpr-search-form-input').attr('no-results'),
 							wpr_exclude_without_thumb: $scope.find('.wpr-search-form-input').attr('exclude-without-thumb'),
 							wpr_ajax_search_link_target: $scope.find('.wpr-search-form-input').attr('link-target'),
 							// wpr_ajax_search_img_size: $scope.find('.wpr-search-form-input').attr('ajax-search-img-size')
 						},
 						success: function(data) {
+							$scope.closest('section').addClass('wpr-section-z-index');
 							if ( $scope.find('.wpr-data-fetch ul').html() === '' ) {
 								$scope.find( '.wpr-pagination-loading' ).hide();
 								$scope.find('.wpr-data-fetch ul').html( data );
@@ -3453,6 +4553,7 @@
 									if (data.includes('wpr-no-results')) {
 										$scope.find('.wpr-ajax-search-pagination').css('display', 'none');
 										$scope.find('.wpr-data-fetch ul').html('');
+										$scope.closest('section').removeClass('wpr-section-z-index');
 									} else {
 										$scope.find('.wpr-ajax-search-pagination').css('display', 'flex');
 									}
@@ -3509,6 +4610,7 @@
 								setTimeout(function() {
 									$scope.find('.wpr-data-fetch ul').html('');
 									$scope.find('.wpr-no-results').remove();
+									$scope.closest('section').removeClass('wpr-section-z-index');
 								}, 600);
 								postsOffset = 0;
 							}
@@ -3552,6 +4654,7 @@
 					setTimeout(function() {
 						$scope.find('.wpr-data-fetch ul').html('');
 						$scope.find('.wpr-no-results').remove();
+						$scope.closest('section').removeClass('wpr-section-z-index');
 					}, 400);
 					postsOffset = 0;
 				});
@@ -3564,13 +4667,12 @@
 							setTimeout(function() {
 								$scope.find('.wpr-data-fetch ul').html('');
 								$scope.find('.wpr-no-results').remove();
+								$scope.closest('section').removeClass('wpr-section-z-index');
 							}, 400);
 							postsOffset = 0;
 						}
 					}
 				});
-
-				
 
 				var mutationObserver = new MutationObserver(function(mutations) {
 					$scope.find('.wpr-data-fetch li').on('click', function() {
@@ -4041,8 +5143,8 @@
 				sliderColumnsDesktop = sliderClass.match(/wpr-ticker-slider-columns-\d/) ? sliderClass.match(/wpr-ticker-slider-columns-\d/).join().slice(-1) : 2,
 				sliderColumnsWideScreen = sliderClass.match(/columns--widescreen\d/) ? sliderClass.match(/columns--widescreen\d/).join().slice(-1) : sliderColumnsDesktop,
 				sliderColumnsLaptop = sliderClass.match(/columns--laptop\d/) ? sliderClass.match(/columns--laptop\d/).join().slice(-1) : sliderColumnsDesktop,
-				sliderColumnsTabletExtra = sliderClass.match(/columns--tablet_extra\d/) ? sliderClass.match(/columns--tablet_extra\d/).join().slice(-1) : sliderColumnsTablet,
 				sliderColumnsTablet = sliderClass.match(/columns--tablet\d/) ? sliderClass.match(/columns--tablet\d/).join().slice(-1) : 2,
+				sliderColumnsTabletExtra = sliderClass.match(/columns--tablet_extra\d/) ? sliderClass.match(/columns--tablet_extra\d/).join().slice(-1) : sliderColumnsTablet,
 				sliderColumnsMobileExtra = sliderClass.match(/columns--mobile_extra\d/) ? sliderClass.match(/columns--mobile_extra\d/).join().slice(-1) : sliderColumnsTablet,
 				sliderColumnsMobile = sliderClass.match(/columns--mobile\d/) ? sliderClass.match(/columns--mobile\d/).join().slice(-1) : 1,
 				dataSlideEffect = $contentTickerSlider.attr('data-slide-effect'),
@@ -4126,12 +5228,20 @@
 
 			// Active Tab
 			var activeTabIndex = tabsData.activeTab - 1;
+
+			// ?active_tab=tab-index#your-id
+			var activeTabIndexFromLocation = window.location.href.indexOf("active_tab=");
+
+			if (activeTabIndexFromLocation > -1) {
+				activeTabIndex = +window.location.href.substring(activeTabIndexFromLocation,  window.location.href.lastIndexOf("#")).replace("active_tab=", '') - 1;
+			}
+
 				$tabList.eq( activeTabIndex ).addClass( 'wpr-tab-active' );
 				$contentList.eq( activeTabIndex ).addClass( 'wpr-tab-content-active wpr-animation-enter' );
 
 			if ( tabsData.autoplay === 'yes' ) {
 				
-				var startIndex = tabsData.activeTab - 1;
+				var startIndex = activeTabIndex;
 
 				var autoplayInterval = setInterval( function() {
 
@@ -4900,7 +6010,96 @@
 			}
 		}, // End of widgetCharts
 
-		widgetPostsTimeline: function($scope) { // goback
+		widgetTaxonomyList: function($scope) {
+			var taxList = $scope.find('.wpr-taxonomy-list');
+
+			if ( taxList.data('show-on-click') == 'yes' ) {
+
+				// $scope.find('.wpr-tax-dropdown').css('margin-left', -($scope.find('.wpr-tax-dropdown').width()));
+
+				taxList.find('.wpr-taxonomy i.wpr-tax-dropdown').on('click', function(e) {
+
+					e.preventDefault();
+
+					if ( taxList.find('.wpr-sub-taxonomy[data-term-id="child-'+ $(this).closest('li').data('term-id') +'"]').hasClass('wpr-sub-hidden') ) {
+						$(this).removeClass('fa-caret-right').addClass('fa-caret-down');
+						// $scope.find('.fa-caret-down').css('margin-left', -($scope.find('.fa-caret-down').width()));
+						taxList.find('.wpr-sub-taxonomy[data-term-id="child-'+ $(this).closest('li').data('term-id') +'"]').removeClass('wpr-sub-hidden');
+					} else {
+						$(this).removeClass('fa-caret-down').addClass('fa-caret-right');
+						// $scope.find('.fa-caret-right').css('margin-left', -($scope.find('.fa-caret-right').width()));
+						taxList.find('.wpr-sub-taxonomy[data-term-id="child-'+ $(this).closest('li').data('term-id') +'"]').addClass('wpr-sub-hidden');
+
+						taxList.find('.wpr-inner-sub-taxonomy[data-term-id="grandchild-'+ $(this).closest('li').data('term-id') +'"]').each(function() {
+							if ( !$(this).hasClass('wpr-sub-hidden') ) {
+								taxList.find('.wpr-sub-taxonomy[data-id="'+ $(this).data('parent-id') +'"] i.wpr-tax-dropdown').removeClass('fa-caret-down').addClass('fa-caret-right');
+								// $scope.find('.fa-caret-right').css('margin-left', -($scope.find('.fa-caret-right').width()));
+								$(this).addClass('wpr-sub-hidden');
+							}
+						});
+
+						taxList.find('.wpr-inner-sub-taxonomy-2[data-term-id="great-grandchild-'+ $(this).closest('li').data('term-id') +'"]').each(function() {
+							if ( !$(this).hasClass('wpr-sub-hidden') ) {
+								taxList.find('.wpr-sub-taxonomy[data-id="'+ $(this).data('parent-id') +'"] i.wpr-tax-dropdown').removeClass('fa-caret-down').addClass('fa-caret-right');
+								// $scope.find('.fa-caret-right').css('margin-left', -($scope.find('.fa-caret-right').width()));
+								$(this).addClass('wpr-sub-hidden');
+							}
+						});
+
+						// if (!taxList.find('.wpr-inner-sub-taxonomy[data-term-id="grandchild-'+ $(this).parent('li').data('term-id') +'"]').hasClass('wpr-sub-hidden')) {
+						// 	taxList.find('.wpr-sub-taxonomy[data-term-id="child-'+ $(this).parent('li').data('term-id') +'"] i').removeClass('fa-caret-down').addClass('fa-caret-right');
+						// 	taxList.find('.wpr-inner-sub-taxonomy[data-term-id="grandchild-'+ $(this).parent('li').data('term-id') +'"]').addClass('wpr-sub-hidden');
+						// }
+					}
+
+					taxList.find('.wpr-inner-sub-taxonomy[data-term-id="grandchild-'+ $(this).closest('li').data('term-id') +'"] i.wpr-tax-dropdown').removeClass('fa-caret-down').addClass('fa-caret-right');
+
+					if ( !taxList.find('.wpr-inner-sub-taxonomy-2[data-term-id="great-grandchild-'+ $(this).closest('li').data('term-id') +'"]').hasClass('wpr-sub-hidden') ) {
+						taxList.find('.wpr-inner-sub-taxonomy-2[data-term-id="great-grandchild-'+ $(this).closest('li').data('term-id') +'"]').addClass('wpr-sub-hidden');
+					}
+				});
+
+				taxList.find('.wpr-sub-taxonomy i.wpr-tax-dropdown').on('click', function(e) {
+
+					e.preventDefault();
+
+					if ( taxList.find('.wpr-inner-sub-taxonomy[data-parent-id="'+ $(this).closest('li').data('id') +'"]').hasClass('wpr-sub-hidden') ) {
+						$(this).removeClass('fa-caret-right').addClass('fa-caret-down');
+						// $scope.find('.fa-caret-down').css('margin-left', -($scope.find('.fa-caret-down').width()));
+						taxList.find('.wpr-inner-sub-taxonomy[data-parent-id="'+ $(this).closest('li').data('id') +'"]').removeClass('wpr-sub-hidden');
+					} else {
+						$(this).removeClass('fa-caret-down').addClass('fa-caret-right');
+						// taxList.find('.wpr-sub-taxonomy i').removeClass('fa-caret-down').addClass('fa-caret-right');
+						// $scope.find('.fa-caret-right').css('margin-left', -($scope.find('.fa-caret-right').width()));
+						taxList.find('.wpr-inner-sub-taxonomy[data-parent-id="'+ $(this).closest('li').data('id') +'"]').addClass('wpr-sub-hidden');
+					}
+
+					taxList.find('.wpr-inner-sub-taxonomy[data-parent-id="'+ $(this).closest('li').data('id') +'"] i.wpr-tax-dropdown').removeClass('fa-caret-down').addClass('fa-caret-right');
+
+					if ( !taxList.find('.wpr-inner-sub-taxonomy-2[data-term-id="great-grandchild-'+ $(this).closest('li').data('term-id').replace('child-', '') +'"]').hasClass('wpr-sub-hidden') ) {
+						taxList.find('.wpr-inner-sub-taxonomy-2[data-term-id="great-grandchild-'+ $(this).closest('li').data('term-id').replace('child-', '') +'"]').addClass('wpr-sub-hidden');
+					}
+				});
+
+				taxList.find('.wpr-inner-sub-taxonomy i.wpr-tax-dropdown').on('click', function(e) {
+
+					e.preventDefault();
+
+					if ( taxList.find('.wpr-inner-sub-taxonomy-2[data-parent-id="'+ $(this).closest('li').data('id') +'"]').hasClass('wpr-sub-hidden') ) {
+						$(this).removeClass('fa-caret-right').addClass('fa-caret-down');
+						// $scope.find('.fa-caret-down').css('margin-left', -($scope.find('.fa-caret-down').width()));
+						taxList.find('.wpr-inner-sub-taxonomy-2[data-parent-id="'+ $(this).closest('li').data('id') +'"]').removeClass('wpr-sub-hidden');
+					} else {
+						$(this).removeClass('fa-caret-down').addClass('fa-caret-right');
+						// taxList.find('.wpr-sub-taxonomy i').removeClass('fa-caret-down').addClass('fa-caret-right');
+						// $scope.find('.fa-caret-right').css('margin-left', -($scope.find('.fa-caret-right').width()));
+						taxList.find('.wpr-inner-sub-taxonomy-2[data-parent-id="'+ $(this).closest('li').data('id') +'"]').addClass('wpr-sub-hidden');
+					}
+				});
+			}
+		}, // End of widgetTaxonomyList
+
+		widgetPostsTimeline: function($scope) {
 			var iScrollTarget = $scope.find( '.wpr-timeline-centered' ).length > 0 ? $scope.find( '.wpr-timeline-centered' ) : '',
 			    element = $scope.find('.wpr-timeline-centered').length > 0 ? $scope.find('.wpr-timeline-centered') : '',
 				pagination = $scope.find( '.wpr-grid-pagination' ).length > 0 ? $scope.find( '.wpr-grid-pagination' ) : '',
@@ -5046,15 +6245,22 @@
 			if ( $scope.find('.swiper-wrapper').length ) {
 
 				var swiperLoader = function swiperLoader(swiperElement, swiperConfig) {
-					if ('undefined' === typeof Swiper) {
-						var asyncSwiper = elementorFrontend.utils.swiper;     
-						return new asyncSwiper(swiperElement, swiperConfig).then( function (newSwiperInstance) {
-							return newSwiperInstance;
-						});  
-					 } else {
-						  return swiperPromise(swiperElement, swiperConfig);  
-					  }
-				};  
+					// if ('undefined' === typeof Swiper) {
+					// 	var asyncSwiper = elementorFrontend.utils.swiper;     
+					// 	return new asyncSwiper(swiperElement, swiperConfig).then( function (newSwiperInstance) {
+					// 		return newSwiperInstance;
+					// 	});
+					//  } else {
+					// 	console.log(Swiper);
+					// 	return swiperPromise(swiperElement, swiperConfig);  
+					// }
+
+					// Check if swiperPromise is necessary
+					var asyncSwiper = elementorFrontend.utils.swiper;     
+					return new asyncSwiper(swiperElement, swiperConfig).then( function (newSwiperInstance) {
+						return newSwiperInstance;
+					});
+				};
 				
 				var swiperPromise = function swiperPromise(swiperElement, swiperConfig) {    
 					return new Promise(function (resolve, reject) {  
@@ -5070,10 +6276,18 @@
 
 				swiperLoader(swiperSlider, {
 					spaceBetween: +swiperSlider.data('swiper-space-between'),
+					loop: swiperSlider.data('loop') === 'yes' ? true : false,
 					autoplay: swiperSlider.data("autoplay") !== 'yes' ? false : {
 						delay: +swiperSlider.attr('data-swiper-delay'),
 						// disableOnInteraction: true,
 						// pauseOnMouseEnter: true,
+					},
+					on: {
+						init: function () {
+							if ( $scope.find('.wpr-timeline-outer-container').length > 0 ) {
+								$scope.find('.wpr-timeline-outer-container').css('opacity', 1);
+							}
+						},
 					},
 					speed: +swiperSlider.attr('data-swiper-speed'),
 					slidesPerView: swiperSlider.data("slidestoshow"),
@@ -5108,6 +6322,14 @@
 				//   }, function() {
 				// 	  (this).swiper.autoplay.start();
 				//   });
+
+			} else {
+				$(document).ready(function() {
+					// Handler when all assets (including images) are loaded
+					if ( $scope.find('.wpr-timeline-outer-container').length ) {
+						$scope.find('.wpr-timeline-outer-container').css('opacity', 1);
+					}
+				});
 			}
 
 			function removeLeftAlignedClass() {
@@ -5181,6 +6403,979 @@
 			});
         }, // end widgetSharingButtons
 
+		widgetTwitterFeed: function($scope) {
+
+			if ($scope.find('.wpr-twitter-feed').attr( 'data-settings' )) {
+				var settings = JSON.parse( $scope.find('.wpr-twitter-feed').attr( 'data-settings' ) );
+			} else {
+				return;
+			}
+
+			let twitterFeed = $scope.find('.wpr-twitter-feed');
+			
+			var settings = JSON.parse( twitterFeed.attr( 'data-settings' ) );
+			var loadMoreSettings = settings.twitter_load_more_settings;
+
+			var nextPostsIndex = loadMoreSettings.number_of_posts;
+			var pagination = $scope.find( '.wpr-grid-pagination' );
+
+			if ( $scope.hasClass('wpr-twitter-feed-masonry') ) {
+				// Init Functions
+				isotopeLayout( settings );
+				setTimeout(function() {
+					isotopeLayout( settings );
+				}, 100 );
+
+				if ( WprElements.editorCheck() ) {
+					setTimeout(function() {
+						isotopeLayout( settings );
+					}, 500 );
+					setTimeout(function() {
+						isotopeLayout( settings );
+					}, 1000 );
+				}
+
+				$( window ).on( 'load', function() {
+					setTimeout(function() {
+						isotopeLayout( settings );
+					}, 100 );
+				});
+
+				$(window).smartresize(function(){
+					setTimeout(function() {
+						isotopeLayout( settings );
+					}, 200 );
+				});
+			}
+
+			function isotopeLayout( settings ) {
+				var twitterFeed = $scope.find( '.wpr-twitter-feed' ),
+					item = twitterFeed.find( '.wpr-tweet' ),
+					layout = settings.layout_select,
+					columns = 3,
+					gutterHr = settings.gutter_hr,
+					gutterVr = settings.gutter_vr,
+					contWidth = twitterFeed.width() + gutterHr - 0.3,
+					viewportWidth = $(window).outerWidth(),
+					transDuration = 400;
+
+					var MobileResp = +elementorFrontend.config.responsive.breakpoints.mobile.value;
+					var MobileExtraResp = +elementorFrontend.config.responsive.breakpoints.mobile_extra.value;
+					var TabletResp = +elementorFrontend.config.responsive.breakpoints.tablet.value;
+					var TabletExtraResp = +elementorFrontend.config.responsive.breakpoints.tablet_extra.value;
+					var LaptopResp = +elementorFrontend.config.responsive.breakpoints.laptop.value;
+					var wideScreenResp = +elementorFrontend.config.responsive.breakpoints.widescreen.value;
+
+				// Mobile
+				if (MobileResp >= viewportWidth ) {
+					columns = (settings.columns_mobile) ? (settings.columns_mobile) : 1;
+				// Mobile Extra
+				} else if ( MobileExtraResp >= viewportWidth ) {
+					columns = (settings.columns_mobile_extra) ? settings.columns_mobile_extra : settings.columns_tablet ? settings.columns_tablet : settings.columns;
+				// Tablet
+				} else if ( TabletResp >= viewportWidth ) {
+					columns = (settings.columns_tablet) ? settings.columns_tablet : 2;
+				// Tablet Extra
+				} else if ( TabletExtraResp >= viewportWidth ) {
+					columns = (settings.columns_tablet_extra) ? settings.columns_tablet_extra : settings.columns_tablet ? settings.columns_tablet : settings.columns;
+
+				// Laptop
+				} else if (  LaptopResp >= viewportWidth ) {
+					columns = (settings.columns_laptop) ? settings.columns_laptop : settings.columns;
+
+				// Desktop
+				} else if ( wideScreenResp - 1 >= viewportWidth ) {
+					columns = settings.columns;
+
+				// Larger Screens
+				} else if ( wideScreenResp <= viewportWidth ) {
+					columns = (settings.columns_widescreen) ? settings.columns_widescreen : settings.columns;
+				} else {
+					columns = settings.columns
+				}
+
+				// Limit Columns for Higher Screens
+				if ( columns > 8 ) {
+					columns = 8;
+				}
+
+				columns = parseInt(columns);
+
+				if ( 'string' == typeof(columns) && -1 !== columns.indexOf('pro') ) {
+					columns = 3;
+				}
+
+				// Calculate Item Width
+				item.outerWidth( Math.floor( contWidth / columns - gutterHr ) );
+
+				// Set Vertical Gutter
+				item.css( 'margin-bottom', gutterVr +'px' );
+
+				// Reset Vertical Gutter for 1 Column Layout
+				if ( 1 === columns ) {
+					item.last().css( 'margin-bottom', '0' );
+				}
+
+				// add last row & make all post equal height
+				var maxTop = -1;
+
+				// Run Isotope
+				var twitterFeedMasonry = twitterFeed.isotopewpr({
+					layoutMode: layout,
+					masonry: {
+						comlumnWidth: contWidth / columns,
+						gutter: gutterHr
+					},
+					transitionDuration: transDuration,
+  					percentPosition: true
+				});
+
+				if ( '1' !== twitterFeed.css( 'opacity' ) ) {
+					twitterFeed.css( 'opacity', '1' );
+				}
+
+				// return instagramFeed;//tmp
+			}
+
+			if ( !WprElements.editorCheck() ) {
+				$scope.find('.wpr-load-more-twitter-posts').on('click', function() {
+					pagination.find( '.wpr-load-more-btn' ).hide();
+					pagination.find( '.wpr-pagination-loading' ).css( 'display', 'inline-block' );
+					// pagination.find( '.wpr-pagination-finish' ).fadeIn(  );
+					// pagination.delay( 2000 ).fadeOut( 1000 );
+					// setTimeout(function() {
+						$.ajax({
+							type: 'POST',
+							url: WprConfig.ajaxurl,
+							data: { 
+								action: 'wpr_load_more_tweets',
+								nonce: WprConfig.nonce,
+								wpr_load_more_settings: loadMoreSettings,
+								next_post_index: nextPostsIndex,
+							},
+							success: function(data) {
+								var $data = $(data);
+
+								$data.each(function() {
+									$(this).addClass('wpr-twitter-hidden-item');
+								});
+
+								
+								$scope.find('.wpr-twitter-feed').append( $data );
+
+								setTimeout(function() {
+					
+									if ( $scope.hasClass('wpr-twitter-feed-masonry') ) {
+										twitterFeed.isotopewpr( 'appended', $data );
+								
+										twitterFeed.isotopewpr( 'reloadItems' ); // https://isotope.metafizzy.co/methods.html#reloaditems
+										
+										twitterFeed.isotopewpr('layout'); // https://isotope.metafizzy.co/methods.html#layout
+						
+										$(window).trigger('resize');
+									}
+
+									$data.each(function(index) {
+										var item = $(this);
+										setTimeout(function() {
+											item.removeClass('wpr-twitter-hidden-item');
+										}, 300);
+									});
+		
+									// Loading
+									pagination.find( '.wpr-pagination-loading' ).hide();
+	
+									if (data.includes('wpr-tweet')) { // replaceclassname
+										pagination.find( '.wpr-load-more-btn' ).fadeIn();
+									} else {
+										pagination.find( '.wpr-pagination-finish' ).fadeIn( 1000 );
+									}
+								}, 400);
+
+								nextPostsIndex =  nextPostsIndex + loadMoreSettings.number_of_posts;
+							},
+							error: function(error) {
+								console.log(error);
+							}
+						});
+
+					// }, 1000);
+				});
+			}
+
+			twitterFeedCarousel();
+				
+			$scope.find('.wpr-grid').css('opacity', 1);
+
+			function twitterFeedCarousel() {
+				if ( $scope.hasClass('wpr-twitter-feed-carousel') ) {
+					var swiperLoader = function swiperLoader(swiperElement, swiperConfig) {
+						// if ('undefined' === typeof Swiper) {
+						// 	var asyncSwiper = elementorFrontend.utils.swiper;     
+						// 	return new asyncSwiper(swiperElement, swiperConfig).then( function (newSwiperInstance) {     
+						// 		return newSwiperInstance;
+						// 	});  
+						// } else {     
+						// 	return swiperPromise(swiperElement, swiperConfig);  
+						// }
+
+						var asyncSwiper = elementorFrontend.utils.swiper;     
+						return new asyncSwiper(swiperElement, swiperConfig).then( function (newSwiperInstance) {     
+							return newSwiperInstance;
+						});
+					};
+					
+					var swiperPromise = function swiperPromise(swiperElement, swiperConfig) {    
+						return new Promise(function (resolve, reject) {  
+								var swiperInstance = new Swiper(swiperElement, swiperConfig);     
+								resolve(swiperInstance); 
+						}); 
+					};
+
+					$scope.find('.wpr-twitter-feed').css('flexWrap', 'nowrap');
+
+					var sliderSettings = settings.carousel;
+					
+					$scope.find('.wpr-twitter-feed-cont').addClass('swiper');
+					$scope.find('.wpr-twitter-feed').addClass('swiper-wrapper');
+					$scope.find('.wpr-tweet').addClass('swiper-slide');
+					$scope.find('.wpr-twitter-feed-cont').css('overflow', 'hidden');
+					// $scope.find('.elementor-container').css('margin', '0');
+					var swiperSlider = $scope.find('.wpr-twitter-feed-cont');
+
+					var aboveMobileResp = +elementorFrontend.config.responsive.breakpoints.mobile.value + 1;
+					var aboveMobileExtraResp = +elementorFrontend.config.responsive.breakpoints.mobile_extra.value + 1;
+					var aboveTabletResp = +elementorFrontend.config.responsive.breakpoints.tablet.value + 1;
+					var aboveTabletExtraResp = +elementorFrontend.config.responsive.breakpoints.tablet_extra.value + 1;
+					var aboveLaptopResp = +elementorFrontend.config.responsive.breakpoints.laptop.value + 1;
+					var wideScreenResp = +elementorFrontend.config.responsive.breakpoints.widescreen.value;
+
+					swiperLoader(swiperSlider, {
+						hashNavigation: sliderSettings.wpr_cs_navigation === 'yes' ? true : false,
+						autoplay: sliderSettings.wpr_cs_autoplay === 'yes' ? {
+							delay: +sliderSettings.wpr_cs_delay,
+						} : false,
+						loop: sliderSettings.wpr_cs_loop === 'yes' ? true : false,
+						slidesPerView: +sliderSettings.wpr_cs_slides_to_show,
+						spaceBetween: +sliderSettings.wpr_cs_space_between,
+						speed: +sliderSettings.wpr_cs_speed,
+						pagination: sliderSettings.wpr_cs_pagination === 'yes' ? {
+						el: '.swiper-pagination',
+						type: sliderSettings.wpr_cs_pagination_type,
+						} : false,
+						navigation: {
+						prevEl: '.wpr-swiper-button-prev',
+						nextEl: '.wpr-swiper-button-next',
+						},
+						// Responsive breakpoints - direction min
+						breakpoints: {
+						320: {
+							slidesPerView: +sliderSettings.wpr_cs_slides_to_show_mobile,
+							// spaceBetween: +sliderSettings.wpr_cs_space_between_mobile,
+						},
+						[aboveMobileResp]: {
+							slidesPerView: +sliderSettings.wpr_cs_slides_to_show_mobile_extra,
+							// spaceBetween: +sliderSettings.wpr_cs_space_between_mobile_extra,
+						},
+						[aboveMobileExtraResp]: {
+							slidesPerView: +sliderSettings.wpr_cs_slides_to_show_tablet,
+							spaceBetween: +sliderSettings.wpr_cs_space_between_tablet,
+						},
+						[aboveTabletResp]: {
+							slidesPerView: +sliderSettings.wpr_cs_slides_to_show_tablet_extra,
+							spaceBetween: +sliderSettings.wpr_cs_space_between_tablet_extra,
+						},
+						[aboveTabletExtraResp]: {
+							slidesPerView: +sliderSettings.wpr_cs_slides_to_show_laptop,
+							spaceBetween: +sliderSettings.wpr_cs_space_between_laptop,
+						},
+						[aboveLaptopResp]: {
+							slidesPerView: +sliderSettings.wpr_cs_slides_to_show,
+							spaceBetween: +sliderSettings.wpr_cs_space_between,
+						},
+						[wideScreenResp]: {
+							slidesPerView: +sliderSettings.wpr_cs_slides_to_show_widescreen,
+							spaceBetween: +sliderSettings.wpr_cs_space_between_widescreen,
+						}
+						},
+					
+					});
+
+					$scope.css('opacity', 1);
+				}
+			}
+
+		}, // end widgetTwitterFeed
+
+        widgetInstagramFeed: function($scope) {
+
+			if ( $scope.find('.wpr-insta-feed-content-wrap').length  > 0 ) {
+
+				let instaFeed = $scope.find('.wpr-instagram-feed');
+			
+				if ( instaFeed.attr( 'data-settings' ) ) {
+					var settings = JSON.parse( instaFeed.attr( 'data-settings' ) );
+					var loadMoreSettings = settings.insta_load_more_settings;
+				}
+				
+				var widgetID = $scope.attr('data-id');
+				
+				// if ( loadMoreSettings.is_mobile === 'mobile') {
+				// 	var nextPostsIndex = loadMoreSettings.limit_mobile;
+				// 	console.log(nextPostsIndex);
+				// } else {
+				// 	var nextPostsIndex = loadMoreSettings.limit;
+				// }
+				var nextPostsIndex = loadMoreSettings.limit;
+				var pagination = $scope.find( '.wpr-grid-pagination' ); // Isotope Layout
+
+				if ( $scope.hasClass('wpr-insta-feed-layout-full-width') ) {
+					if ( loadMoreSettings.limit > $scope.find('.wpr-insta-feed-content-wrap').length ) {
+						$scope.find('.wpr-layout-full-width').css('grid-template-columns', "repeat("+ $scope.find('.wpr-insta-feed-content-wrap').length +", minmax(0, 1fr))");
+					}
+				}
+	
+				if ( $scope.hasClass('wpr-insta-feed-masonry') ) {
+					// Init Functions
+					isotopeLayout( settings );
+					setTimeout(function() {
+						isotopeLayout( settings );
+					}, 100 );
+	
+					if ( WprElements.editorCheck() ) {
+						setTimeout(function() {
+							isotopeLayout( settings );
+						}, 500 );
+						setTimeout(function() {
+							isotopeLayout( settings );
+						}, 1000 );
+					}
+	
+					$( window ).on( 'load', function() {
+						setTimeout(function() {
+							isotopeLayout( settings );
+						}, 100 );
+					});
+	
+					$(window).smartresize(function(){
+						setTimeout(function() {
+							isotopeLayout( settings );
+						}, 200 );
+					});
+				}
+	
+				if ( $scope.hasClass('wpr-insta-feed-layout-list') ) {
+					var mediaAlign = settings.media_align,
+					mediaWidth = settings.media_width,
+					mediaDistance = settings.media_distance;
+					$scope.find( '.wpr-insta-feed-item-below-content' ).css({
+						'float' : mediaAlign,
+						'width' : 'calc((100% - '+ mediaWidth +'%) - '+ mediaDistance +'px)',
+					});
+	
+					$(window).smartresize(function() {
+						mediaAlign = settings.media_align,
+						mediaWidth = settings.media_width,
+						mediaDistance = settings.media_distance;
+						$scope.find( '.wpr-insta-feed-item-below-content' ).css({
+							'float' : mediaAlign,
+							'width' : 'calc((100% - '+ mediaWidth +'%) - '+ mediaDistance +'px)',
+						});
+					});
+				}
+	
+				function isotopeLayout( settings ) {
+					var instaFeed = $scope.find( '.wpr-instagram-feed' ),
+						item = instaFeed.find( '.wpr-insta-feed-content-wrap' ),
+						layout = settings.insta_layout_select,
+						columns = 3,
+						gutterHr = settings.gutter_hr,
+						gutterVr = settings.gutter_vr,
+						contWidth = instaFeed.width() + gutterHr - 0.3,
+						viewportWidth = $(window).outerWidth(),
+						transDuration = 400;
+	
+						var MobileResp = +elementorFrontend.config.responsive.breakpoints.mobile.value;
+						var MobileExtraResp = +elementorFrontend.config.responsive.breakpoints.mobile_extra.value;
+						var TabletResp = +elementorFrontend.config.responsive.breakpoints.tablet.value;
+						var TabletExtraResp = +elementorFrontend.config.responsive.breakpoints.tablet_extra.value;
+						var LaptopResp = +elementorFrontend.config.responsive.breakpoints.laptop.value;
+						var wideScreenResp = +elementorFrontend.config.responsive.breakpoints.widescreen.value;
+	
+					// Mobile
+					if (MobileResp >= viewportWidth ) {
+						columns = (settings.columns_mobile) ? (settings.columns_mobile) : 1;
+					// Mobile Extra
+					} else if ( MobileExtraResp >= viewportWidth ) {
+						columns = (settings.columns_mobile_extra) ? settings.columns_mobile_extra : settings.columns_tablet ? settings.columns_tablet : settings.columns;
+					// Tablet
+					} else if ( TabletResp >= viewportWidth ) {
+						columns = (settings.columns_tablet) ? settings.columns_tablet : 2;
+					// Tablet Extra
+					} else if ( TabletExtraResp >= viewportWidth ) {
+						columns = (settings.columns_tablet_extra) ? settings.columns_tablet_extra : settings.columns_tablet ? settings.columns_tablet : settings.columns;
+	
+					// Laptop
+					} else if (  LaptopResp >= viewportWidth ) {
+						columns = (settings.columns_laptop) ? settings.columns_laptop : settings.columns;
+	
+					// Desktop
+					} else if ( wideScreenResp - 1 >= viewportWidth ) {
+						columns = settings.columns;
+	
+					// Larger Screens
+					} else if ( wideScreenResp <= viewportWidth ) {
+						columns = (settings.columns_widescreen) ? settings.columns_widescreen : settings.columns;
+					} else {
+						columns = settings.columns
+					}
+	
+					// Limit Columns for Higher Screens
+					if ( columns > 8 ) {
+						columns = 8;
+					}
+	
+					columns = parseInt(columns);
+					if ( 'string' == typeof(columns) && -1 !== columns.indexOf('pro') ) {
+						columns = 3;
+					}
+	
+					// Calculate Item Width
+					item.outerWidth( Math.floor( contWidth / columns - gutterHr ) );
+	
+					// Set Vertical Gutter
+					item.css( 'margin-bottom', gutterVr +'px' );
+	
+					// Reset Vertical Gutter for 1 Column Layout
+					if ( 1 === columns ) {
+						item.last().css( 'margin-bottom', '0' );
+					}
+	
+					// Run Isotope
+					var instagramFeed = instaFeed.isotopewpr({
+						layoutMode: layout,
+						masonry: {
+							comlumnWidth: contWidth / columns,
+							gutter: gutterHr
+						},
+						transitionDuration: transDuration,
+						  percentPosition: true
+					});
+					// return instagramFeed;//tmp
+				}
+	
+				if ( !WprElements.editorCheck() ) {
+					$scope.find('.wpr-load-more-insta-posts').on('click', function() {
+						pagination.find( '.wpr-load-more-btn' ).hide();
+						pagination.find( '.wpr-pagination-loading' ).css( 'display', 'inline-block' );
+						// pagination.find( '.wpr-pagination-finish' ).fadeIn(  );
+						// pagination.delay( 2000 ).fadeOut( 1000 );
+						// setTimeout(function() {
+							$.ajax({
+								type: 'POST',
+								url: WprConfig.ajaxurl,
+								data: { 
+									action: 'wpr_load_more_instagram_posts',
+									nonce: WprConfig.nonce,
+									wpr_load_more_settings: loadMoreSettings,
+									wpr_insta_feed_widget_id: widgetID,
+									next_post_index: nextPostsIndex,
+								},
+								success: function(data) {
+									var $data = $(data);
+	
+									$data.each(function() {
+										$(this).addClass('wpr-instagram-hidden-item');
+									});
+	
+									$scope.find('.wpr-instagram-feed').append( $data );
+										
+	
+									if ( $scope.hasClass('wpr-insta-feed-layout-list') ) {
+										mediaAlign = settings.media_align,
+										mediaWidth = settings.media_width,
+										mediaDistance = settings.media_distance;
+										$scope.find( '.wpr-insta-feed-item-below-content' ).css({
+											'float' : mediaAlign,
+											'width' : 'calc((100% - '+ mediaWidth +'%) - '+ mediaDistance +'px)',
+										});
+									}
+	
+									if ( $scope.hasClass('wpr-insta-feed-masonry') ) {
+										instaFeed.isotopewpr( 'appended', $data );
+									
+										instaFeed.isotopewpr( 'reloadItems' ); // https://isotope.metafizzy.co/methods.html#reloaditems
+										
+										instaFeed.isotopewpr('layout'); // https://isotope.metafizzy.co/methods.html#layout
+		
+										$(window).trigger('resize');
+									}
+	
+									setTimeout(function() {
+	
+										$data.each(function(index) {
+											var item = $(this);
+											setTimeout(function() {
+												item.removeClass('wpr-instagram-hidden-item');
+											}, 100);
+										});
+		
+										// Loading
+										pagination.find( '.wpr-pagination-loading' ).hide();
+		
+										if (data.includes('wpr-insta-feed-content-wrap')) {
+											setTimeout(function() {
+												pagination.find( '.wpr-load-more-btn' ).fadeIn();
+											}, 400);
+										} else {
+											pagination.find( '.wpr-pagination-finish' ).fadeIn( 1000 );
+											pagination.delay( 2000 ).fadeOut( 1000 );
+											setTimeout(function() {
+												pagination.find( '.wpr-pagination-loading' ).hide();
+											}, 500 );
+										}
+	
+									}, 400);
+									
+									// if ( loadMoreSettings.is_mobile === 'mobile' ) {
+									// 	nextPostsIndex =  nextPostsIndex + loadMoreSettings.limit_mobile;
+									// } else {
+									// 	nextPostsIndex =  nextPostsIndex + loadMoreSettings.limit;
+									// }
+									nextPostsIndex =  nextPostsIndex + loadMoreSettings.limit;
+	
+									if ( instaFeed.data('lightGallery') ) {
+										// Fix Lightbox
+										instaFeed.data( 'lightGallery' ).destroy( true );
+									}
+		
+									mediaHoverLink();
+								},
+								error: function(error) {
+									console.log(error);
+								}
+							});
+						// }, 1000);
+					});
+				}
+	
+				if ( $scope.find('.wpr-layout-carousel') ) {
+					instaFeedCarousel();
+				}
+				
+				$(document).ready(function() {
+					$scope.find('.wpr-grid-pagination').removeClass('wpr-pagination-hidden'); 
+				});
+
+				$(document).ready(function() {
+					// Handler when all assets (including images) are loaded
+					if ( instaFeed.length ) {
+						instaFeed.css('opacity', 1);
+					}
+				});
+	
+				if ( WprElements.editorCheck() ) {
+					// Handler when all assets (including images) are loaded
+					if ( instaFeed.length ) {
+						instaFeed.css('opacity', 1);
+					}
+				}
+	
+				// Init Media Hover Link
+				mediaHoverLink();
+	
+				// Init Lightbox
+				lightboxPopup( settings );
+	
+				// Init Post Sharing
+				postSharing();
+	
+				var mutationObserver = new MutationObserver(function(mutations) {
+					// Init Media Hover Link
+					mediaHoverLink();
+	
+					lightboxPopup( settings );
+				});
+	
+				mutationObserver.observe($scope[0], {
+					childList: true,
+					subtree: true,
+				});
+	
+				// Post Sharing
+				function postSharing() {
+					if ( $scope.find( '.wpr-sharing-trigger' ).length ) {
+						var sharingTrigger = $scope.find( '.wpr-sharing-trigger' ),
+							sharingInner = $scope.find( '.wpr-post-sharing-inner' ),
+							sharingWidth = 5;
+	
+						// Calculate Width
+						sharingInner.first().find( 'a' ).each(function() {
+							sharingWidth += $(this).outerWidth() + parseInt( $(this).css('margin-right'), 10 );
+						});
+	
+						// Calculate Margin
+						var sharingMargin = parseInt( sharingInner.find( 'a' ).css('margin-right'), 10 );
+	
+						// Set Positions
+						if ( 'left' === sharingTrigger.attr( 'data-direction') ) {
+							// Set Width
+							sharingInner.css( 'width', sharingWidth +'px' );
+	
+							// Set Position
+							sharingInner.css( 'left', - ( sharingMargin + sharingWidth ) +'px' );
+						} else if ( 'right' === sharingTrigger.attr( 'data-direction') ) {
+							// Set Width
+							sharingInner.css( 'width', sharingWidth +'px' );
+	
+							// Set Position
+							sharingInner.css( 'right', - ( sharingMargin + sharingWidth ) +'px' );
+						} else if ( 'top' === sharingTrigger.attr( 'data-direction') ) {
+							// Set Margins
+							sharingInner.find( 'a' ).css({
+								'margin-right' : '0',
+								'margin-top' : sharingMargin +'px'
+							});
+	
+							// Set Position
+							sharingInner.css({
+								'top' : -sharingMargin +'px',
+								'left' : '50%',
+								'-webkit-transform' : 'translate(-50%, -100%)',
+								'transform' : 'translate(-50%, -100%)'
+							});
+						} else if ( 'right' === sharingTrigger.attr( 'data-direction') ) {
+							// Set Width
+							sharingInner.css( 'width', sharingWidth +'px' );
+	
+							// Set Position
+							sharingInner.css({
+								'left' : sharingMargin +'px',
+								// 'bottom' : - ( sharingInner.outerHeight() + sharingTrigger.outerHeight() ) +'px',
+							});
+						} else if ( 'bottom' === sharingTrigger.attr( 'data-direction') ) {
+							// Set Margins
+							sharingInner.find( 'a' ).css({
+								'margin-right' : '0',
+								'margin-bottom' : sharingMargin +'px'
+							});
+	
+							// Set Position
+							sharingInner.css({
+								'bottom' : -sharingMargin +'px',
+								'left' : '50%',
+								'-webkit-transform' : 'translate(-50%, 100%)',
+								'transform' : 'translate(-50%, 100%)'
+							});
+						}
+	
+						if ( 'click' === sharingTrigger.attr( 'data-action' ) ) {
+							sharingTrigger.on( 'click', function() {
+								var sharingInner = $(this).next();
+	
+								if ( 'hidden' === sharingInner.css( 'visibility' ) ) {
+									sharingInner.css( 'visibility', 'visible' );
+									sharingInner.find( 'a' ).css({
+										'opacity' : '1',
+										'top' : '0'
+									});
+	
+									setTimeout( function() {
+										sharingInner.find( 'a' ).addClass( 'wpr-no-transition-delay' );
+									}, sharingInner.find( 'a' ).length * 100 );
+								} else {
+									sharingInner.find( 'a' ).removeClass( 'wpr-no-transition-delay' );
+	
+									sharingInner.find( 'a' ).css({
+										'opacity' : '0',
+										'top' : '-5px'
+									});
+									setTimeout( function() {
+										sharingInner.css( 'visibility', 'hidden' );
+									}, sharingInner.find( 'a' ).length * 100 );
+								}
+							});
+						} else {
+							sharingTrigger.on( 'mouseenter', function() {
+								var sharingInner = $(this).next();
+	
+								sharingInner.css( 'visibility', 'visible' );
+								sharingInner.find( 'a' ).css({
+									'opacity' : '1',
+									'top' : '0',
+								});
+								
+								setTimeout( function() {
+									sharingInner.find( 'a' ).addClass( 'wpr-no-transition-delay' );
+								}, sharingInner.find( 'a' ).length * 100 );
+							});
+							$scope.find( '.wpr-insta-feed-item-sharing' ).on( 'mouseleave', function() {
+								var sharingInner = $(this).find( '.wpr-post-sharing-inner' );
+	
+								sharingInner.find( 'a' ).removeClass( 'wpr-no-transition-delay' );
+	
+								sharingInner.find( 'a' ).css({
+									'opacity' : '0',
+									'top' : '-5px'
+								});
+								setTimeout( function() {
+									sharingInner.css( 'visibility', 'hidden' );
+								}, sharingInner.find( 'a' ).length * 100 );
+							});
+						}
+					}				
+				}
+	
+				// Remove if not necessary - GOGA
+				$scope.find('.elementor-widget-wrap').removeClass('e-swiper-container');
+	
+				function instaFeedCarousel() {
+					if ( $scope.hasClass('wpr-insta-feed-layout-carousel') ) {
+						var swiperLoader = function swiperLoader(swiperElement, swiperConfig) {
+							// if ('undefined' === typeof Swiper) {     
+							// 	var asyncSwiper = elementorFrontend.utils.swiper;     
+							// 	return new asyncSwiper(swiperElement, swiperConfig).then( function (newSwiperInstance) {     
+							// 		return newSwiperInstance;
+							// 	});  
+							// } else {     
+							// 	return swiperPromise(swiperElement, swiperConfig);  
+							// }
+							     
+							var asyncSwiper = elementorFrontend.utils.swiper;     
+							return new asyncSwiper(swiperElement, swiperConfig).then( function (newSwiperInstance) {     
+								return newSwiperInstance;
+							}); 
+						};
+						
+						var swiperPromise = function swiperPromise(swiperElement, swiperConfig) {    
+							return new Promise(function (resolve, reject) {  
+									var swiperInstance = new Swiper(swiperElement, swiperConfig);     
+									resolve(swiperInstance); 
+							}); 
+						};
+	
+						$scope.find('.wpr-instagram-feed').css('flexWrap', 'nowrap');
+	
+						var sliderSettings = settings.carousel;
+						
+						$scope.find('.wpr-instagram-feed-cont').addClass('swiper');
+						$scope.find('.wpr-instagram-feed').addClass('swiper-wrapper');
+						$scope.find('.wpr-insta-feed-content-wrap').addClass('swiper-slide');
+						$scope.find('.wpr-instagram-feed-cont').css('overflow', 'hidden');
+						// $scope.find('.elementor-container').css('margin', '0');
+						var swiperSlider = $scope.find('.wpr-instagram-feed-cont');
+	
+						var aboveMobileResp = +elementorFrontend.config.responsive.breakpoints.mobile.value + 1;
+						var aboveMobileExtraResp = +elementorFrontend.config.responsive.breakpoints.mobile_extra.value + 1;
+						var aboveTabletResp = +elementorFrontend.config.responsive.breakpoints.tablet.value + 1;
+						var aboveTabletExtraResp = +elementorFrontend.config.responsive.breakpoints.tablet_extra.value + 1;
+						var aboveLaptopResp = +elementorFrontend.config.responsive.breakpoints.laptop.value + 1;
+						var wideScreenResp = +elementorFrontend.config.responsive.breakpoints.widescreen.value;
+	
+						swiperLoader(swiperSlider, {
+							hashNavigation: sliderSettings.wpr_cs_navigation === 'yes' ? true : false,
+							autoplay: sliderSettings.wpr_cs_autoplay === 'yes' ? {
+								delay: +sliderSettings.wpr_cs_delay,
+							} : false,
+							loop: sliderSettings.wpr_cs_loop === 'yes' ? true : false,
+							slidesPerView: +sliderSettings.wpr_cs_slides_to_show,
+							spaceBetween: +sliderSettings.wpr_cs_space_between,
+							speed: +sliderSettings.wpr_cs_speed,
+							pagination: sliderSettings.wpr_cs_pagination === 'yes' ? {
+								el: '.swiper-pagination',
+								type: sliderSettings.wpr_cs_pagination_type,
+								clickable: 'bullets' === sliderSettings.wpr_cs_pagination_type ? true : false,
+							} : false,
+							navigation: {
+								prevEl: '.wpr-swiper-button-prev',
+								nextEl: '.wpr-swiper-button-next',
+							},
+							// Responsive breakpoints - direction min
+							breakpoints: {
+							320: {
+								slidesPerView: +sliderSettings.wpr_cs_slides_to_show_mobile,
+								// spaceBetween: +sliderSettings.wpr_cs_space_between_mobile,
+							},
+							[aboveMobileResp]: {
+								slidesPerView: +sliderSettings.wpr_cs_slides_to_show_mobile_extra,
+								// spaceBetween: +sliderSettings.wpr_cs_space_between_mobile_extra,
+							},
+							[aboveMobileExtraResp]: {
+								slidesPerView: +sliderSettings.wpr_cs_slides_to_show_tablet,
+								spaceBetween: +sliderSettings.wpr_cs_space_between_tablet,
+							},
+							[aboveTabletResp]: {
+								slidesPerView: +sliderSettings.wpr_cs_slides_to_show_tablet_extra,
+								spaceBetween: +sliderSettings.wpr_cs_space_between_tablet_extra,
+							},
+							[aboveTabletExtraResp]: {
+								slidesPerView: +sliderSettings.wpr_cs_slides_to_show_laptop,
+								spaceBetween: +sliderSettings.wpr_cs_space_between_laptop,
+							},
+							[aboveLaptopResp]: {
+								slidesPerView: +sliderSettings.wpr_cs_slides_to_show,
+								spaceBetween: +sliderSettings.wpr_cs_space_between,
+							},
+							[wideScreenResp]: {
+								slidesPerView: +sliderSettings.wpr_cs_slides_to_show_widescreen,
+								spaceBetween: +sliderSettings.wpr_cs_space_between_widescreen,
+							}
+							},
+						
+						});
+	
+						$scope.css('opacity', 1);
+						
+					}
+				}
+	
+				function lightboxPopup( settings ) {
+					if ( -1 === $scope.find( '.wpr-insta-feed-item-lightbox' ).length ) {
+						return;
+					}
+	
+					var lightbox = $scope.find( '.wpr-insta-feed-item-lightbox' ),
+						lightboxOverlay = lightbox.find( '.wpr-insta-feed-lightbox-overlay' );
+	
+					// Set Src Attributes
+					lightbox.each(function() {
+						var source = $(this).find('.inner-block > span').attr( 'data-src' ),
+							instaFeedItem = $(this).closest( '.wpr-insta-feed-content-wrap' );
+	
+							instaFeedItem.find( '.wpr-insta-feed-image-wrap' ).attr( 'data-src', source );
+	
+						var dataSource = instaFeedItem.find( '.wpr-insta-feed-image-wrap' ).attr( 'data-src' );
+					});
+	
+					// Init Lightbox
+					instaFeed.lightGallery( settings.lightbox );
+	
+					// Fix LightGallery Thumbnails
+					instaFeed.on('onAfterOpen.lg', function() {
+						if ( $('.lg-outer').find('.lg-thumb-item').length ) {
+							$('.lg-outer').find('.lg-thumb-item').each(function() {
+								var imgSrc = $(this).find('img').attr('src'),
+									newImgSrc = imgSrc,
+									extIndex = imgSrc.lastIndexOf('.'),
+									imgExt = imgSrc.slice(extIndex),
+									cropIndex = imgSrc.lastIndexOf('-'),
+									cropSize = /\d{3,}x\d{3,}/.test(imgSrc.substring(extIndex,cropIndex)) ? imgSrc.substring(extIndex,cropIndex) : false;
+								
+								if ( 42 <= imgSrc.substring(extIndex,cropIndex).length ) {
+									cropSize = '';
+								}
+	
+								if ( cropSize !== '' ) {
+									if ( false !== cropSize ) {
+										newImgSrc = imgSrc.replace(cropSize, '-150x150');
+									} else {
+										newImgSrc = [imgSrc.slice(0, extIndex), '-150x150', imgSrc.slice(extIndex)].join('');
+									}
+								}
+	
+								// Change SRC
+								$(this).find('img').attr('src', newImgSrc);
+		
+								if ( false == cropSize ) {
+									$(this).find('img').attr('src', imgSrc);
+								}
+							});
+						}
+					});
+	
+					// Show/Hide Controls
+					$scope.find( '.wpr-insta-feed' ).on( 'onAferAppendSlide.lg, onAfterSlide.lg', function( event, prevIndex, index ) {
+						var lightboxControls = $( '#lg-actual-size, #lg-zoom-in, #lg-zoom-out, #lg-download' ),
+							lightboxDownload = $( '#lg-download' ).attr( 'href' );
+	
+						if ( $( '#lg-download' ).length ) {
+							if ( -1 === lightboxDownload.indexOf( 'wp-content' ) ) {
+								lightboxControls.addClass( 'wpr-hidden-element' );
+							} else {
+								lightboxControls.removeClass( 'wpr-hidden-element' );
+							}
+						}
+	
+						// Autoplay Button
+						if ( '' === settings.lightbox.autoplay ) {
+							$( '.lg-autoplay-button' ).css({
+								 'width' : '0',
+								 'height' : '0',
+								 'overflow' : 'hidden'
+							});
+						}
+					});
+	
+					// Overlay
+					if ( lightboxOverlay.length ) {
+						$scope.find( '.wpr-insta-feed-media-hover-bg' ).after( lightboxOverlay.remove() );
+	
+						$scope.find( '.wpr-insta-feed-lightbox-overlay' ).on( 'click', function() {
+							if ( ! WprElements.editorCheck() ) {
+								$(this).closest( '.wpr-insta-feed-content-wrap' ).find( '.wpr-insta-feed-image-wrap' ).trigger( 'click' );
+							} else {
+								alert( 'Lightbox is Disabled in the Editor!' );
+							}
+						});
+					} else {
+						lightbox.find( '.inner-block > span' ).on( 'click', function() {
+							if ( ! WprElements.editorCheck() ) {
+								var imageWrap = $(this).closest( '.wpr-insta-feed-content-wrap' ).find( '.wpr-insta-feed-image-wrap' );
+									imageWrap.trigger( 'click' );
+							} else {
+								alert( 'Lightbox is Disabled in the Editor!' );
+							}
+						});
+					}
+				}
+	
+				// Media Hover Link
+				function mediaHoverLink() {
+					if ( 'yes' === instaFeed.find( '.wpr-insta-feed-media-wrap' ).attr( 'data-overlay-link' ) && ! WprElements.editorCheck() ) {
+							instaFeed.find( '.wpr-insta-feed-media-wrap' ).css('cursor', 'pointer');
+	
+							instaFeed.find( '.wpr-insta-feed-media-wrap' ).on( 'click', function( event ) {
+							var targetClass = event.target.className;
+	
+							if ( -1 !== targetClass.indexOf( 'inner-block' ) || -1 !== targetClass.indexOf( 'wpr-cv-inner' ) || 
+								 -1 !== targetClass.indexOf( 'wpr-insta-feed-media-hover' ) ) {
+								event.preventDefault();
+	
+								var itemUrl = $(this).find( '.wpr-insta-feed-media-hover-bg' ).attr( 'data-url' ),
+									itemUrl = itemUrl.replace('#new_tab', '');
+	
+								if ( '_blank' === instaFeed.find( '.wpr-insta-feed-media-hover-bg' ).data('target') ) {
+									window.open(itemUrl, '_blank').focus();
+								} else {
+									window.location.href = itemUrl;
+								}
+							}
+						});
+					}				
+				}
+			}
+
+        }, // end widgetInstagramFeed
+
+        widgetFacebookFeed: function($scope) {
+			window.fbAsyncInit = function() {
+				FB.init({
+				  appId      : '1184287221975469',
+				  xfbml      : true,
+				  version    : 'v13.0'
+				});
+				FB.AppEvents.logPageView();
+			  };
+			
+			  (function(d, s, id){
+				 var js, fjs = d.getElementsByTagName(s)[0];
+				 if (d.getElementById(id)) {return;}
+				 js = d.createElement(s); js.id = id;
+				 js.src = "https://connect.facebook.net/en_US/sdk.js";
+				 fjs.parentNode.insertBefore(js, fjs);
+			   }(document, 'script', 'facebook-jssdk'));
+        }, // end widgetFacebookFeed
+		
 		widgetFlipCarousel: function($scope) {
 			var flipsterSettings = JSON.parse($scope.find('.wpr-flip-carousel').attr('data-settings'));
 
@@ -5227,7 +7422,7 @@
 				});
 			})
 		}, // end widgetFeatureList
-
+		
 		widgetAdvancedAccordion: function($scope) {
             var acc = $scope.find('.wpr-acc-button');
             var accItemWrap = $scope.find('.wpr-accordion-item-wrap');
@@ -5235,6 +7430,13 @@
 			var activeIndex = +$scope.find('.wpr-advanced-accordion').data('active-index') - 1;
 			var accordionTrigger = $scope.find('.wpr-advanced-accordion').data('accordion-trigger');
 			var interactionSpeed = +$scope.find('.wpr-advanced-accordion').data('interaction-speed') * 1000;
+
+			// ?active_panel=panel-index#your-id
+			var activeTabIndexFromLocation = window.location.href.indexOf("active_panel=");
+
+			if (activeTabIndexFromLocation > -1) {
+				activeIndex = +window.location.href.substring(activeTabIndexFromLocation,  window.location.href.lastIndexOf("#")).replace("active_panel=", '') - 1;
+			}
 
 			if ('click' === accordionTrigger) {
 
@@ -5337,7 +7539,6 @@
 					if ( thisValue.length > 0 ) {
 						$scope.find('.wpr-acc-search-input-wrap').find('i.fa-times').css('display', 'inline-block');
 						allInAcc.each(function() {
-							// console.log($(this), $(this).text().toUpperCase().indexOf(thisValue.toUpperCase()));
 							if ( $(this).hasClass('wpr-accordion-item-wrap') ) {
 								var itemWrap = $(this);
 								if ( itemWrap.text().toUpperCase().indexOf(thisValue.toUpperCase()) == -1 ) {
@@ -5549,7 +7750,1417 @@
 			
 			$scope.find('.wpr-image-accordion-wrap').css('opacity', 1); 
         }, // end widgetImageAccordion
+
+		widgetOffcanvas: function($scope) {
+			let animationDuration;
+
+			if ( $scope.hasClass('wpr-offcanvas-entrance-animation-pro-sl') ) {
+				$scope.removeClass('wpr-offcanvas-entrance-animation-pro-sl').addClass('wpr-offcanvas-entrance-animation-fade');
+			} else if ( $scope.hasClass('wpr-offcanvas-entrance-animation-pro-gr') ) {
+				$scope.removeClass('wpr-offcanvas-entrance-animation-pro-gr').addClass('wpr-offcanvas-entrance-animation-fade');
+			}
+
+			if ( $scope.hasClass('wpr-offcanvas-entrance-type-pro-ps') ) {
+				$scope.removeClass('wpr-offcanvas-entrance-type-pro-ps').addClass('wpr-offcanvas-entrance-type-cover');
+			}
+
+			function openOffcanvas(offcanvasSelector) {
+				animationDuration = +offcanvasSelector.find('.wpr-offcanvas-content').css('animation-duration').replace('s', '') * 1000;
+				offcanvasSelector.fadeIn(animationDuration);
+				offcanvasSelector.addClass('wpr-offcanvas-wrap-active');
+				if ( $scope.hasClass('wpr-offcanvas-entrance-animation-slide') ) {
+					if ( offcanvasSelector.find('.wpr-offcanvas-content').hasClass('wpr-offcanvas-slide-in') ) {
+						offcanvasSelector.find('.wpr-offcanvas-content').removeClass('wpr-offcanvas-slide-in').addClass('wpr-offcanvas-slide-out');
+					} else {
+						offcanvasSelector.find('.wpr-offcanvas-content').removeClass('wpr-offcanvas-slide-out').addClass('wpr-offcanvas-slide-in');
+					}
+				} else if ( $scope.hasClass('wpr-offcanvas-entrance-animation-grow') ) {
+					if ( offcanvasSelector.find('.wpr-offcanvas-content').hasClass('wpr-offcanvas-grow-in') ) {
+						offcanvasSelector.find('.wpr-offcanvas-content').removeClass('wpr-offcanvas-grow-in').addClass('wpr-offcanvas-grow-out');
+					} else {
+						offcanvasSelector.find('.wpr-offcanvas-content').removeClass('wpr-offcanvas-grow-out').addClass('wpr-offcanvas-grow-in');
+					}
+				} else if ( $scope.hasClass('wpr-offcanvas-entrance-animation-fade') ) {
+					if ( offcanvasSelector.find('.wpr-offcanvas-content').hasClass('wpr-offcanvas-fade-in') ) {
+						offcanvasSelector.find('.wpr-offcanvas-content').removeClass('wpr-offcanvas-fade-in').addClass('wpr-offcanvas-fade-out');
+					} else {
+						offcanvasSelector.find('.wpr-offcanvas-content').removeClass('wpr-offcanvas-fade-out').addClass('wpr-offcanvas-fade-in');
+					}
+				}
+
+				$(window).trigger('resize');
+			}
+
+			function closeOffcanvas(offcanvasSelector) {
+				if ( $scope.hasClass('wpr-offcanvas-entrance-animation-slide') ) {
+					offcanvasSelector.find('.wpr-offcanvas-content').removeClass('wpr-offcanvas-slide-in').addClass('wpr-offcanvas-slide-out');
+				} else if ( $scope.hasClass('wpr-offcanvas-entrance-animation-grow') ) {
+					offcanvasSelector.find('.wpr-offcanvas-content').removeClass('wpr-offcanvas-grow-in').addClass('wpr-offcanvas-grow-out');
+				} else if ( $scope.hasClass('wpr-offcanvas-entrance-animation-fade') ) {
+					offcanvasSelector.find('.wpr-offcanvas-content').removeClass('wpr-offcanvas-fade-in').addClass('wpr-offcanvas-fade-out');
+				}
+
+				offcanvasSelector.fadeOut(animationDuration);
+				offcanvasSelector.removeClass('wpr-offcanvas-wrap-active');
+				// setTimeout(function() {
+				// }, 600);
+			}
+
+			if ( $scope.hasClass('wpr-offcanvas-entrance-type-push') ) {
+
+				function growBodyWidth() {
+					openOffcanvas(offcanvasSelector);
+
+					$('body').addClass('wpr-offcanvas-body-overflow');
+	
+					if ( offcanvasSelector.find('.wpr-offcanvas-content').hasClass('wpr-offcanvas-content-left') ) {
+						// bodyInnerWrap.animate({'margin-left': offcanvasSelector.find('.wpr-offcanvas-content').width() + 'px'}, 'slow');
+						bodyInnerWrap.css({
+							'transition-duration': offcanvasSelector.find('.wpr-offcanvas-content').css('animation-duration'),
+							'transform': 'translateX('+ offcanvasSelector.find('.wpr-offcanvas-content').outerWidth() +'px)',
+						});
+					} else if ( offcanvasSelector.find('.wpr-offcanvas-content').hasClass('wpr-offcanvas-content-right') ) {
+						// bodyInnerWrap.animate({'margin-right': offcanvasSelector.find('.wpr-offcanvas-content').width() + 'px'}, 'slow');
+						bodyInnerWrap.css({
+							'transition-duration': offcanvasSelector.find('.wpr-offcanvas-content').css('animation-duration'),
+							'transform': 'translateX(-'+ offcanvasSelector.find('.wpr-offcanvas-content').outerWidth() +'px)',
+						});
+					} else if ( offcanvasSelector.find('.wpr-offcanvas-content').hasClass('wpr-offcanvas-content-top') ) {
+						// bodyInnerWrap.animate({'margin-top': offcanvasSelector.find('.wpr-offcanvas-content').outerHeight() + 'px'}, 'slow');
+						bodyInnerWrap.css({
+							'transition-duration': offcanvasSelector.find('.wpr-offcanvas-content').css('animation-duration'),
+							'margin-top': offcanvasSelector.find('.wpr-offcanvas-content').outerHeight() + 'px',
+						});
+					}
+				}
+	
+				function reduceBodyWidth() {
+					closeOffcanvas(offcanvasSelector);
+
+					if ( offcanvasSelector.find('.wpr-offcanvas-content').hasClass('wpr-offcanvas-content-left') ) {
+						// bodyInnerWrap.animate({'margin-left': 0}, 'slow');
+						bodyInnerWrap.css({'transform': 'translateX(0px)'});
+					} else if ( offcanvasSelector.find('.wpr-offcanvas-content').hasClass('wpr-offcanvas-content-right') ) {
+						// bodyInnerWrap.animate({'margin-right': 0}, 'slow');
+						bodyInnerWrap.css({'transform': 'translateX(0px)'});
+					} else if ( offcanvasSelector.find('.wpr-offcanvas-content').hasClass('wpr-offcanvas-content-top') ) {
+						// bodyInnerWrap.animate({'margin-top': 0}, 'slow');
+						bodyInnerWrap.css({'margin-top': 0});
+					}
+
+					$('body').removeClass('wpr-offcanvas-body-overflow');
+				}
+	
+				function closeTriggers() {
+					offcanvasSelector.on('click', function(e){
+						if ( !e.target.classList.value.includes('wpr-offcanvas-content') && !e.target.closest('.wpr-offcanvas-content') ) {
+							reduceBodyWidth();
+						}
+					});
+					
+					$(document).on('keyup', function(event) {
+						if (event.key == "Escape") {
+							reduceBodyWidth();
+						}
+					});
 		
+					offcanvasSelector.find('.wpr-close-offcanvas').on('click', function() {
+						reduceBodyWidth();
+					});
+				}
+
+				if ( !($('.wpr-offcanvas-body-inner-wrap-' + $scope.data('id')).length > 0) ) {
+					$("body").wrapInner('<div class="wpr-offcanvas-body-inner-wrap-' + $scope.data('id') + '" />');
+				}
+
+				var bodyInnerWrap = $('.wpr-offcanvas-body-inner-wrap-' + $scope.data('id'));
+
+				bodyInnerWrap.css('position', 'relative');
+
+				if ( !(bodyInnerWrap.prev('.wpr-offcanvas-wrap').length > 0) ) {
+					$scope.find('.wpr-offcanvas-wrap').addClass('wpr-offcanvas-wrap-'+ $scope.data('id'));
+
+					document.querySelector('body').insertBefore($scope.find('.wpr-offcanvas-wrap')[0], document.querySelector('.wpr-offcanvas-body-inner-wrap-' + $scope.data('id')));
+				}
+
+				var offcanvasSelector = $('.wpr-offcanvas-wrap-'+ $scope.data('id'));
+
+				$scope.find('.wpr-offcanvas-trigger').on('click', function() {
+					if ( $('.wpr-offcanvas-wrap-'+ $scope.data('id')).length > 0 && $scope.find('.wpr-offcanvas-wrap').length > 0 ) {
+						$('.wpr-offcanvas-wrap-'+ $scope.data('id')).remove();
+						$scope.find('.wpr-offcanvas-wrap').addClass('wpr-offcanvas-wrap-'+ $scope.data('id'));
+						document.querySelector('body').insertBefore($scope.find('.wpr-offcanvas-wrap')[0], document.querySelector('.wpr-offcanvas-body-inner-wrap-' + $scope.data('id')));
+						offcanvasSelector = $('.wpr-offcanvas-wrap-'+ $scope.data('id'));
+					}
+
+					if (offcanvasSelector.hasClass('wpr-offcanvas-wrap-active')) {
+						reduceBodyWidth();
+					} else {
+						growBodyWidth();
+					}
+				});
+	
+				if ( 'yes' === $scope.find('.wpr-offcanvas-container').data('offcanvas-open') ) {
+					$scope.find('.wpr-offcanvas-trigger').trigger('click');
+				}
+
+				closeTriggers();
+
+				var mutationObserver = new MutationObserver(function(mutations) {
+					closeTriggers();
+				});
+
+				// Listen to Mini Cart Changes
+				mutationObserver.observe($scope[0], {
+					childList: true,
+					subtree: true,
+				});
+
+			} else {
+
+				$scope.find('.wpr-offcanvas-trigger').on('click', function() {
+					openOffcanvas($scope.find('.wpr-offcanvas-wrap'));
+				});
+	
+				$scope.find('.wpr-offcanvas-wrap').on('click', function(e){
+					if ( !e.target.classList.value.includes('wpr-offcanvas-content') && !e.target.closest('.wpr-offcanvas-content') ) {
+						closeOffcanvas($scope.find('.wpr-offcanvas-wrap'));
+					}
+				});
+	
+				if ( 'yes' === $scope.find('.wpr-offcanvas-container').data('offcanvas-open') ) {
+					$scope.find('.wpr-offcanvas-trigger').trigger('click');
+				}
+				
+				$(document).on('keyup', function(event) {
+					if (event.key == "Escape") {
+						closeOffcanvas($scope.find('.wpr-offcanvas-wrap'));
+					}
+				});
+	
+				$scope.find('.wpr-close-offcanvas').on('click', function() {
+					closeOffcanvas($scope.find('.wpr-offcanvas-wrap'));
+				});
+				
+			}
+
+		}, // end widgetOffcanvas
+
+		widgetWishlist: function($scope) {
+
+			$.ajax({
+				url: WprConfig.ajaxurl,
+				type: 'POST',
+				data: {
+					action: 'count_wishlist_items',
+					element_addcart_simple_txt: $scope.find('.wpr-wishlist-products').attr('element_addcart_simple_txt'),
+					element_addcart_grouped_txt: $scope.find('.wpr-wishlist-products').attr('element_addcart_grouped_txt'),
+					element_addcart_variable_txt: $scope.find('.wpr-wishlist-products').attr('element_addcart_variable_txt')
+				},
+				success: function(response) { 
+					// Get all elements with the class 'wpr-wishlist-product' and their product IDs
+					var productElements = $scope.find('.wpr-wishlist-product');
+					var productIds = productElements.map(function() {
+						return $(this).data('product-id');
+					}).get();
+					
+					// Filter out the items in the response that match the product IDs
+					var newWishlistItems = response.wishlist_items.filter(function(item) {
+						return !productIds.includes(item.product_id);
+					});
+
+					// Convert the wishlist_items to an array of product_ids for easier searching
+					var wishlistProductIds = response.wishlist_items.map(function(item) {
+						return item.product_id;
+					});
+
+					productElements.each(function() {
+						var productId = $(this).data('product-id');
+					
+						// If the product ID is not in the wishlistProductIds array, remove the element
+						if (!wishlistProductIds.includes(productId)) {
+						$(this).remove();
+						}
+					});
+
+					newWishlistItems.forEach(function(item) {
+						var html = '<tr class="wpr-wishlist-product" data-product-id="' + item.product_id + '">';
+							html += '<td><span class="wpr-wishlist-remove" data-product-id="' + item.product_id + '"></span></td>';
+							html += '<td><a class="wpr-wishlist-img-wrap" href="' + item.product_url + '">' + item.product_image + '</a></td>';
+							html += '<td><a class="wpr-wishlist-product-name" href="' + item.product_url + '">' + item.product_title + '</a></td>';
+							html += '<td><div class="wpr-wishlist-product-price">' + item.product_price + '</div></td>';
+							html += '<td><div class="wpr-wishlist-product-status">' + item.product_stock + '</div></td>';
+							html += '<td><div class="wpr-wishlist-product-atc">' + item.product_atc + '</div></td>';
+						html += '</tr>';
+						$scope.find('.wpr-wishlist-products tbody').append(html);
+					});
+
+					if ( 0 < +response.wishlist_count ) {
+						if ( $scope.find('.wpr-wishlist-products').hasClass('wpr-wishlist-empty-hidden') ) {
+							$scope.find('.wpr-wishlist-products').removeClass('wpr-wishlist-empty-hidden');
+						}
+
+						if ( !$scope.find('.wpr-wishlist-empty').hasClass('wpr-wishlist-empty-hidden') ) {
+							$scope.find('.wpr-wishlist-empty').addClass('wpr-wishlist-empty-hidden');
+						}
+					} else {
+						if ( !$scope.find('.wpr-wishlist-products').hasClass('wpr-wishlist-empty-hidden') ) {
+							$scope.find('.wpr-wishlist-products').addClass('wpr-wishlist-empty-hidden');
+						}
+
+						if ( $scope.find('.wpr-wishlist-empty').hasClass('wpr-wishlist-empty-hidden') ) {
+							$scope.find('.wpr-wishlist-empty').removeClass('wpr-wishlist-empty-hidden');
+						}
+					}
+				},
+				error: function(error) {
+					console.log(error);
+				}
+			});
+
+			$scope.on('click', '.wpr-wishlist-remove', function(e) {
+				e.preventDefault();
+				var product_id = $(this).data('product-id');
+
+				$.ajax({
+					url: WprConfig.ajaxurl,
+					type: 'POST',
+					data: {
+						action: 'remove_from_wishlist',
+						product_id: product_id
+					},
+					success: function(response) {
+						if ( 1 === $scope.find('.wpr-wishlist-product').length ) {	
+							if ( !$scope.find('.wpr-wishlist-products').hasClass('wpr-wishlist-empty-hidden') ) {
+								$scope.find('.wpr-wishlist-products').addClass('wpr-wishlist-empty-hidden');
+							}
+
+							if ( $scope.find('.wpr-wishlist-empty').hasClass('wpr-wishlist-empty-hidden') ) {
+								$scope.find('.wpr-wishlist-empty').removeClass('wpr-wishlist-empty-hidden');
+							}
+						}
+
+           				$scope.find('.wpr-wishlist-product[data-product-id="' + product_id + '"]').remove();
+						WprElements.changeActionTargetProductId(product_id);
+						$(document).trigger('removed_from_wishlist');	
+					},
+					error: function(error) {
+						console.log(error);
+					}
+				});
+			});
+
+			$( 'body' ).on( 'added_to_cart', function(ev, fragments, hash, button) {
+				button.next().fadeTo( 700, 1 );
+
+				button.css('display', 'none');
+			});
+
+		}, // end widgetWishlistTest
+
+		//GOGA - widget wishlist count place here
+
+		widgetWishlistButton: function($scope) {
+
+				$.ajax({
+					url: WprConfig.ajaxurl,
+					type: 'POST',
+					data: {
+						action: 'check_product_in_wishlist',
+						product_id: $scope.find('.wpr-wishlist-add').data('product-id')
+					},
+					success: function(response) {
+						if ( true == response ) {
+							if ( !$scope.find('.wpr-wishlist-add').hasClass('wpr-button-hidden') ) {
+								$scope.find('.wpr-wishlist-add').addClass('wpr-button-hidden');
+							}
+
+							if ( $scope.find('.wpr-wishlist-remove').hasClass('wpr-button-hidden') ) {
+								$scope.find('.wpr-wishlist-remove').removeClass('wpr-button-hidden');
+							}
+						}
+					}
+				});
+
+				$scope.find('.wpr-wishlist-add').click(function(e) {
+					e.preventDefault();
+					var product_id = $(this).data('product-id');
+
+					$(this).fadeTo(500, 0);
+	
+					$.ajax({
+						url: WprConfig.ajaxurl,
+						type: 'POST',
+						data: {
+							action: 'add_to_wishlist',
+							product_id: product_id
+						},
+						success: function() {
+							$scope.find('.wpr-wishlist-add[data-product-id="' + product_id + '"]').hide();
+							$scope.find('.wpr-wishlist-remove[data-product-id="' + product_id + '"]').show();
+							$scope.find('.wpr-wishlist-remove[data-product-id="' + product_id + '"]').fadeTo(500, 1);
+							WprElements.changeActionTargetProductId(product_id);
+							$(document).trigger('added_to_wishlist');
+						},
+						error: function(response) {
+							var error_message = response.responseJSON.message;
+							// Display error message
+							alert(error_message);
+						}
+					});
+				});
+				$scope.find('.wpr-wishlist-remove').on('click', function(e) {
+					e.preventDefault();
+					var product_id = $(this).data('product-id');
+
+					$(this).fadeTo(500, 0);
+
+					$.ajax({
+						url: WprConfig.ajaxurl,
+						type: 'POST',
+						data: {
+							action: 'remove_from_wishlist',
+							product_id: product_id
+						},
+						success: function() {
+							$scope.find('.wpr-wishlist-remove[data-product-id="' + product_id + '"]').hide();
+							$scope.find('.wpr-wishlist-add[data-product-id="' + product_id + '"]').show();
+							$scope.find('.wpr-wishlist-add[data-product-id="' + product_id + '"]').fadeTo(500, 1);
+							WprElements.changeActionTargetProductId(product_id);
+							$(document).trigger('removed_from_wishlist');
+						}
+					});
+				});
+
+				$(document).on('removed_from_wishlist', function() {
+					$scope.find('.wpr-wishlist-remove[data-product-id="' + actionTargetProductId + '"]').hide();
+					$scope.find('.wpr-wishlist-add[data-product-id="' + actionTargetProductId + '"]').show();
+					$scope.find('.wpr-wishlist-add[data-product-id="' + actionTargetProductId + '"]').fadeTo(500, 1);
+				});
+		
+		}, // end widgetWishlistButton
+
+		widgetCompareButton: function($scope) {
+
+			$.ajax({
+				url: WprConfig.ajaxurl,
+				type: 'POST',
+				data: {
+					action: 'check_product_in_compare',
+					product_id: $scope.find('.wpr-compare-add').data('product-id')
+				},
+				success: function(response) {
+					if ( true == response ) {
+						if ( !$scope.find('.wpr-compare-add').hasClass('wpr-button-hidden') ) {
+							$scope.find('.wpr-compare-add').addClass('wpr-button-hidden');
+						}
+
+						if ( $scope.find('.wpr-compare-remove').hasClass('wpr-button-hidden') ) {
+							$scope.find('.wpr-compare-remove').removeClass('wpr-button-hidden');
+						}
+					}
+				}
+			});
+
+			// $(document).ready(function() {
+				$scope.find('.wpr-compare-add').click(function(e) {
+					e.preventDefault();
+					var product_id = $(this).data('product-id');
+
+					$(this).fadeTo(500, 0);
+
+					$.ajax({
+						url: WprConfig.ajaxurl,
+						type: 'POST',
+						data: {
+							action: 'add_to_compare',
+							product_id: product_id
+						},
+						success: function() {
+							$scope.find('.wpr-compare-add[data-product-id="' + product_id + '"]').hide();
+							$scope.find('.wpr-compare-remove[data-product-id="' + product_id + '"]').show();
+							$scope.find('.wpr-compare-remove[data-product-id="' + product_id + '"]').fadeTo(500, 1);
+							WprElements.changeActionTargetProductId(product_id);
+							$(document).trigger('added_to_compare');
+						},
+						error: function(response) {
+							var error_message = response.responseJSON.message;
+							// Display error message
+							alert(error_message);
+						}
+					});
+				});
+				$scope.find('.wpr-compare-remove').click(function(e) {
+					e.preventDefault();
+					var product_id = $(this).data('product-id');
+					
+					$(this).fadeTo(500, 0);
+
+					$.ajax({
+						url: WprConfig.ajaxurl,
+						type: 'POST',
+						data: {
+							action: 'remove_from_compare',
+							product_id: product_id
+						},
+						success: function() {
+							$scope.find('.wpr-compare-remove[data-product-id="' + product_id + '"]').hide();
+							$scope.find('.wpr-compare-add[data-product-id="' + product_id + '"]').show();
+							$scope.find('.wpr-compare-add[data-product-id="' + product_id + '"]').fadeTo(500, 1);
+							WprElements.changeActionTargetProductId(product_id);
+							$(document).trigger('removed_from_compare');
+						}
+					});
+				});
+
+				$(document).on('removed_from_compare', function() {
+					$scope.find('.wpr-compare-remove[data-product-id="' + actionTargetProductId + '"]').hide();
+					$scope.find('.wpr-compare-add[data-product-id="' + actionTargetProductId + '"]').show();
+					$scope.find('.wpr-compare-add[data-product-id="' + actionTargetProductId + '"]').fadeTo(500, 1);
+				});
+
+			// });
+
+		}, // end widgetCompareButton
+
+		widgetMiniCompare: function($scope) {
+			// $scope.find('.wpr-compare-text').click(function(e) {
+			// 	e.preventDefault();
+			// 	alert(WprConfig.comparePageID);
+			// 	$scope.find('.wpr-compare-popup').removeClass('wpr-compare-popup-hidden');
+			// 	$.ajax({
+			// 		// url: WprConfig.ajaxurl,
+			// 		url: '/royal-wp/wp-json/wpraddons/v1/page-content/' + WprConfig.comparePageID,
+			// 		type: 'GET',
+			// 		// data: {
+			// 		// 	action: 'wpr_get_page_content',
+			// 		// 	wpr_compare_page_id: WprConfig.comparePageID // Replace with the ID of the page you want to retrieve
+			// 		// },
+			// 		// success: function(response) {
+			// 		// 	console.log(response);
+			// 		// 	// $scope.find('.wpr-compare-popup').append(response.data.content);
+			// 		// 	$scope.find('.wpr-compare-popup').append(response);
+			// 		// },
+			// 		dataType: 'json',
+			// 		success: function(response) {
+			// 				$scope.find('.wpr-compare-popup').append(response);
+			// 				elementorFrontend.init();
+			// 		},
+			// 		error: function(xhr, status, error) {
+			// 			console.log(xhr.responseText);
+			// 		}
+			// 	});
+			// });
+			
+			if ( !($scope.find('.wpr-compare-count').length > 0 && 0 == $scope.find('.wpr-compare-count').text()) ) {
+				$scope.find('.wpr-compare-count').css('display', 'inline-flex');
+			}
+
+			// WITH AJAX
+			if ( $scope.hasClass('wpr-compare-style-popup') ) {
+				$scope.find('.wpr-compare-toggle-btn').on('click', function(e) {
+					e.preventDefault();
+
+					$('body').addClass('wpr-body-overflow-hidden');
+
+					$scope.find('.wpr-compare-bg').removeClass('wpr-compare-popup-hidden');
+					$scope.find('.wpr-compare-popup').removeClass('wpr-compare-fade-out').addClass('wpr-compare-fade-in');
+					$scope.find('.wpr-compare-bg').removeClass('wpr-compare-fade-out').addClass('wpr-compare-fade-in');
+
+					$scope.find('.wpr-compare-popup-inner-wrap').html('<div class="wpr-compare-loader-wrap"><div class="wpr-double-bounce"><div class="wpr-child wpr-double-bounce1"></div><div class="wpr-child wpr-double-bounce2"></div></div></div>');
+					$.ajax({
+						url: WprConfig.ajaxurl,
+						type: 'POST',
+						data: {
+							action: 'wpr_get_page_content',
+							wpr_compare_page_id: WprConfig.comparePageID
+						},
+						success: function(response) {
+							$scope.find('.wpr-compare-popup-inner-wrap').html(response.data.content);
+							WprElements.widgetCompare($scope);
+							
+							$scope.find('.wpr-compare-remove').click(function(e) {
+								e.preventDefault();
+								var productID = $(this).data('product-id');
+							
+								$.ajax({
+									url: WprConfig.ajaxurl,
+									type: 'POST',
+									data: {
+										action: 'remove_from_compare',
+										product_id: productID
+									},
+									success: function() {
+										WprElements.changeActionTargetProductId(productID);
+										$scope.find('[data-product-id="' + productID + '"]').remove();
+										if ( !($scope.find('.wpr-compare-popup-inner-wrap').find('.wpr-compare-remove').length > 0) ) {
+											$scope.find('.wpr-compare-products').addClass('wpr-hidden-element');
+											$scope.find('.wpr-compare-empty').removeClass('wpr-hidden-element');
+										} else {
+											$scope.find('.wpr-compare-empty').addClass('wpr-hidden-element');
+											$scope.find('.wpr-compare-products').removeClass('wpr-hidden-element');
+										}
+										$(document).trigger('removed_from_compare');
+									}
+								});
+							});
+						},
+						error: function(xhr, status, error) {
+							console.log(xhr.responseText);
+						}
+					});
+				});
+	
+				$scope.find('.wpr-close-compare').click(function(e) {
+					$scope.find('.wpr-compare-popup').removeClass('wpr-compare-fade-in').addClass('wpr-compare-fade-out');
+					$scope.find('.wpr-compare-bg').removeClass('wpr-compare-fade-in').addClass('wpr-compare-fade-out');
+					setTimeout(function() {
+						$scope.find('.wpr-compare-bg').addClass('wpr-compare-popup-hidden');
+						$('body').removeClass('wpr-body-overflow-hidden');
+					}, 600)
+				});
+	
+				$scope.find('.wpr-compare-bg').click(function(e) {
+					if ( !e.target.classList.value.includes('wpr-compare-popup') && !e.target.closest('.wpr-compare-popup') ) {
+						var thisTarget = $(this);
+						$scope.find('.wpr-compare-popup').removeClass('wpr-compare-fade-in').addClass('wpr-compare-fade-out');
+						$scope.find('.wpr-compare-bg').removeClass('wpr-compare-fade-in').addClass('wpr-compare-fade-out');
+						setTimeout(function() {
+							thisTarget.addClass('wpr-compare-popup-hidden');
+							$('body').removeClass('wpr-body-overflow-hidden');
+						}, 600);
+					}
+				});
+
+			}
+
+			$.ajax({
+				url: WprConfig.ajaxurl,
+				type: 'POST',
+				data: {
+					action: 'count_compare_items',
+				},
+				success: function(response) {
+					if ( $scope.find('.wpr-compare-count').css('display') == 'none' && 0 < response.compare_count ) {
+						$scope.find('.wpr-compare-count').text(response.compare_count);
+						$scope.find('.wpr-compare-count').css('display', 'inline-flex');
+					} else if ( 0 == response.compare_count ) {
+						$scope.find('.wpr-compare-count').css('display', 'none');
+						$scope.find('.wpr-compare-count').text(response.compare_count);
+					} else {
+						$scope.find('.wpr-compare-count').text(response.compare_count);
+					}
+				},
+				error: function(error) {
+					console.log(error);
+				}
+			});
+
+			$(document).on('removed_from_compare', function() {
+				$.ajax({
+					url: WprConfig.ajaxurl,
+					type: 'POST',
+					data: {
+						action: 'update_mini_compare',
+						product_id: actionTargetProductId,
+					},
+					success: function(response) {
+						$scope.find('.wpr-compare-count').text(response.compare_count);
+						
+						if ( response.compare_count == 0 ) {
+							$scope.find('.wpr-compare-count').css('display', 'none');
+						} else {
+							$scope.find('.wpr-compare-count').css('display', 'inline-flex');
+						}
+					}
+				});
+			});
+
+			$(document).on('added_to_compare', function() {
+				$.ajax({
+					url: WprConfig.ajaxurl,
+					type: 'POST',
+					data: {
+						action: 'update_mini_compare',
+						product_id: actionTargetProductId,
+					},
+					success: function(response) {
+						$scope.find('.wpr-compare-count').text(response.compare_count);
+						$scope.find('.wpr-compare-count').css('display', 'inline-flex');
+					}
+				});
+			});
+		}, // end widgetMiniCompare
+
+		widgetCompare: function($scope) {
+			$.ajax({
+				url: WprConfig.ajaxurl,
+				type: 'POST',
+				data: {
+					action: 'count_compare_items',
+					remove_text: $scope.find('.wpr-compare-table-wrap').attr('remove_from_compare_text'),
+					compare_empty_text: $scope.find('.wpr-compare-table-wrap').attr('compare_empty_text'),
+					element_addcart_simple_txt: $scope.find('.wpr-compare-table-wrap').attr('element_addcart_simple_txt'),
+					element_addcart_grouped_txt: $scope.find('.wpr-compare-table-wrap').attr('element_addcart_grouped_txt'),
+					element_addcart_variable_txt: $scope.find('.wpr-compare-table-wrap').attr('element_addcart_variable_txt')
+				},
+				success: function(response) {
+					if ( true ) {
+						$scope.find('.wpr-compare-table-wrap').html(response.compare_table);
+					}
+				},
+				error: function(error) {
+					console.log(error);
+				}
+			});
+
+			$scope.on('click', '.wpr-compare-remove', function(e) {
+				e.preventDefault();
+				var productID = $(this).data('product-id');
+			
+				$.ajax({
+					url: WprConfig.ajaxurl,
+					type: 'POST',
+					data: {
+						action: 'remove_from_compare',
+						product_id: productID
+					},
+					success: function() {
+						WprElements.changeActionTargetProductId(productID);
+						$scope.find('[data-product-id="' + productID + '"]').remove();
+						if ( !($scope.find('.wpr-compare-remove').length > 0) ) {
+							$scope.find('.wpr-compare-products').addClass('wpr-hidden-element');
+							$scope.find('.wpr-compare-empty').removeClass('wpr-hidden-element');
+						} else {
+							$scope.find('.wpr-compare-empty').addClass('wpr-hidden-element');
+							$scope.find('.wpr-compare-products').removeClass('wpr-hidden-element');
+						}
+						$(document).trigger('removed_from_compare');
+					}
+				});
+			});
+			
+			$( 'body' ).on( 'added_to_cart', function(ev, fragments, hash, button) {
+				button.next().fadeTo( 700, 1 );
+
+				button.css('display', 'none');
+			});
+		}, // end widgetCompare
+		
+		widgetFormBuilder: function($scope) {
+
+			var formContent = {};
+
+			var fileUrl = {};
+
+			if ( $('body').find('.wpr-form-field-type-recaptcha-v3') ) {
+					var script = document.createElement('script');
+					script.src = 'https://www.google.com/recaptcha/api.js?render='+ $scope.find('#g-recaptcha-response').data('site-key') +'';
+					document.body.appendChild(script);
+			}
+
+			var currentTab = 0; // Current tab is set to be the first tab (0)
+			if ( 0 < $scope.find('.wpr-step-tab').length ) {
+				showTab(currentTab); // Display the current tab
+
+				$scope.find('.wpr-step-prev').each(function() {
+					$(this).on('click', function() {
+						nextPrev(-1);	
+					});
+				});
+	
+				$scope.find(".wpr-step-next").each(function() {
+					$(this).on('click', function() {
+						nextPrev(1);
+					});
+				});
+			}
+
+			var actions = $scope.find('.wpr-form-field-type-submit').data('actions');
+			
+			$scope.find('input[type="file"]').on('change', function(e) {
+				var files = this.files;
+				var thisInput = $(this);
+				var eventType = e.type;
+				handleFileValidityAndUpload(thisInput, files, eventType);
+			});
+
+			$scope.find('input, select, textarea').each(function() {
+				$(this).on('change', function() {
+					var $this = $(this);
+					if ('checkbox' == $this.attr('type')) {
+						var $option = $this.closest('.wpr-form-field-option');
+						if ($option.hasClass('wpr-checked')) {
+							$option.removeClass('wpr-checked');
+						} else {
+							$option.addClass('wpr-checked');
+						}
+					} else if ('radio' == $this.attr('type')) {
+						// Find all radio buttons in the same group
+						var name = $this.attr('name');
+						var $group = $('input[type="radio"][name="' + name + '"]');
+				
+						// Remove 'wpr-checked' from all options in the group
+						$group.closest('.wpr-form-field-option').removeClass('wpr-checked');
+				
+						// Add 'wpr-checked' to the selected option
+						if ($this.is(':checked')) {
+							$this.closest('.wpr-form-field-option').addClass('wpr-checked');
+						}
+					}
+				});
+
+				$(this).on('input change keyup', function(e) {
+					if ( $(this).closest('.wpr-select-wrap').length > 0 ) {
+						$(this).closest('.wpr-select-wrap').removeClass('wpr-form-error-wrap');
+					}
+					$(this).removeClass('wpr-form-error');
+					$(this).closest('.wpr-field-group').find('.wpr-submit-error').remove();
+				});
+			});
+
+			$scope.find('.wpr-button').on('click', function(e) {
+				e.preventDefault();
+
+				var eventType = e.type;
+
+				formContent = {};
+				
+				// Create an array to store the promises of the file uploads
+				let fileUploadPromises = [];
+
+				if ( 0 < $scope.find('input[type="file"').length ) {
+					$scope.find('input[type="file"]').each(function() {
+						var files = this.files;
+						var thisInput = $(this);
+					
+						fileUploadPromises.push(handleFileValidityAndUpload(thisInput, files, eventType));
+					});
+	
+					// Wait for all file uploads to complete
+					Promise.all(fileUploadPromises)
+						.then(() => {
+							createFormContent();
+
+							// Check if the form is valid and submit the form
+							if (validateForm()) {
+								$(this).closest('form').trigger('submit');
+							}
+						})
+						.catch((error) => {
+							// Handle errors
+							console.error(error);
+						});
+				} else {
+					createFormContent();
+
+					if ( validateForm() ) {
+						$(this).closest('form').trigger('submit');
+					}
+				}
+			});
+			
+
+			$scope.find('form').on('submit', function(e) {
+				
+				e.preventDefault();
+				
+				let responsesArray = [];
+
+				$scope.find('.wpr-button>span').addClass('wpr-loader-hidden');
+				$scope.find('.wpr-button').find('.wpr-double-bounce').removeClass('wpr-loader-hidden');
+
+				if ( $scope.find('.wpr-submit-error') ) {
+					$scope.find('.wpr-submit-error').remove();
+				}
+
+				if ( $scope.find('.wpr-submit-success') ) {
+					$scope.find('.wpr-submit-success').remove();
+				} 
+				
+				function processRecaptcha(callback) {
+					if ($scope.find('#g-recaptcha-response').length > 0) {
+						grecaptcha.ready(function() {
+							grecaptcha.execute(WprConfig.site_key, {action: 'submit'}).then(function(token) {
+								// Set the token value to the hidden input field
+								$scope.find('#g-recaptcha-response').val(token);
+			
+								// Perform the AJAX call after the token is set
+								$.ajax({
+									type: 'POST',
+									url: WprConfig.ajaxurl,
+									data: {
+										action: 'wpr_verify_recaptcha',
+										'g-recaptcha-response': token
+									},
+									success: function(response) {
+										if( !response.success ) {
+											console.log(response);
+											setTimeout(function() {
+												$scope.find('.wpr-button').find('.wpr-double-bounce').addClass('wpr-loader-hidden');
+												$scope.find('.wpr-button>span').removeClass('wpr-loader-hidden');
+												$scope.find('form').append('<p class="wpr-submit-error">'+ WprConfig.recaptcha_error +'</p>');
+											}, 500);
+											callback(false); // Call the callback with failure
+										} else {
+											console.log(response);
+											callback(true); // Call the callback with success
+										}
+									},
+									error: function(error) {
+										console.log(error);
+										setTimeout(function() {
+											$scope.find('.wpr-button').find('.wpr-double-bounce').addClass('wpr-loader-hidden');
+											$scope.find('.wpr-button>span').removeClass('wpr-loader-hidden');
+											$scope.find('form').append('<p class="wpr-submit-error">'+ WprConfig.recaptcha_error +'</p>');
+										}, 500);
+										callback(false); // Call the callback with failure
+									}
+								});
+							});
+						});
+					} else {
+						callback(true); // Call the callback if there's no reCAPTCHA
+					}
+				}
+
+				// Call the processRecaptcha function and pass a callback that submits the form on success
+				processRecaptcha(function(isRecaptchaSuccessful) {
+					if (isRecaptchaSuccessful) {
+
+						// Perform the form submission here
+						var actionsObject = {
+							emailPromise: sendEmail,
+							submissionsPromise: createPost,
+							mailchimpPromise: subscribeMailchimp
+						}
+
+						// Wait for all Promises to resolve
+						Promise.all(
+							actions.map((action) => {
+								try {
+									if (actionsObject[action + 'Promise']) {
+										return actionsObject[action + 'Promise']();
+									}
+								} catch (error) {
+									console.error(error);
+									return Promise.reject(error);
+								}
+							})
+						)
+						.then((responses) => {
+							console.log(responses);
+							
+							// Find the post ID from the createPost() response
+							const createPostResponse = responses.find((response) => response && response.data.action === 'wpr_form_builder_submissions');
+
+							const postId = createPostResponse ? createPostResponse.data.post_id : null;
+							
+								// Update post meta for each action
+								var updateMetaPromises = actions.map((action) => {
+									if ( action !== 'redirect' ) {
+										action = 'wpr_form_builder_' + action;
+										
+										// Find the response object for the current action
+										const response = responses.find((response) => response && response.data.action === action);
+										
+										// Store the message from the response object in a variable
+										const message = response ? response.data.message : '';
+										
+										if (response && response.data.status === 'success') {
+											responsesArray.push('success');
+											if (postId) {
+												return updateFormActionMeta(postId, action, 'success', message);
+											}
+										} else {
+											responsesArray.push('error');
+											
+											if (postId) {
+												return updateFormActionMeta(postId, action, 'error', message);
+											}
+										}
+									}
+								});
+							
+								return Promise.all(updateMetaPromises).then(() => {
+									if (responsesArray.includes('error')) {
+										$scope.find('form').append('<p class="wpr-submit-error">'+ $scope.data('settings').error_message +'</p>');
+									} else {
+										$scope.find('form').append('<p class="wpr-submit-success">'+ $scope.data('settings').success_message +'</p>');
+										$scope.find('button').attr('disabled', true);
+										$scope.find('button').css('opacity', 0.6);
+									}
+								});
+							// }
+						})
+						.catch((error) => {
+							// Handle errors
+							console.error(error);
+						})
+						.then(() => {
+							// All AJAX actions have completed
+							setTimeout(function() {
+								// Switch submit button from loader back to submit
+								$scope.find('.wpr-button').find('.wpr-double-bounce').addClass('wpr-loader-hidden');
+								$scope.find('.wpr-button>span').removeClass('wpr-loader-hidden');
+								setTimeout(function() {
+									if (actions.includes('redirect') && responsesArray.includes('success')) {
+										// window.location.replace($scope.find('.wpr-form-field-type-submit').data('redirect-url'));
+										$(location).prop('href', $scope.find('.wpr-form-field-type-submit').data('redirect-url'))
+									}
+								}, 500);
+							}, 500);
+						})
+						.catch((error) => {
+							// Handle errors
+							console.error(error);
+						});
+					} else {
+						// Handle the case when reCAPTCHA fails
+						return false;
+					}
+				});
+
+				function updateFormActionMeta(postId, actionName, status, message) {
+					return $.ajax({
+						type: 'POST',
+						url: WprConfig.ajaxurl,
+						data: {
+							action: 'wpr_update_form_action_meta',
+							post_id: postId,
+							action_name: actionName,
+							status: status,
+							message: message
+						},
+					});
+				}
+
+				function deepCopy(obj) {
+					return JSON.parse(JSON.stringify(obj));
+				}
+				
+				function sendEmail() {
+					var data = deepCopy(formContent);
+					
+					for (let key in data) {
+						if (data[key][0] == 'radio' || data[key][0] == 'checkbox' ) {
+							if (Array.isArray(data[key][1])) {
+								let trueValues = data[key][1].filter(innerArray => innerArray[1] === true).map(innerArray => innerArray[0]);
+								let trueValuesString = trueValues.join(', ');
+								data[key][1] = trueValuesString;
+							}
+						}
+					}
+
+					return $.ajax({
+						type: 'POST',
+						url: WprConfig.ajaxurl,
+						data: { 
+							action: 'wpr_form_builder_email',
+							nonce: WprConfig.nonce,
+							form_content: data,
+							wpr_form_id: $scope.find('input[name="form_id"]').val(),
+							nonce: WprConfig.nonce,
+						},
+						success: function(response) {
+							console.log(response);
+							if ( !response.success ) {
+								// if (WprConfig.is_admin) {
+								// 	$scope.find('form').append('<p class="wpr-submit-error">'+ response.data.message +'</p>');
+								// }
+							} else {
+								// if (WprConfig.is_admin) {
+								// 	$scope.find('form').append('<p class="wpr-submit-success">'+ response.data.message +'</p>');
+								// }
+							}
+						},
+						error: function(error) {
+							// if (WprConfig.is_admin) {
+							// 	$scope.find('form').append('<p class="wpr-submit-error">'+ error.data.message +'</p>');
+							// }
+						}
+					});
+				}
+
+				function createPost() {
+					
+					var data = {
+						action: 'wpr_form_builder_submissions',
+						nonce: WprConfig.nonce,
+						form_content: formContent,
+						status: 'publish',
+						form_name: $scope.find('form').attr('name'),
+						form_id: $scope.find('input[name="form_id"]').val(),
+						form_page: $scope.find('form').attr('page'),
+						form_page_id: $scope.find('form').attr('page_id')
+					};
+					
+					return $.ajax({
+						type: 'POST',
+						url: WprConfig.ajaxurl,
+						data: data,
+						success: function(response) {
+							console.log(response);
+							// if (WprConfig.is_admin) {
+							// 	$scope.find('form').append('<p class="wpr-submit-success">'+ response.data.message +'</p>');
+							// }
+						},
+						error: function(error) {
+							console.log(error)
+							// if (WprConfig.is_admin) {
+							// 	$scope.find('form').append('<p class="wpr-submit-error">'+ response.data.message +'</p>');
+							// }
+						}
+					});
+				}
+
+				function subscribeMailchimp() {
+
+					const submitButton = $scope.find('.wpr-form-field-type-submit');
+					const mailchimpFields = JSON.parse(submitButton.attr('data-mailchimp-fields'));
+
+					let formData = {};
+		
+					Object.keys(mailchimpFields).forEach(function (fieldId) {
+						if ( fieldId == 'group_id' ) {
+
+							var fieldValue = Array.isArray(mailchimpFields[fieldId]) ? mailchimpFields[fieldId].join(',') : mailchimpFields[fieldId];
+						} else {
+							var fieldValue = $scope.find('#form-field-' + mailchimpFields[fieldId]).val();
+						}
+						if ( fieldValue ) {
+							if ( fieldId == 'birthday_field') {
+								formData[fieldId] = convertToMailchimpBirthdayFormat(fieldValue);
+							} else {
+								formData[fieldId] = fieldValue;
+							}
+						}
+					});
+
+					return $.ajax({
+						url: WprConfig.ajaxurl,
+						method: 'POST',
+						data: {
+							action: 'wpr_form_builder_mailchimp',
+							nonce: WprConfig.nonce,
+							form_data: formData,
+							listId: submitButton.data( 'list-id' )
+							// security: mailchimpSubscription.security
+						},
+						beforeSend: function () {
+							submitButton.prop('disabled', true);
+						},
+						success: function (response) {
+							console.log(response);
+							if (!response.success) {
+								// if (WprConfig.is_admin) {
+								// 	$scope.find('form').append('<p class="wpr-submit-error">'+ response.data.message +'</p>');
+								// }
+							} else {
+								// if (WprConfig.is_admin) {
+								// 	$scope.find('form').append('<p class="wpr-submit-success">'+ response.data.message +'</p>');
+								// }
+							}
+							// Handle success response, e.g., show a success message.
+						},
+						error: function (jqXHR, textStatus, errorThrown) {
+							console.log(errorThrown);
+							// if (WprConfig.is_admin) {
+							// 	$scope.find('form').append('<p class="wpr-submit-error">'+ errorThrown.message +'</p>');
+							// }
+						},
+						complete: function () {
+							submitButton.prop('disabled', false);
+						}
+					});
+				}
+			});
+
+			function createFormContent() {
+				$scope.find('.wpr-form-field, .wpr-form-field-type-radio, .wpr-form-field-type-checkbox, .wpr-step-input').each(function() {
+
+					var label = '';
+					if ( $(this).prev('label') ) {
+						label = $(this).prev('label').text().trim();
+					} else {
+						label = '';
+					}
+								
+					if ( 'textarea' !== $(this).prop('tagName').toLowerCase() ) {
+						if ( $(this).hasClass('wpr-select-wrap') ) {
+							var selectValue = $(this).find('select').val();
+							if ( Array.isArray($(this).find('select').val()) ) {
+								selectValue = $(this).find('select').val().join(', ');
+							} else {
+								selectValue = $(this).find('select').val();
+							}
+							formContent[$(this).find('select').attr('id').replace('-', '_')] = ['select', selectValue, label];
+						} else if ( $(this).hasClass('wpr-form-field-type-radio' ) || $(this).hasClass('wpr-form-field-type-checkbox') ) {
+							var valuesArray = [];
+							var checkedField = $(this).find('input');
+							var type;
+							checkedField.each(function() {
+								valuesArray.push([$(this).val(), $(this).is(':checked'), $(this).attr('name'), $(this).attr('id')]);
+							});
+
+							if ( $(this).hasClass('wpr-form-field-type-radio') ) {
+								type = 'radio'
+							} else {
+								type = 'checkbox';
+							}
+
+							var inputLabel = $(this).find('.wpr-form-field-label').text().trim();
+
+							if (checkedField.length > 0) {
+								formContent[$(this).find('.wpr-form-field-option').data('key').replace('-', '_')] = [type, valuesArray, inputLabel];
+							}
+						} else if ( $(this).hasClass('wpr-step-input') ) {
+							formContent[$(this).attr('id').replace('-', '_')] = [$(this).attr('type'), '', $(this).val(), label];
+						} else {
+							if ( $(this).attr('type') == 'file' ) {
+								formContent[$(this).attr('id').replace('-', '_')] = [$(this).attr('type'), fileUrl[$(this).attr('id')], label];
+							} else {
+								formContent[$(this).attr('id').replace('-', '_')] = [$(this).attr('type'), $(this).val(), label];
+							}
+						}
+					} else {
+						formContent[$(this).attr('id').replace('-', '_')] = [$(this).prop('tagName').toLowerCase(), $(this).val(), label];
+					}
+	
+				});
+			}
+
+			function handleFileValidityAndUpload(thisInput, files, eventType) {
+				var thisId = thisInput.attr('id');
+			  
+				if (0 < thisInput.closest('.wpr-field-group').find('.wpr-submit-error').length) {
+				  thisInput.closest('.wpr-field-group').find('.wpr-submit-error').remove();
+				}
+			  
+				// Get the data-maxfs value from the input.
+				var maxFileSize = thisInput.data('maxfs') ? thisInput.data('maxfs') : 0;
+				var allowedFileTypes = thisInput.data('allft') ? thisInput.data('allft') : 0;
+			  
+				// Create an array to store the upload promises
+				let uploadPromises = [];
+			  
+				for (let i = 0; i < files.length; i++) {
+				  var fileInput = files[i];
+			  
+				  // Create a new FormData object.
+				  var formDataForFile = new FormData();
+				  formDataForFile.append('action', 'wpr_addons_upload_file');
+				  formDataForFile.append('uploaded_file', fileInput);
+				  formDataForFile.append('max_file_size', maxFileSize);
+				  formDataForFile.append('allowed_file_types', allowedFileTypes);
+				  formDataForFile.append('triggering_event', eventType);
+				  formDataForFile.append('wpr_addons_nonce', WprConfig.nonce);
+			  
+				  if ('click' == eventType) {
+					if (!fileUrl[thisId]) {
+					  fileUrl[thisId] = [];
+					}
+				  }
+			  
+				  // Wrap the AJAX call in a Promise and push it to the uploadPromises array
+				  uploadPromises.push(
+					new Promise((resolve, reject) => {
+					  $.ajax({
+						url: WprConfig.ajaxurl,
+						type: 'POST',
+						data: formDataForFile,
+						processData: false,
+						contentType: false,
+						success: function(response) {
+						  if (response.success) {
+							// Do something with the uploaded file's URL (e.g., store it in a hidden input).
+							console.log(response);
+							if (eventType == 'click') {
+							  fileUrl[thisId][i] = response.data.url;
+							}
+							resolve(response);
+						  } else {
+							console.error('Error:', response);
+							if (response.data ) {
+								if ( 'filesize' === response.data.cause ) {
+									let maxFileNotice = thisInput.data('maxfs-notice') ? thisInput.data('maxfs-notice') : response.data.message;
+									thisInput.closest('.wpr-field-group').append('<p class="wpr-submit-error">' + maxFileNotice + '</p>');
+								}
+
+								if ( 'filetype' == response.data.cause ) {
+									thisInput.closest('.wpr-field-group').append('<p class="wpr-submit-error">' + response.data.message + '</p>');
+								}
+							}
+
+							reject(response);
+						  }
+						},
+						error: function(error) {
+							if ( 'filesize' === error.cause ) {
+								let maxFileNotice = thisInput.data('maxfs-notice') ? thisInput.data('maxfs-notice') : error.message;
+								thisInput.closest('.wpr-field-group').append('<p class="wpr-submit-error">' + maxFileNotice + '</p>');
+							}
+
+							if ( 'filetype' == error.cause ) {
+								thisInput.closest('.wpr-field-group').append('<p class="wpr-submit-error">' + error.message + '</p>');
+							}
+						  console.log(error);
+						  reject(error);
+						},
+					  });
+					}),
+				  );
+				}
+			  
+				// Return a Promise that resolves when all uploadPromises are resolved
+				return Promise.all(uploadPromises);
+			}			  
+			
+			function convertToMailchimpBirthdayFormat(dateString) {
+				const date = new Date(dateString);
+				const month = (date.getMonth() + 1).toString().padStart(2, '0');
+				const day = date.getDate().toString().padStart(2, '0');
+				return `${month}/${day}`;
+			}
+
+			function showTab(n) {
+				// This function will display the specified tab of the form...
+				var $stepTab = $scope.find(".wpr-step-tab");
+				$stepTab.eq(n).removeClass('wpr-step-tab-hidden');
+				//... and fix the Previous/Next buttons:
+				if (n === 0) {
+					$scope.find(".wpr-step-prev").hide();
+				} else {
+					$scope.find(".wpr-step-prev").show();
+				}
+				//... and run a function that will display the correct step indicator:
+				fixStepIndicator(n);
+			}
+
+			function nextPrev(n) {
+				// This function will figure out which tab to display
+				var $stepTab = $scope.find(".wpr-step-tab");
+
+				// Exit the function if any field in the current tab is invalid:
+				if (n === 1 && !validateForm()) {
+					return false;
+				}
+				// Hide the current tab:
+				$stepTab.eq(currentTab).addClass('wpr-step-tab-hidden');
+				// Increase or decrease the current tab by 1:
+				currentTab = currentTab + n;
+				// if you have reached the end of the form...
+				if (currentTab >= $stepTab.length) {
+					// ... the form gets submitted:
+					$scope.find("form").submit();
+					return false;
+				}
+				// Otherwise, display the correct tab:
+				showTab(currentTab);
+			}
+
+			function validateForm() {
+				var valid = true;
+				var $stepTab = $scope.find(".wpr-step-tab");
+				if ( !($stepTab.length > 0) ) {
+					$stepTab = $scope.find('.wpr-form-fields-wrap');
+					currentTab = 0;
+				}
+				var $types = ['text', 'email', 'password', 'file', 'url', 'tel', 'number', 'date', 'datetime-local', 'time', 'week', 'month', 'color']; // radio checkbox ?
+
+				$stepTab.eq(currentTab).find('input, select, textarea').each(function() {
+				  const type = $(this).attr('type');
+
+				  var requiredField = $(this).closest('.wpr-field-group').find('.wpr-form-field').attr('required') === 'required' || $(this).closest('.wpr-field-group').find('.wpr-form-field-textual').attr('required') === 'required';
+
+				//   if ( this.tagName === 'SELECT' ) {
+				// 	requiredField = $(this).attr('required') === 'required';
+				//   }
+
+				  if ( type !== undefined && $.inArray(type, $types) !== -1 && $(this).val() === '' && requiredField ) {
+					// add an "invalid" class to the field:
+					$(this).addClass("wpr-form-error");
+					// and set the current valid status to false
+					valid = false;
+				  } else if ( type === 'radio' || type === 'checkbox' ) {
+					let requiredOption = $(this).closest('.wpr-field-group').find('.wpr-form-field-option input').attr('required') === 'required';
+
+					if ( requiredOption && $stepTab.eq(currentTab).find('input[type="'+ type +'"]:checked').length === 0 ) {
+						// add an "invalid" class to the field:
+						$(this).addClass("wpr-form-error");
+						// and set the current valid status to false
+						valid = false;
+					}
+				  } else if ( requiredField && this.tagName === 'SELECT' && $(this).val().trim() === '' ) {
+					// select error wrap
+					$(this).closest('.wpr-select-wrap').addClass('wpr-form-error-wrap');
+					// add an "invalid" class to the field:
+					$(this).addClass("wpr-form-error");
+					// and set the current valid status to false
+					valid = false;
+				  } else if ( requiredField && this.tagName === 'TEXTAREA' && $(this).val().trim() === '' ) {
+					// add an "invalid" class to the field:
+					$(this).addClass("wpr-form-error");
+					// and set the current valid status to false
+					valid = false;
+				  }
+				});
+
+				if (!valid) {
+					$stepTab.eq(currentTab).find('.wpr-form-error, .wpr-form-error-wrap').each(function() {
+						if ( !($(this).closest('.wpr-field-group').find('.wpr-submit-error').length > 0) ) {
+							if ( $(this).attr('type') == 'file' ) {
+								$(this).closest('.wpr-field-group').append('<p class="wpr-submit-error">'+ WprConfig.file_empty +'</p>');
+							} else if ( $(this).is('select') || $(this).attr('type') === 'radio' || $(this).attr('type') === 'checkbox' ) {
+								$(this).closest('.wpr-field-group').append('<p class="wpr-submit-error">'+ WprConfig.select_empty +'</p>');
+							} else {
+								$(this).closest('.wpr-field-group').append('<p class="wpr-submit-error">'+ WprConfig.input_empty +'</p>');
+							}
+						}
+					});
+				}
+
+				if (valid) {
+					$scope.find(".wpr-step").eq(currentTab).addClass("wpr-step-finish");
+				} else {
+                    if ( $scope.find(".wpr-step").eq(currentTab).hasClass('wpr-step-finish') ) {
+                        $scope.find(".wpr-step").eq(currentTab).removeClass('wpr-step-finish');
+                    }
+                }
+
+				return valid;
+			}
+
+			function fixStepIndicator(n) {
+				// This function removes the "active" class of all steps...
+				var $step = $scope.find(".wpr-step");
+				$step.removeClass("wpr-step-active");
+				//... and adds the "active" class on the current step:
+				$step.eq(n).addClass("wpr-step-active");
+
+                if ( $scope.find('.wpr-step-active').hasClass('wpr-step-finish') ) {
+                    $scope.find('.wpr-step-active').removeClass('wpr-step-finish');
+                }
+
+				const stepTabs = $scope.find('.wpr-step-tab');
+				const progressBarFill = $scope.find('.wpr-step-progress-fill');
+		
+				let currentStep = n + 1;
+
+				updateProgressBar()
+		
+				function updateProgressBar() {
+					const totalSteps = stepTabs.length;
+					const progressPercentage = (currentStep / totalSteps) * 100;
+		
+					progressBarFill.css('width', progressPercentage + '%');
+					setTimeout(function() {
+						progressBarFill.text(Math.round(progressPercentage) + '%');
+					}, 500);
+				}
+			}
+		}, // end widgetFormBuilder
+
 		widgetProductAddToCart: function($scope) {
 			var qtyInput = jQuery('.woocommerce .wpr-quantity-wrapper'),
 				qtyInputInStock = qtyInput.find('input.qty').attr('max') ? qtyInput.find('input.qty').attr('max') : 99999999,
@@ -5595,7 +9206,7 @@
 					jQuery('input[name="update_cart"]').removeAttr('disabled');
 				}
 			});
-		
+			
 			// minus
 			qtyInput.on('click', 'i:'+minusIconChild, function() {
 				if ( parseInt(jQuery(this).next('.quantity').find('input.qty').val(), 10) > 0 && qtyLayout == 'both' ) {
@@ -5615,13 +9226,19 @@
 			});
 
 			if ( 'yes' === $scope.find('.wpr-product-add-to-cart').data('ajax-add-to-cart') ) {
-				$scope.find('.single_add_to_cart_button').on('click', ajaxAddToCart);
+				if ( !$('div[data-elementor-type="wpr-theme-builder"]').hasClass('product-type-external') ) {
+					$scope.find('.single_add_to_cart_button').on('click', ajaxAddToCart);
+				}
 			}
 
 			function ajaxAddToCart(e) {
 				e.preventDefault();
 			
 				let $form = $( this ).closest('form');
+
+				var $variationForm = $form.closest('.variations_form');
+
+				let isGrouped = $form.hasClass('grouped_form');
 			
 				if ( ! $form[0].checkValidity() ) {
 					$form[0].reportValidity();
@@ -5632,42 +9249,354 @@
 				let $thisBtn = $( this ),
 					product_id = $thisBtn.val() || '',
 					cartFormData = $form.serialize();
+					
+					// // Get the ID of the selected variation
+					// let variation_id = $scope.find('input[name="variation_id"]').val();
+					// console.log(window['wc_variation_form']);
+					// // Get the data of the selected variation
+					// let variation_data = window['wc_variation_form'].variation_data[variation_id];
+					
+					// // Get the availability HTML of the selected variation
+					// let availability_html = variation_data.availability_html;
+					
+					// // Check if the variation is in stock
+					// if (availability_html.indexOf('In stock') !== -1) {
+					//   console.log('Selected variation is in stock');
+					// } else {
+					//   console.log('Selected variation is out of stock');
+					// }
+				
+				if (isGrouped) {
+					let nonZero = false;
+					$scope.find('.woocommerce-grouped-product-list-item__quantity').find('input').each(function() {
+						if ($(this).val() > 0 ) {
+							nonZero = true;
+						}
+					});
+
+					if ( !nonZero ) {
+						// The grouped product does not have the required number of items selected
+						alert(WprConfig.chooseQuantityText);
+						return;
+					}
+				}
 			
 				$.ajax( {
 					type: 'POST',
 					url: WprConfig.ajaxurl,
 					data: 'action=wpr_addons_add_cart_single_product&add-to-cart=' + product_id + '&' + cartFormData,
 					beforeSend: function () {
+						if ( $variationForm.length > 0 && ! $variationForm.find('.variations select').val() ) {
+							// Do not trigger added_to_cart event if options are not selected for variable product
+							return;
+						} 
+						if ( $thisBtn.hasClass('disabled') ) {
+							return
+						}
+
 						$thisBtn.removeClass( 'added' ).addClass( 'loading' );
 					},
 					complete: function () {
+						if ( $variationForm.length > 0 && ! $variationForm.find('.variations select').val() ) {
+							// Do not trigger added_to_cart event if options are not selected for variable product
+							return;
+						} 
+
+						if ( $thisBtn.hasClass('disabled') ) {
+							return
+						}
+
 						$thisBtn.addClass( 'added' ).removeClass( 'loading' );
 					},
 					success: function ( response ) {
+
+						// GOGA - remove later
+						if (response.notices && response.notices.length > 0) {
+
+							// The selected variation is low in stock, display a warning message
+							if (response.notices[0].type === 'wc_low_stock') {
+								alert('Only ' + response.notices[0].message + ' left in stock!');
+							} else {
+								alert(response.notices[0].message);
+							}
+						}
+
 						if ( response.error && response.product_url ) {
 							window.location = response.product_url;
-			
 							return;
 						}
-			
-						setTimeout( function () {
-							$thisBtn.removeClass( 'added' );
-						}, 1000 );
-			
-						$( document.body ).trigger( 'wc_fragment_refresh' );
-						$( document.body ).trigger( 'added_to_cart', [ response.fragments, response.cart_hash, $thisBtn ] );
 			
 						if ( typeof wc_add_to_cart_params === 'undefined' ) {
 							return false;
 						}
+			
+						if ( $variationForm.length > 0 && ! $variationForm.find('.variations select').val() ) {
+							// Do not trigger added_to_cart event if options are not selected for variable product
+							return;
+						}
+						
+						if ( $thisBtn.hasClass('disabled') ) {
+							return;
+						}
 
-						var currentCartCount = parseInt($('.wpr-mini-cart-icon-count').text());
-						var updatedCartCount = parseInt($scope.find('.wpr-quantity-wrapper .qty').val());
-						$('.wpr-mini-cart-icon-count').text(currentCartCount + updatedCartCount);
+						$( document.body ).trigger( 'wc_fragment_refresh' );
+						$( document.body ).trigger( 'added_to_cart', [ response.fragments, response.cart_hash, $thisBtn ] );
+
+						setTimeout( function () {
+							$thisBtn.removeClass( 'added' );
+							var currentCartCount = parseInt($('.wpr-mini-cart-icon-count').text());
+							var updatedCartCount = parseInt($scope.find('.wpr-quantity-wrapper .qty').val());
+							$('.wpr-mini-cart-icon-count').text(currentCartCount + updatedCartCount);
+						}, 1000 );
 					},
 				} );
 			}
 		}, // End of widgetProductAddToCart
+
+		widgetMiniWishlist: function($scope) {
+			
+			if ( !($scope.find('.wpr-wishlist-count').length > 0 && 0 == $scope.find('.wpr-wishlist-count').text()) ) {
+				$scope.find('.wpr-wishlist-count').css('display', 'inline-flex');
+			} else {
+
+			}
+			
+			function wishlistRemoveHandler() {
+				$scope.find('.wpr-wishlist-remove').on('click', function(e) {
+					e.preventDefault();
+					var product_id = $(this).data('product-id');
+					$.ajax({
+						url: WprConfig.ajaxurl,
+						type: 'POST',
+						data: {
+							action: 'remove_from_wishlist',
+							product_id: product_id
+						},
+						success: function() {
+							   $scope.find('.wpr-wishlist-product[data-product-id="' + product_id + '"]').remove();
+							WprElements.changeActionTargetProductId(product_id);
+							$(document).trigger('removed_from_wishlist');
+						}
+					});
+				});
+			}
+
+			wishlistRemoveHandler();
+	
+			var mutationObserver = new MutationObserver(function(mutations) {
+				wishlistRemoveHandler();
+			});
+
+			mutationObserver.observe($scope[0], {
+				childList: true,
+				subtree: true,
+			});
+
+			$.ajax({
+				url: WprConfig.ajaxurl,
+				type: 'POST',
+				data: {
+					action: 'count_wishlist_items',
+				},
+				success: function(response) {
+					if ( $scope.find('.wpr-wishlist-count').css('display') == 'none' && 0 < response.wishlist_count ) {
+						$scope.find('.wpr-wishlist-count').text(response.wishlist_count);
+						$scope.find('.wpr-wishlist-count').css('display', 'inline-flex');
+					} else if ( 0 == response.wishlist_count ) {
+						$scope.find('.wpr-wishlist-count').css('display', 'none');
+						$scope.find('.wpr-wishlist-count').text(response.wishlist_count);
+					} else {
+						$scope.find('.wpr-wishlist-count').text(response.wishlist_count);
+					}
+
+					if ( true ) {
+						// Get all elements with the class 'wpr-wishlist-product' and their product IDs
+						var productElements = $scope.find('.wpr-wishlist-product');
+						var productIds = productElements.map(function() {
+						  return $(this).data('product-id');
+						}).get();
+						
+						// Filter out the items in the response that match the product IDs
+						var newWishlistItems = response.wishlist_items.filter(function(item) {
+						  return !productIds.includes(item.product_id);
+						});
+
+						// Convert the wishlist_items to an array of product_ids for easier searching
+						var wishlistProductIds = response.wishlist_items.map(function(item) {
+							return item.product_id;
+						});
+
+						productElements.each(function() {
+						  var productId = $(this).data('product-id');
+						
+						  // If the product ID is not in the wishlistProductIds array, remove the element
+						  if (!wishlistProductIds.includes(productId)) {
+							$(this).remove();
+						  }
+						});
+
+						newWishlistItems.forEach(function(item) {
+							$scope.find('.wpr-wishlist-products').append('<li class="wpr-wishlist-product" data-product-id="'+ item.product_id +'"><a class="wpr-wishlist-product-img" href="'+ item.product_url +'">'+ item.product_image +'</a><div><a href="'+ item.product_url +'">'+ item.product_title +'</a><div class="wpr-wishlist-product-price">'+ item.product_price +'</div></div><span class="wpr-wishlist-remove" data-product-id="'+ item.product_id +'"></span></li>');
+						});
+					}
+				}
+			});
+
+			$(document).on('added_to_wishlist', function() {
+				$.ajax({
+					url: WprConfig.ajaxurl,
+					type: 'POST',
+					data: {
+						action: 'update_mini_wishlist',
+						product_id: actionTargetProductId,
+					},
+					success: function(response) {
+						if ( $scope.find('.wpr-wishlist-products').find('li[data-product-id='+ response.product_id +']').length == 0 ) {
+							$scope.find('.wpr-wishlist-products').append('<li class="wpr-wishlist-product" data-product-id="'+ response.product_id +'"><a class="wpr-wishlist-product-img" href="'+ response.product_url +'">'+ response.product_image +'</a><div><a href="'+ response.product_url +'">'+ response.product_title +'</a><div class="wpr-wishlist-product-price">'+ response.product_price +'</div></div><span class="wpr-wishlist-remove" data-product-id="'+ response.product_id +'"></span></li>');
+						}
+
+						$scope.find('.wpr-wishlist-count').text(response.wishlist_count);
+						$scope.find('.wpr-wishlist-count').css('display', 'inline-flex');
+					}
+				});
+			});
+
+			$(document).on('removed_from_wishlist', function() {
+				$scope.find('.wpr-wishlist-product[data-product-id="' + actionTargetProductId + '"]').remove();
+				$.ajax({
+					url: WprConfig.ajaxurl,
+					type: 'POST',
+					data: {
+						action: 'update_mini_wishlist',
+						product_id: actionTargetProductId,
+					},
+					success: function(response) {
+						$scope.find('.wpr-wishlist-count').text(response.wishlist_count);
+						
+						if ( response.wishlist_count == 0 ) {
+							$scope.find('.wpr-wishlist-count').css('display', 'none');
+						} else {
+							$scope.find('.wpr-wishlist-count').css('display', 'inline-flex');
+						}
+					}
+				});
+			});
+			$scope.find('.wpr-wishlist').css({"display": "none"});
+
+			var animationSpeed = $scope.find('.wpr-wishlist-wrap').data('animation');
+
+			$('body').on('click', function(e) {
+				if ( !e.target.classList.value.includes('wpr-wishlist-wrap') && !e.target.closest('.wpr-wishlist-wrap') ) {
+					if ( $scope.hasClass('wpr-wishlist-slide') ) {
+						$scope.find('.wpr-wishlist').slideUp(animationSpeed);
+					} else {
+						$scope.find('.wpr-wishlist').fadeOut(animationSpeed);
+					}
+				}
+			});
+
+			if ( 0 !== $scope.hasClass('wpr-wishlist-sidebar').length ) {
+				if ( $('#wpadminbar').length ) {
+					$scope.find('.wpr-wishlist').css({
+						// 'top': $('#wpadminbar').css('height'),
+						// 'height': $scope.find('.wpr-shopping-cart-wrap').css('height') -  $('#wpadminbar').css('height')
+						'z-index': 999999
+					});
+				}
+
+				closeSideBar();
+
+				$scope.find('.wpr-wishlist').on('click', function(e) {
+					// if ( !e.target.classList.value.includes('widget_shopping_cart_content') && !e.target.closest('.widget_shopping_cart_content') ) {
+					if ( !e.target.classList.value.includes('wpr-wishlist-inner-wrap') && !e.target.closest('.wpr-wishlist-inner-wrap') ) {
+						// $scope.find('.widget_shopping_cart_content').addClass('wpr-mini-cart-slide-out');
+						$scope.find('.wpr-wishlist-inner-wrap').addClass('wpr-wishlist-slide-out');
+						$scope.find('.wpr-wishlist-slide-out').css('animation-speed', animationSpeed);
+						$scope.find('.wpr-wishlist').fadeOut(animationSpeed);
+						$('body').removeClass('wpr-wishlist-sidebar-body');
+						setTimeout(function() {
+							// $scope.find('.widget_shopping_cart_content').removeClass('wpr-mini-cart-slide-out');
+							$scope.find('.wpr-wishlist-inner-wrap').removeClass('wpr-wishlist-slide-out');
+							$scope.find('.wpr-wishlist').css({"display": "none"});
+						}, animationSpeed + 100);
+					}
+				});
+			}
+
+			if ( $scope.find('.wpr-wishlist').length ) {
+				if ( $scope.hasClass('wpr-wishlist-sidebar') || $scope.hasClass('wpr-wishlist-dropdown') ) {
+					$scope.find('.wpr-wishlist-toggle-btn').on('click', function(e) {
+						e.stopPropagation();
+						e.preventDefault();
+						if ( 'none' === $scope.find('.wpr-wishlist').css("display") ) {
+							if ( $scope.hasClass('wpr-wishlist-slide') ) {
+								$scope.find('.wpr-wishlist').slideDown(animationSpeed);
+							} else {
+								$scope.find('.wpr-wishlist').fadeIn(animationSpeed);
+							}
+							if ( $scope.hasClass('wpr-wishlist-sidebar') ) {
+								$scope.find('.wpr-wishlist').fadeIn(animationSpeed);
+								$scope.find('.wpr-wishlist-inner-wrap').addClass('wpr-wishlist-slide-in');
+								$scope.find('.wpr-wishlist-slide-in').css('animation-speed', animationSpeed);
+								$('body').addClass('wpr-wishlist-sidebar-body');
+							}
+							setTimeout(function() {
+								// $scope.find('.widget_shopping_cart_content').removeClass('wpr-mini-cart-slide-in');
+								$scope.find('.wpr-wishlist').removeClass('wpr-wishlist-slide-in');
+								if ( $scope.hasClass('wpr-wishlist-sidebar') ) {
+									$scope.find('.wpr-wishlist').trigger('resize');
+								}
+							}, animationSpeed + 100);
+						} else {
+							if ( $scope.hasClass('wpr-wishlist-slide') ) {
+								$scope.find('.wpr-wishlist').slideUp(animationSpeed);
+							} else {
+								$scope.find('.wpr-wishlist').fadeOut(animationSpeed);
+							}
+						}
+					});
+				}
+			}
+
+			var mutationObserver = new MutationObserver(function(mutations) {
+				if (  0 !== $scope.hasClass('wpr-wishlist-sidebar').length ) {
+					closeSideBar();
+				}
+				
+				$scope.find('.wpr-wishlist-product').on('click', '.wpr-wishlist-remove', function() {
+					$(this).closest('li').addClass('wpr-before-remove-from-wishlist');
+				});
+
+				if ( $scope.find('.wpr-wishlist-product').length !== 0 ) {
+					$scope.find('.wpr-wishlist-empty').addClass('wpr-wishlist-empty-hidden');
+					$scope.find('.wpr-view-wishlist').removeClass('wpr-hidden-element');
+				} else {
+					$scope.find('.wpr-wishlist-empty').removeClass('wpr-wishlist-empty-hidden');
+					$scope.find('.wpr-view-wishlist').addClass('wpr-hidden-element');
+				}
+			});
+
+			// Listen to Mini Cart Changes
+			mutationObserver.observe($scope[0], {
+				childList: true,
+				subtree: true,
+			});
+
+			function closeSideBar() {
+				$scope.find('.wpr-close-wishlist span').on('click', function(e) {
+					// $scope.find('.widget_shopping_cart_content').addClass('wpr-mini-cart-slide-out');
+					$scope.find('.wpr-wishlist-inner-wrap').addClass('wpr-wishlist-slide-out');
+					$scope.find('.wpr-wishlist-slide-out').css('animation-speed', animationSpeed);
+					$scope.find('.wpr-wishlist').fadeOut(animationSpeed);
+					$('body').removeClass('wpr-wishlist-sidebar-body');
+					setTimeout(function() {
+						// $scope.find('.widget_shopping_cart_content').removeClass('wpr-mini-cart-slide-out');
+						$scope.find('.wpr-wishlist-inner-wrap').removeClass('wpr-wishlist-slide-out');
+						$scope.find('.wpr-wishlist').css({"display": "none"});
+					}, animationSpeed + 100);
+				});
+			}
+		}, // end widgetMiniWishlist
 
 		widgetProductMiniCart: function($scope) {
 				$scope.find('.wpr-mini-cart').css({"display": "none"});
@@ -5686,7 +9615,7 @@
 					}
 				});
 
-				if ( 0 !== $scope.hasClass('wpr-mini-cart-sidebar').length ) {
+				if ( $scope.hasClass('wpr-mini-cart-sidebar') ) {
 					if ( $('#wpadminbar').length ) {
 						$scope.find('.wpr-mini-cart').css({
 							// 'top': $('#wpadminbar').css('height'),
@@ -5715,41 +9644,43 @@
 				}
 
 				if ( $scope.find('.wpr-mini-cart').length ) {
-					$scope.find('.wpr-mini-cart-toggle-btn').on('click', function(e) {
-						e.stopPropagation();
-						e.preventDefault();
-						if ( 'none' === $scope.find('.wpr-mini-cart').css("display") ) {
-							if ( $scope.hasClass('wpr-mini-cart-slide') ) {
-								$scope.find('.wpr-mini-cart').slideDown(animationSpeed);
-							} else {
-								$scope.find('.wpr-mini-cart').fadeIn(animationSpeed);
-							}
-							if ( $scope.hasClass('wpr-mini-cart-sidebar') ) {
-								$scope.find('.wpr-shopping-cart-wrap').fadeIn(animationSpeed);
-								// $scope.find('.widget_shopping_cart_content').addClass('wpr-mini-cart-slide-in');
-								$scope.find('.wpr-shopping-cart-inner-wrap').addClass('wpr-mini-cart-slide-in');
-								$scope.find('.wpr-mini-cart-slide-in').css('animation-speed', animationSpeed);
-								$('body').addClass('wpr-mini-cart-sidebar-body');
-							}
-							setTimeout(function() {
-								// $scope.find('.widget_shopping_cart_content').removeClass('wpr-mini-cart-slide-in');
-								$scope.find('.wpr-shopping-cart-inner-wrap').removeClass('wpr-mini-cart-slide-in');
-								if ( $scope.hasClass('wpr-mini-cart-sidebar') ) {
-									$scope.find('.wpr-woo-mini-cart').trigger('resize');
+					if ( $scope.hasClass('wpr-mini-cart-sidebar') || $scope.hasClass('wpr-mini-cart-dropdown') ) {
+						$scope.find('.wpr-mini-cart-toggle-btn').on('click', function(e) {
+							e.stopPropagation();
+							e.preventDefault();
+							if ( 'none' === $scope.find('.wpr-mini-cart').css("display") ) {
+								if ( $scope.hasClass('wpr-mini-cart-slide') ) {
+									$scope.find('.wpr-mini-cart').slideDown(animationSpeed);
+								} else {
+									$scope.find('.wpr-mini-cart').fadeIn(animationSpeed);
 								}
-							}, animationSpeed + 100);
-						} else {
-							if ( $scope.hasClass('wpr-mini-cart-slide') ) {
-								$scope.find('.wpr-mini-cart').slideUp(animationSpeed);
+								if ( $scope.hasClass('wpr-mini-cart-sidebar') ) {
+									$scope.find('.wpr-shopping-cart-wrap').fadeIn(animationSpeed);
+									// $scope.find('.widget_shopping_cart_content').addClass('wpr-mini-cart-slide-in');
+									$scope.find('.wpr-shopping-cart-inner-wrap').addClass('wpr-mini-cart-slide-in');
+									$scope.find('.wpr-mini-cart-slide-in').css('animation-speed', animationSpeed);
+									$('body').addClass('wpr-mini-cart-sidebar-body');
+								}
+								setTimeout(function() {
+									// $scope.find('.widget_shopping_cart_content').removeClass('wpr-mini-cart-slide-in');
+									$scope.find('.wpr-shopping-cart-inner-wrap').removeClass('wpr-mini-cart-slide-in');
+									if ( $scope.hasClass('wpr-mini-cart-sidebar') ) {
+										$scope.find('.wpr-woo-mini-cart').trigger('resize');
+									}
+								}, animationSpeed + 100);
 							} else {
-								$scope.find('.wpr-mini-cart').fadeOut(animationSpeed);
+								if ( $scope.hasClass('wpr-mini-cart-slide') ) {
+									$scope.find('.wpr-mini-cart').slideUp(animationSpeed);
+								} else {
+									$scope.find('.wpr-mini-cart').fadeOut(animationSpeed);
+								}
 							}
-						}
-					});
+						});
+					}
 				}
 
 				var mutationObserver = new MutationObserver(function(mutations) {
-					if (  0 !== $scope.hasClass('wpr-mini-cart-sidebar').length ) {
+					if (  $scope.hasClass('wpr-mini-cart-sidebar') ) {
 						closeSideBar();
 
 						// if ( $scope.find('.wpr-mini-cart').data('close-cart-heading') ) {
@@ -5831,7 +9762,32 @@
 					$scope.find('[wpr-my-account-page="'+ pageName +'"]').css('display', 'block');
 
 				});
-			}	
+			}
+			
+			if ( $scope.find('.wpr-wishlist-remove').length ) {
+				$scope.find('.wpr-wishlist-remove').on('click', function(e) {
+					e.preventDefault();
+					var product_id = $(this).data('product-id');
+					$.ajax({
+						url: WprConfig.ajaxurl,
+						type: 'POST',
+						data: {
+							action: 'remove_from_wishlist',
+							product_id: product_id,
+						},
+						success: function() {
+							$scope.find('.wpr-wishlist-product[data-product-id="' + product_id + '"]').remove();
+							WprElements.changeActionTargetProductId(product_id);
+							$(document).trigger('removed_from_wishlist');
+						}
+					});
+				});
+
+				$(document).on('removed_from_wishlist', function() {
+					$scope.find('.wpr-wishlist-product[data-product-id="' + actionTargetProductId + '"]').remove();
+				});
+
+			}
 			
 		}, // End of widgetPageMyAccount
 
@@ -6224,13 +10180,16 @@
 				}
 			});
 		},
+
+		changeActionTargetProductId: function(productId) {
+			actionTargetProductId = productId;
+		}
 	
 	} // End WprElements
 
 	$( window ).on( 'elementor/frontend/init', WprElements.init );
 
 }( jQuery, window.elementorFrontend ) );
-
 
 // Resize Function - Debounce
 (function($,sr){

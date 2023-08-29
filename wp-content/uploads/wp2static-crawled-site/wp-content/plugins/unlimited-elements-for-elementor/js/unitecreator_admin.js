@@ -242,9 +242,7 @@ function UniteCreatorAdmin(){
 					var objTextArea = jQuery("#area_addon_html");
 				    var textArea = objTextArea[0];
 					  
-				      var mixedMode = {
-				    	        name: "htmlmixed"
-				      };
+				      var mixedMode = {name: "twig", base: "text/html"};
 				      
 				      var mode = objTextArea.data("mode");
 					  if(mode)  		
@@ -281,9 +279,12 @@ function UniteCreatorAdmin(){
 				g_codemirrorHtmlItem = true;
 				
 				setTimeout(function(){
+					
 				      var mixedMode = {
-				    	        name: "htmlmixed"
+						      name: "twig", base: "text/html"
+				    	       //name: "htmlmixed"
 				      };
+				      
 				      var optionsCM = {
 								mode: mixedMode,
 								lineNumbers: true
@@ -308,7 +309,7 @@ function UniteCreatorAdmin(){
 				
 				setTimeout(function(){
 				      var mixedMode = {
-				    	        name: "htmlmixed"
+						      name: "twig", base: "text/html"
 				      };
 				      var optionsCM = {
 								mode: mixedMode,
@@ -1647,14 +1648,21 @@ function UniteCreatorAdmin(){
 		//change files event
 		g_settingsItem.setEventOnChange(onSettingsItemsChange);
 		
+		onSettingsItemsChange();
+		
 		//expand click
 		jQuery(".uc-tabcontent-link-expand").on("click",function(){
 			
 			var objLink = jQuery(this);
+			
 			var objRow = objLink.parents("tr");
-			objRow.addClass("uc-row-expanded");
+									
+			var rowClass = "uc-row-expanded";
+						
+			objRow.addClass(rowClass);
 			
 			objLink.hide();
+			
 			
 		});
 		

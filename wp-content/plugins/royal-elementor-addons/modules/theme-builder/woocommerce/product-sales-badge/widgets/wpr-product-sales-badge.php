@@ -29,7 +29,7 @@ class Wpr_Product_SalesBadge extends Widget_Base {
 	}
 
 	public function get_keywords() {
-		return [ 'qq', 'woocommerce', 'product-sales-badge', 'product', 'sales-badge', 'sales', 'badge' ];//tmp
+		return [ 'woocommerce', 'product-sales-badge', 'product', 'sales-badge', 'sales', 'badge' ];
 	}
 
 	protected function register_controls() {
@@ -46,6 +46,9 @@ class Wpr_Product_SalesBadge extends Widget_Base {
 			'sales_badge_text',
 			[
 				'type'        => Controls_Manager::TEXT,
+				'dynamic' => [
+					'active' => true,
+				],
 				'label'       => esc_html__( 'Sale Badge Text', 'wpr-addons' ),
 				'default'     => 'Sale!',
 			]

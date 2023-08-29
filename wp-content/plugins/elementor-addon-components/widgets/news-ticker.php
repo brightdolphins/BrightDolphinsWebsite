@@ -8,7 +8,7 @@
  * Description: Bandeau déroulant les nouvelles des journaux par leurs flux RSS.
  *
  * @since 1.9.2
- * @since 1.9.3 Envoie le nonce dans un champ 'input hidden'
+ * @since 1.9.3 Transmets le nonce dans un champ 'input hidden'
  */
 
 namespace EACCustomWidgets\Widgets;
@@ -36,14 +36,12 @@ class News_Ticker_Widget extends Widget_Base {
 	 * Constructeur de la class News_Ticker_Widget
 	 *
 	 * Enregistre les scripts et les styles
-	 *
-	 * @since 1.9.2
 	 */
 	public function __construct( $data = array(), $args = null ) {
 		parent::__construct( $data, $args );
 
-		wp_register_script( 'eac-news-ticker', EAC_Plugin::instance()->get_register_script_url( 'eac-news-ticker' ), array( 'jquery', 'elementor-frontend' ), '1.9.2', true );
-		wp_register_style( 'eac-news-ticker', EAC_Plugin::instance()->get_register_style_url( 'news-ticker' ), array( 'eac' ), '1.9.2' );
+		wp_register_script( 'eac-news-ticker', EAC_Plugin::instance()->get_script_url( 'assets/js/elementor/eac-news-ticker' ), array( 'jquery', 'elementor-frontend' ), '1.9.2', true );
+		wp_register_style( 'eac-news-ticker', EAC_Plugin::instance()->get_style_url( 'assets/css/news-ticker' ), array( 'eac' ), '1.9.2' );
 	}
 
 	/**
@@ -372,6 +370,7 @@ class News_Ticker_Widget extends Widget_Base {
 					'default'      => 'left',
 					'prefix_class' => 'news-ticker_orientation-',
 					'render_type'  => 'template',
+					'toggle'  => false,
 					'separator'    => 'before',
 				)
 			);
@@ -392,6 +391,7 @@ class News_Ticker_Widget extends Widget_Base {
 						),
 					),
 					'default' => 'no',
+					'toggle'  => false,
 				)
 			);
 
@@ -411,6 +411,7 @@ class News_Ticker_Widget extends Widget_Base {
 						),
 					),
 					'default' => 'no',
+					'toggle'  => false,
 				)
 			);
 
@@ -430,6 +431,7 @@ class News_Ticker_Widget extends Widget_Base {
 						),
 					),
 					'default' => 'no',
+					'toggle'  => false,
 				)
 			);
 
@@ -543,7 +545,6 @@ class News_Ticker_Widget extends Widget_Base {
 					'selectors'          => array(
 						'{{WRAPPER}} .news-ticker_wrapper-title' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
 					),
-					'separator'          => 'before',
 				)
 			);
 
@@ -693,23 +694,21 @@ class News_Ticker_Widget extends Widget_Base {
 		/** @since 1.9.3 'input hidden' */
 		?>
 		<div class="eac-news-ticker">
-			<input type="hidden" id="news_nonce" name="news_nonce" value="<?php echo wp_create_nonce( 'eac_rss_feed_' . $this->get_id() ); ?>" />
-			<div <?php echo $this->get_render_attribute_string( 'news_ticker' ); ?>>
+			<input type="hidden" id="news_nonce" name="news_nonce" value="<?php echo wp_create_nonce( 'eac_rss_feed_' . $this->get_id() ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>" />
+			<div <?php echo wp_kses_post( $this->get_render_attribute_string( 'news_ticker' ) ); ?>>
 				<div class="news-ticker_wrapper-title">Breaking News: Taglines</div>
-				<div class="news-ticker_wrapper-content"><div class="animationPause animationHorizontal"></div></div>
-				
-				<?php // if ($settings['news_wrapper_style'] !== 'style-10') : ?>
-					<div class="news-ticker_wrapper-control">
-						<?php if ( $settings['news_item_controls'] === 'yes' ) : ?>
-							<span class="left"><i class="far fa-caret-square-left"></i></span>
-						<?php endif; ?>
-						<span class="play"><i class="far fa-play-circle"></i></span>
-						<span class="pause"><i class="far fa-pause-circle"></i></span>
-						<?php if ( $settings['news_item_controls'] === 'yes' ) : ?>
-							<span class="right"><i class="far fa-caret-square-right"></i></span>
-						<?php endif; ?>
-					</div>
-				<?php // endif; ?>
+				<div class="news-ticker_wrapper-content" role="feed"><div class="animationPause animationHorizontal"></div></div>
+
+				<div class="news-ticker_wrapper-control">
+					<?php if ( 'yes' === $settings['news_item_controls'] ) : ?>
+						<span class="left" role="button" tabindex="0" aria-label="Backward the feed"><i class="far fa-caret-square-left"></i></span>
+					<?php endif; ?>
+					<span class="play" role="button" tabindex="0" aria-label="Start reading"><i class="far fa-play-circle"></i></span>
+					<span class="pause" role="button" tabindex="0" aria-label="Stop reading"><i class="far fa-pause-circle"></i></span>
+					<?php if ( 'yes' === $settings['news_item_controls'] ) : ?>
+						<span class="right" role="button" tabindex="0" aria-label=">Forward the feed"><i class="far fa-caret-square-right"></i></span>
+					<?php endif; ?>
+				</div>
 			</div>
 			<?php $this->render_galerie(); ?>
 		</div>
@@ -744,7 +743,7 @@ class News_Ticker_Widget extends Widget_Base {
 	 * Retrieve fields values to pass at the widget container
 	 * Convert on JSON format
 	 *
-	 * @uses      json_encode()
+	 * @uses      wp_json_encode()
 	 *
 	 * @return    JSON oject
 	 *
@@ -757,18 +756,16 @@ class News_Ticker_Widget extends Widget_Base {
 
 		$settings = array(
 			'data_id'     => $this->get_id(),
-			'data_nombre' => $module_settings['news_item_nombre'],
-			'data_date'   => $module_settings['news_item_date'] === 'yes' ? true : false,
+			'data_nombre' => absint( $module_settings['news_item_nombre'] ),
+			'data_date'   => 'yes' === $module_settings['news_item_date'] ? true : false,
 			'data_speed'  => $module_settings['news_item_speed']['size'],
-			'data_loop'   => $module_settings['news_item_loop'] === 0 ? 1000 : $module_settings['news_item_loop'],
-			'data_auto'   => $module_settings['news_item_read_auto'] === 'yes' ? true : false,
+			'data_loop'   => 0 === $module_settings['news_item_loop'] ? 1000 : absint( $module_settings['news_item_loop'] ),
+			'data_auto'   => 'yes' === $module_settings['news_item_read_auto'] ? true : false,
 			'data_rtl'    => $module_settings['news_item_scroll'],
 		);
 
-		$settings = json_encode( $settings );
-		return $settings;
+		return wp_json_encode( $settings );
 	}
 
 	protected function content_template() {}
-
 }

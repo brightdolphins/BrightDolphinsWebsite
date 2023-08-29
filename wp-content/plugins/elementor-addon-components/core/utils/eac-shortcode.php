@@ -1,5 +1,13 @@
 <?php
-/*
+
+// Exit if accessed directly
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+use EACCustomWidgets\Core\Eac_Config_Elements;
+
+/**
 add_action('elementor/editor/wp_head', function() {
 	if (\Elementor\Plugin::$instance->editor->is_edit_mode()) {
 		echo "<script>window.addEventListener('DOMContentLoaded', function() {
@@ -12,7 +20,8 @@ add_action('elementor/editor/wp_head', function() {
 				}, 100);
 		});</script>";
 	}
-});*/
+});
+ */
 
 /**
  * eac_register_shortcode
@@ -24,53 +33,58 @@ add_action('elementor/editor/wp_head', function() {
  * @since 1.5.3
  * @since 1.6.0
  * @since 1.6.3 Suppression du shortcode 'eac_media_shortcode'
+ * @since 2.1.0 Ajout du shortcode 'eac_widget_cart'
  */
 add_action( 'init', 'eac_register_shortcode', 0 );
 function eac_register_shortcode() {
 	add_shortcode( 'eac_img', 'eac_img_shortcode' );
 	add_shortcode( 'eac_elementor_tmpl', 'eac_elementor_add_tmpl' );
 	if ( class_exists( 'WooCommerce' ) ) {
-		add_shortcode( 'product_rating', 'eac_display_product_rating' );
-		add_shortcode( 'woo_session_cart', 'eac_display_session_cart' );
+		add_shortcode( 'eac_product_rating', 'eac_display_product_rating' );
+		add_shortcode( 'eac_widget_cart', 'eac_display_widget_cart' );
 	}
 	add_action( 'manage_elementor_library_posts_columns', 'eac_add_colonnes_elementor' );
 	add_action( 'manage_elementor_library_posts_custom_column', 'eac_data_colonnes_elementor', 10, 2 );
 }
 
-// https://stackoverflow.com/questions/38546354/woocommerce-cookies-and-sessions-get-the-current-products-in-cart
-if ( class_exists( 'WooCommerce' ) && ! function_exists( 'eac_display_session_cart' ) ) {
-	function eac_display_session_cart( $atts ) {
-		$session_id = null;
-		$values     = null;
-
-		foreach ( $_COOKIE as $key => $value ) {
-			if ( stripos( $key, 'wp_woocommerce_session_' ) === false ) {
-				continue;
-			}
-			$values = explode( '||', $value );
-		}
-
-		$session_id   = $values[0];
-		$session      = new WC_Session_Handler();
-		$session_data = $session->get_session( $session_id );
-
-		// Contains array of items in cart including product ids, quantities, totals, etc.
-		$cart_data = unserialize( $session_data['cart'] );
-
-		return highlight_string( "<?php\nWoo Cokkie =\n" . var_export( $cart_data, true ) . ";\n?>" );
-		// return json_encode($cart_data);
+/** @since 2.1.0 */
+if ( ! function_exists( 'eac_display_widget_cart' ) ) {
+	function eac_display_widget_cart( $params = array() ) {
+		$args  = shortcode_atts(
+			array(
+				'title' => '',
+			),
+			$params,
+			'eac_widget_cart'
+		);
+		/**$has_cart = ! is_null( WC()->cart && WC()->cart->get_cart_contents_count() !== 0 );*/
+		$title = ! empty( $args['title'] ) ? trim( $args['title'] ) : esc_html__( 'Mon panier', 'eac-components' );
+		ob_start();
+		?>
+		<div class="eac_widget_cart">
+		<?php
+		the_widget( 'WC_Widget_Cart', array( 'title' => $title ) );
+		?>
+		</div>
+		<?php
+		return ob_get_clean();
 	}
 }
 
 // WooCommerce est installé
-if ( class_exists( 'WooCommerce' ) && ! function_exists( 'eac_display_product_rating' ) ) {
-	function eac_display_product_rating( $atts ) {
-		// Shortcode attributes
-		$atts = shortcode_atts( array( 'id' => '' ), $atts, 'product_rating' );
+if ( ! function_exists( 'eac_display_product_rating' ) ) {
+	function eac_display_product_rating( $params = array() ) {
+		$args = shortcode_atts(
+			array(
+				'id' => '',
+			),
+			$params,
+			'eac_product_rating'
+		);
 
-		if ( isset( $atts['id'] ) && $atts['id'] > 0 ) {
+		if ( isset( $args['id'] ) && $args['id'] > 0 ) {
 			// Get an instance of the WC_Product Object
-			$product = wc_get_product( $atts['id'] );
+			$product = wc_get_product( $args['id'] );
 
 			// The product average rating (or how many stars this product has)
 			$average = $product->get_average_rating();
@@ -95,34 +109,31 @@ if ( class_exists( 'WooCommerce' ) && ! function_exists( 'eac_display_product_ra
  * @since 1.9.2 Ajout des attributs "noopener noreferrer" pour les liens ouverts dans un autre onglet
  */
 function eac_img_shortcode( $params = array() ) {
-	extract(
-		shortcode_atts(
-			array(
-				'src'      => '',
-				'link'     => '',
-				'fancybox' => 'no',
-				'caption'  => '',
-				'embed'    => 'no',
-			),
-			$params
-		)
+	$args = shortcode_atts(
+		array(
+			'src'      => '',
+			'link'     => '',
+			'fancybox' => 'no',
+			'caption'  => '',
+			'embed'    => 'no',
+		),
+		$params,
+		'eac_img'
 	);
 
 	$html_default = '';
-	$source       = trim( $src );
-	$linked       = ! empty( trim( $link ) ) ? trim( $link ) : $link;
-	$fancy_box    = in_array( trim( $fancybox ), array( 'yes', 'no' ) ) ? trim( $fancybox ) : $fancybox;
-	$fig_caption  = ! empty( trim( $caption ) ) ? trim( $caption ) : 'Hooops';
-	$embed_link   = in_array( trim( $embed ), array( 'yes', 'no' ) ) ? trim( $embed ) : $embed;
+	$source       = esc_url( $args['src'] );
+	$linked       = esc_url( $args['link'] );
+	$fancy_box    = in_array( trim( $args['fancybox'] ), array( 'yes', 'no' ), true ) ? trim( $args['fancybox'] ) : 'no';
+	$fig_caption  = esc_html( $args['caption'] );
+	$embed_link   = in_array( trim( $args['embed'] ), array( 'yes', 'no' ), true ) ? trim( $args['embed'] ) : 'no';
 
 	if ( empty( $source ) ) {
 		return $html_default; }
-	// if (! empty($source) && ! preg_match("/\.(gif|png|jpg|jpeg|bmp)$/i", $source)) { return $html_default; }
 
-	if ( $embed_link === 'yes' ) {
+	if ( 'yes' === $embed_link ) {
 		// print_r($linked); // Embed le lien
-		// Lien externe
-	} elseif ( ! empty( $linked ) ) {
+	} elseif ( ! empty( $linked ) ) { // Lien externe
 		$html_default =
 			'<figure>
                 <a href="' . $linked . '" target="_blank" rel="nofollow noopener noreferrer">
@@ -131,7 +142,7 @@ function eac_img_shortcode( $params = array() ) {
                 </a>
             </figure>';
 		// @since 1.6.2 Fancybox
-	} elseif ( $fancy_box === 'yes' ) {
+	} elseif ( 'yes' === $fancy_box ) {
 		$html_default =
 			'<figure>
                 <a href="' . $source . '" data-elementor-open-lightbox="no" data-fancybox="eac-img-shortcode" data-caption="' . $fig_caption . '">
@@ -161,25 +172,24 @@ function eac_img_shortcode( $params = array() ) {
  * @since 1.6.2 Ajout du filtre language 'WPML'
  */
 function eac_elementor_add_tmpl( $params = array() ) {
-	extract(
-		shortcode_atts(
-			array(
-				'id'  => '',
-				'css' => 'true',
-			),
-			$params
-		)
+	$args = shortcode_atts(
+		array(
+			'id'  => '',
+			'css' => 'true',
+		),
+		$params,
+		'eac_elementor_tmpl'
 	);
 
-	$id_tmpl  = trim( $id );
-	$css_tmpl = trim( $css );
+	$id_tmpl  = absint( trim( $args['id'] ) );
+	$css_tmpl = trim( $args['css'] );
 
 	if ( empty( $id_tmpl ) || ! get_post( $id_tmpl ) ) {
 		return '';
 	}
 
 	// Évite la récursivité
-	if ( get_the_ID() === (int) $id_tmpl ) {
+	if ( get_the_ID() === $id_tmpl ) {
 		return esc_html__( 'ID du modèle ne peut pas être le même que le modèle actuel', 'eac-components' );
 	}
 
@@ -194,9 +204,23 @@ function eac_elementor_add_tmpl( $params = array() ) {
  * Ajout de la colonne 'Shortcode' dans la vue Elementor Templates
  *
  * @since 1.6.0
+ * @since 2.1.0 Ajout de la colonne 'Show on'
+ * @since 2.1.0 Ajout de la colonne 'Cache'
  */
 function eac_add_colonnes_elementor( $columns ) {
-	return array_merge( $columns, array( 'eac_shortcode' => esc_html__( 'Shortcode', 'eac-components' ) ) );
+	$hft_column = array();
+	$option_cache = get_option( Eac_Config_Elements::get_mega_nav_menu_cache_name() );
+
+	if ( ! empty( get_query_var( 'elementor_library_type' ) ) && ( 'siteheader' === get_query_var( 'elementor_library_type' ) || 'sitefooter' === get_query_var( 'elementor_library_type' ) ) ) {
+		$hft_column['eac_hfb_show'] = esc_html__( 'Afficher avec', 'eac-components' );
+		if ( $option_cache && 'yes' === $option_cache ) {
+			$hft_column['eac_hfb_cache'] = esc_html( 'Cache' );
+		}
+	} else {
+		$hft_column['eac_shortcode'] = esc_html__( 'Code court', 'eac-components' );
+	}
+
+	return array_merge( $columns, $hft_column );
 }
 
 /**
@@ -205,11 +229,76 @@ function eac_add_colonnes_elementor( $columns ) {
  *
  * @since 1.6.0
  * @since 1.9.1 Check post_status
+ * @since 2.1.0 Valorisation de la colonne 'Show on'
+ * @since 2.1.1 Valorisation de la colonne 'Cache' si le menu est effectivement dans le cache (options)
  */
 function eac_data_colonnes_elementor( $column_name, $post_id ) {
-	$poste = get_post( $post_id );
-	if ( $poste->post_status === 'publish' && 'eac_shortcode' === $column_name ) {
-		echo '<input type="text" class="widefat" onfocus="this.select()" value=\'[eac_elementor_tmpl id="' . $post_id . '"]\' readonly>';
+	global $wpdb;
+	$the_post = get_post( $post_id );
+
+	if ( 'publish' === $the_post->post_status && 'eac_shortcode' === $column_name ) {
+		echo '<input type="text" class="widefat" onfocus="this.select()" value=\'[eac_elementor_tmpl id="' . esc_attr( $post_id ) . '"]\' readonly>';
+	} elseif ( 'publish' === $the_post->post_status && 'eac_hfb_cache' === $column_name ) {
+		$option_name = 'eac_options_nav_menu-' . $post_id . '-';
+		$option      = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT option_name
+				FROM {$wpdb->prefix}options
+				WHERE option_name LIKE %s",
+				$wpdb->esc_like( $option_name ) . '%'
+			)
+		);
+
+		//error_log(json_encode(\Elementor\Plugin::$instance->documents->get( $post_id )->get_elements_data()));
+
+		if ( $option && ! empty( $option ) ) {
+			echo esc_html__( 'Oui', 'eac-components' );
+		} else {
+			echo esc_html__( 'Non', 'eac-components' );
+		}
+	} elseif ( 'publish' === $the_post->post_status && 'eac_hfb_show' === $column_name ) {
+		$meta = get_post_meta( $post_id, '_elementor_page_settings', true );
+
+		if ( isset( $meta['show_on'] ) ) {
+			if ( 'singular' === $meta['show_on'] ) {
+				if ( ! empty( $meta['singular_pages'] ) ) {
+					echo esc_html( implode( ',', array_map( 'ucfirst', $meta['singular_pages'] ) ) );
+				} else {
+					echo esc_html( 'singular' );
+				}
+			} elseif ( 'archive' === $meta['show_on'] ) {
+				if ( ! empty( $meta['archive_pages'] ) ) {
+					echo esc_html( implode( ',', array_map( 'ucfirst', $meta['archive_pages'] ) ) );
+				} else {
+					echo esc_html( 'Archives' );
+				}
+			} elseif ( 'custom' === $meta['show_on'] ) {
+				if ( ! empty( $meta['singular_pages'] ) ) {
+					echo esc_html( implode( ',', array_map( 'ucfirst', $meta['singular_pages'] ) ) );
+				}
+				if ( ! empty( $meta['archive_pages'] ) ) {
+					echo esc_html( ',' . implode( ',', array_map( 'ucfirst', $meta['archive_pages'] ) ) );
+				}
+			} elseif ( 'global' === $meta['show_on'] ) {
+				echo esc_html( 'Global' );
+			} elseif ( 'blog' === $meta['show_on'] || 'index' === $meta['show_on'] ) {
+				echo esc_html( 'Blog' );
+			} elseif ( 'front' === $meta['show_on'] ) {
+				echo esc_html__( "Page d'accueil", 'eac-components' );
+			} elseif ( 'search' === $meta['show_on'] ) {
+				echo esc_html__( 'Résultat de la recherche', 'eac-components' );
+			} elseif ( 'wc_shop' === $meta['show_on'] ) {
+				echo esc_html__( 'Boutique WooCommerce', 'eac-components' );
+			} elseif ( 'err404' === $meta['show_on'] ) {
+				echo esc_html__( 'Page erreur 404', 'eac-components' );
+			} elseif ( 'privacy' === $meta['show_on'] ) {
+				echo esc_html__( 'Politique de confidentialité', 'eac-components' );
+			} else {
+				echo esc_html( '---' );
+			}
+		} else {
+			echo esc_html( '---' );
+		}
 	}
 }
 
@@ -220,7 +309,7 @@ function eac_data_colonnes_elementor( $column_name, $post_id ) {
  * @since 1.6.5
  */
 function console_log( $output, $with_script_tags = true ) {
-	$js_code = 'console.log(' . json_encode( $output, JSON_HEX_TAG ) . ');';
+	$js_code = 'console.log(' . wp_json_encode( $output, JSON_HEX_TAG ) . ');';
 	if ( $with_script_tags ) {
 		$js_code = '<script>' . $js_code . '</script>';
 	}

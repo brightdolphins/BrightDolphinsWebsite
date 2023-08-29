@@ -106,7 +106,6 @@ class UniteCreatorTestAddonView{
 		$addonType = $this->addon->getType();
 		$objAddonType = $this->addon->getObjAddonType();
 		
-		
 		$urlEditAddon = HelperUC::getViewUrl_EditAddon($addonID);
 		
 		$urlTestWithData = HelperUC::getViewUrl_TestAddon($addonID, "loaddata=test");

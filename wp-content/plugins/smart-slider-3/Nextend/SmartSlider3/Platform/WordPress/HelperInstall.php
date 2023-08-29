@@ -48,6 +48,10 @@ class HelperInstall {
 
             update_option("n2_ss3_version", SmartSlider3Info::$completeVersion);
 
+            if (function_exists('opcache_reset')) {
+                opcache_reset();
+            }
+
             return true;
         }
 

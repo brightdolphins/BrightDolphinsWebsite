@@ -138,6 +138,9 @@ class Wpr_Mailchimp extends Widget_Base {
 			[
 				'label' => esc_html__( 'Form Title', 'wpr-addons' ),
 				'type' => Controls_Manager::TEXT,
+				'dynamic' => [
+					'active' => true,
+				],
 				'default' => 'Join the family!',
 				'condition' => [
 					'show_form_header' => 'yes',
@@ -150,6 +153,9 @@ class Wpr_Mailchimp extends Widget_Base {
 			[
 				'label' => esc_html__( 'Form Description', 'wpr-addons' ),
 				'type' => Controls_Manager::TEXTAREA,
+				'dynamic' => [
+					'active' => true,
+				],
 				'default' => 'Sign up for a Newsletter.',
 				'condition' => [
 					'show_form_header' => 'yes',
@@ -202,6 +208,9 @@ class Wpr_Mailchimp extends Widget_Base {
 			[
 				'label' => esc_html__( 'Email Label', 'wpr-addons' ),
 				'type' => Controls_Manager::TEXT,
+				'dynamic' => [
+					'active' => true,
+				],
 				'default' => 'Email',
 				'separator' => 'before',
 			]
@@ -212,6 +221,9 @@ class Wpr_Mailchimp extends Widget_Base {
 			[
 				'label' => esc_html__( 'Email Placeholder', 'wpr-addons' ),
 				'type' => Controls_Manager::TEXT,
+				'dynamic' => [
+					'active' => true,
+				],
 				'default' => 'sample@mail.com',
 			]
 		);
@@ -233,6 +245,9 @@ class Wpr_Mailchimp extends Widget_Base {
 			[
 				'label' => esc_html__( 'Button Text', 'wpr-addons' ),
 				'type' => Controls_Manager::TEXT,
+				'dynamic' => [
+					'active' => true,
+				],
 				'default' => 'Subscribe',
 			]
 		);
@@ -242,6 +257,9 @@ class Wpr_Mailchimp extends Widget_Base {
 			[
 				'label' => esc_html__( 'Button Loading Text', 'wpr-addons' ),
 				'type' => Controls_Manager::TEXT,
+				'dynamic' => [
+					'active' => true,
+				],
 				'default' => 'Subscribing...',
 				'separator' => 'after'
 			]
@@ -252,6 +270,9 @@ class Wpr_Mailchimp extends Widget_Base {
 			[
 				'label' => esc_html__( 'Success Message', 'wpr-addons' ),
 				'type' => Controls_Manager::TEXT,
+				'dynamic' => [
+					'active' => true,
+				],
 				'default' => 'You have been successfully Subscribed!',
 			]
 		);
@@ -261,6 +282,9 @@ class Wpr_Mailchimp extends Widget_Base {
 			[
 				'label' => esc_html__( 'Error Message', 'wpr-addons' ),
 				'type' => Controls_Manager::TEXT,
+				'dynamic' => [
+					'active' => true,
+				],
 				'default' => 'Ops! Something went wrong, please try again.',
 			]
 		);
@@ -284,7 +308,8 @@ class Wpr_Mailchimp extends Widget_Base {
 
 		// Section: Pro Features
 		Utilities::pro_features_list_section( $this, '', Controls_Manager::RAW_HTML, 'mailchimp', [
-			'Add Extra Fields - Name, Last Name & Phone Number'
+			'Add Extra Fields - Name, Last Name & Phone Number',
+			'Clear Fields after Form Submission'
 		] );
 
 		// Styles ====================
@@ -1397,7 +1422,7 @@ class Wpr_Mailchimp extends Widget_Base {
 
 		?>
 
-		<form class="wpr-mailchimp-form" id="wpr-mailchimp-form-<?php echo esc_attr( $this->get_id() ); ?>" method="POST" data-api-key="<?php echo esc_attr(get_option('wpr_mailchimp_api_key')); ?>" data-list-id="<?php echo esc_attr($settings['maichimp_audience']); ?>" data-clear-fields="<?php echo $clear_fields_on_submit; ?>">
+		<form class="wpr-mailchimp-form" id="wpr-mailchimp-form-<?php echo esc_attr( $this->get_id() ); ?>" method="POST" data-list-id="<?php echo esc_attr($settings['maichimp_audience']); ?>" data-clear-fields="<?php echo $clear_fields_on_submit; ?>">
 			<!-- Form Header -->
 			<?php if ( 'yes' === $settings['show_form_header'] ) : ?>
 			<div class="wpr-mailchimp-header">

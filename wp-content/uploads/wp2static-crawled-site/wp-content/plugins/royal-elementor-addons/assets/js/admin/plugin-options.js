@@ -12,8 +12,10 @@ jQuery(document).ready(function( $ ) {
 
 	// Current Tab
 	var currentTab = $('.nav-tab-active').attr( 'data-title' );
-		currentTab = currentTab.trim().toLowerCase(),
-		currentTab = currentTab.replace(' ', '_');
+		if ( currentTab ) {
+			currentTab = currentTab.trim().toLowerCase(),
+			currentTab = currentTab.replace(' ', '_');
+		}
 
 	/*
 	** Get Active Filter -------------------------
@@ -73,6 +75,7 @@ jQuery(document).ready(function( $ ) {
 		// AJAX Data
 		var data = {
 			action: 'wpr_create_template',
+			nonce: WprPluginOptions.nonce,
 			user_template_library: library,
 			user_template_title: title,
 			user_template_slug: slug,
@@ -174,8 +177,11 @@ jQuery(document).ready(function( $ ) {
 			// Get Template Slug
 			var slug = deleteButton.attr('data-slug');
 
+			var oneTimeNonce = deleteButton.attr('data-nonce');
+
 			// AJAX Data
 			var data = {
+				nonce: oneTimeNonce,
 				action: 'wpr_delete_template',
 				template_slug: slug,
 				template_library: library,
@@ -206,7 +212,8 @@ jQuery(document).ready(function( $ ) {
 
 				// AJAX Data
 				var data = {
-					action: 'wpr_save_template_conditions'
+					action: 'wpr_save_template_conditions',
+					nonce: WprPluginOptions.nonce,
 				};
 				data['wpr_'+ currentTab +'_conditions'] = JSON.stringify(conditions);
 			}
@@ -445,13 +452,23 @@ jQuery(document).ready(function( $ ) {
 	function popupSubConditionSelect() {
 		$('.archives-condition-select, .singles-condition-select').on( 'change', function() {
 			var current = $(this).parent(),
-				selected = $( 'option:selected', this );
+				selected = $( 'option:selected', this ),
+				value = $(this).val();
 
 			// Show Custom ID input
 			if ( selected.hasClass('custom-ids') || selected.hasClass('custom-type-ids') ) {
 				current.find(inputIDs).val('all').trigger('keyup').show();
 			} else {
 				current.find(inputIDs).hide();
+			}
+
+			console.log(value);
+
+			// Show/Hide Expert Notice
+			if ( 0 === value.indexOf('pro-') ) {
+				$('.wpr-expert-notice').show();
+			} else {
+				$('.wpr-expert-notice').hide();
 			}
 		});
 	}
@@ -587,6 +604,7 @@ jQuery(document).ready(function( $ ) {
 			// AJAX Data
 			var data = {
 				action: 'wpr_save_template_conditions',
+				nonce: WprPluginOptions.nonce,
 				template: template
 			};
 			data['wpr_'+ currentTab +'_conditions'] = JSON.stringify(conditions);
@@ -624,7 +642,7 @@ jQuery(document).ready(function( $ ) {
 	** Highlight Templates with Active Conditions --------
 	*/
 	if ( $('body').hasClass('royal-addons_page_wpr-theme-builder') || $('body').hasClass('royal-addons_page_wpr-popups') ) {
-		if ( 'my_templates' !== currentTab ) {
+		if ( currentTab && 'my_templates' !== currentTab ) {
 			var conditions = $( '#wpr_'+ currentTab +'_conditions' ).val(),
 				conditions = ('' === conditions || '[]' === conditions) ? {} : JSON.parse(conditions);
 
@@ -634,6 +652,24 @@ jQuery(document).ready(function( $ ) {
 		}
 	}
 
+	/*
+	** Save Options with Ajax -------------------------
+	*/
+	$('.wpr-settings-page form').submit(function () {
+		var settings =  $(this).serialize();
+
+		$.post( 'options.php', settings ).error(function() {
+			// alert('error');
+		}).success(function() {
+			$('.wpr-settings-saved').stop().fadeIn(500).delay(1000).fadeOut(1000); 
+		});
+
+		return false;    
+	});
+
+	$('.wpr-element').find('input').on( 'change', function() {
+		$('.wpr-settings-page form').submit();
+	});
 
 	/*
 	** Elements Toggle -------------------------
@@ -644,46 +680,95 @@ jQuery(document).ready(function( $ ) {
 		} else {
 			$('.wpr-element').find('input').prop( 'checked', false );
 		}
+
+		$('.wpr-settings-page form').submit();
 	});
 
 
 	/*
-	** Filters -------------------------
+	** Elements Search --------------------------
 	*/
-	$( '.template-filters ul li span' ).on( 'click', function() {
-		var filter = $(this).parent();
+	var searchTimeout = null;  
+	$('.wpr-widgets-search').find('input').keyup(function(e) {
+		if ( e.which === 13 ) {
+			return false;
+		}
 
-		// Deny
-		if ( 'back' === filter.data('role') ) return;
+		var val = $(this).val().toLowerCase();
 
-		// Reset
-		filter.parent().find('li').removeClass('active-filter');
-		$(this).closest('.templates-grid').find('.column-3-wrap').hide();
+		if (searchTimeout != null) {
+			clearTimeout(searchTimeout);
+		}
 
-		// Active Class
-		filter.addClass('active-filter');
-		$(this).closest('.templates-grid').find('.column-3-wrap.'+ filter.data('class')).fadeIn();
+		searchTimeout = setTimeout(function() {
+			searchTimeout = null;
+			let visibleElements = 'none';
+			
+			// Reset
+			$('.wpr-widgets-not-found').hide();
+			$('.submit').show();
+
+			if ( '' !== val ) {
+				$('.wpr-elements, .wpr-element, .wpr-elements-heading').hide();
+				$('.wpr-widgets-not-found').hide();
+			} else {
+				$('.wpr-elements, .wpr-element, .wpr-elements-heading').show();
+				$('.wpr-elements-filters li').first().trigger('click');
+			}
+
+			$('.wpr-element').each(function(){
+				let title = $(this).find('h3').text().toLowerCase();
+
+				if ( -1 !== title.indexOf(val) ) {
+					$(this).show();
+					$(this).parent().show();
+					visibleElements = 'visible';
+				}
+			});
+
+			if ( 'none' === visibleElements ) {
+				$('.wpr-widgets-not-found').css('display', 'flex');
+				$('.submit').hide();
+			}
+
+			$.ajax({
+				type: 'POST',
+				url: ajaxurl,
+				data: {
+					action: 'wpr_backend_widget_search_query_results',
+					search_query: val
+				},
+				success: function( response ) {}
+			});
+		}, 1000);  
 	});
 
-	// Sub Filters
-	$( '.template-filters ul li span' ).on( 'click', function() {
-		var filter = $(this).parent(),
-			role   = filter.data('role');
+	/*
+	** Elements Filters -----------------------------------
+	*/
+	$('.wpr-elements-filters li').on('click', function() {
+		let filter = $(this).data('filter');
 
-		if ( 'parent' === role ) {
-			filter.siblings().hide();
-			filter.children('span').hide();
-			filter.find('.sub-filters').show();
-		} else if ( 'back' === role ) {
-			filter.closest('ul').parent().siblings().show();
-			filter.closest('ul').parent().children('span').show();
-			filter.closest('ul').parent().find('.sub-filters').hide();
+		$('.wpr-elements-toggle').hide();
+		$('.wpr-elements-filters li').removeClass('wpr-active-filter');
+		$(this).addClass('wpr-active-filter');
+
+		if ( 'all' === filter ) {
+			$('.wpr-elements, .wpr-elements-heading').show();
+			$('.wpr-elements-toggle').show();
+		} else if ( 'theme' === filter ) {
+			$('.wpr-elements, .wpr-elements-heading').hide();
+			$('.wpr-elements-theme').show();
+			$('.wpr-elements-theme').prev('.wpr-elements-heading').show();
+		} else {
+			$('.wpr-elements, .wpr-elements-heading').hide();
+			$('.wpr-elements-woo').show();
+			$('.wpr-elements-woo').prev('.wpr-elements-heading').show();
 		}
 	});
 
-
 	/*
-	** Settings Tab -------------------------
+	** Settings Tab ------------------------------
 	*/
 
 	// Lightbox Settings
@@ -706,7 +791,7 @@ jQuery(document).ready(function( $ ) {
 
 
 	/*
-	** Image Upload Option -------------------------
+	** Image Upload Option -----------------------
 	*/
 	$('body').on( 'click', '.wpr-setting-custom-img-upload button', function(e){
 		e.preventDefault();
@@ -743,8 +828,88 @@ jQuery(document).ready(function( $ ) {
 	
 	});
 
+    // $('a.wpr-authorize-instagram').on('click', function() {
+    //     window.open('https://www.instagram.com/oauth/authorize?client_id=5484217328332432&redirect_uri=https://reastats.kinsta.cloud/token/social-network.php&scope=user_profile,user_media&response_type=code','popup','width=600,height=600'); 
+    //     return false;
+    // });
+
 
 	//TODO: Remove this - only for development
 	// $('.nav-tab-wrapper').after( '<p>'+ $('.nav-tab-wrapper').next('input').val() +'</p>' );
+
+
+	/*
+	** Free vs Pro Options Dropdown ---------------
+	*/
+	$('.wpr-pro-widgets > ul > li > span').on('click', function() {
+		let options = $(this).parent('li').find('ul'),
+			display = options.css('display');
+
+		// Reset
+		$('.wpr-pro-widgets ul ul').slideUp();
+
+		// Show
+		if ( 'none' === display ) {
+			options.slideDown();
+		} else {
+			options.slideUp();
+		}
+	});
+
+	/*
+	** Free vs Pro Search -------------------------
+	*/
+	var searchTimeoutFP = null;  
+	$('.wpr-free-pro-search').find('input').keyup(function(e) {
+		if ( e.which === 13 ) {
+			return false;
+		}
+
+		var val = $(this).val().toLowerCase();
+
+		if (searchTimeoutFP != null) {
+			clearTimeout(searchTimeoutFP);
+		}
+
+		searchTimeoutFP = setTimeout(function() {
+			searchTimeoutFP = null;
+			let visibleElements = 'none';
+
+			// Reset
+			$('.wpr-feature-not-found').hide();
+			$('.wpr-free-pro-upgrade.last').show();
+
+			if ( '' !== val ) {
+				$('.wpr-free-vs-pro > div > ul > li').hide();
+			} else {
+				$('.wpr-free-vs-pro > div > ul > li').show();
+			}
+
+			$('.wpr-free-vs-pro > div > ul > li').each(function(){
+				let title = $(this).find('span').text().toLowerCase();
+
+				if ( -1 !== title.indexOf(val) ) {
+					$(this).show();
+					$(this).parent().show();
+					visibleElements = 'visible';
+				}
+			});
+
+			if ( 'none' === visibleElements ) {
+				$('.wpr-feature-not-found').css('display', 'flex');
+				$('.wpr-free-pro-upgrade.last').hide();
+			}
+
+			$.ajax({
+				type: 'POST',
+				url: ajaxurl,
+				data: {
+					action: 'wpr_backend_freepro_search_query_results',
+					search_query: val
+				},
+				success: function( response ) {}
+			});
+		}, 1000);  
+	});
 
 }); // end dom ready

@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitb4e75f8308c5c865d42739a27e752291
+class ComposerStaticInitd6181bb3614c9c3744da15a71446ee60
 {
     public static $prefixLengthsPsr4 = array (
         'W' => 
@@ -24,16 +24,15 @@ class ComposerStaticInitb4e75f8308c5c865d42739a27e752291
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'WP2StaticZip\\CLI' => __DIR__ . '/../..' . '/src/CLI.php',
         'WP2StaticZip\\Controller' => __DIR__ . '/../..' . '/src/Controller.php',
-        'WP2StaticZip\\WP2StaticZipException' => __DIR__ . '/../..' . '/src/WP2StaticZipException.php',
         'WP2StaticZip\\ZipArchiver' => __DIR__ . '/../..' . '/src/ZipArchiver.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitb4e75f8308c5c865d42739a27e752291::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitb4e75f8308c5c865d42739a27e752291::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitb4e75f8308c5c865d42739a27e752291::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitd6181bb3614c9c3744da15a71446ee60::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitd6181bb3614c9c3744da15a71446ee60::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInitd6181bb3614c9c3744da15a71446ee60::$classMap;
 
         }, null, ClassLoader::class);
     }

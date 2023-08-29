@@ -16,8 +16,6 @@ $header_nav_menu = wp_nav_menu( [
 	'echo' => false,
 ] );
 ?>
-<a class="skip-link screen-reader-text" href="#content">
-	<?php _e( 'Skip to content', 'hello-elementor' ); ?></a>
 
 <header id="site-header" class="site-header" role="banner">
 
@@ -28,7 +26,7 @@ $header_nav_menu = wp_nav_menu( [
 		} elseif ( $site_name ) {
 			?>
 			<h1 class="site-title">
-				<a href="<?php echo esc_url( home_url( '/' ) ); ?>" title="<?php esc_attr_e( 'Home', 'hello-elementor' ); ?>" rel="home">
+				<a href="<?php echo esc_url( home_url( '/' ) ); ?>" title="<?php echo esc_attr__( 'Home', 'hello-elementor' ); ?>" rel="home">
 					<?php echo esc_html( $site_name ); ?>
 				</a>
 			</h1>
@@ -43,8 +41,11 @@ $header_nav_menu = wp_nav_menu( [
 	</div>
 
 	<?php if ( $header_nav_menu ) : ?>
-		<nav class="site-navigation" role="navigation">
-			<?php echo $header_nav_menu; ?>
+		<nav class="site-navigation">
+			<?php
+			// PHPCS - escaped by WordPress with "wp_nav_menu"
+			echo $header_nav_menu; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			?>
 		</nav>
 	<?php endif; ?>
 </header>

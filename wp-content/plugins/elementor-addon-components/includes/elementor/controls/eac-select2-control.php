@@ -15,6 +15,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use EACCustomWidgets\EAC_Plugin;
+
 use Elementor\Base_Data_Control;
 
 class Ajax_Select2_Control extends Base_Data_Control {
@@ -48,7 +50,7 @@ class Ajax_Select2_Control extends Base_Data_Control {
 		wp_enqueue_style( 'elementor-select2' );
 
 		// Charge le script
-		wp_enqueue_script( 'eac-select2-control', EAC_ADDONS_URL . 'assets/js/elementor/controls/eac-select2-control.min.js', array( 'jquery', 'jquery-elementor-select2' ), '1.9.8', true );
+		wp_enqueue_script( 'eac-select2-control', EAC_Plugin::instance()->get_script_url( 'assets/js/elementor/controls/eac-select2-control' ), array( 'jquery', 'jquery-elementor-select2' ), '1.9.8', true );
 
 		$args = array(
 			'ajax_url'           => admin_url( 'admin-ajax.php' ),
@@ -96,9 +98,9 @@ class Ajax_Select2_Control extends Base_Data_Control {
 				</select>
 			</div>
 		</div>
-			
+
 		<# if (data.description) { #><div class="elementor-control-field-description">{{{ data.description }}}</div><# } #></div>
-		
+
 		<?php
 	}
 }

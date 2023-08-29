@@ -9,6 +9,5 @@ return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
     'WP2StaticZip\\CLI' => $baseDir . '/src/CLI.php',
     'WP2StaticZip\\Controller' => $baseDir . '/src/Controller.php',
-    'WP2StaticZip\\WP2StaticZipException' => $baseDir . '/src/WP2StaticZipException.php',
     'WP2StaticZip\\ZipArchiver' => $baseDir . '/src/ZipArchiver.php',
 );

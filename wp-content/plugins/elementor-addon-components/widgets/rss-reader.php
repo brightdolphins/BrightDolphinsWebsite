@@ -8,13 +8,9 @@
  * qui diffuse du contenu au format RSS
  *
  * @since 1.0.0
- * @since 1.8.2 Ajout de la propriété 'prefix_class' pour modifier le style sans recharger le widget
- *              Ajout d'un control pour poser l'URL sur l'image
- * @since 1.8.7 Application des breakpoints
- *              Suppression de la méthode 'init_settings'
- * @since 1.9.0 Intégration des scripts et des styles dans le constructeur de la class
- *              Sécurité passe un nonce en paramètre au script JS
- * @since 1.9.3 Envoie le nonce dans un champ 'input hidden'
+ * @since 2.1.0 Ajout d'un champ texte pour renseigner le label du bouton
+ * Un control pour le style de l'image
+ * Refonte de la partie 'style'
  */
 
 namespace EACCustomWidgets\Widgets;
@@ -32,6 +28,7 @@ use Elementor\Control_Media;
 use Elementor\Utils;
 use Elementor\Group_Control_Typography;
 use Elementor\Core\Schemes\Typography;
+use Elementor\Group_Control_Border;
 use Elementor\Core\Schemes\Color;
 use Elementor\Repeater;
 use Elementor\Core\Breakpoints\Manager as Breakpoints_manager;
@@ -43,14 +40,13 @@ class Lecteur_Rss_Widget extends Widget_Base {
 	 * Constructeur de la class Lecteur_Rss_Widget
 	 *
 	 * Enregistre les scripts et les styles
-	 *
-	 * @since 1.9.0
 	 */
 	public function __construct( $data = array(), $args = null ) {
 		parent::__construct( $data, $args );
 
-		wp_register_script( 'eac-rss-reader', EAC_Plugin::instance()->get_register_script_url( 'eac-rss-reader' ), array( 'jquery', 'elementor-frontend' ), '1.0.0', true );
-		wp_register_style( 'eac-rss-reader', EAC_Plugin::instance()->get_register_style_url( 'rss-reader' ), array( 'eac' ), '1.0.0' );
+		wp_register_script( 'eac-rss-reader', EAC_Plugin::instance()->get_script_url( 'assets/js/elementor/eac-rss-reader' ), array( 'jquery', 'elementor-frontend' ), '1.0.0', true );
+
+		wp_register_style( 'eac-rss-reader', EAC_Plugin::instance()->get_style_url( 'assets/css/rss-reader' ), array( 'eac' ), '1.0.0' );
 	}
 
 	/**
@@ -195,7 +191,7 @@ class Lecteur_Rss_Widget extends Widget_Base {
 				array(
 					'label'       => esc_html__( 'URL', 'eac-components' ),
 					'type'        => Controls_Manager::URL,
-					'placeholder' => 'http://your-link.com/xml/',
+					'placeholder' => 'https://your-link.com/xml/',
 					'default'     => array(
 						'is_external' => true,
 						'nofollow'    => true,
@@ -210,12 +206,24 @@ class Lecteur_Rss_Widget extends Widget_Base {
 					'fields'      => $repeater->get_controls(),
 					'default'     => array(
 						array(
-							'rss_item_title' => "Youtube Playlist - L'univers",
-							'rss_item_url'   => array( 'url' => 'https://www.youtube.com/feeds/videos.xml?playlist_id=PLFs4vir_WsTwEd-nJgVJCZPNL3HALHHpF' ),
+							'rss_item_title' => 'EAC - Components feed',
+							'rss_item_url'   => array( 'url' => 'https://elementor-addon-components.com/feed/' ),
 						),
 						array(
-							'rss_item_title' => 'Youtube Channel - Arte vidéo',
-							'rss_item_url'   => array( 'url' => 'https://www.youtube.com/feeds/videos.xml?channel_id=UCL_cZf5sHKQHMRIEax5o3sg' ),
+							'rss_item_title' => 'Reuters - News en-US',
+							'rss_item_url'   => array( 'url' => 'https://news.google.com/rss/search?q=when:24h+allinurl:reuters.com&ceid=US:en&hl=en-US&gl=US' ),
+						),
+						array(
+							'rss_item_title' => 'Nasa - Image of the day',
+							'rss_item_url'   => array( 'url' => 'https://www.nasa.gov/rss/dyn/lg_image_of_the_day.rss' ),
+						),
+						array(
+							'rss_item_title' => 'Sciences et Avenir - Espace',
+							'rss_item_url'   => array( 'url' => 'https://www.sciencesetavenir.fr/espace/rss.xml' ),
+						),
+						array(
+							'rss_item_title' => "Youtube Playlist - L'univers",
+							'rss_item_url'   => array( 'url' => 'https://www.youtube.com/feeds/videos.xml?playlist_id=PLFs4vir_WsTwEd-nJgVJCZPNL3HALHHpF' ),
 						),
 						array(
 							'rss_item_title' => 'Youtube Channel - Arte cinéma',
@@ -255,7 +263,7 @@ class Lecteur_Rss_Widget extends Widget_Base {
 						),
 						array(
 							'rss_item_title' => "L'Équipe",
-							'rss_item_url'   => array( 'url' => 'https://www.lequipe.fr/rss/actu_rss.xml' ),
+							'rss_item_url'   => array( 'url' => 'https://dwh.lequipe.fr/api/edito/rss?path=/' ),
 						),
 						array(
 							'rss_item_title' => 'France TV - Info',
@@ -264,10 +272,6 @@ class Lecteur_Rss_Widget extends Widget_Base {
 						array(
 							'rss_item_title' => 'Sciences et Avenir - Espace',
 							'rss_item_url'   => array( 'url' => 'https://www.sciencesetavenir.fr/espace/rss.xml' ),
-						),
-						array(
-							'rss_item_title' => 'RTBF - Info',
-							'rss_item_url'   => array( 'url' => 'https://rss.rtbf.be/article/rss/highlight_rtbfinfo_info-accueil.xml' ),
 						),
 						array(
 							'rss_item_title' => 'Huffington Post',
@@ -290,10 +294,6 @@ class Lecteur_Rss_Widget extends Widget_Base {
 							'rss_item_url'   => array( 'url' => 'https://ep00.epimg.net/rss/internacional/portada.xml' ),
 						),
 						array(
-							'rss_item_title' => 'Sénégal - APS',
-							'rss_item_url'   => array( 'url' => 'http://aps.sn/spip.php?page=backend' ),
-						),
-						array(
 							'rss_item_title' => 'Die Welt',
 							'rss_item_url'   => array( 'url' => 'https://www.welt.de/feeds/latest.rss' ),
 						),
@@ -303,7 +303,7 @@ class Lecteur_Rss_Widget extends Widget_Base {
 						),
 						array(
 							'rss_item_title' => 'Première - Actu Cinéma',
-							'rss_item_url'   => array( 'url' => 'http://www.premiere.fr/rss/actu-cinema' ),
+							'rss_item_url'   => array( 'url' => 'https://www.premiere.fr/rss/actu-cinema' ),
 						),
 						array(
 							'rss_item_title' => 'WP Formation',
@@ -311,35 +311,35 @@ class Lecteur_Rss_Widget extends Widget_Base {
 						),
 						array(
 							'rss_item_title' => 'WP Marmite',
-							'rss_item_url'   => array( 'url' => 'http://feedpress.me/WPMarmite' ),
+							'rss_item_url'   => array( 'url' => 'https://feedpress.me/WPMarmite' ),
+						),
+						array(
+							'rss_item_title' => 'Smashing Magazine',
+							'rss_item_url'   => array( 'url' => 'https://www.smashingmagazine.com/feed/' ),
 						),
 						array(
 							'rss_item_title' => 'Podcast France Inter - Le 7/9',
-							'rss_item_url'   => array( 'url' => 'http://radiofrance-podcast.net/podcast09/rss_10241.xml' ),
+							'rss_item_url'   => array( 'url' => 'https://radiofrance-podcast.net/podcast09/rss_10241.xml' ),
 						),
 						array(
 							'rss_item_title' => 'Podcast France Inter - Le masque et la plume',
-							'rss_item_url'   => array( 'url' => 'http://radiofrance-podcast.net/podcast09/rss_14007.xml' ),
+							'rss_item_url'   => array( 'url' => 'https://radiofrance-podcast.net/podcast09/rss_14007.xml' ),
 						),
 						array(
 							'rss_item_title' => 'Podcast France Culture - La méthode scientifique',
-							'rss_item_url'   => array( 'url' => 'http://radiofrance-podcast.net/podcast09/rss_14312.xml' ),
+							'rss_item_url'   => array( 'url' => 'https://radiofrance-podcast.net/podcast09/rss_14312.xml' ),
 						),
 						array(
-							'rss_item_title' => 'Podcast Collège de France - Histoire des religions',
-							'rss_item_url'   => array( 'url' => 'http://podcast.college-de-france.fr/xml/histoirereligions.xml' ),
+							'rss_item_title' => 'Podcast Collège de France - Tous les podcasts',
+							'rss_item_url'   => array( 'url' => 'https://podcast.college-de-france.fr/xml/general.xml' ),
 						),
 						array(
-							'rss_item_title' => 'Podcast Collège de France - Sciences et technologies',
-							'rss_item_url'   => array( 'url' => 'http://podcast.college-de-france.fr/xml/sciencestechno.xml' ),
+							'rss_item_title' => 'Collège de France - Actualités',
+							'rss_item_url'   => array( 'url' => 'https://www.college-de-france.fr/news.xml' ),
 						),
 						array(
 							'rss_item_title' => 'Podcast BBC - BBC World Service',
 							'rss_item_url'   => array( 'url' => 'https://podcasts.files.bbci.co.uk/p02nq0gn.rss' ),
-						),
-						array(
-							'rss_item_title' => 'Podcast VOA - Learning English Broadcast',
-							'rss_item_url'   => array( 'url' => 'https://learningenglish.voanews.com/podcast/?count=20&zoneId=1689' ),
 						),
 						array(
 							'rss_item_title' => 'Podcast Spanish - Learn Spanish',
@@ -382,6 +382,20 @@ class Lecteur_Rss_Widget extends Widget_Base {
 					'max'         => 50,
 					'step'        => 5,
 					'default'     => 20,
+				)
+			);
+
+			/** @since 2.1.0 */
+			$this->add_control(
+				'rss_item_button_label',
+				array(
+					'label'     => esc_html__( 'Label du bouton', 'eac-components' ),
+					'type'      => Controls_Manager::TEXT,
+					'default'   => esc_html__( 'Lire le flux', 'eac-components' ),
+					'dynamic'   => array(
+						'active' => true,
+					),
+					'separator' => 'before',
 				)
 			);
 
@@ -515,12 +529,18 @@ class Lecteur_Rss_Widget extends Widget_Base {
 			$active_breakpoints  = Plugin::$instance->breakpoints->get_active_breakpoints();
 			$columns_device_args = array();
 		foreach ( $active_breakpoints as $breakpoint_name => $breakpoint_instance ) {
-			if ( $breakpoint_name === Breakpoints_manager::BREAKPOINT_KEY_MOBILE ) {
-				$columns_device_args[ $breakpoint_name ] = array( 'default' => '1' );
-			} elseif ( $breakpoint_name === Breakpoints_manager::BREAKPOINT_KEY_MOBILE_EXTRA ) {
-				$columns_device_args[ $breakpoint_name ] = array( 'default' => '2' );
-			} else {
+			if ( Breakpoints_manager::BREAKPOINT_KEY_WIDESCREEN === $breakpoint_name ) {
+				$columns_device_args[ $breakpoint_name ] = array( 'default' => '4' );
+			} elseif ( Breakpoints_manager::BREAKPOINT_KEY_LAPTOP === $breakpoint_name ) {
 				$columns_device_args[ $breakpoint_name ] = array( 'default' => '3' );
+			} elseif ( Breakpoints_manager::BREAKPOINT_KEY_TABLET_EXTRA === $breakpoint_name ) {
+					$columns_device_args[ $breakpoint_name ] = array( 'default' => '3' );
+			} elseif ( Breakpoints_manager::BREAKPOINT_KEY_TABLET === $breakpoint_name ) {
+					$columns_device_args[ $breakpoint_name ] = array( 'default' => '3' );
+			} elseif ( Breakpoints_manager::BREAKPOINT_KEY_MOBILE_EXTRA === $breakpoint_name ) {
+				$columns_device_args[ $breakpoint_name ] = array( 'default' => '2' );
+			} elseif ( Breakpoints_manager::BREAKPOINT_KEY_MOBILE === $breakpoint_name ) {
+				$columns_device_args[ $breakpoint_name ] = array( 'default' => '1' );
 			}
 		}
 
@@ -549,7 +569,7 @@ class Lecteur_Rss_Widget extends Widget_Base {
 		$this->start_controls_section(
 			'rss_general_style',
 			array(
-				'label' => esc_html__( 'Global', 'eac-components' ),
+				'label' => esc_html__( 'Général', 'eac-components' ),
 				'tab'   => Controls_Manager::TAB_STYLE,
 			)
 		);
@@ -590,15 +610,15 @@ class Lecteur_Rss_Widget extends Widget_Base {
 				)
 			);
 
-		$this->end_controls_section();
-
-		$this->start_controls_section(
-			'rss_items_style',
-			array(
-				'label' => esc_html__( 'Articles', 'eac-components' ),
-				'tab'   => Controls_Manager::TAB_STYLE,
-			)
-		);
+			/** Articles */
+			$this->add_control(
+				'rss_items_style',
+				array(
+					'label'     => esc_html__( 'Articles', 'eac-components' ),
+					'type'      => Controls_Manager::HEADING,
+					'separator' => 'before',
+				)
+			);
 
 			$this->add_control(
 				'rss_items_bg_color',
@@ -613,15 +633,54 @@ class Lecteur_Rss_Widget extends Widget_Base {
 				)
 			);
 
-		$this->end_controls_section();
+			/** @since 2.1.0 Image */
+			$this->add_control(
+				'rss_image_style',
+				array(
+					'label'     => esc_html__( 'Image', 'eac-components' ),
+					'type'      => Controls_Manager::HEADING,
+					'separator' => 'before',
+				)
+			);
 
-		$this->start_controls_section(
-			'rss_title_style',
-			array(
-				'label' => esc_html__( 'Titre', 'eac-components' ),
-				'tab'   => Controls_Manager::TAB_STYLE,
-			)
-		);
+			$this->add_group_control(
+				Group_Control_Border::get_type(),
+				array(
+					'name'     => 'rss_image_border',
+					'selector' => '{{WRAPPER}} .rss-galerie__item-image img',
+				)
+			);
+
+			$this->add_control(
+				'rss_image_border_radius',
+				array(
+					'label'              => esc_html__( 'Rayon de la bordure', 'eac-components' ),
+					'type'               => Controls_Manager::DIMENSIONS,
+					'size_units'         => array( 'px', '%' ),
+					'allowed_dimensions' => array( 'top', 'right', 'bottom', 'left' ),
+					'default'            => array(
+						'top'      => 0,
+						'right'    => 0,
+						'bottom'   => 0,
+						'left'     => 0,
+						'unit'     => 'px',
+						'isLinked' => true,
+					),
+					'selectors'          => array(
+						'{{WRAPPER}} .rss-galerie__item-image img' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+					),
+				)
+			);
+
+			/** Titre */
+			$this->add_control(
+				'rss_title_style',
+				array(
+					'label'     => esc_html__( 'Titre', 'eac-components' ),
+					'type'      => Controls_Manager::HEADING,
+					'separator' => 'before',
+				)
+			);
 
 			$this->add_control(
 				'rss_titre_color',
@@ -646,15 +705,15 @@ class Lecteur_Rss_Widget extends Widget_Base {
 				)
 			);
 
-		$this->end_controls_section();
-
-		$this->start_controls_section(
-			'rss_excerpt_style',
-			array(
-				'label' => esc_html__( 'Résumé', 'eac-components' ),
-				'tab'   => Controls_Manager::TAB_STYLE,
-			)
-		);
+			/** Résumé */
+			$this->add_control(
+				'rss_excerpt_style',
+				array(
+					'label'     => esc_html__( 'Résumé', 'eac-components' ),
+					'type'      => Controls_Manager::HEADING,
+					'separator' => 'before',
+				)
+			);
 
 			$this->add_control(
 				'rss_excerpt_color',
@@ -679,16 +738,16 @@ class Lecteur_Rss_Widget extends Widget_Base {
 				)
 			);
 
-		$this->end_controls_section();
-
-		$this->start_controls_section(
-			'rss_icone_style',
-			array(
-				'label'     => esc_html__( 'Pictogrammes', 'eac-components' ),
-				'tab'       => Controls_Manager::TAB_STYLE,
-				'condition' => array( 'rss_item_date' => 'yes' ),
-			)
-		);
+			/** Pictogrammes */
+			$this->add_control(
+				'rss_icone_style',
+				array(
+					'label'     => esc_html__( 'Pictogrammes', 'eac-components' ),
+					'type'      => Controls_Manager::HEADING,
+					'separator' => 'before',
+					'condition' => array( 'rss_item_date' => 'yes' ),
+				)
+			);
 
 			$this->add_control(
 				'rss_icone_color',
@@ -724,13 +783,14 @@ class Lecteur_Rss_Widget extends Widget_Base {
 			return;
 		}
 		$this->add_render_attribute( 'rss_galerie', 'class', 'rss-galerie' );
+		$this->add_render_attribute( 'rss_galerie', 'id', 'rss-galerie' );
+		$this->add_render_attribute( 'rss_galerie', 'role', 'feed' );
 		$this->add_render_attribute( 'rss_galerie', 'data-settings', $this->get_settings_json() );
-		/** @since 1.9.3 'input hidden' */
 		?>
 		<div class="eac-rss-galerie">
-			<input type="hidden" id="rss_nonce" name="rss_nonce" value="<?php echo wp_create_nonce( 'eac_rss_feed_' . $this->get_id() ); ?>" />
+			<input type="hidden" id="rss_nonce" name="rss_nonce" value="<?php echo wp_create_nonce( 'eac_rss_feed_' . $this->get_id() ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>" />
 			<?php $this->render_galerie(); ?>
-			<div <?php echo $this->get_render_attribute_string( 'rss_galerie' ); ?>></div>
+			<div <?php echo wp_kses_post( $this->get_render_attribute_string( 'rss_galerie' ) ); ?>></div>
 		</div>
 		<?php
 	}
@@ -757,7 +817,9 @@ class Lecteur_Rss_Widget extends Widget_Base {
 				</select>
 			</div>
 			<div class="eac__button">
-				<button id="rss__read-button" class="eac__read-button"><?php esc_html_e( 'Lire le flux', 'eac-components' ); ?></button>
+				<button id="rss__read-button" class="eac__read-button" type="button" tabindex="0" aria-expanded="false" aria-controls="rss-galerie">
+					<?php echo sanitize_text_field( $settings['rss_item_button_label'] ); ?>
+				</button>
 			</div>
 			<div id="rss__loader-wheel" class="eac__loader-spin"></div>
 		</div>
@@ -771,15 +833,10 @@ class Lecteur_Rss_Widget extends Widget_Base {
 	 * Retrieve fields values to pass at the widget container
 	 * Convert on JSON format
 	 *
-	 * @uses      json_encode()
+	 * @uses      wp_json_encode()
 	 *
 	 * @return    JSON oject
 	 *
-	 * @access    protected
-	 * @since 1.0.0
-	 * @since 1.0.7
-	 * @since 1.8.2 Suppression de la propriété du style
-	 *              Ajout du paramètre 'data_image_link'
 	 * @since 1.9.0 Ajout du nonce et id du composant
 	 */
 
@@ -788,18 +845,16 @@ class Lecteur_Rss_Widget extends Widget_Base {
 
 		$settings = array(
 			'data_id'         => $this->get_id(),
-			'data_nombre'     => $module_settings['rss_item_nombre'],
-			'data_longueur'   => $module_settings['rss_item_length'],
-			'data_date'       => $module_settings['rss_item_date'] === 'yes' ? true : false,
-			'data_img'        => $module_settings['rss_item_image'] === 'yes' ? true : false,
-			'data_lightbox'   => $module_settings['rss_item_lightbox'] === 'yes' ? true : false,
-			'data_image_link' => $module_settings['rss_item_image_link'] === 'yes' ? true : false,
+			'data_nombre'     => absint( $module_settings['rss_item_nombre'] ),
+			'data_longueur'   => absint( $module_settings['rss_item_length'] ),
+			'data_date'       => 'yes' === $module_settings['rss_item_date'] ? true : false,
+			'data_img'        => 'yes' === $module_settings['rss_item_image'] ? true : false,
+			'data_lightbox'   => 'yes' === $module_settings['rss_item_lightbox'] ? true : false,
+			'data_image_link' => 'yes' === $module_settings['rss_item_image_link'] ? true : false,
 		);
 
-		$settings = json_encode( $settings );
-		return $settings;
+		return wp_json_encode( $settings );
 	}
 
 	protected function content_template() {}
-
 }

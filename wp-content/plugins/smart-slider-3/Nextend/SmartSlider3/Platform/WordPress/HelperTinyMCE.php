@@ -37,9 +37,9 @@ class HelperTinyMCE {
             'page.php'
         ))) {
 
-            $this->addForced();
-
             if (intval(Settings::get('editor-icon', 1))) {
+                $this->addForced();
+
                 if (get_user_option('rich_editing') == 'true') {
                     add_filter('mce_external_plugins', array(
                         $this,

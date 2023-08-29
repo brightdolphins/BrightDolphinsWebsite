@@ -210,7 +210,7 @@ class UniteCreatorElementorIntegrate{
 				//$className .= "_no_memory";
 			
 			self::logMemoryUsage("Before Register Widget: ".$name. ", counter: ".self::$counterWidgets);
-						
+			
 		    $code = "class {$className} extends UniteCreatorElementorWidget{}";
 		    eval($code);
             
@@ -569,6 +569,10 @@ class UniteCreatorElementorIntegrate{
      */
     private function preloadElementorDBData(){
     	
+    	//don't let run the function twice
+    	if(!empty(self::$arrAddonsRecords))
+			return(false);
+			    	
     	$db = HelperUC::getDB();
     	
     	$tableCats = GlobalsUC::$table_categories;
@@ -613,7 +617,7 @@ class UniteCreatorElementorIntegrate{
     		}
     		
     		$this->collectPostsWidgetsByRecord($record);
-    		    		
+    		   
     		self::$arrAddonsRecords[$addonName] = $record;
     		
     		//cache category records
@@ -827,11 +831,13 @@ class UniteCreatorElementorIntegrate{
 			$location = UniteFunctionsUC::getVal($bgOutput, "location");
 
 			$addClass = "";
-			if($location === "front")
+			if($location === "front" || $location === "body_front" || $location === "layout_front")
 				$addClass = " uc-bg-front";
 			
+			$addData = "data-location=\"$location\"";
+			
 			?>
-			<div class="unlimited-elements-background-overlay<?php echo $addClass?>" data-forid="<?php echo $elementID?>" style="display:none">
+			<div class="unlimited-elements-background-overlay<?php echo $addClass?>" data-forid="<?php echo $elementID?>" <?php echo $addData?> style="display:none">
 				<?php echo $html?>
 			</div>
 			<?php 
@@ -848,20 +854,38 @@ class UniteCreatorElementorIntegrate{
 					
 					if(objBG.length == 0)
 						return(false);
-					
+										
 					objBG.each(function(index, bgElement){
 
 						var objBgElement = jQuery(bgElement);
 
 						var targetID = objBgElement.data("forid");
 
-						var objTarget = jQuery("*[data-id=\""+targetID+"\"]");
+						var location = objBgElement.data("location");
+
+						switch(location){
+							case "body":
+							case "body_front":
+								var objTarget = jQuery("body");
+							break;
+							case "layout":
+							case "layout_front":
+								var objLayout = jQuery("*[data-id=\""+targetID+"\"]");
+								var objTarget = objLayout.parents(".elementor");
+								if(objTarget.length > 1)
+									objTarget = jQuery(objTarget[0]);
+							break;
+							default:
+								var objTarget = jQuery("*[data-id=\""+targetID+"\"]");
+							break;
+						}
+						
 						
 						if(objTarget.length == 0)
 							return(true);
 
 						var objVideoContainer = objTarget.children(".elementor-background-video-container");
-
+						
 						if(objVideoContainer.length == 1)
 							objBgElement.detach().insertAfter(objVideoContainer).show();
 						else
@@ -962,8 +986,12 @@ class UniteCreatorElementorIntegrate{
 				'default' => 'back',
 				'options' => array(
 					'back'  => esc_html__( 'In Background', 'unlimited-elements-for-elementor' ),
-					'front' => esc_html__( 'In Foregroud', 'unlimited-elements-for-elementor' )
-				),
+					'front' => esc_html__( 'In Foregroud', 'unlimited-elements-for-elementor' ),
+					'body' => esc_html__( 'Site Body Background', 'unlimited-elements-for-elementor' ),
+					'body_front' => esc_html__( 'Site Body Foreground', 'unlimited-elements-for-elementor' ),
+					'layout' => esc_html__( 'Layout Background', 'unlimited-elements-for-elementor' ),
+					'layout_front' => esc_html__( 'Layout Foreground', 'unlimited-elements-for-elementor' )
+			),
 				"condition" => array(self::CONTROL_BACKGROUND_TYPE."!" => "{$none}")
 			)
 		);
@@ -1271,8 +1299,6 @@ class UniteCreatorElementorIntegrate{
      */
     public function onEnqueueEditorScripts(){
 
-    	
-    	
     	$adminStyleHandle = "unlimited_elements_editor_admin_css";
     	
     	HelperUC::addScriptAbsoluteUrl(HelperProviderCoreUC_EL::$urlCore."elementor/assets/uc_editor_admin.js", "unlimited_elements_editor_admin");
@@ -1308,7 +1334,7 @@ class UniteCreatorElementorIntegrate{
     		
 	    	$nonce = UniteFunctionsUC::getPostVariable("nonce", "", UniteFunctionsUC::SANITIZE_TEXT_FIELD);
 	    	UniteProviderFunctionsUC::verifyNonce($nonce);
-	    		    	
+	    	
 	    	$arrTempFile = UniteFunctionsUC::getVal($_FILES, "file");
 	    	UniteFunctionsUC::validateNotEmpty($arrTempFile,"import file");
 	    	
@@ -1455,7 +1481,8 @@ class UniteCreatorElementorIntegrate{
 	 */
 	public function onTheContent($content){
 		
-		UniteCreatorOutput::clearIncludesCache();
+		if(GlobalsProviderUC::$isUnderDynamicTemplateLoop == false)
+			UniteCreatorOutput::clearIncludesCache();
 		
 		return($content);
 	}
@@ -1541,31 +1568,70 @@ class UniteCreatorElementorIntegrate{
 	 */
 	public function onWpmlTranslateRegister($arrWidgets){
 		
+    	try{
+			
+    		$this->preloadElementorDBData();
+			
+    		$objWpmlIntegrate = new UniteCreatorWpmlIntegrate();
+    		
+    		$arrUEWidgets = $objWpmlIntegrate->getTranslatableElementorWidgetsFields(self::$arrAddonsRecords);
+    		
+    		if(!empty($arrUEWidgets))
+    			$arrWidgets = array_merge($arrWidgets, $arrUEWidgets);
+    			    		
+    	}catch(Exception $e){
+    		
+    	}
 		
-		dmp("register wpml translate");
-		exit();
 		
 		return($arrWidgets);
 	}
 	
+	/**
+	 * get current rendering widget settings
+	 */
+	public function onGetCurrentRenderingWidgetSettings($settings = array()){
+		
+		if(empty(GlobalsUnlimitedElements::$currentRenderingWidget))
+			return(null);
+			
+		$widget = GlobalsUnlimitedElements::$currentRenderingWidget;
+		
+		$arrDynamic = $widget->ueGetDynamicSettingsValues();
+		
+		return($arrDynamic);
+	}
     
 	private function a____________INIT_INTEGRATION___________(){}
 
+	/**
+	 * check if panel dark mode
+	 */
+	public static function isElementorPanelDarkMode(){
+		
+		$uiTheme = SettingsManager::get_settings_managers( 'editorPreferences' )->get_model()->get_settings( 'ui_theme' );
+		
+		if($uiTheme == "dark")
+			return(true);
+
+		return(false);
+	}
+	
 	/**
 	 * on elementor editor init, set some preferences of the editor
 	 */
 	public function onEditorInit(){
 		
-		$uiTheme = SettingsManager::get_settings_managers( 'editorPreferences' )->get_model()->get_settings( 'ui_theme' );
-		
-		if($uiTheme == "dark")
-			self::$isDarkMode = true;
+		self::$isDarkMode = self::isElementorPanelDarkMode();
 		
     	self::$showWidgetPreviews = HelperProviderCoreUC_EL::getGeneralSetting("enable_panel_previews");
     	self::$showWidgetPreviews = UniteFunctionsUC::strToBool(self::$showWidgetPreviews);
     	
     	self::$enableEditHTMLButton = HelperProviderCoreUC_EL::getGeneralSetting("show_edit_html_button");
     	self::$enableEditHTMLButton = UniteFunctionsUC::strToBool(self::$enableEditHTMLButton);
+    	
+    	GlobalsProviderUC::$isInsideEditorBackend = true;
+    	
 	}
 	
 	
@@ -1614,6 +1680,8 @@ class UniteCreatorElementorIntegrate{
 		
 	}
 	
+	
+	
     /**
      * init the elementor integration
      */
@@ -1637,6 +1705,8 @@ class UniteCreatorElementorIntegrate{
     	//set if edit mode for widget output
     	self::$isEditMode = HelperUC::isElementorEditMode();
     	
+    	GlobalsProviderUC::$isInsideEditor = self::$isEditMode;
+    	    	
     	$arrSettingsValues = HelperProviderCoreUC_EL::getGeneralSettingsValues();
     	
     	//detect old elementor version
@@ -1701,7 +1771,7 @@ class UniteCreatorElementorIntegrate{
     	
     	//fix some frontend bug with double render
     	add_filter("elementor/frontend/the_content",array($this, "onTheContent"));
-
+		
 		add_filter( 'pre_handle_404', array($this, 'checkAllowWidgetPagination' ), 11, 2 );
     	
 		//dynamic loop
@@ -1714,8 +1784,12 @@ class UniteCreatorElementorIntegrate{
 		
 		//wpml translation integrattion
 		
-		//add_filter( 'wpml_elementor_widgets_to_translate', array( $this, 'onWpmlTranslateRegister' ) );
-		 
+		add_filter( 'wpml_elementor_widgets_to_translate', array( $this, 'onWpmlTranslateRegister' ) );
+		
+		//get current dynamic settings from loop
+		
+		add_filter( 'ue_get_current_widget_settings', array( $this, 'onGetCurrentRenderingWidgetSettings' ) );
+		
 		
     	// ------ admin related only ----------
     	

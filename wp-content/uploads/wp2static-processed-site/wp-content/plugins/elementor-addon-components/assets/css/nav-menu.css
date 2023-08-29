@@ -1,4 +1,3 @@
-
 .nav-menu_title-container:not(.has-children).depth-1,
 .nav-menu_title-container:not(.has-children).depth-2,
 .nav-menu_title-container:not(.has-children).depth-3 {
@@ -59,9 +58,11 @@
 .widget-area .widget_nav_menu ul li a,
 .widget-area .widget_nav_menu ul li a:visited,
 .widget-area .widget_nav_menu ul li a:active {
-	/*list-style-type: none;
+	list-style-type: none;
 	text-decoration: none !important;
-	outline: 0 none !important;*/
+	outline: 0 none !important;
+	margin: 0 !important;
+	line-height: 2em;
 }
 
 /** Cache les éléments ajoutés au menu principal dans un sidebar ou dans un pied de page */
@@ -85,7 +86,7 @@
 	padding: unset !important;
 }
 
-.oc-offcanvas__menu-wrapper ul li > ul {
+.oc-offcanvas__menu-wrapper ul li>ul {
 	margin-top: 0;
 	line-height: 1.5em;
 }
@@ -104,7 +105,7 @@
 
 /** Badge */
 .nav-menu_item-badge {
-    position: relative;
+	position: relative;
 	color: white;
 	font-weight: 600;
 	padding: 2px 5px !important;
@@ -115,10 +116,6 @@
 }
 
 /** Media queries */
-@media (max-width: 767px) {
-	
-}
+@media (max-width: 767px) {}
 
-@media (max-width: 1040px) {
-	
-}
+@media (max-width: 1040px) {}

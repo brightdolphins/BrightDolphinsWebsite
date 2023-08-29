@@ -19,23 +19,9 @@ if ( ! defined( 'WPINC' ) ) {
 define( 'WP2STATIC_ZIP_PATH', plugin_dir_path( __FILE__ ) );
 define( 'WP2STATIC_ZIP_VERSION', '1.0.1' );
 
-if ( file_exists( WP2STATIC_ZIP_PATH . 'vendor/autoload.php' ) ) {
-    require_once WP2STATIC_ZIP_PATH . 'vendor/autoload.php';
-}
+require WP2STATIC_ZIP_PATH . 'vendor/autoload.php';
 
-if ( ! class_exists( 'WP2StaticZip\Controller' ) ) {
-    if ( file_exists( WP2STATIC_ZIP_PATH . 'src/WP2StaticZipException.php' ) ) {
-        require_once WP2STATIC_ZIP_PATH . 'src/WP2StaticZipException.php';
-
-        throw new WP2StaticZip\WP2StaticZipException(
-            'Looks like you\'re trying to activate this addon from source' .
-            ' code, without compiling it first. Please see' .
-            ' https://wp2static.com/compiling-from-source for assistance.'
-        );
-    }
-}
-
-function run_wp2static_addon_zip() : void {
+function run_wp2static_addon_zip() {
     $controller = new WP2StaticZip\Controller();
     $controller->run();
 }

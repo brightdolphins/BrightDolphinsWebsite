@@ -470,7 +470,7 @@ class Wpr_OnepageNav extends Widget_Base {
 				'default' => '#ffffff',
 				'selectors' => [
 					'{{WRAPPER}} .wpr-onepage-nav-item i' => 'color: {{VALUE}};',
-					'{{WRAPPER}} .wpr-onepage-nav-item svg' => 'color: {{VALUE}};',
+					'{{WRAPPER}} .wpr-onepage-nav-item svg' => 'color: {{VALUE}};', // GOGA - shesacvlelia mgoni
 				],
 			]
 		);
@@ -527,7 +527,7 @@ class Wpr_OnepageNav extends Widget_Base {
 				'default' => '#FFEC00',
 				'selectors' => [
 					'{{WRAPPER}} .wpr-onepage-nav-item:hover i' => 'color: {{VALUE}};',
-					'{{WRAPPER}} .wpr-onepage-active-item i' => 'color: {{VALUE}};',
+					'{{WRAPPER}} .wpr-onepage-active-item i' => 'color: {{VALUE}} !important;',
 					'{{WRAPPER}} .wpr-onepage-nav-item:hover svg' => 'fill: {{VALUE}};',
 					'{{WRAPPER}} .wpr-onepage-active-item svg' => 'fill: {{VALUE}};',
 				],
@@ -542,7 +542,7 @@ class Wpr_OnepageNav extends Widget_Base {
 				'default' => '',
 				'selectors' => [
 					'{{WRAPPER}} .wpr-onepage-nav-item:hover i' => 'background-color: {{VALUE}};',
-					'{{WRAPPER}} .wpr-onepage-active-item i' => 'background-color: {{VALUE}};',
+					'{{WRAPPER}} .wpr-onepage-active-item i' => 'background-color: {{VALUE}} !important;',
 					'{{WRAPPER}} .wpr-onepage-nav-item:hover svg' => 'background-color: {{VALUE}};',
 					'{{WRAPPER}} .wpr-onepage-active-item svg' => 'background-color: {{VALUE}};',
 				],
@@ -557,7 +557,7 @@ class Wpr_OnepageNav extends Widget_Base {
 				'default' => '#E8E8E8',
 				'selectors' => [
 					'{{WRAPPER}} .wpr-onepage-nav-item:hover i' => 'border-color: {{VALUE}};',
-					'{{WRAPPER}} .wpr-onepage-active-item i' => 'border-color: {{VALUE}};',
+					'{{WRAPPER}} .wpr-onepage-active-item i' => 'border-color: {{VALUE}} !important;',
 					'{{WRAPPER}} .wpr-onepage-nav-item:hover svg' => 'border-color: {{VALUE}};',
 					'{{WRAPPER}} .wpr-onepage-active-item svg' => 'border-color: {{VALUE}};',
 				],
@@ -629,6 +629,7 @@ class Wpr_OnepageNav extends Widget_Base {
 				'step' => 0.1,
 				'selectors' => [
 					'{{WRAPPER}} .wpr-onepage-active-item i' => 'transform: scale({{SIZE}}); -webkit-transform: scale({{SIZE}});',
+					'{{WRAPPER}} .wpr-onepage-active-item i:before' => 'transform: scale({{SIZE}}); -webkit-transform: scale({{SIZE}});',
 					'{{WRAPPER}} .wpr-onepage-active-item svg' => 'width: {{SIZE}}{{UNIT}};height: {{SIZE}}{{UNIT}};',
 				],
 				'condition' => [

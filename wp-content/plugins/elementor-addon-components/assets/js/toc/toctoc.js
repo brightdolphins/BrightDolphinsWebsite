@@ -8,6 +8,7 @@
 *				Obtimiser les ancres de lien plus convivial pour le référencement 'more SEO friendly'
 * @since 1.8.5	L'ancre est maintenant sur le titre
 *				N'affecte plus la class 'active' au lien de la TOC
+* @since 2.1.1	Support pour le composant breadcrumb
 */
 //import _ from '/wp-includes/js/dist/vendor/lodash.js'
 
@@ -60,6 +61,11 @@
 			//let titles = settings.target+" h1, "+settings.target+" h2, "+settings.target+" h3, "+settings.target+" h4, "+settings.target+" h5, "+settings.target+" h6";
 			
 			$(titlesTarget).each(function(index) {
+				/** @since 2.1.1 Saute les items du breadcrumb */
+				if ($(this).hasClass('eac-breadcrumbs-item')) {
+					return true;
+				}
+
 				let contentAnchor;
 				
 				// tagName = h1 ... h6
@@ -173,8 +179,10 @@
 			settings.opened ? settings.opened = false : settings.opened = true;
 			if(settings.opened) {
 				$tocHeadToggler.text(settings.headPicto[1]);
+				$tocHead.attr('aria-expanded', 'true');
 			} else {
 				$tocHeadToggler.text(settings.headPicto[0]);
+				$tocHead.attr('aria-expanded', 'false');
 			}
 			$tocBody.slideToggle(300);
 		}

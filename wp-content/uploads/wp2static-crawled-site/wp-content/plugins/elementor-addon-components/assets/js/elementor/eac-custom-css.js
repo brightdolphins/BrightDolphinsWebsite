@@ -24,7 +24,7 @@
 		}
 		
 		/**
-		 * Recherche de la poignée d'édition pour la section/Colonne/Widget
+		 * Recherche de la poignée d'édition pour la section/colonne/widget/container
 		 * La première si c'est une section/colonne il ne faut pas modifier les poignées internes
 		 */
 		var $elHandle = $(context.el).find('.elementor-editor-element-settings .elementor-editor-element-edit').first();
@@ -51,7 +51,6 @@
     function addPageCustomCss() {
         var customCSS = elementor.settings.page.model.get('custom_css');
         if(customCSS) {
-            //customCSS = customCSS.replace(/selector/g, elementor.config.settings.page.cssWrapperSelector);
 			customCSS = customCSS.replace(/selector/g, elementor.config.document.settings.cssWrapperSelector); // @since 1.7.80
             elementor.settings.page.getControlsCSS().elements.$stylesheetElement.append(customCSS);
         }

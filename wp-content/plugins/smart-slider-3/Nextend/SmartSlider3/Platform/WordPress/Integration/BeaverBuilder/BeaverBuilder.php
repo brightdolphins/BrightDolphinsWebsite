@@ -51,6 +51,10 @@ class BeaverBuilder {
             $this,
             'forceShortcodeIframe'
         ));
+        add_action('fl_builder_before_render_ajax_layout', array(
+            $this,
+            'forceShortcodeIframe'
+        ));
 
         add_action('init', array(
             $this,

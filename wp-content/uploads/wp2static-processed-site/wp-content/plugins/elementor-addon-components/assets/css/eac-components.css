@@ -1,41 +1,82 @@
-
 :root {
-	--eac-color-primary: #1569AE;				/* input border, border-left info, separator, loading spin : #F27F6F */
-	--eac-bg-input: aliceblue;					/* input background-color : #FAEBD7 */
-	--eac-hover-head-color: #abffd9;			/* selection head button hover */
-	--eac-bg-jqcloud: rgba(255,255,255,0.0);	/* background-color JQCloud */
-	--eac-bg-head-color: rgba(255,255,255,1);	/* background-color entête de bloc résultat*/
-	--eac-global-color-texte: #919ca7;			/* couleur des textes par défaut */
-	
-	--eac-header-color-background: #411f1f;		/* couleur du fond de l'entête */
-	--eac-header-color-title: #cedebd;			/* couleur du titre de l'entête */
-	--eac-header-color-nav-background: #86c4ba;	/* couleur du fond de la barre de navigation */
-	--eac-header-color-nav-text: #ffffff;		/* couleur du texte de la barre de navigation */
-	--eac-header-color-nav-text-weight: 500;	/* poids du texte de la barre de navigation */
-	
-	--eac-header-desktop-min-height: 150px;		/* Hauteur min de l'entête pour l'ordinateur */
-	--eac-header-tablet-min-height: 180px;		/* Hauteur min de l'entête pour la tablette */
-	--eac-header-mobile-min-height: 220px;		/* Hauteur min de l'entête pour le mobile */
-												
-												/* Lecteur RSS */
-	--eac-rss-reader-flex-margin: 14px;			/* La marge pour calculer la largeur d'un item du widget  */
-	--eac-rss-reader-items-margin: 7px;			/* La marge entre les items du widget, doit être la moitié de la var précédente */
-	
-												/* ACF Relationship */
-	--eac-acf-relationship-flex-margin: 14px;	/* La marge pour calculer la largeur d'un item du widget  */
-	--eac-acf-relationship-items-margin: 7px;	/* La marge entre les items du widget, doit être la moitié de la var précédente */
-	--eac-acf-relationship-grid-margin: 14;		/* La marge 'spaceBetween' entre les items de Swiper */
-	
-												/* Team Members */
-	--eac-team-members-flex-margin: 14px;		/* La marge pour calculer la largeur d'un item du widget  */
-	--eac-team-members-items-margin: 7px;		/* La marge entre les items du widget, doit être la moitié de la var précédente */
-												
-												/* Ratio des images pour le mode Slider */
-	--eac-image-ratio-1-1: 100%;				/* Image ratio plein */
-	--eac-image-ratio-4-3: 75%;					/* Image ratio 4/3 */
-	--eac-image-ratio-3-2: 66.66%;				/* Image ratio 3/2 */
-	--eac-image-ratio-16-9: 56.25%;				/* Image ratio 16/9 */
-	--eac-image-ratio-21-9: 42.85%;				/* Image ratio 21/9 */
+	--eac-color-primary: #1569AE;
+	/* input border, border-left info, separator, loading spin : #F27F6F */
+	--eac-bg-input: aliceblue;
+	/* input background-color : #FAEBD7 */
+	--eac-hover-head-color: #abffd9;
+	/* selection head button hover */
+	--eac-bg-jqcloud: rgba(255, 255, 255, 0.0);
+	/* background-color JQCloud */
+	--eac-bg-head-color: rgba(255, 255, 255, 1);
+	/* background-color entête de bloc résultat*/
+	--eac-global-color-texte: #919ca7;
+	/* couleur des textes par défaut */
+
+	--eac-header-color-background: #411f1f;
+	/* couleur du fond de l'entête */
+	--eac-header-color-title: #cedebd;
+	/* couleur du titre de l'entête */
+	--eac-header-color-nav-background: #86c4ba;
+	/* couleur du fond de la barre de navigation */
+	--eac-header-color-nav-text: #ffffff;
+	/* couleur du texte de la barre de navigation */
+	--eac-header-color-nav-text-weight: 500;
+	/* poids du texte de la barre de navigation */
+
+	--eac-header-desktop-min-height: 150px;
+	/* Hauteur min de l'entête pour l'ordinateur */
+	--eac-header-tablet-min-height: 180px;
+	/* Hauteur min de l'entête pour la tablette */
+	--eac-header-mobile-min-height: 220px;
+	/* Hauteur min de l'entête pour le mobile */
+
+	/** Lecteur RSS */
+	--eac-rss-reader-flex-margin: 14px;
+	/* La marge pour calculer la largeur d'un item du widget  */
+	--eac-rss-reader-items-margin: 7px;
+	/* La marge entre les items du widget, doit être la moitié de la var précédente */
+
+	/** ACF Relationship */
+	--eac-acf-relationship-flex-margin: 14px;
+	/* La marge pour calculer la largeur d'un item du widget  */
+	--eac-acf-relationship-items-margin: 7px;
+	/* La marge entre les items du widget, doit être la moitié de la var précédente */
+	--eac-acf-relationship-grid-margin: 14;
+	/* La marge 'spaceBetween' entre les items de Swiper */
+
+	/* Team Members */
+	--eac-team-members-flex-margin: 14px;
+	/* La marge pour calculer la largeur d'un item du widget  */
+	--eac-team-members-items-margin: 7px;
+	/* La marge entre les items du widget, doit être la moitié de la var précédente */
+
+	/** Ratio des images pour le mode Slider */
+	--eac-image-ratio-1-1: 100%;
+	/* Image ratio plein */
+	--eac-image-ratio-4-3: 75%;
+	/* Image ratio 4/3 */
+	--eac-image-ratio-3-2: 66.66%;
+	/* Image ratio 3/2 */
+	--eac-image-ratio-16-9: 56.25%;
+	/* Image ratio 16/9 */
+	--eac-image-ratio-21-9: 42.85%;
+	/* Image ratio 21/9 */
+
+	/** Header footer mega-menu */
+	/* Line-height horizontal top li et div toggle */
+	--eac-hrz-top-item-line-height: 60px;
+	/* Line-height buttons toggle */
+	--eac-buttons-toggle-line-height: 50px;
+	/* Line-height sub li */
+	--eac-hrz-sub-item-line-height: 25px;
+	/* Line-height top li responsive */
+	--eac-hrz-top-item-breakpoint-line-height: 40px;
+	/* Line-height vertical top li */
+	--eac-vrt-top-item-line-height: 40px;
+	/* Line-height vertical sub li */
+	--eac-vrt-sub-item-line-height: 30px;
+	/* Line-height vertical sub li responsive */
+	--eac-vrt-sub-item-breakpoint-line-height: 25px;
 }
 
 /**------------------------------------------*/
@@ -51,7 +92,7 @@
 	background: #EEE;
 	border: none;
 	border-radius: 7px;
-	background-image: linear-gradient( to bottom, hsla(0, 0%, 0%, 0), hsla(0, 0%, 0%, 0.2) );
+	background-image: linear-gradient(to bottom, hsla(0, 0%, 0%, 0), hsla(0, 0%, 0%, 0.2));
 	color: #222 !important;
 	font-family: sans-serif;
 	font-size: .9em;
@@ -61,9 +102,9 @@
 }
 
 .eac__button .eac__read-button:hover {
-  background-color: #8CF;
-  text-shadow: 0 1px hsla(0, 0%, 100%, 0.5);
-  color: #222;
+	background-color: #8CF;
+	text-shadow: 0 1px hsla(0, 0%, 100%, 0.5);
+	color: #222;
 }
 
 .eac__button .eac__read-button:active,
@@ -81,7 +122,9 @@
 }
 
 @media (max-width: 640px) {
-	.eac__button { display: block; }
+	.eac__button {
+		display: block;
+	}
 }
 
 /**-----------------------------*/
@@ -112,7 +155,7 @@
 	background-color: var(--eac-color-primary);
 	background-image: linear-gradient(to top left, rgba(0, 0, 0, .2), rgba(0, 0, 0, .2) 30%, rgba(0, 0, 0, 0));
 	box-shadow: inset 2px 2px 3px rgba(255, 255, 255, .6),
-				inset -2px -2px 3px rgba(0, 0, 0, .6);
+		inset -2px -2px 3px rgba(0, 0, 0, .6);
 	cursor: pointer;
 }
 
@@ -146,63 +189,34 @@
 	border-radius: 50%;
 }
 
-@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-@-webkit-keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-@-moz-keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes spin {
+	from {
+		transform: rotate(0deg);
+	}
 
-/**------------------------------------------*/
-/**<div id="pin__loader-wheel" class="eac__loader-wheel"><i><i><i><i><i><i><i><i><i><i><i><i></i></i></i></i></i></i></i></i></i></i></i></i></div>*/
-
-/** animation loading wheel */
-.eac__loader-wheel {
-	display: none;
-	margin: 5px auto;
+	to {
+		transform: rotate(360deg);
+	}
 }
 
-.eac__loader-wheel {
-  font-size: 32px; /* change size here */
-  position: relative;
-  height: 1em;
-  width: 1em;
-  padding-left: 0.45em;
-  overflow: hidden;
-  /*margin: 0 auto;*/
-  animation: eac-loader__wheel-rotate 0.5s steps(12) infinite;
+@-webkit-keyframes spin {
+	from {
+		transform: rotate(0deg);
+	}
+
+	to {
+		transform: rotate(360deg);
+	}
 }
 
-.eac__loader-wheel i {
-  display: block;
-  position: absolute;
-  height: 0.3em;
-  width: 0.1em;
-  border-radius: 0.05em;
-  background: #333; /* change color here */
-  opacity: 0.8;
-  transform: rotate(-30deg);
-  transform-origin: center 0.5em;
-}
+@-moz-keyframes spin {
+	from {
+		transform: rotate(0deg);
+	}
 
-@keyframes eac-loader__wheel-rotate {
-	from { transform: rotate(0deg); }
-	to { transform: rotate(360deg); }
-}
-
-/** Augmentation de la taille font awesome fa-lg */
-.insta-user__link-icon .fa-instagram.fa-lg,
-.insta-explore__link-icon .fa-instagram.fa-lg,
-.insta-location__link-icon .fa-instagram.fa-lg {
-	font-size: 1.45555555em !important
-}
-
-/**------------------------------------------*/
-/** Responsive embeded shortcode Instagram */
-iframe.instagram-media.instagram-media-rendered {
-	margin: 0 auto 12px !important;
-}
-
-/** Important pour les composant Instagram qui affichent video ou slideshow */
-@media only screen and (min-width: 640px) {
-    iframe.instagram-media.instagram-media-rendered { width: 450px !important; }
+	to {
+		transform: rotate(360deg);
+	}
 }
 
 /*----------------------------*/
@@ -210,7 +224,7 @@ iframe.instagram-media.instagram-media-rendered {
 .acf-relational_container {
 	display: flex;
 	flex-wrap: wrap;
-    padding: 10px 0;
+	padding: 10px 0;
 }
 
 .acf-relational_post {
@@ -240,10 +254,12 @@ iframe.instagram-media.instagram-media-rendered {
 		max-width: 100%;
 		padding-bottom: 10px;
 	}
+
 	.acf-relational_post article {
 		flex-direction: column;
 		align-items: center;
 	}
+
 	.acf-relational_post article .acf-relational_title {
 		text-align: center;
 	}
@@ -254,6 +270,7 @@ iframe.instagram-media.instagram-media-rendered {
 		flex-direction: column;
 		align-items: center;
 	}
+
 	.acf-relational_post article .acf-relational_title {
 		text-align: center;
 	}
@@ -261,7 +278,7 @@ iframe.instagram-media.instagram-media-rendered {
 
 .acf-relational_post article .acf-relational_img {
 	flex: 1 0 auto;
-    margin-right: 5px;
+	margin-right: 5px;
 }
 
 .acf-relational_post article .acf-relational_title {
@@ -290,72 +307,105 @@ iframe.instagram-media.instagram-media-rendered {
 /**---------------------------*/
 /* Dynamic tags socials icon Container class Flex */
 .dynamic-tags_social-container {
-	display:flex;
-	flex-direction:row;
-	justify-content:space-around;
-	align-items:center;
+	display: flex;
+	align-items: center;
+	justify-content: space-around;
 	padding: 5px;
+}
+
+.dynamic-tags_social-icon {
+	display: flex;
+	align-items: center;
+	justify-content: space-around;
+}
+
+.dynamic-tags_social-icon i {
+	font-size: 1em;
 }
 
 /* Font awesome default */
 .dynamic-tags_social-icon i {
-    color: red;
+	color: red;
 }
+
 /* Font awesome Twitter */
 .dynamic-tags_social-icon.twitter i {
-    color: #00aced;
+	color: #00aced;
 }
+
 /* Font awesome Facebook */
 .dynamic-tags_social-icon.facebook i {
-    color: #3b5998;
+	color: #3b5998;
 }
+
 /* Font awesome Instagram */
 .dynamic-tags_social-icon.instagram i {
-    color: #c13584;
+	color: #c13584;
 }
+
 /* Font awesome Linkedin */
 .dynamic-tags_social-icon.linkedin i {
-    color: #007bb6;
+	color: #007bb6;
 }
+
 /* Font awesome Youtube */
 .dynamic-tags_social-icon.youtube i {
-    color: #bb0000;
+	color: #bb0000;
 }
+
 /* Font awesome Pinterest */
 .dynamic-tags_social-icon.pintrest i {
-    color: #cb2027;
+	color: #cb2027;
 }
+
 /* Font awesome Tumblr */
 .dynamic-tags_social-icon.tumblr i {
-    color: #32506d;
+	color: #32506d;
 }
+
 /* Font awesome Flickr */
 .dynamic-tags_social-icon.flickr i {
-    color: #0063dc;
+	color: #0063dc;
 }
+
 /* Font awesome Reddit */
 .dynamic-tags_social-icon.reddit i {
-    color: #ff4500;
+	color: #ff4500;
 }
+
 /* Font awesome TikTok */
 .dynamic-tags_social-icon.tiktok i {
-    color: #010101;
+	color: #010101;
 }
+
 /* Font awesome Telegram */
 .dynamic-tags_social-icon.telegram i {
-    color: #0088cc;
+	color: #0088cc;
 }
+
 /* Font awesome Quora */
 .dynamic-tags_social-icon.quora i {
-    color: #aa1100;
+	color: #aa1100;
 }
+
 /* Font awesome Twitch */
 .dynamic-tags_social-icon.twitch i {
-    color: #6441a5;
+	color: #6441a5;
 }
+
 /* Font awesome Github */
 .dynamic-tags_social-icon.github i {
-    color: #24292F;
+	color: #24292F;
+}
+
+/* Font awesome Spotify */
+.dynamic-tags_social-icon.spotify i {
+	color: #1DB954;
+}
+
+/* Font awesome Mastodon */
+.dynamic-tags_social-icon.mastodon i {
+	color: #3088d4;
 }
 
 /**---------------------------*/
@@ -363,19 +413,185 @@ iframe.instagram-media.instagram-media-rendered {
 .eac-element_sticky-class {
 	position: sticky !important;
 	position: -webkit-sticky !important;
-	top: 50px;
 	transition: ease .3s;
+}
+
+/** Fixed header widget class */
+.eac-element_fixed-header {
+	position: fixed !important;
+	top: 0;
+	left: 0;
+	right: 0;
+	/* Des thèmes surchargent position avec width:unset; on force avec right:0 */
+	width: 100%;
+	animation: slideDown 0.35s ease-out;
+}
+
+/** Fixed header widget class */
+.eac-element_fixed-footer {
+	position: fixed !important;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	/* Des thèmes surchargent position avec width:unset; on force avec right:0 */
+	width: 100%;
+	animation: slideUp 0.35s ease-out;
 }
 
 /**---------------------------*/
 /* Feature Section / Colonne link class */
 .eac-element-link {
-	display:inline-block;
-	position:absolute;
-	top:0;
-	left:0;
-	width:100%;
-	height:100%;
-	z-index:99;
-	background-color: rgba(255,255,255,0);
+	display: inline-block;
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 99;
+	background-color: rgba(255, 255, 255, 0);
+}
+
+/**----------------------------*/
+/* Les boutons read more et add to cart peuvent être réutilisés */
+.buttons-wrapper {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+}
+
+.buttons-wrapper .button__readmore-wrapper,
+.buttons-wrapper .button__cart-wrapper {
+	display: inline-block;
+	position: relative;
+	margin: 10px auto;
+}
+
+.buttons-wrapper .button__readmore-wrapper .button-readmore,
+.buttons-wrapper .button__readmore-wrapper .button-cart {
+	color: #1346CD;
+	background-color: transparent;
+	border: 2px solid #1346CD;
+	padding: 3px 10px 3px;
+	border-radius: 4px;
+	font-size: 15px;
+	text-decoration: none;
+	cursor: pointer;
+	display: inline-block;
+}
+
+/**---------------------------*/
+/** Shortcode 'eac_widget_cart' */
+.eac_widget_cart a,
+.eac_widget_cart a:visited,
+.eac_widget_cart a:active {
+	text-decoration: none !important;
+	outline: 0 none !important;
+}
+
+.eac_widget_cart .button.wc-forward.ast-continue-shopping {
+	display: none;
+}
+
+.eac_widget_cart .widget ul li a {
+	padding: 0;
+}
+
+.eac_widget_cart .widget_shopping_cart {
+	background-color: #7A7A7A !important;
+	padding: 10px !important;
+}
+
+.eac_widget_cart .woocommerce-mini-cart .mini_cart_item {
+	line-height: 1.5em;
+	padding-bottom: 0;
+}
+
+.eac_widget_cart .woocommerce-mini-cart .mini_cart_item:hover {
+	background-color: unset !important;
+}
+
+.eac_widget_cart .woocommerce-mini-cart .mini_cart_item a:not(.remove_from_cart_button),
+.eac_widget_cart .woocommerce-mini-cart .mini_cart_item .quantity,
+.eac_widget_cart .woocommerce-mini-cart .mini_cart_item .product-title,
+.eac_widget_cart .woocommerce-mini-cart .mini_cart_item .quantity .amount,
+.eac_widget_cart .woocommerce-mini-cart__total.total,
+.eac_widget_cart .woocommerce-mini-cart__total.total strong,
+.eac_widget_cart .woocommerce-mini-cart__total.total .amount,
+.eac_widget_cart .woocommerce-mini-cart__empty-message {
+	color: white !important;
+	background-color: #7A7A7A !important;
+	float: none !important;
+}
+
+.eac_widget_cart .woocommerce-mini-cart .mini_cart_item a.remove_from_cart_button,
+.eac_widget_cart .woocommerce-mini-cart .mini_cart_item a.remove_from_cart_button::before,
+.eac_widget_cart .woocommerce-mini-cart .mini_cart_item a.remove_from_cart_button svg {
+	color: white !important;
+	fill: white !important;
+}
+
+.eac_widget_cart .woocommerce-mini-cart .mini_cart_item a:not(.remove_from_cart_button),
+.eac_widget_cart .woocommerce-mini-cart .mini_cart_item .quantity,
+.eac_widget_cart .woocommerce-mini-cart .mini_cart_item .product-title,
+.eac_widget_cart .woocommerce-mini-cart .mini_cart_item .quantity .amount,
+.eac_widget_cart .woocommerce-mini-cart__total.total,
+.eac_widget_cart .woocommerce-mini-cart__total.total strong,
+.eac_widget_cart .woocommerce-mini-cart__total.total .amount,
+.eac_widget_cart .woocommerce-mini-cart__buttons .button,
+.eac_widget_cart .woocommerce-mini-cart .mini_cart_item a.remove_from_cart_button::before {
+	font-size: 14px;
+	font-weight: normal;
+	letter-spacing: unset;
+}
+
+.eac_widget_cart .woocommerce-mini-cart__total.total {
+	display: block;
+	text-align: center;
+	margin-top: .5em;
+	margin-bottom: .5em;
+	padding: 10px !important;
+	border-top: 3px double white;
+	background-color: #54595F;
+}
+
+.eac_widget_cart .widget_shopping_cart .widgettitle {
+	font-size: 20px;
+	padding: unset;
+	margin-bottom: 0;
+	text-align: center;
+	color: white !important;
+}
+
+.eac_widget_cart .woocommerce-mini-cart__buttons {
+	display: flex !important;
+	align-items: center;
+	justify-content: space-around;
+	grid-column-gap: 0;
+	float: none;
+}
+
+.eac_widget_cart .woocommerce-mini-cart__buttons .button {
+	display: block;
+	margin: 0 5px 5px 0 !important;
+	padding: 0.2em 1em !important;
+	line-height: 2em;
+	text-align: center;
+	font-weight: unset !important;
+	background-color: #fff !important;
+	color: #000 !important;
+	box-shadow: unset !important;
+	border: unset !important;
+	width: 45%;
+	white-space: nowrap;
+	letter-spacing: unset !important;
+	float: none !important;
+	text-transform: none;
+}
+
+.eac_widget_cart .woocommerce-mini-cart__total,
+.eac_widget_cart .woocommerce-mini-cart__buttons {
+	padding: .5em 0;
+	margin: unset;
 }

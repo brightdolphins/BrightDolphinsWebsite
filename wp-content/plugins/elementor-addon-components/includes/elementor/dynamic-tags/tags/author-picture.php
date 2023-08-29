@@ -5,6 +5,7 @@
  * @return l'URL de l'avatar/gravatar de l'auteur de l'article courant
  * @since 1.6.0
  * @since 1.9.1 Test de la Global $authordata
+ * @since 2.1.0 Affecte la global $authordata
  */
 
 namespace EACCustomWidgets\Includes\Elementor\DynamicTags\Tags;
@@ -56,19 +57,25 @@ class Eac_Author_Picture extends Data_Tag {
 		global $authordata;
 		$size = $this->get_settings( 'author_picture_size' );
 
-		// @since 1.9.1 Global $authordata n'est pas instancié
-		if ( ! is_object( $authordata ) || ! isset( $authordata->ID ) ) {
+		/**
+		 * La variable globale n'est pas définie
+		 *
+		 * @since 2.1.0
+		 */
+		if ( ! isset( $authordata->ID ) ) {
+			$post = get_post();
+			if ( $post ) {
+				$authordata = get_userdata( $post->post_author ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			}
+		}
+
+		// @since 1.9.1 Global $authordata n'est pas instanciée
+		if ( ! isset( $authordata->ID ) ) {
 			return array(
 				'url' => '',
 				'id'  => '',
 			);
 		}
-
-		/*
-		if (! isset($authordata->ID)) { // La variable globale n'est pas définie
-			$post = get_post();
-			$authordata = get_userdata($post->post_author);
-		}*/
 
 		return array(
 			'url' => get_avatar_url( (int) get_the_author_meta( 'ID' ), array( 'size' => $size ) ),

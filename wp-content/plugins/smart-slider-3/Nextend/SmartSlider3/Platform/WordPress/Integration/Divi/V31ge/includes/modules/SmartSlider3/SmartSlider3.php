@@ -65,7 +65,7 @@ class ET_Builder_Module_SmartSlider3 extends ET_Builder_Module {
         $slidersModel = new ModelSliders($applicationType);
 
         $options    = array();
-        $options[0] = 'None';
+        $options[-1] = 'None';
         foreach ($slidersModel->getAll(0, 'published') as $slider) {
             if ($slider['type'] == 'group') {
 
@@ -93,7 +93,7 @@ class ET_Builder_Module_SmartSlider3 extends ET_Builder_Module {
 
         return array(
             'slider' => array(
-                'default'         => 0,
+                'default'         => -1,
                 'label'           => 'Slider',
                 'option_category' => 'basic_option',
                 'type'            => 'select',

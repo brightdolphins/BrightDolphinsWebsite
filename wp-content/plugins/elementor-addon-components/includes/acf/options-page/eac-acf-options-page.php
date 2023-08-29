@@ -7,7 +7,7 @@
  *
  * @since 1.8.4
  * @since 1.9.6 Check les droits pour le chargement de la class
- * 			    et pour l'ajout du sous-menu 'add_site_settings_to_menu'
+ * et pour l'ajout du sous-menu 'add_site_settings_to_menu'
  */
 
 namespace EACCustomWidgets\Includes\ACF\OptionsPage;
@@ -28,14 +28,14 @@ if ( class_exists( 'acf_pro' ) ) {
 	return;
 }
 
-use EACCustomWidgets\EAC_Plugin;
+use EACCustomWidgets\Core\Eac_Config_Elements;
 
 /**
  * Administrateur ou nouvelle capacité
  *
  * @since 1.9.6 Check capacité 'eac_manage_options'
  */
-if ( ! current_user_can( 'manage_options' ) && ! current_user_can( EAC_Plugin::instance()->get_manage_options_name() ) ) {
+if ( ! current_user_can( 'manage_options' ) && ! current_user_can( Eac_Config_Elements::get_manage_options_name() ) ) {
 	return;
 }
 
@@ -107,7 +107,6 @@ class Eac_Acf_Options_Page {
 
 		// L'article est mis dans la poubelle
 		add_action( 'wp_trash_post', array( $this, 'delete_options_page' ), 10 );
-		// add_action('wp_delete_post', array($this, 'delete_options_page'), 10);
 
 		// Champ ACF supprimé. C'est l'action suivante qui fait le job
 		// add_action('acf/delete_field', array($this, 'delete_acf_field'));
@@ -147,7 +146,7 @@ class Eac_Acf_Options_Page {
 				// Tous les groupes de champs pour cette article
 				$groups = acf_get_field_groups( array( 'post_id' => $data->ID ) );
 				foreach ( $groups as $group ) {
-					if ( is_array( $group ) && ! empty( $group ) && $group['ID'] == $group_updated['ID'] ) {
+					if ( is_array( $group ) && ! empty( $group ) && $group['ID'] === $group_updated['ID'] ) {
 						$this->save_options_page( $data->ID );
 					}
 				}
@@ -192,26 +191,47 @@ class Eac_Acf_Options_Page {
 		 * C'est un champ de type group
 		 * On le supprime ainsi que tous les sous-champs
 		 */
-		if ( $field['type'] === 'group' ) {
-			$option = $wpdb->get_results( "SELECT option_name FROM {$wpdb->prefix}options WHERE option_name LIKE '%-{$key}'" );
+		if ( 'group' === $field['type'] ) {
+			$option = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT option_name
+					FROM {$wpdb->prefix}options
+					WHERE option_name LIKE %s",
+					'%-' . $wpdb->esc_like( $key )
+				)
+			);
 
-			if ( $option && ! empty( $option ) && count( $option ) == 1 ) {
+			if ( $option && ! empty( $option ) && count( $option ) === 1 ) {
 				$option_name = reset( $option )->option_name;
 				delete_option( $option_name );
 			}
 			foreach ( $field['sub_fields'] as $sub_field ) {
-				$key    = $sub_field['key'];
-				
-				$option = $wpdb->get_results( "SELECT option_name FROM {$wpdb->prefix}options WHERE option_name LIKE '%-{$key}'" );
-				if ( $option && ! empty( $option ) && count( $option ) == 1 ) {
+				$key = $sub_field['key'];
+
+				$option = $wpdb->get_results(
+					$wpdb->prepare(
+						"SELECT option_name
+						FROM {$wpdb->prefix}options
+						WHERE option_name LIKE %s",
+						'%-' . $wpdb->esc_like( $key )
+					)
+				);
+				if ( $option && ! empty( $option ) && count( $option ) === 1 ) {
 					$option_name = reset( $option )->option_name;
 					delete_option( $option_name );
 				}
 			}
 		} else {
-			$option = $wpdb->get_results( "SELECT option_name FROM {$wpdb->prefix}options WHERE option_name LIKE '%-{$key}'" );
-			
-			if ( $option && ! empty( $option ) && count( $option ) == 1 ) {
+			$option = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT option_name
+					FROM {$wpdb->prefix}options
+					WHERE option_name LIKE %s",
+					'%-' . $wpdb->esc_like( $key )
+				)
+			);
+
+			if ( $option && ! empty( $option ) && count( $option ) === 1 ) {
 				$option_name = reset( $option )->option_name;
 				delete_option( $option_name );
 			}
@@ -233,13 +253,15 @@ class Eac_Acf_Options_Page {
 		$post_type   = $post->post_type;
 		$post_status = $post->post_status;
 
+		/* if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) { return; }*/
+
 		// Ce n'est pas le type d'article attendu
-		if ( self::$acf_post_type != $post_type ) {
+		if ( self::$acf_post_type !== $post_type ) {
 			return;
 		}
 
 		// L'article n'est pas publié
-		if ( $post_status != 'publish' ) {
+		if ( 'publish' !== $post_status ) {
 			return;
 		}
 
@@ -282,7 +304,7 @@ class Eac_Acf_Options_Page {
 
 			foreach ( $fields as $field ) {
 				// Le type du champ est un group
-				if ( $field['type'] === 'group' ) {
+				if ( 'group' === $field['type'] ) {
 					$option_name = self::$options_page_name . $post_id . '-' . $field['key'];
 
 					// La clé n'est pas utilisée dans une autre page d'options
@@ -344,7 +366,7 @@ class Eac_Acf_Options_Page {
 		$post_type = $post->post_type;
 
 		// Ce n'est pas le type d'article attendu
-		if ( self::$acf_post_type != $post_type ) {
+		if ( self::$acf_post_type !== $post_type ) {
 			return;
 		}
 
@@ -369,9 +391,16 @@ class Eac_Acf_Options_Page {
 	public function delete_all_options_page( $post_id ) {
 		global $wpdb;
 		$option_name = self::$options_page_name . $post_id;
-		
-		$options = $wpdb->get_results( "SELECT option_name FROM {$wpdb->prefix}options WHERE option_name LIKE '{$option_name}%'" );
-		
+
+		$options = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT option_name
+				FROM {$wpdb->prefix}options
+				WHERE option_name LIKE %s",
+				$wpdb->esc_like( $option_name ) . '%'
+			)
+		);
+
 		if ( $options && ! empty( $options ) ) {
 			foreach ( $options as $option ) {
 				delete_option( $option->option_name );
@@ -390,7 +419,7 @@ class Eac_Acf_Options_Page {
 	public static function get_options_page_id( $key ) {
 		global $wpdb;
 		// recherche du groupe parent de la clé
-		/*
+		/**
 		$group = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT p.post_name
@@ -398,19 +427,27 @@ class Eac_Acf_Options_Page {
 				INNER JOIN {$wpdb->prefix}posts pkey
 				ON pkey.post_parent = p.ID
 				WHERE pkey.post_name = %s",
-				$key
+				$wpdb->esc_like( $key )
 			)
-		);*/
+		);
+		*/
 
 		// La clé du groupe
 		// reset() and end() are nice because you don't need to know the key, just the position (first or last).
 		// $group_key = reset($group)->post_name;
 
 		/** Recherche de l'option par sa clé dans la table eac_options */
-		$option = $wpdb->get_results( "SELECT option_name, option_value FROM {$wpdb->prefix}options WHERE option_name LIKE '%-{$key}'" );
+		$option = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT option_name, option_value
+				FROM {$wpdb->prefix}options
+				WHERE option_name LIKE %s",
+				'%-' . $wpdb->esc_like( $key )
+			)
+		);
 
 		// Une seule option pour la clé
-		if ( $option && ! empty( $option ) && count( $option ) == 1 ) {
+		if ( $option && ! empty( $option ) && count( $option ) === 1 ) {
 			$name                          = reset( $option )->option_name;
 			$value                         = maybe_unserialize( reset( $option )->option_value );
 			list($prefix, $id, $field_key) = explode( '-', $name );
@@ -500,8 +537,8 @@ class Eac_Acf_Options_Page {
 		$option   = '';
 
 		$current_user = wp_get_current_user();
-		if ( $current_user->has_cap( EAC_Plugin::instance()->get_manage_options_name() ) ) {
-			$option = EAC_Plugin::instance()->get_manage_options_name();
+		if ( $current_user->has_cap( Eac_Config_Elements::get_manage_options_name() ) ) {
+			$option = Eac_Config_Elements::get_manage_options_name();
 		} elseif ( $current_user->has_cap( 'manage_options' ) ) {
 			$option = 'manage_options';
 		}
@@ -543,7 +580,7 @@ class Eac_Acf_Options_Page {
 
 		switch ( $column_name ) {
 			case 'eac_type':
-				echo get_post_type_object( get_post_type( $post_id ) )->labels->singular_name;
+				echo esc_html( get_post_type_object( get_post_type( $post_id ) )->labels->singular_name );
 				break;
 			case 'eac_group':
 				$title  = array();
@@ -552,7 +589,7 @@ class Eac_Acf_Options_Page {
 					$title[] = $group['title'] . ' (' . $group['key'] . ')';
 				}
 				if ( ! empty( $title ) ) {
-					echo implode( '<br> ', $title );
+					echo implode( '<br /> ', $title );
 				} else {
 					echo 'Not found';
 				}
@@ -569,7 +606,7 @@ class Eac_Acf_Options_Page {
 					}
 
 					foreach ( $fields as $field ) {
-						if ( $field['type'] === 'group' ) {
+						if ( 'group' === $field['type'] ) {
 							$id[] = $field['name'] . ' (' . $field['key'] . ')';
 							foreach ( $field['sub_fields'] as $sub_field ) {
 								$id[] = $field['name'] . '_' . $sub_field['name'] . ' (' . $sub_field['key'] . ')';
@@ -581,7 +618,7 @@ class Eac_Acf_Options_Page {
 				}
 
 				if ( ! empty( $id ) ) {
-					echo implode( '<br>', $id );
+					echo implode( '<br />', $id );
 				} else {
 					echo 'Not found';
 				}
@@ -602,30 +639,30 @@ class Eac_Acf_Options_Page {
 					$fields_count += count( $fields );
 
 					foreach ( $fields as $field ) {
-						if ( $field['type'] === 'group' ) {
+						if ( 'group' === $field['type'] ) {
 							foreach ( $field['sub_fields'] as $sub_field ) {
 								$option_name = self::$options_page_name . $post_id . '-' . $sub_field['key'];
-								if ( get_option( $option_name ) == false ) {
+								if ( get_option( $option_name ) === false ) {
 									$saved = esc_html__( 'Non', 'eac-components' );
 								}
 							}
 						} else {
 							$option_name = self::$options_page_name . $post_id . '-' . $field['key'];
-							if ( get_option( $option_name ) == false ) {
+							if ( get_option( $option_name ) === false ) {
 								$saved = esc_html__( 'Non', 'eac-components' );
 							}
 						}
 					}
 				}
 
-				if ( $fields_count == 0 ) {
+				if ( 0 === $fields_count ) {
 					echo '----';
 				} else {
 					echo $saved;
 				}
 				break;
 			case 'eac_id':
-				echo $post_id;
+				echo absint( $post_id );
 				break;
 		}
 	}
@@ -701,7 +738,7 @@ class Eac_Acf_Options_Page {
 		foreach ( $acf_field_groups as $acf_field_group ) {
 			foreach ( $acf_field_group['location'] as $group_locations ) {
 				foreach ( $group_locations as $rule ) {
-					if ( $rule['param'] === 'post_type' && $rule['operator'] === '==' && $rule['value'] === $post_type ) {
+					if ( 'post_type' === $rule['param'] && '==' === $rule['operator'] && $rule['value'] === $post_type ) {
 						$groups[] = $acf_field_group;
 					}
 				}

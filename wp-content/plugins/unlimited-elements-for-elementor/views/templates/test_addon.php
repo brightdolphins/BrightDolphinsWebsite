@@ -27,8 +27,10 @@ if(!empty($objAddonType->addonView_urlBack))
 
 	$textEditThis = esc_html__("Edit This ", "unlimited-elements-for-elementor"). $this->textSingle;
 	
-	$textBackTo = esc_html__("Back To ", "unlimited-elements-for-elementor"). $this->textPlural .esc_html__(" List", "unlimited-elements-for-elementor")
+	$textBackTo = esc_html__("Back To ", "unlimited-elements-for-elementor"). $this->textPlural .esc_html__(" List", "unlimited-elements-for-elementor");
 
+	$urlTestAddonNew = HelperUC::getViewUrl("testaddonnew", "id={$addonID}");
+	
 ?>
 
 <div id="uc_testaddon_wrapper" class="uc-testaddon-wrapper">
@@ -44,6 +46,8 @@ if(!empty($objAddonType->addonView_urlBack))
 		<a id="uc_button_close_preview" href="javascript:void(0)" class="unite-button-secondary" <?php echo UniteProviderFunctionsUC::escAddParam($isPreviewMode?$styleShow:$styleHide)?>><?php esc_html_e("Hide Preview", "unlimited-elements-for-elementor")?></a>
 		
 		<a id="uc_button_preview_tab" href="javascript:void(0)" class="unite-button-secondary uc-button-cat-sap"><?php esc_html_e("Preview New Tab", "unlimited-elements-for-elementor")?></a>
+		
+		<a id="uc_button_testaddon_new" href="<?php echo $urlTestAddonNew?>" class="unite-button-secondary uc-button-cat-sap"><?php esc_html_e("Test Widget New", "unlimited-elements-for-elementor")?></a>
 		
 		<span id="uc_testaddon_slot1" class="uc-testaddon-slot" <?php echo UniteProviderFunctionsUC::escAddParam($slot1AddHtml)?>>
 			<a id="uc_testaddon_button_restore" href="javascript:void(0)" class="unite-button-secondary"><?php esc_html_e("Restore Data", "unlimited-elements-for-elementor")?></a>

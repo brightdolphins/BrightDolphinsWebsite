@@ -7,11 +7,8 @@
  * Description: Génère et formate automatiquement une Table des matières
  *
  * @since 1.8.0
- * @since 1.8.1 Ajout du control 'trailer' pour différencier les titres homonymes par un numéro d'ordre
- *              Sélection des niveaux de titres
- *              Choix du titre de l'ancre 'généré automatiquement' ou titre de la balise titre cible
- * @since 1.8.7 Application des breakpoints
- * @since 1.9.0 Intégration des scripts et des styles dans le constructeur de la class
+ * @since 2.1.1 Fix: aria expanded true ou false si le container est condensé ou non au chargement
+ *              Fix: ajout d'autres class pour la cible du contenu
  */
 
 namespace EACCustomWidgets\Widgets;
@@ -38,18 +35,14 @@ class Table_Of_Contents_Widget extends Widget_Base {
 	 * Constructeur de la class Table_Of_Contents_Widget
 	 *
 	 * Enregistre les scripts et les styles
-	 *
-	 * @since 1.9.0
 	 */
 	public function __construct( $data = array(), $args = null ) {
 		parent::__construct( $data, $args );
 
-		$suffix_js = EAC_SCRIPT_DEBUG ? '.js' : '.min.js';
+		wp_register_script( 'eac-toc-toc', EAC_Plugin::instance()->get_script_url( 'assets/js/toc/toctoc' ), array( 'jquery' ), '1.8.0', true );
+		wp_register_script( 'eac-table-content', EAC_Plugin::instance()->get_script_url( 'assets/js/elementor/eac-table-content' ), array( 'jquery', 'elementor-frontend', 'eac-toc-toc' ), '1.8.0', true );
 
-		wp_register_script( 'eac-toc-toc', EAC_ADDONS_URL . 'assets/js/toc/toctoc' . $suffix_js, array( 'jquery' ), '1.8.0', true );
-
-		wp_register_script( 'eac-table-content', EAC_Plugin::instance()->get_register_script_url( 'eac-table-content' ), array( 'jquery', 'elementor-frontend' ), '1.8.0', true );
-		wp_register_style( 'eac-table-content', EAC_Plugin::instance()->get_register_style_url( 'toctoc' ), array( 'eac' ), '1.8.0' );
+		wp_register_style( 'eac-table-content', EAC_Plugin::instance()->get_style_url( 'assets/css/toctoc' ), array( 'eac' ), '1.8.0' );
 	}
 
 	/**
@@ -185,6 +178,7 @@ class Table_Of_Contents_Widget extends Widget_Base {
 				)
 			);
 
+			/** @since 2.1.1 */
 			$this->add_control(
 				'toc_content_target',
 				array(
@@ -193,10 +187,12 @@ class Table_Of_Contents_Widget extends Widget_Base {
 					'description' => esc_html__( "Cible de l'analyse", 'eac-components' ),
 					'options'     => array(
 						'body'                   => 'Body',
-						'.site-content'          => 'Site-content',
-						'.site-main'             => 'Site-main',
-						'.entry-content'         => 'Entry-content',
-						'.entry-content article' => 'Article',
+						'.site-content'          => 'Site content',
+						'.site-main'             => 'Site main',
+						'.entry-content'         => 'Entry content',
+						'.page-content'          => 'Page content',
+						'.entry-content article' => 'Entry article',
+						'.site-main article'     => 'Page article',
 					),
 					'label_block' => true,
 					'default'     => 'body',
@@ -300,13 +296,12 @@ class Table_Of_Contents_Widget extends Widget_Base {
 				)
 			);
 
-			/** @since 1.8.7 Application des breakpoints */
 			$this->add_responsive_control(
 				'toc_content_width',
 				array(
 					'label'       => esc_html__( 'Largeur', 'eac-components' ),
 					'type'        => Controls_Manager::SLIDER,
-					'size_units'  => array( 'px' ),
+					'size_units'  => array( 'px', '%' ),
 					'default'     => array(
 						'unit' => 'px',
 						'size' => 500,
@@ -475,12 +470,15 @@ class Table_Of_Contents_Widget extends Widget_Base {
 	 */
 	protected function render() {
 		$settings = $this->get_settings_for_display();
+		/** @since 2.1.1 */
+		$expanded = 'yes' === $settings['toc_content_toggle'] ? 'false' : 'true';
+
 		$this->add_render_attribute( 'wrapper', 'class', 'eac-table-of-content' );
 		$this->add_render_attribute( 'wrapper', 'data-settings', $this->get_settings_json() );
 		?>
-		<div <?php echo $this->get_render_attribute_string( 'wrapper' ); ?>>
+		<div <?php echo wp_kses_post( $this->get_render_attribute_string( 'wrapper' ) ); ?>>
 			<div id="toctoc">
-				<div id="toctoc-head">
+				<div id="toctoc-head" aria-expanded="<?php echo esc_attr( $expanded ); ?>" aria-controls="toctoc-body">
 					<span id="toctoc-title"><?php echo sanitize_text_field( $settings['toc_header_title'] ); ?></span>
 				</div>
 				<div id="toctoc-body"></div>
@@ -495,7 +493,7 @@ class Table_Of_Contents_Widget extends Widget_Base {
 	 * Retrieve fields values to pass at the widget container
 	 * Convert on JSON format
 	 *
-	 * @uses         json_encode()
+	 * @uses         wp_json_encode()
 	 *
 	 * @return   JSON oject
 	 *
@@ -504,22 +502,20 @@ class Table_Of_Contents_Widget extends Widget_Base {
 	 */
 	protected function get_settings_json() {
 		$module_settings = $this->get_settings_for_display();
-		$numbering       = $module_settings['toc_content_anchor_trailer'] === 'yes' ? true : false;
+		$numbering       = 'yes' === $module_settings['toc_content_anchor_trailer'] ? true : false;
 
 		$settings = array(
-			'data_opened'      => $module_settings['toc_content_toggle'] === 'yes' ? false : true,
+			'data_opened'      => 'yes' === $module_settings['toc_content_toggle'] ? false : true,
 			'data_target'      => $module_settings['toc_content_target'],
 			'data_fontawesome' => ! empty( $module_settings['toc_content_picto']['value'] ) ? $module_settings['toc_content_picto']['value'] : '',
 			'data_title'       => ! empty( $module_settings['toc_content_heading'] ) ? implode( ',', $module_settings['toc_content_heading'] ) : 'h2',
-			'data_trailer'     => $module_settings['toc_content_anchor_auto'] === 'yes' ? true : $numbering,
-			'data_anchor'      => $module_settings['toc_content_anchor_auto'] === 'yes' ? true : false,
+			'data_trailer'     => 'yes' === $module_settings['toc_content_anchor_auto'] ? true : $numbering,
+			'data_anchor'      => 'yes' === $module_settings['toc_content_anchor_auto'] ? true : false,
 			'data_topmargin'   => 0, // $module_settings['toc_content_margin_top']['size'],
 		);
 
-		$settings = json_encode( $settings );
-		return $settings;
+		return wp_json_encode( $settings );
 	}
 
 	protected function content_template() {}
-
 }

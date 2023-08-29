@@ -10,6 +10,9 @@
  *              Deprecated widgets_registered
  *              Deprecated register_widget_type
  *              Ajout des filtres WooCommerce
+ * @since 2.0.2 Suppression des actions et fonctions depréciées
+ * @since 2.1.0 Initialization du module Header & Footer
+ *              Ajout du groupe Elementor 'Header & Footer'
  */
 
 namespace EACCustomWidgets\Core;
@@ -45,7 +48,7 @@ class Eac_Load_Elements {
 	private function __construct() {
 
 		/**
-		 * Les actions 'wp_ajax_xxxxxx' pour le control 'eac-select2' doivent être chargées avant les actions Elementor
+		 * Les actions AJAX 'wp_ajax_xxxxxx' pour le control 'eac-select2' doivent être chargées avant les actions Elementor
 		 *
 		 * @since 1.9.8
 		 */
@@ -53,12 +56,27 @@ class Eac_Load_Elements {
 
 		/**
 		 * @since 1.9.8 Filtres WooCommerce
+		 * @since 2.1.0 Le mega menu intègre le filtre 'woocommerce_add_to_cart_fragments' pour le mini-cart
 		 */
-		if ( Eac_Config_Elements::is_widget_active( 'woo-product-grid' ) ) {
+		if ( Eac_Config_Elements::is_widget_active( 'woo-product-grid' ) || Eac_Config_Elements::is_widget_active( 'mega-menu' ) ) {
 			require_once EAC_ADDONS_PATH . 'includes/woocommerce/eac-woo-hooks.php';
 		} else {
-			// On force la suppression de l'option d'intégration WC par sécurité
+			// On force la suppression de l'option des filtres WC par sécurité
 			delete_option( Eac_Config_Elements::get_woo_hooks_option_name() );
+		}
+
+		/**
+		 * Initialize le module Header & Footer avant les actions Elementor
+		 *
+		 * @since 2.1.0
+		 */
+		if ( Eac_Config_Elements::is_widget_active( 'header-footer' ) ) {
+			$path = Eac_Config_Elements::get_widget_path( 'header-footer' );
+			if ( $path ) {
+				// Charge les actions AJAX 'wp_ajax_xxxxxx' pour mettre à jour le badge du mini-cart
+				require_once EAC_ADDONS_PATH . 'templates-lib/widgets/classes/class-menu-actions.php';
+				require_once $path;
+			}
 		}
 
 		/**
@@ -74,12 +92,14 @@ class Eac_Load_Elements {
 		 *
 		 * @since 1.8.9
 		 * @since 1.9.8 register vs controls_registered
+		 * @since 2.0.2 action controls_registered depréciée
 		 */
-		if ( version_compare( ELEMENTOR_VERSION, '3.5.0', '<' ) ) {
-			add_action( 'elementor/controls/controls_registered', array( $this, 'register_controls' ) );
-		} else {
-			add_action( 'elementor/controls/register', array( $this, 'register_controls' ) );
-		}
+		add_action( 'elementor/controls/register', array( $this, 'register_controls' ) );
+
+		/**
+		 * Charge les traits avant les widgets
+		 */
+		$this->load_traits();
 
 		/**
 		 * Charge les widgets
@@ -87,12 +107,9 @@ class Eac_Load_Elements {
 		 *
 		 * @since 0.0.9
 		 * @since 1.9.8 register vs widgets_registered
+		 * @since 2.0.2 action widgets_registered depréciée
 		 */
-		if ( version_compare( ELEMENTOR_VERSION, '3.5.0', '<' ) ) {
-			add_action( 'elementor/widgets/widgets_registered', array( $this, 'register_widgets' ) );
-		} else {
-			add_action( 'elementor/widgets/register', array( $this, 'register_widgets' ) );
-		}
+		add_action( 'elementor/widgets/register', array( $this, 'register_widgets' ) );
 	}
 
 	/** @since 2.0.1 Singleton de la class */
@@ -109,6 +126,7 @@ class Eac_Load_Elements {
 	 * @since 0.0.9
 	 * @since 1.8.8 Le troisième paramètre est déprécié
 	 * @since 1.8.9 Ajout du groupe de composants 'eac-advanced'
+	 * @since 2.1.0 Ajout du groupe de composants 'eac-ehf'
 	 */
 	public function register_categories( $elements_manager ) {
 		$elements_manager->add_category(
@@ -125,20 +143,22 @@ class Eac_Load_Elements {
 				'icon'  => 'fa fa-plug',
 			)
 		);
+		$elements_manager->add_category(
+			'eac-ehf',
+			array(
+				'title' => esc_html__( 'EAC Entête & Pied de page', 'eac-components' ),
+				'icon'  => 'fa fa-plug',
+			)
+		);
 	}
 
 	/**
 	 * Enregistre les nouveaux controls
 	 *
-	 * Méthode register_control: 'NOM_DU_CONTROL'
-	 * Méthode register: pas de nom pour le control
-	 * class du control: méthode get_type() { return 'NOM_DU_CONTROL'; }
-	 * script gestion du control: elementor.addControlView('NOM_DU_CONTROL', nom object);
-	 * widget add_control: 'type' => 'NOM_DU_CONTROL',
-	 *
 	 * @args $controls_manager Gestionnaire des controls
 	 * @since 1.8.9
 	 * @since 1.9.8 register vs register_control
+	 * @since 2.0.2 fonction register_control depréciée
 	 */
 	public function register_controls( $controls_manager ) {
 
@@ -148,12 +168,34 @@ class Eac_Load_Elements {
 		// Enregistre le control 'eac-select2' pour le control select2
 		require_once EAC_ADDONS_PATH . 'includes/elementor/controls/eac-select2-control.php';
 
-		if ( version_compare( ELEMENTOR_VERSION, '3.5.0', '<' ) ) {
-			$controls_manager->register_control( 'FILE_VIEWER', new \EACCustomWidgets\Includes\Elementor\Controls\Simple_File_Viewer_Control() );
-			$controls_manager->register_control( 'eac-select2', new \EACCustomWidgets\Includes\Elementor\Controls\Ajax_Select2_Control() );
-		} else {
-			$controls_manager->register( new \EACCustomWidgets\Includes\Elementor\Controls\Simple_File_Viewer_Control() );
-			$controls_manager->register( new \EACCustomWidgets\Includes\Elementor\Controls\Ajax_Select2_Control() );
+		$controls_manager->register( new \EACCustomWidgets\Includes\Elementor\Controls\Simple_File_Viewer_Control() );
+		$controls_manager->register( new \EACCustomWidgets\Includes\Elementor\Controls\Ajax_Select2_Control() );
+	}
+
+	/**
+	 * Enregistre les traits des widgets
+	 *
+	 * @since 2.1.0
+	 */
+	public function load_traits() {
+		/**
+		 * Le trait pour les titres de page avec le contexte
+		 * Le dynamic tag page title et le widget page title de la fonctionnalité header-footer
+		 */
+		require_once EAC_WIDGETS_TRAITS_PATH . 'page-title-trait.php';
+
+		// Les traits 'slider' et 'Button read more' pour les composants qui implémente le slider swiper
+		if ( Eac_Config_Elements::is_widget_active( 'woo-product-grid' ) || Eac_Config_Elements::is_widget_active( 'articles-liste' ) || Eac_Config_Elements::is_widget_active( 'acf-relationship' ) || Eac_Config_Elements::is_widget_active( 'image-galerie' ) ) {
+			require_once EAC_WIDGETS_TRAITS_PATH . 'slider-trait.php';
+			require_once EAC_WIDGETS_TRAITS_PATH . 'button-read-more-trait.php';
+		}
+
+		// Le composant product grid est activé, on charge les traits
+		if ( Eac_Config_Elements::is_widget_active( 'woo-product-grid' ) ) {
+			require_once EAC_WIDGETS_TRAITS_PATH . 'button-add-to-cart-trait.php';
+			require_once EAC_WIDGETS_TRAITS_PATH . 'badge-new-trait.php';
+			require_once EAC_WIDGETS_TRAITS_PATH . 'badge-promo-trait.php';
+			require_once EAC_WIDGETS_TRAITS_PATH . 'badge-stock-trait.php';
 		}
 	}
 
@@ -164,36 +206,20 @@ class Eac_Load_Elements {
 	 * @since 1.9.0 Suppression des composants 'Instagram'
 	 * @since 1.9.8 register vs register_widget_type
 	 *              Charge les traits nécessaires pour les composants qui les utilisent
+	 * @since 2.0.2 fonction register_widget_type depréciée
 	 */
 	public function register_widgets( $widgets_manager ) {
-
-		// Le trait slider pour les composants qui implémente le slider swiper
-		if ( Eac_Config_Elements::is_widget_active( 'woo-product-grid' ) || Eac_Config_Elements::is_widget_active( 'articles-liste' ) || Eac_Config_Elements::is_widget_active( 'acf-relationship' ) || Eac_Config_Elements::is_widget_active( 'image-galerie' ) ) {
-			require_once EAC_WIDGETS_TRAITS_PATH . 'slider-trait.php';
-		}
-
-		// Le composant product grid est activé, on charge les traits
-		if ( Eac_Config_Elements::is_widget_active( 'woo-product-grid' ) ) {
-			require_once EAC_WIDGETS_TRAITS_PATH . 'button-read-more-trait.php';
-			require_once EAC_WIDGETS_TRAITS_PATH . 'button-add-to-cart-trait.php';
-			require_once EAC_WIDGETS_TRAITS_PATH . 'badge-new-trait.php';
-			require_once EAC_WIDGETS_TRAITS_PATH . 'badge-promo-trait.php';
-			require_once EAC_WIDGETS_TRAITS_PATH . 'badge-stock-trait.php';
-		}
 
 		foreach ( Eac_Config_Elements::get_widgets_active() as $element => $active ) {
 			if ( Eac_Config_Elements::is_widget_active( $element ) ) {
 				$path       = Eac_Config_Elements::get_widget_path( $element );
 				$name_space = Eac_Config_Elements::get_widget_namespace( $element );
-				if ( $path ) {
+				if ( $path && ! empty( $name_space ) ) {
 					require_once $path;
-					if ( version_compare( ELEMENTOR_VERSION, '3.5.0', '<' ) ) {
-						$widgets_manager->register_widget_type( new $name_space() );
-					} else {
-						$widgets_manager->register( new $name_space() );
-					}
+					$widgets_manager->register( new $name_space() );
 				}
 			}
 		}
 	}
+
 } Eac_Load_Elements::instance();

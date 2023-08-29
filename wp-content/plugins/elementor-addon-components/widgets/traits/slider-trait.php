@@ -29,6 +29,7 @@ trait Slider_Trait {
 					),
 				),
 				'default' => 'no',
+				'toggle'  => false,
 			)
 		);
 
@@ -37,8 +38,8 @@ trait Slider_Trait {
 			array(
 				'label'     => esc_html__( "Interval d'affichage (ms)", 'eac-components' ),
 				'type'      => Controls_Manager::NUMBER,
-				'min'       => 500,
-				'max'       => 5000,
+				'min'       => 0,
+				'max'       => 6000,
 				'step'      => 500,
 				'default'   => 2000,
 				'condition' => array( 'slider_autoplay' => 'yes' ),
@@ -61,6 +62,7 @@ trait Slider_Trait {
 					),
 				),
 				'default'   => 'yes',
+				'toggle'  => false,
 				'condition' => array( 'slider_autoplay' => 'yes' ),
 			)
 		);
@@ -74,7 +76,34 @@ trait Slider_Trait {
 				'max'       => 30,
 				'step'      => 1,
 				'default'   => 3,
-				'condition' => array( 'slider_effect!' => array( 'creative', 'fade' ) ),
+				'condition' => array(
+					'slider_effect!'         => array( 'creative', 'fade' ),
+					//'slider_images_centered' => 'no',
+				),
+			)
+		);
+
+		$this->add_control(
+			'slider_images_centered',
+			array(
+				'label'     => esc_html__( 'Diapositive centrée', 'eac-components' ),
+				'type'      => Controls_Manager::CHOOSE,
+				'options'   => array(
+					'yes' => array(
+						'title' => esc_html__( 'Oui', 'eac-components' ),
+						'icon'  => 'fa fa-check',
+					),
+					'no'  => array(
+						'title' => esc_html__( 'Non', 'eac-components' ),
+						'icon'  => 'fa fa-ban',
+					),
+				),
+				'default'   => 'no',
+				'toggle'  => false,
+				'condition' => array(
+					'slider_autoplay' => 'yes',
+					'slider_effect!' => array( 'creative', 'fade' ),
+				),
 			)
 		);
 
@@ -94,6 +123,7 @@ trait Slider_Trait {
 					),
 				),
 				'default'   => 'left',
+				'toggle'  => false,
 				'condition' => array(
 					'slider_autoplay' => 'yes',
 					'slider_effect!'  => 'creative',
@@ -199,13 +229,27 @@ trait Slider_Trait {
 			)
 		);
 
+		/** @since 2.0.2 Active le ratio image */
+		$this->add_control(
+			'slider_ratio_enable',
+			array(
+				'label'        => esc_html__( 'Activer le ratio image', 'eac-components' ),
+				'type'         => Controls_Manager::SWITCHER,
+				'label_on'     => esc_html__( 'oui', 'eac-components' ),
+				'label_off'    => esc_html__( 'non', 'eac-components' ),
+				'return_value' => 'yes',
+				'default'      => 'yes',
+				'separator'    => 'before',
+			)
+		);
+
 		$this->add_responsive_control(
 			'slider_ratio',
 			array(
 				'label'          => esc_html__( 'Ratio image', 'eac-components' ),
 				'type'           => Controls_Manager::SELECT,
 				'default'        => '1-1',
-				'tablet_default' => '3-2',
+				'tablet_default' => '4-3',
 				'mobile_default' => '1-1',
 				'options'        => array(
 					'1-1'  => esc_html__( 'Défaut', 'eac-components' ),
@@ -219,18 +263,35 @@ trait Slider_Trait {
 					'relation' => 'or',
 					'terms'    => array(
 						array(
-							'name'     => 'slider_images_number',
-							'operator' => '>',
-							'value'    => 0,
+							'terms' => array(
+								array(
+									'name'     => 'slider_images_number',
+									'operator' => '>',
+									'value'    => 0,
+								),
+								array(
+									'name'     => 'slider_ratio_enable',
+									'operator' => '===',
+									'value'    => 'yes',
+								),
+							),
 						),
 						array(
-							'name'     => 'slider_effect',
-							'operator' => 'in',
-							'value'    => array( 'fade', 'creative' ),
+							'terms' => array(
+								array(
+									'name'     => 'slider_effect',
+									'operator' => 'in',
+									'value'    => array( 'fade', 'creative' ),
+								),
+								array(
+									'name'     => 'slider_ratio_enable',
+									'operator' => '===',
+									'value'    => 'yes',
+								),
+							),
 						),
 					),
 				),
-				'separator'      => 'before',
 			)
 		);
 
@@ -264,14 +325,32 @@ trait Slider_Trait {
 					'relation' => 'or',
 					'terms'    => array(
 						array(
-							'name'     => 'slider_images_number',
-							'operator' => '>',
-							'value'    => 0,
+							'terms' => array(
+								array(
+									'name'     => 'slider_images_number',
+									'operator' => '>',
+									'value'    => 0,
+								),
+								array(
+									'name'     => 'slider_ratio_enable',
+									'operator' => '===',
+									'value'    => 'yes',
+								),
+							),
 						),
 						array(
-							'name'     => 'slider_effect',
-							'operator' => 'in',
-							'value'    => array( 'fade', 'creative' ),
+							'terms' => array(
+								array(
+									'name'     => 'slider_effect',
+									'operator' => 'in',
+									'value'    => array( 'fade', 'creative' ),
+								),
+								array(
+									'name'     => 'slider_ratio_enable',
+									'operator' => '===',
+									'value'    => 'yes',
+								),
+							),
 						),
 					),
 				),
@@ -294,6 +373,7 @@ trait Slider_Trait {
 					),
 				),
 				'default'   => 'no',
+				'toggle'  => false,
 				'separator' => 'before',
 			)
 		);
@@ -314,6 +394,7 @@ trait Slider_Trait {
 					),
 				),
 				'default' => 'no',
+				'toggle'  => false,
 			)
 		);
 
@@ -333,6 +414,7 @@ trait Slider_Trait {
 					),
 				),
 				'default'   => 'no',
+				'toggle'  => false,
 				'condition' => array( 'slider_pagination' => 'yes' ),
 			)
 		);
@@ -353,6 +435,7 @@ trait Slider_Trait {
 					),
 				),
 				'default' => 'no',
+				'toggle'  => false,
 			)
 		);
 	}

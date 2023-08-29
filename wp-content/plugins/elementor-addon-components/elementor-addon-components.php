@@ -4,11 +4,11 @@
  * Description: Ajouter des composants et des fonctionnalités avancées pour la version gratuite d'Elementor
  * Plugin URI: https://elementor-addon-components.com/
  * Author: Team EAC
- * Version: 2.0.1
- * Elementor tested up to: 3.8.1
+ * Version: 2.1.2
+ * Elementor tested up to: 3.14.1
  * WC requires at least: 6.9.0
- * WC tested up to: 7.1.0
- * ACF tested up to: 6.0.3
+ * WC tested up to: 7.8.0
+ * ACF tested up to: 6.1.6
  * Author URI: https://elementor-addon-components.com/
  * Text Domain: eac-components
  * Domain Path: /languages
@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 define( 'EAC_DOMAIN', 'eac-components' );
 define( 'EAC_PLUGIN_NAME', 'Elementor Addon Components' );
-define( 'EAC_ADDONS_VERSION', '2.0.1' );
+define( 'EAC_ADDONS_VERSION', '2.1.2' );
 
 define( 'EAC_CUSTOM_FILE', __FILE__ );
 define( 'EAC_ADDONS_URL', plugins_url( '/', __FILE__ ) );
@@ -43,10 +43,14 @@ define( 'EAC_WIDGETS_NAMESPACE', 'EACCustomWidgets\\Widgets\\' );
 define( 'EAC_WIDGETS_PATH', EAC_ADDONS_PATH . 'widgets/' );
 define( 'EAC_WIDGETS_TRAITS_PATH', EAC_ADDONS_PATH . 'widgets/traits/' );
 
-define( 'EAC_SCRIPT_DEBUG', false );              // true = .js ou false = .min.js
-define( 'EAC_STYLE_DEBUG', false );               // true = .css ou false = .min.css
-define( 'EAC_GET_POST_ARGS_IN', false );          // get_display_for_settings de la page en entrée
-define( 'EAC_GET_POST_ARGS_OUT', false );         // arguments formatés pour WP_Query en sortie
+define( 'EAC_EHF_PATH', EAC_ADDONS_PATH . 'templates-lib/' );
+define( 'EAC_EHF_WIDGETS_PATH', EAC_ADDONS_PATH . 'templates-lib/widgets/' );
+define( 'EAC_EHF_WIDGETS_NAMESPACE', 'EACCustomWidgets\\TemplatesLib\\Widgets\\' );
+
+define( 'EAC_SCRIPT_DEBUG', false );            // true = .js ou false = .min.js
+define( 'EAC_STYLE_DEBUG', false );            // true = .css ou false = .min.css
+define( 'EAC_GET_POST_ARGS_IN', false );       // arguments $settings pour WP_Query de la page en entrée
+define( 'EAC_GET_POST_ARGS_OUT', false );      // arguments formatés pour WP_Query en sortie
 define( 'EAC_GET_META_FILTER_QUERY', false );
 
 /**
@@ -55,10 +59,23 @@ define( 'EAC_GET_META_FILTER_QUERY', false );
  * @since 0.0.9
  */
 final class EAC_Components_Plugin {
+
 	/** Version Elementor */
-	const EAC_ELEMENTOR_VERSION_REQUIRED = '3.4.0';
-	/** Version PHP */
-	const EAC_MINIMUM_PHP_VERSION = '7.0';
+	const EAC_ELEMENTOR_VERSION_REQUIRED = '3.5.0';
+
+	/**
+	 * Version PHP
+	 *
+	 * @since 2.1.0 Version PHP requise 7.4
+	 */
+	const EAC_MINIMUM_PHP_VERSION = '7.4';
+
+	/**
+	 * Version WordPress
+	 *
+	 * @since 2.1.0 Version WordPress requise 5.9.0
+	 */
+	const EAC_WORDPRESS_VERSION_REQUIRED = '5.9.0';
 
 	/** L'instance du plugin */
 	private static $instance = null;
@@ -141,6 +158,16 @@ final class EAC_Components_Plugin {
 		}
 
 		/**
+		 * Test de la version WordPress
+		 *
+		 * @since 2.1.0
+		 */
+		if ( version_compare( get_bloginfo( 'version' ), self::EAC_WORDPRESS_VERSION_REQUIRED, '<' ) ) {
+			add_action( 'admin_notices', array( $this, 'wordpress_bad_version' ) );
+			return;
+		}
+
+		/**
 		 * Test de la version PHP
 		 *
 		 *  @since 1.4.9
@@ -218,7 +245,7 @@ final class EAC_Components_Plugin {
 	public function elementor_bad_version() {
 		$message = sprintf(
 			/* translators: 1: Elementor version minimum */
-			esc_html__( 'EAC Elementor version minimum:  %1$s', 'eac-components' ),
+			esc_html__( 'EAC Elementor version minimale:  %1$s', 'eac-components' ),
 			self::EAC_ELEMENTOR_VERSION_REQUIRED
 		);
 		?>
@@ -237,7 +264,7 @@ final class EAC_Components_Plugin {
 	public function minimum_php_version() {
 		$message = sprintf(
 			/* translators: 1: PHP version minimum */
-			esc_html__( 'EAC PHP version minimum:  %1$s', 'eac-components' ),
+			esc_html__( 'EAC PHP version minimale:  %1$s', 'eac-components' ),
 			self::EAC_MINIMUM_PHP_VERSION
 		);
 		?>
@@ -246,4 +273,23 @@ final class EAC_Components_Plugin {
 		</div>
 		<?php
 	}
+
+	/**
+	 * Notification WordPress n'est pas à la bonne version
+	 *
+	 * @since 2.1.0
+	 */
+	public function wordpress_bad_version() {
+		$message = sprintf(
+			/* translators: 1: WordPress version minimum */
+			esc_html__( 'EAC WordPress version minimale:  %1$s', 'eac-components' ),
+			self::EAC_WORDPRESS_VERSION_REQUIRED
+		);
+		?>
+		<div class="notice notice-error is-dismissible">
+			<p><?php echo esc_html( $message ); ?></p>
+		</div>
+		<?php
+	}
+
 } EAC_Components_Plugin::instance();

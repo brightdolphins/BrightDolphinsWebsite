@@ -8,7 +8,7 @@
 defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 
 class InstagramAPIOfficialUC{
-	
+		
 	const URL_REFRESH = "https://graph.instagram.com/refresh_access_token";
 	const URL_AUTHORIZE = "https://api.instagram.com/oauth/authorize";
 	const APP_CLIENT_ID = "301063367606985";
@@ -22,6 +22,7 @@ class InstagramAPIOfficialUC{
 	const CACHE_RESPONSE = true;
 	private $lastAPIError = "";
 	const DEBUG_SERVER_REQUEST = false;
+	
 	
 	/**
 	 * check if raw response is error one.
@@ -71,7 +72,19 @@ class InstagramAPIOfficialUC{
 		}
 		
 		//get response from cache
-		if(self::CACHE_RESPONSE == true){
+		
+		$isNoCache = UniteFunctionsUC::getGetVar("ucnocache","",UniteFunctionsUC::SANITIZE_TEXT_FIELD);
+		$isNoCache = UniteFunctionsUC::strToBool($isNoCache);
+		
+		if(UniteFunctionsWPUC::isCurrentUserHasPermissions() == false)
+			$isNoCache = false;
+		
+		if($isNoCache === true){
+			dmp("loading instagram without cache...");
+		}
+		
+		if(self::CACHE_RESPONSE == true && $isNoCache !== true){
+						
 			$cacheKey = $this->createCacheKey($url);
 			
 			$response = HelperInstaUC::getFromCache($cacheKey);
@@ -189,7 +202,7 @@ class InstagramAPIOfficialUC{
 			UniteFunctionsUC::throwError("Wrong API Response");
 		
 		$arrData = UniteFunctionsUC::convertStdClassToArray($arrData);
-		
+				
 		//check for errors:
 		$error = UniteFunctionsUC::getVal($arrData, "error");
 		if(empty($error))
@@ -278,22 +291,20 @@ class InstagramAPIOfficialUC{
 	 */
 	private function requestMedia(){
 		
-		$fields = "media_url,thumbnail_url,caption,id,media_type,timestamp,username,comments_count,like_count,permalink,children{media_url,id,media_type,timestamp,permalink,thumbnail_url}";
-		//$fields = "media_url,thumbnail_url,caption,media_type";
+		$fields = "media_url,thumbnail_url,caption,id,media_type,timestamp,username,permalink,children{media_url,id,media_type,timestamp,permalink,thumbnail_url}";
 		
 		$data = array();
 		$count = 2;
 		
 		$urlNext = $this->getUrlRequest("media", $fields);
-		
+				
 		$arrDataCombined = array();
 		
 		$maxRequest = 3;
 		
-		do{
-			
+		do{			
 			$response = $this->requestForData($urlNext);
-			
+						
 			$data = UniteFunctionsUC::getVal($response, "data");
 			if(empty($data))
 				$data = array();
@@ -351,7 +362,7 @@ class InstagramAPIOfficialUC{
 		$this->initAccessData();
 		
 		$arrUserData = $this->requestUser();
-		
+				
 		$arrItemsData = $this->requestMedia();
 				
 		$objItems = new InstaObjUserUCItemsUC();
@@ -422,6 +433,7 @@ class InstagramAPIOfficialUC{
 	 */
 	public function getItemsData($mixed, $lastID=null, $userID = null, $maxItems = null){
 		
+		
 		$type = "";
 		if(strpos($mixed,"@") === 0)
 			$type = "user";
@@ -441,6 +453,7 @@ class InstagramAPIOfficialUC{
 			
 			switch($type){
 				case "user":
+					
 					//$objItems = $this->getUserData($mixed, $lastID, $userID);
 					$objItems = $this->getUserData_new($mixed, $lastID, $userID);
 					

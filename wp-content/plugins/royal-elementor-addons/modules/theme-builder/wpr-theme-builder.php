@@ -39,12 +39,22 @@ class Wpr_Theme_Builder extends Elementor\Core\Base\Document {
 		$default_archives = [
 			'archive/posts' => esc_html__( 'Posts Archive', 'wpr-addons' ),
 			'product_archive/products' => esc_html__( 'Products Archive', 'wpr-addons' ),
+			'product_archive/product_search' => esc_html__('Products Search', 'wpr-addons'),
 			'archive/author' => esc_html__( 'Author Archive', 'wpr-addons' ),
 			'archive/date' => esc_html__( 'Date Archive', 'wpr-addons' ),
 			'archive/search' => esc_html__( 'Search Results', 'wpr-addons' ),
 		];
 
 		$taxonomy_archives = $post_taxonomies;
+
+		// Add CPT to Default Archives
+		foreach ($post_types as $post_type => $value) {
+			if ( 'post' === $post_type || 'page' === $post_type || 'e-landing-page' === $post_type ) {
+				continue;
+			}
+
+			$default_archives['archive/'. $post_type] = $value .' '. esc_html__( 'Archive', 'wpr-addons' );
+		}
 
 		$id = get_the_ID();
 		$query = '';
@@ -98,11 +108,23 @@ class Wpr_Theme_Builder extends Elementor\Core\Base\Document {
 					$query = 'product_cat';
 				} elseif ( $template_slug == Utilities::get_template_slug($conds, 'product_archive/product_tag/all', $id) ) {
 					$query = 'product_tag';
+				} elseif ( $template_slug == Utilities::get_template_slug($conds, 'product_archive/product_search') ) {
+					$query = 'product_archive/product_search';
 				} elseif ( $template_slug == Utilities::get_template_slug($conds, 'archive/categories', $id) ) {
 					$query = 'category';
 				} elseif ( $template_slug == Utilities::get_template_slug($conds, 'archive/tags', $id) ) {
 					$query = 'post_tag';
 				} else {
+					foreach ($post_types as $post_type => $value) {
+						if ( 'post' === $post_type || 'page' === $post_type ) {
+							continue;
+						}
+
+						if ( $template_slug == Utilities::get_template_slug($conds, 'archive/'. $post_type, $id) ) {
+							$query = 'archive/'. $post_type;
+						}
+					}
+
 					foreach ($post_taxonomies as $tax => $value) {
 						if ( 'category' === $tax || 'tag' === $tax ) {
 							continue;
@@ -174,10 +196,13 @@ class Wpr_Theme_Builder extends Elementor\Core\Base\Document {
 				'preview_single_'. $slug,
 				[
 					'label' => 'Select '. $title,
-					'type' => Controls_Manager::SELECT2,
+					'type' => 'wpr-ajax-select2',
+					// 'type' => Controls_Manager::SELECT2,
 					'label_block' => true,
 					'default' => !empty($latest_post) ? $latest_post[0]->ID : '',
-					'options' => Utilities::get_posts_by_post_type( $slug ),
+					'options' => 'ajaxselect2/get_posts_by_post_type',
+					// 'options' => Utilities::get_posts_by_post_type( $slug ),
+					'query_slug' => $slug,
 					'separator' => 'before',
 					'condition' => [
 						'preview_source' => $slug,
@@ -252,12 +277,25 @@ class Wpr_Theme_Builder extends Elementor\Core\Base\Document {
 				$args = [ 'post_type' => 'post' ];
 				break;
 
+			case 'product_archive/products':
+				$args = ['post_type' => 'product'];
+				break;
+
 			case 'archive/author':
 				$args = [ 'author' => $settings['preview_archive_author'] ];
 				break;
 
 			case 'archive/search':
 				$args = [ 's' => $settings['preview_archive_search'] ];
+				break;
+			
+			default:
+				// Custom Post Type Archives
+				if ( strpos( $source, 'archive/' ) !== false ) {
+					$post_type = str_replace( 'archive/', '', $source );
+					$args = [ 'post_type' => $post_type ];
+				}
+				
 				break;
 		}
 

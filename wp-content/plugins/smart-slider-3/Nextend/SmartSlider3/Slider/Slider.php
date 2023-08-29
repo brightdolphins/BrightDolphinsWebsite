@@ -161,7 +161,7 @@ class Slider extends AbstractRenderable {
                 $this->hasError = true;
                 throw new Exception('Slider does not exists!');
             } else {
-                if (!$this->isAdminArea && $sliderRow['status'] != 'published') {
+                if (!$this->isAdminArea && $sliderRow['slider_status'] != 'published') {
                     $this->hasError = true;
                     throw new Exception('Slider is not published!');
                 }
@@ -392,9 +392,7 @@ class Slider extends AbstractRenderable {
 
         $html .= Html::tag("div", $sliderAttributes, $slider);
 
-        if (!$this->params->get('optimize-jetpack-photon', 0)) {
-            AssetManager::$image->add($this->images);
-        }
+        AssetManager::$image->add($this->images);
 
         $needDivWrap = false;
 

@@ -273,6 +273,23 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 			return($arrValues);
 		}
 		
+		/**
+		 * convert posts array to assoc by ID
+		 */
+		public static function arrPostsToAssoc($arrPosts){
+			
+			if(empty($arrPosts))
+				return(array());
+			
+			$arrOutput = array();
+			foreach($arrPosts as $post){
+				
+				$arrOutput[$post->ID] = $post;
+			}
+			
+			return($arrOutput);
+		}
+		
 		
 		/**
 		 *
@@ -293,9 +310,10 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 					
 					if(!empty($field2))
 						$arrAssoc[$item[$field]] = $item[$field2];
-					else
+					else{
+												
 						$arrAssoc[$item[$field]] = $item;
-					
+					}
 				}
 			}
 		
@@ -338,6 +356,30 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 				$value = $item[$valueName];
 				
 				$arr[$key] = $value;
+			}
+		
+			return($arr);
+		}
+
+		/**
+		 *
+		 * convert assoc array to array
+		 */
+		public static function assocToArrayNames($assoc, $valueName){
+			
+			$arr = array();
+			
+			if(empty($assoc))
+				return(array());
+			
+			foreach($assoc as $item){
+				
+				if(!array_key_exists($valueName, $item))
+					UniteFunctionsUC::throwError("field: $valueName not found in array");
+				
+				$value = $item[$valueName];
+				
+				$arr[] = $value;
 			}
 		
 			return($arr);
@@ -867,32 +909,53 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 		 */
 		public static function truncateString($value, $length = 100, $preserve = true, $separator = '...', $charset="utf-8"){
 			
-			$value = strip_tags($value);
-						
-	        if (mb_strlen($value, $charset) > $length) {
-	            if ($preserve) {
-	            	
-	            	if(function_exists("mb_strpos")){
-		                // If breakpoint is on the last word, return the value without separator.
-		                if (false === ($breakpoint = mb_strpos($value, ' ', $length, $charset))) {
-		                    return $value;
-		                }
-	            	}else{
-		                
-	            		if (false === ($breakpoint = strpos($value, ' ', $length))) {
-		                    return $value;
-		                }
-	            		
-	            	}
-	
-	                $length = $breakpoint;
-	            }
-				
+			if(empty($length))
+				$length = 100;
+			
+			$originalValue = $value;
+        	
+			$value = strip_tags($value,"<br><em><b><strong>");
+			
+			if (mb_strlen($value, $charset) <= $length) 
+				return($originalValue);
+			
+			//preserve words
+            if ($preserve) {
+            	
+            	if(function_exists("mb_strpos")){
+	                // If breakpoint is on the last word, return the value without separator.
+	                if (false === ($breakpoint = mb_strpos($value, ' ', $length, $charset))) {
+	                	return $value;
+	                }
+            	}else{
+	                
+            		if (false === ($breakpoint = strpos($value, ' ', $length))) {
+	                    return $value;
+	                }
+            		
+            	}
+
+                $length = $breakpoint;
+            }
+			
+            if(function_exists("mb_substr"))	            
+            	$value = rtrim(mb_substr($value, 0, $length, $charset)).$separator;
+            else
+            	$value = rtrim(substr($value, 0, $length)).$separator;
+            
+	       	
+            //if html errors - strip tags and trim again
+            
+	        $arrErrors = UniteFunctionsUC::validateHTML($value);
+	        
+	        if(!empty($arrErrors)){
+	        	$value = strip_tags($originalValue);
+
 	            if(function_exists("mb_substr"))	            
-	            	return rtrim(mb_substr($value, 0, $length, $charset)).$separator;
+	            	$value = rtrim(mb_substr($value, 0, $length, $charset)).$separator;
 	            else
-	            	return rtrim(substr($value, 0, $length, $charset)).$separator;
-	            
+	            	$value = rtrim(substr($value, 0, $length)).$separator;
+	            	
 	        }
 	        
 	        return $value;
@@ -1989,19 +2052,51 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 	    }
 		
 	    /**
+	     * check if the html is valid
+	     */
+	    public static function isHTMLValid($html){
+	    	
+	    	if(empty($html))
+	    		return(true);
+	    	
+	    	if(class_exists("DOMDocument") == false)
+	    		return(true);
+	    		
+	    	$dom = new DOMDocument;
+			$dom->loadHTML($html);
+			
+	    	$isValid = $dom->validate();
+	    	
+	    	
+	    	return($isValid);
+	    }
+	    
+	    
+	    /**
 	     * check if html valid, get errors list
 	     */
 		public static function validateHTML($string){
 			
 		    $start = strpos($string, '<');
 		    $end = strrpos($string, '>', $start);
-		
+			
+		    if($start === false)
+				return(array());
+		    
+			if(function_exists("libxml_clear_errors") == false)
+				return(array());
+				
+			if(function_exists("simplexml_load_string") == false)
+				return(array());
+		    
+		    
 		    if ($end !== false) {
 		        $string = substr($string, $start);
 		    } else {
 		        $string = substr($string, $start, strlen($string) - $start);
 		    }
 			
+		    
 		    // xml requires one root node
 		    $string = "<div>$string</div>";
 			
@@ -2013,6 +2108,8 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 			
 		    return $arrErrors;
 		}
+		
+		
 		
 		public static function z________FILE_SYSTEM________(){}
 		
@@ -2089,6 +2186,10 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 				UniteFunctionsUC::throwError("write file should accept only string in file: ". $filepath);
 			
 			$fp = fopen($filepath,"w+");
+			
+			if($fp === false)
+				UniteFunctionsUC::throwError("File $filepath could not been created. Check folder permissions");
+			
 			fwrite($fp,$str);
 			fclose($fp);
 		}
@@ -2160,10 +2261,15 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 				
 				$filepath = $path.$file;
 				
-				if(is_dir($filepath)){
+				$isDir = is_dir($filepath);
+				
+				if($isDir == true){
+					
 					//add dirs
-					if(is_array($filetype) && array_search("dir", $filetype) !== false || !is_array($filetype) && $filetype == "dir")
+					if(is_array($filetype) && array_search("dir", $filetype) !== false || !is_array($filetype) && $filetype == "dir"){
 						$arrFiles[] = $filepath;
+					}
+					
 					$arrFiles = self::getFileListTree($filepath, $filetype, $arrFiles);
 				}
 
@@ -2176,6 +2282,9 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 					continue;
 				}
 				if(!empty($filetype) && is_array($filetype) == false && $filetype != $ext)
+					continue;
+				
+				if($isDir == true)
 					continue;
 				
 				$arrFiles[] = $filepath;
@@ -2249,6 +2358,27 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 		public static function clearDirByTime($path, $olderThenSeconds = 60){
 			
 			self::deleteDir($path,false,array(),"",array("olderthen"=>$olderThenSeconds));
+		}
+		
+		/**
+		 * delete list of files
+		 */
+		public static function deleteListOfFiles($arrFiles){
+			
+			if(empty($arrFiles))
+				return(false);
+				
+			if(is_array($arrFiles) == false)
+				return(false);
+			
+			foreach($arrFiles as $filepath){
+				
+				if(file_exists($filepath) == false)
+					continue;
+				
+				unlink($filepath);
+			}
+			
 		}
 		
 		
@@ -2585,26 +2715,26 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 			
 			//year
 			if ($time_difference >= 60 * 60 * 24 * 365.242199)
-				return self::getTimeAgoStringUnit($time_stamp, 60 * 60 * 24 * 365.242199, 'years','year');
+				return self::getTimeAgoStringUnit($time_stamp, 60 * 60 * 24 * 365.242199, __('years',"unlimited-elements-for-elementor"),__('year',"unlimited-elements-for-elementor"));
 			
 			//month
 			if ($time_difference >= 60 * 60 * 24 * 30.4368499)
-				return self::getTimeAgoStringUnit($time_stamp, 60 * 60 * 24 * 30.4368499, 'months','month');
+				return self::getTimeAgoStringUnit($time_stamp, 60 * 60 * 24 * 30.4368499,__('months',"unlimited-elements-for-elementor"),__('month',"unlimited-elements-for-elementor"));
 			
 			//week
 			if ($time_difference >= 60 * 60 * 24 * 7)
-				return self::getTimeAgoStringUnit($time_stamp, 60 * 60 * 24 * 7, 'weeks','week');
+				return self::getTimeAgoStringUnit($time_stamp, 60 * 60 * 24 * 7, __('weeks',"unlimited-elements-for-elementor"),__('week',"unlimited-elements-for-elementor"));
 			
 			//day
 			if ($time_difference >= 60 * 60 * 24)
-				return self::getTimeAgoStringUnit($time_stamp, 60 * 60 * 24, 'days','day');
+				return self::getTimeAgoStringUnit($time_stamp, 60 * 60 * 24, __('days',"unlimited-elements-for-elementor"),__('day',"unlimited-elements-for-elementor"));
 			
 			//hour
 			if($time_difference >= 60 * 60)
-				return self::getTimeAgoStringUnit($time_stamp, 60 * 60, 'hours','hour');
+				return self::getTimeAgoStringUnit($time_stamp, 60 * 60, __('hours',"unlimited-elements-for-elementor") ,__('hour',"unlimited-elements-for-elementor"));
 			
 			//minute
-			return self::getTimeAgoStringUnit($time_stamp, 60, 'minutes','minute');
+			return self::getTimeAgoStringUnit($time_stamp, 60, __('minutes',"unlimited-elements-for-elementor"),__('minute',"unlimited-elements-for-elementor"));
 		}
 		
 		

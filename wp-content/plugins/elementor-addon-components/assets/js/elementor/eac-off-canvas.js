@@ -5,6 +5,7 @@
  * @param {selector} $scope. Le contenu de la section
  * @since 1.8.5
  * @since 1.9.6	Changement de la valeur de $targetId. data_canvas_id vs data_id
+ * @since 2.1.0 Gestion de l'accessibilité aria
  */
 ;(function($, elementor) {
 
@@ -25,9 +26,7 @@
 				$targetId = $('#' + settings.data_canvas_id + '.oc-offcanvas__wrapper-canvas'),
 				$targetHeader = $targetId.find('.oc-offcanvas__canvas-header'),
 				$targetCloseId = $targetId.find('.oc-offcanvas__canvas-close span'),
-				$targetContent = $targetId.find('.oc-offcanvas__canvas-content'),
-				$targetTitleContent = $targetId.find('.oc-offcanvas__canvas-content .widget .widgettitle, .oc-offcanvas__canvas-content .widget .widget-title'),
-				$targetAllCanvas = $('.oc-offcanvas__wrapper-canvas');
+				$targetContent = $targetId.find('.oc-offcanvas__canvas-content');
 			
 			// Erreur settings
 			if(Object.keys(settings).length === 0) {
@@ -40,24 +39,10 @@
 			}
 			
 			// Click sur le bouton ou le texte pour ouvrir/fermer le canvas
-			/*$targetTitleContent.on('click', function(evt) {
-				evt.preventDefault();
-				$(this).parent().slideToggle(300);
-			});*/
-			
-			// Click sur le bouton ou le texte pour ouvrir/fermer le canvas
 			$triggerId.on('click', function(evt) {
 				evt.preventDefault();
-				
-				// Fermeture des autres canvas
-				/*if($targetAllCanvas.length > 0) {
-					$.each($targetAllCanvas, function(indice, target) {
-						if($(target).id != settings.data_id && $(target).css('display') === 'block') {
-							$(target).slideToggle(300);
-						}
-					});
-				}*/
-				
+				$(this).attr('aria-expanded', 'true');
+
 				/* Cache le contenu systématiquement avant l'ouverture/fermeture */
 				if($targetContent.css('display') === 'block') {
 					$targetContent.css({'display': 'none'});
@@ -81,7 +66,8 @@
 			// Bouton supérieur de fermeture du canvas
 			$targetCloseId.on('click', function(evt) {
 				evt.preventDefault();
-				
+				$triggerId.attr('aria-expanded', 'false');
+
 				$targetContent.css({'display': 'none'});
 				$targetOverlay.css({'display': 'none'});
 				
@@ -95,7 +81,8 @@
 			// Click sur l'overlay
 			$targetOverlay.on('click', function(evt) {
 				evt.preventDefault();
-				
+				$triggerId.attr('aria-expanded', 'false');
+
 				$targetContent.css({'display': 'none'});
 				$targetOverlay.css({'display': 'none'});
 				
@@ -109,6 +96,8 @@
 			// Touche échappement ESC de fermeture du canvas
 			$('body').on('keydown', function(evt) {
 				if(evt.which === 27 && $targetId.css('display') === 'block') {
+					$triggerId.attr('aria-expanded', 'false');
+
 					$targetContent.css({'display': 'none'});
 					$targetOverlay.css({'display': 'none'});
 					

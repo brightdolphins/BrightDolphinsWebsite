@@ -11,6 +11,7 @@
  * @since 1.9.0	Passe un nonce et un id à l'instance 'instanceAjax.init'
  * @since 1.9.2	Ajout des attributs "noopener noreferrer" pour les liens ouverts dans un autre onglet
  * @since 1.9.3	Récupère la valeur du nonce d'un champ 'input hidden'
+ * @since 2.1.0 Gestion de l'accessibilité aria
  */
 ;(function($, elementor) {
 
@@ -47,6 +48,7 @@
 			// Event change sur la liste des flux
 			$targetSelect.on('change', function(e) {
 				e.preventDefault();
+				$targetButton.attr('aria-expanded', 'false');
 				$('.rss-galerie__item', $target).remove();
 				$targetHeader.html('');
 			});
@@ -54,6 +56,7 @@
 			// Event click sur le bouton 'lire le flux'
 			$targetButton.on('click touch', function(e) {
 				e.preventDefault();
+				$(this).attr('aria-expanded', 'true');
 				$('.rss-galerie__item', $target).remove();
 				$targetHeader.html('');
 				
@@ -91,7 +94,7 @@
 					var $wrapperHeadContent = $('<div/>', { class: 'rss-item__header-content' });
 					
 					if(Profile.headLogo) {
-						$targetHeader.append('<div class="rss-item__header-img"><a href="' + Profile.headLink + '" target="_blank" rel="nofollow noopener noreferrer"><img class="eac-image-loaded" src="' + Profile.headLogo + '"></a></div>');
+						$targetHeader.append('<div class="rss-item__header-img"><a href="' + Profile.headLink + '" target="_blank" rel="nofollow noopener noreferrer"><img class="eac-image-loaded" src="' + Profile.headLogo + '" alt="' + Profile.headTitle + '"></a></div>');
 					}
 					$wrapperHeadContent.append('<span><a href="' + Profile.headLink + '" target="_blank" rel="nofollow noopener noreferrer"><h2>' + Profile.headTitle.substring(0, 27) + '...</h2></a></span>');
 					$wrapperHeadContent.append('<span>' + Profile.headDescription + '</span>');
@@ -109,14 +112,16 @@
 						
 						/** @since 1.3.1 Ajout du support de l'audio, de la vidéo et du PDF */
 						if(item.img && settings.data_img) {
-							var img = '';
+							var img       = '';
 							var videoattr = '';
+							var titreImg  = $.trim(item.title.replace(/"/g, " "));
+
 							if(item.img.match(/\.mp3|\.m4a/)) { // Flux mp3
 								img =	'<div class="rss-galerie__item-image">' +
-											'<audio controls preload="none" src="' + item.img + '" type="audio/mp3"></audio>' +
+											'<audio aria-label="' + titreImg + '" controls preload="none" src="' + item.img + '" type="audio/mp3"></audio>' +
 										'</div>';
 							} else if(item.img.match(/\.mp4|\.m4v/)) { // Flux mp4
-								videoattr = is_ios ? '<video controls preload="metadata" type="video/mp4">' : '<video controls preload="none" type="video/mp4">';
+								videoattr = is_ios ? '<video aria-label="' + titreImg + '" controls preload="metadata" type="video/mp4">' : '<video controls preload="none" type="video/mp4">';
 								img =	'<div class="rss-galerie__item-image">' +
 											 videoattr +
 												'<source src="' + item.img + '">' +
@@ -124,15 +129,15 @@
 											'</video>' +
 										'</div>';
 							} else if(item.img.match(/\.pdf/)) { // Fichier PDF
-								img = '<div class="rss-galerie__item-image"><a href="' + item.imgLink + 
-									'" data-elementor-open-lightbox="no" data-fancybox="rss-gallery" data-caption="' + item.title.replace(/"/g, "'") + '"><i class="fa fa-file-pdf-o" aria-hidden="true"></i></a></div>';
+								img = '<div class="rss-galerie__item-image" aria-label="' + titreImg + '"><a href="' + item.imgLink + 
+									'" data-elementor-open-lightbox="no" data-fancybox="rss-gallery" data-caption="' + titreImg + '"><i class="fa fa-file-pdf-o" aria-hidden="true"></i></a></div>';
 							} else if(settings.data_lightbox) { // Fancybox activée. Suppression des " par des ' dans le titre
-								img = '<div class="rss-galerie__item-image"><a href="' + item.imgLink + 
-									'" data-elementor-open-lightbox="no" data-fancybox="rss-gallery" data-caption="' + item.title.replace(/"/g, "'") + '"><img class="eac-image-loaded" src="' + item.img + '"></a></div>';
+								img = '<div class="rss-galerie__item-image" role="img" aria-label="' + titreImg + '"><a href="' + item.imgLink + 
+									'" data-elementor-open-lightbox="no" data-fancybox="rss-gallery" data-caption="' + titreImg + '"><img class="eac-image-loaded" src="' + item.img + '"></a></div>';
 							} else if(settings.data_image_link) { // @since 1.8.2 Lien de l'article sur l'image
-								img = '<div class="rss-galerie__item-image"><a href="' + item.lien + '" target="_blank" rel="nofollow noopener noreferrer"><img class="eac-image-loaded" src="' + item.img + '"></a></div>';
+								img = '<div class="rss-galerie__item-image" role="img" aria-label="' + titreImg + '"><a href="' + item.lien + '" target="_blank" rel="nofollow noopener noreferrer"><img class="eac-image-loaded" src="' + item.img + '"></a></div>';
 							} else {
-								img = '<div class="rss-galerie__item-image"><img class="eac-image-loaded" src="' + item.img + '"></div>';
+								img = '<div class="rss-galerie__item-image" role="img" aria-label="' + titreImg + '"><img class="eac-image-loaded" src="' + item.img + '"></div>';
 							}
 						$wrapperContent.append(img);
 						}

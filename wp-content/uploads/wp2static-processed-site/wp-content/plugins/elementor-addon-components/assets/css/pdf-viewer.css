@@ -1,31 +1,42 @@
-
 /** le composant et ses liens */
-.eac-pdf-viewer a, .eac-pdf-viewer a:visited, .eac-pdf-viewer a:active {
-	text-decoration: none !important;
-	outline: 0 none !important;
+.eac-pdf-viewer a,
+.eac-pdf-viewer a:visited,
+.eac-pdf-viewer a:active {
+  text-decoration: none !important;
+  outline: 0 none !important;
 }
 
 .eac-pdf-viewer::after {
-	content: '';
-	display: block;
-	clear: both;
+  content: '';
+  display: block;
+  clear: both;
 }
 
 .fv-viewer_loader-wheel {
-	display: none;
+  display: none;
 }
 
-/** Style des boutons déclencheurs  */
+/** Style du texte déclencheur */
+.fv-viewer__wrapper-text {
+  position: relative;
+  width: fit-content;
+}
+
+/** Style des boutons déclencheurs */
 .fv-viewer__wrapper-btn {
-	color: #FFFFFF;
-	background-color: #1569AE;
-	border-radius: 8px;
+  display: block;
+  color: #FFFFFF;
+  background-color: #1569AE;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
-.fv-viewer__wrapper-btn:hover, .fv-viewer__wrapper-btn:focus, .fv-viewer__wrapper-btn:visited {
-	color: #FFFFFF;
-	background-color: #1569AE;
-	outline: none !important;
+.fv-viewer__wrapper-btn:hover,
+.fv-viewer__wrapper-btn:focus,
+.fv-viewer__wrapper-btn:visited {
+  color: #FFFFFF;
+  background-color: #1569AE;
+  outline: none !important;
 }
 
 /** Type de bouton */

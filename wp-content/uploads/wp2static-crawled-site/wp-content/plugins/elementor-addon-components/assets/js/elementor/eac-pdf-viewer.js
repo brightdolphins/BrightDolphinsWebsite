@@ -40,7 +40,7 @@
 			if($targetLoader.length > 0) { $targetLoader.show(); }
 			
 			$.ajax({
-				url: eacElementsPath.proxies + 'proxy_pdf.php',
+				url: eacElementsPath.proxies + 'proxy-pdf.php',
 				type: 'GET',
 				data: { url: encodeURIComponent(dataURI), id: settings.data_id, nonce: targetNonce },
 				xhrFields: { responseType: 'blob' },

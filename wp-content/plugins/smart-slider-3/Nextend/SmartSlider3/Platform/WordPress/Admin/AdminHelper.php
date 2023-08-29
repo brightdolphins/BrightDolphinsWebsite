@@ -234,10 +234,10 @@ class AdminHelper {
                             (
                                 xref.group_id IS NULL 
                                 OR xref.group_id = 0
-                                OR (SELECT _sliders.status FROM ' . $wpdb->prefix . 'nextend2_smartslider3_sliders AS _sliders WHERE _sliders.id = xref.group_id ) LIKE \'published\'
+                                OR (SELECT _sliders.slider_status FROM ' . $wpdb->prefix . 'nextend2_smartslider3_sliders AS _sliders WHERE _sliders.id = xref.group_id ) LIKE \'published\'
                             )
                             
-            AND sliders.status = \'published\'
+            AND sliders.slider_status = \'published\'
             ORDER BY time DESC LIMIT 10';
         $sliders = $wpdb->get_results($query, ARRAY_A);
 

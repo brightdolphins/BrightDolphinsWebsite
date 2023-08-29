@@ -60,7 +60,7 @@ class WidgetSmartSlider3 extends WP_Widget {
 
         if ($instance['slider'] === 0) {
 
-            $instance['slider'] = $wpdb->get_var('SELECT id FROM ' . $wpdb->prefix . 'nextend2_smartslider3_sliders WHERE status = \'published\' LIMIT 0,1');
+            $instance['slider'] = $wpdb->get_var('SELECT id FROM ' . $wpdb->prefix . 'nextend2_smartslider3_sliders WHERE slider_status = \'published\' LIMIT 0,1');
         }
 
         $slider = do_shortcode('[smartslider3 slider=' . $instance['slider'] . ']');
@@ -138,7 +138,7 @@ class WidgetSmartSlider3 extends WP_Widget {
                     <?php
                     if ($instance['slider'] === 0) {
                         global $wpdb;
-                        $value = $wpdb->get_var('SELECT id FROM ' . $wpdb->prefix . 'nextend2_smartslider3_sliders WHERE status = \'published\' LIMIT 0,1');
+                        $value = $wpdb->get_var('SELECT id FROM ' . $wpdb->prefix . 'nextend2_smartslider3_sliders WHERE slider_status = \'published\' LIMIT 0,1');
 
                     }
                     foreach ($choices as $id => $choice) {

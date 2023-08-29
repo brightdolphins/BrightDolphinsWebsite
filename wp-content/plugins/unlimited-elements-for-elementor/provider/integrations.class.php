@@ -12,8 +12,17 @@ defined ('UNLIMITED_ELEMENTS_INC') or die ('restricted aceess');
 
 class UniteCreatorPluginIntegrations{
 	
+	private function ___________JET_ENGINE_________(){}
 	
-/* wp popular posts */
+	/**
+	 * check if the jet engin exists
+	 */
+	public static function isJetEngineExists(){
+							
+		$isExists = class_exists( 'Jet_Engine' );
+		
+		return($isExists);
+	}
 	
 	private function ___________WP_POPULAR_POSTS_________(){}
 	
@@ -244,6 +253,101 @@ class UniteCreatorPluginIntegrations{
 		
 		
 		return($arrPostsOutput);
+	}
+
+	private function ___________CONTACT_FORM_7_________(){}
+	
+	
+	/**
+	 * check if contact form 7 installed
+	 */
+	public static function isContactFrom7Installed(){
+		
+		if(defined("WPCF7_VERSION"))
+			return(true);
+			
+		return(false);
+	}
+	
+	
+	/**
+	 * get contact from 7 array
+	 */
+	public static function getArrContactForm7(){
+		
+		$arrPosts = UniteFunctionsWPUC::getPostsByType("wpcf7_contact_form");
+		
+		if(empty($arrPosts))
+			return(array());
+		
+		$arrForms = array();
+		
+		$arrForms["[ Select From ]"] = __("Please Select Contact From 7","unlimited-elements-for-elementor");
+		
+		foreach($arrPosts as $post){
+		
+			$postID = $post["ID"];
+			
+			$title = $post["post_title"];
+			
+			$title = esc_attr($title);
+			
+			$shortcode = "[contact-form-7 id=\"{$postID}\" title=\"{$title}\"]";
+			
+			if(isset($arrForms[$title]))
+				$title = "$title ($postID)";
+			
+			$arrForms[$title] = $shortcode;
+		}
+		
+		
+		return($arrForms);
+	}
+	
+	private function ___________JET_WISHLIST_________(){}
+	
+	/**
+	 * put woocommerce jet wishlist button if exist
+	 */
+	public static function putJetWooWishlistButton(){
+		
+		
+		if(GlobalsProviderUC::$isInsideEditor == true)
+			return(false);
+		
+		if(class_exists("Jet_CW") == false)
+			return(false);
+		
+		$objJetCW = Jet_CW();
+		
+		if(empty($objJetCW))
+			return(false);
+		
+		$isEnabled = $objJetCW->wishlist_enabled;
+		
+		if($isEnabled == false)
+			return(false);
+		
+		$objSettings = $objJetCW->settings;
+		
+		if(empty($objSettings))
+			return(false);
+		
+		$isAddDefault = $objSettings->get("add_default_wishlist_button");
+		
+		$isAddDefault = UniteFunctionsUC::strToBool($isAddDefault);
+		
+		if($isAddDefault == false)
+			return(false);
+					
+		if(empty($objJetCW->wishlist_integration))
+			return(false);
+		
+		if(method_exists($objJetCW->wishlist_integration,"add_wishlist_button_default") == false)
+			return(false);
+		
+		$objJetCW->wishlist_integration->add_wishlist_button_default();
+		
 	}
 	
 	

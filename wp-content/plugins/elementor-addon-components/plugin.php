@@ -4,14 +4,7 @@
  *
  * Description:  Active l'administration du plugin avec les droits d'Admin
  *
- * @since 0.0.9
- * @since 1.9.6 Ajout d'une nouvelle capacité 'eac_manage_options' pour les rôles 'editor' et 'shop_manager'
- * @since 1.9.7 Ajout de la méthode 'get_register_script_url' pour construire le chemin d'accès aux scripts JS
- *              Ajout de la méthode 'get_register_style_url' pour construire le chemin d'accès aux fichiers CSS
- *              Ajout de la méthode 'get_manage_options_name'
- *              Ajout des méthodes 'instance' 'clone' et 'wakeup'
- * @since 1.9.8 Déplacer le chargement des Groupes, des Controls et des Composants Elementor dans le fichier 'includes/eac-load-elements'
- *              Charge la configuration des composants et des fonctionnalités et transfert des tables 'elements_keys' et 'features_keys'
+ * @since 1.0.0
  * @since 1.9.9 Déplacement des fichiers de configuration sous le répertoire 'core'
  * @since 2.0.0 Changer la syntaxe 'require_once' dans tous les fichiers
  *              'require_once' est une déclaration, pas une fonction.
@@ -23,7 +16,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
-use EACCustomWidgets\Admin\Settings\EAC_Admin_Settings;
 use EACCustomWidgets\Core\Eac_Config_Elements;
 
 /**
@@ -32,15 +24,6 @@ use EACCustomWidgets\Core\Eac_Config_Elements;
  * @since 0.0.9
  */
 class EAC_Plugin {
-
-	/**
-	 * @var $manage_options
-	 *
-	 * Le libellé de la capacité ajoutée aux rôles 'editor' et 'shop_manager'
-	 *
-	 * @since 1.9.6
-	 */
-	private $manage_options = 'eac_manage_options';
 
 	/**
 	 * @var $instance
@@ -94,7 +77,7 @@ class EAC_Plugin {
 		/**
 		 * Charge la page d'administration du plugin
 		 */
-		if ( current_user_can( 'manage_options' ) || current_user_can( $this->manage_options ) ) {
+		if ( current_user_can( 'manage_options' ) || current_user_can( Eac_Config_Elements::get_manage_options_name() ) ) {
 			require_once __DIR__ . '/admin/settings/eac-load-components.php';
 		}
 
@@ -152,7 +135,7 @@ class EAC_Plugin {
 	 *
 	 * Ajoute une nouvelle capability 'eac_manage_options' aux rôles "editor' et 'shop_manager'
 	 *
-	 * 'option_name' = 'wp_user_roles' de la table options
+	 * 'wp_user_roles' de la table options
 	 *
 	 * @since 1.9.6
 	 */
@@ -163,26 +146,26 @@ class EAC_Plugin {
 		$role_shop_manager = get_role( 'shop_manager' );
 
 		if ( $grant_option_page ) {
-			if ( false === $role_editor->has_cap( $this->manage_options ) ) {
-				wp_roles()->add_cap( 'editor', $this->manage_options );
+			if ( false === $role_editor->has_cap( Eac_Config_Elements::get_manage_options_name() ) ) {
+				wp_roles()->add_cap( 'editor', Eac_Config_Elements::get_manage_options_name() );
 			}
 
-			if ( ! is_null( $role_shop_manager ) && false === $role_shop_manager->has_cap( $this->manage_options ) ) {
-				wp_roles()->add_cap( 'shop_manager', $this->manage_options );
+			if ( ! is_null( $role_shop_manager ) && false === $role_shop_manager->has_cap( Eac_Config_Elements::get_manage_options_name() ) ) {
+				wp_roles()->add_cap( 'shop_manager', Eac_Config_Elements::get_manage_options_name() );
 			}
 		} else {
-			if ( true === $role_editor->has_cap( $this->manage_options ) ) {
-				wp_roles()->remove_cap( 'editor', $this->manage_options );
+			if ( true === $role_editor->has_cap( Eac_Config_Elements::get_manage_options_name() ) ) {
+				wp_roles()->remove_cap( 'editor', Eac_Config_Elements::get_manage_options_name() );
 			}
 
-			if ( ! is_null( $role_shop_manager ) && true === $role_shop_manager->has_cap( $this->manage_options ) ) {
-				wp_roles()->remove_cap( 'shop_manager', $this->manage_options );
+			if ( ! is_null( $role_shop_manager ) && true === $role_shop_manager->has_cap( Eac_Config_Elements::get_manage_options_name() ) ) {
+				wp_roles()->remove_cap( 'shop_manager', Eac_Config_Elements::get_manage_options_name() );
 			}
 		}
 	}
 
 	/**
-	 * get_register_script_url
+	 * get_script_url
 	 *
 	 * Construit le chemin du fichier et ajoute l'extension relative à la constant globale
 	 *
@@ -190,16 +173,12 @@ class EAC_Plugin {
 	 *
 	 * @return le chemin absolu du fichier JS passé en paramètre
 	 */
-	public function get_register_script_url( $file, $admin = false ) {
-		if ( $admin ) {
-			return EAC_ADDONS_URL . 'admin/js/' . $file . $this->suffix_js;
-		} else {
-			return EAC_ADDONS_URL . 'assets/js/elementor/' . $file . $this->suffix_js;
-		}
+	public function get_script_url( $file ) {
+		return esc_url( EAC_ADDONS_URL . $file . $this->suffix_js );
 	}
 
 	/**
-	 * get_register_style_url
+	 * get_style_url
 	 *
 	 * Construit le chemin du fichier et ajoute l'extension relative à la constant globale
 	 *
@@ -207,23 +186,8 @@ class EAC_Plugin {
 	 *
 	 * @return le chemin absolu du fichier CSS passé en paramètre
 	 */
-	public function get_register_style_url( $file, $admin = false ) {
-		if ( $admin ) {
-			return EAC_ADDONS_URL . 'admin/css/' . $file . $this->suffix_css;
-		} else {
-			return EAC_ADDONS_URL . 'assets/css/' . $file . $this->suffix_css;
-		}
-	}
-
-	/**
-	 * get_manage_options_name
-	 *
-	 * @since 1.9.7
-	 *
-	 * @return le nom de la capacité 'eac_manage_options'
-	 */
-	public function get_manage_options_name() {
-		return $this->manage_options;
+	public function get_style_url( $file ) {
+			return esc_url( EAC_ADDONS_URL . $file . $this->suffix_css );
 	}
 
 } EAC_Plugin::instance();

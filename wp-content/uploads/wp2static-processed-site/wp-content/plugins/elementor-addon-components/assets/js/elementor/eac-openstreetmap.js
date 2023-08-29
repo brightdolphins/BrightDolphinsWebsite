@@ -3,6 +3,7 @@
  *
  * @return {object[]} Tableau d'objets Latitude, Longitude du client au format JSON
  * @since 1.8.8
+ * @since 2.1.0 Ajout du mode plein écran
  */
 var get_CurrentPosition = {
 	lat: null,
@@ -47,6 +48,8 @@ window.addEventListener("load", function(event) {
  * @since 1.9.5	Ajout de deux variables 'osmImageUrl' et 'osmTilesUrl'
  *				Génération dynamique des tuiles et des markers
  *				Chargement et affichage des marqueurs importés au format geoJSON
+ * @since 2.0.2 Fix Safari click marqueur inopérant
+ * @since 2.1.0 Gestion du mode fullscreen
  */
 ;(function($, elementor) {
 
@@ -66,7 +69,7 @@ window.addEventListener("load", function(event) {
 				targetNonce = $targetInstance.find('#osm_nonce').val(),
 				settings = $targetWrapper.data('settings') || {},
 				osmImageUrl = eacElementsPath.osmImages,
-				proxyPhp = eacElementsPath.proxies + 'proxy_osm.php',
+				proxyPhp = eacElementsPath.proxies + 'proxy-osm.php',
 				osmTilesFile = eacElementsPath.osmConfig + 'osmTiles.json',
 				osmMap,
 				geoJsonHeader = 'FeatureCollection',
@@ -134,13 +137,18 @@ window.addEventListener("load", function(event) {
 					}
 				});
 				
-				// Création de la carte
+				/**
+				 * Création de la carte
+				 * @since 2.0.2 Safari click marqueurs ne fonctionne pas OSM 1.7.1.
+				 * Passe l'option 'tap' à false
+				 */
 				var map = L.map(settings.data_id, {
 					center: [mapData.lat, mapData.lng],
 					layers: baseLayers[settings.data_layer], // Les tuiles par défaut
 					closePopupOnClick: settings.data_clickpopup,
 					zoom: settings.data_zoom,
 					zoomControl: !settings.data_zoompos,
+					tap: false,
 				});
 
 				// Ajout du control des tuiles (tiles) et des surcouches (overlays)
@@ -158,7 +166,20 @@ window.addEventListener("load", function(event) {
 				if(settings.data_zoompos) {
 					L.control.zoom({position: 'bottomleft'}).addTo(map);
 				}
-					
+
+				/** @since 2.1.0 */
+				if (settings.data_fullscreen) {
+					L.control.fullscreen({
+						position: settings.data_zoompos ? 'bottomleft' : 'topleft', // change the position of the button can be topleft, topright, bottomright or bottomleft, default topleft
+						title: 'Show me the fullscreen !', // change the title of the button, default Full Screen
+						titleCancel: 'Exit fullscreen mode', // change the title of the button when fullscreen is on, default Exit Full Screen
+						content: null, // change the content of the button, can be HTML, default null
+						forceSeparateButton: false, // force separate button to detach from zoom buttons, default false
+						forcePseudoFullscreen: true, // force use of pseudo full screen even if full screen API is available, default false
+						fullscreenElement: false // Dom element to render in full screen, false by default, fallback to map._container
+					}).addTo(map);
+				}
+
 				// Propriétés du marker central
 				var defaultIcon = new newIcon({
 					iconUrl: osmImageUrl + 'osm-icons/default.png', // osmImageUrl + 'marker-icon.png'
@@ -168,7 +189,11 @@ window.addEventListener("load", function(event) {
 				});
 				
 				// Ajout du marker central à la map et affichage de la popup
-				L.marker([mapData.lat, mapData.lng], {icon: defaultIcon}).addTo(map).bindPopup("<div class='osm-map_popup-title'>" + mapData.title + "</div><div class='osm-map_popup-content'>" + mapData.content + "</div>").openPopup();
+				var markerCentralContent = "<div class='osm-map_popup-title'>" + mapData.title + "</div><div class='osm-map_popup-content'>" + mapData.content + "</div>";
+				var markerCentral = L.marker([mapData.lat, mapData.lng], {icon: defaultIcon}).addTo(map).bindPopup(markerCentralContent);
+				if (settings.data_openpopup) {
+					markerCentral.openPopup();
+				}
 				
 				// Ajout du marqueur à la liste des marqueurs
 				markerArray.push(L.marker(new L.LatLng(mapData.lat, mapData.lng)));

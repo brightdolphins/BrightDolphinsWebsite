@@ -658,13 +658,16 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 	     * Extract zip archive
 	     */
 		 public function extract($src, $dest){
-
+			
 	    	if($this->isZipArchiveExists() == true){				//zipArchive
-				
+					    		
 	    		$success = $this->extract_zipArchive($src, $dest);
-				
+					    		
 	    		if($success == false){
-	    			UniteFunctionsUC::throwError("Can't extract zip");
+	    			
+	    			$filename = basename($src);
+	    			
+	    			UniteFunctionsUC::throwError("Can't extract zip: $filename ");
 	    		}
 	    		
 			}

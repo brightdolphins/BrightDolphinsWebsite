@@ -24,7 +24,7 @@ function UniteProviderAdminUC(){
 		
 		if(isMultiple == undefined)
 			isMultiple = false;
-		
+				
 		// Media Library params
 		var frame = wp.media({
 			//frame:      'post',
@@ -100,6 +100,78 @@ function UniteProviderAdminUC(){
 			
 			onInsert(urlImage,"");	//return empty id, it can be changed
 		}
+	}
+	
+	
+	/**
+	 * test media editor
+	 */
+	function testMediaEditor(){
+		
+		/*
+		trace("open dialog");
+		trace(wp.media.gallery);
+ 		trace(wp.media);
+ 		
+ 	    var frameStates = {
+ 	    	      create: 'gallery',
+ 	    	      add: 'gallery-library',
+ 	    	      edit: 'gallery-edit'
+ 	    	    };
+ 		
+		// Open the media dialog
+ 		
+ 	    var attachments = wp.media.query({
+ 	       orderby: 'post__in',
+ 	       order: 'ASC',
+ 	       type: 'image',
+ 	     });
+ 	    
+ 	     var objSelection = new wp.media.model.Selection(attachments.models, {
+ 	       props: attachments.props.toJSON(),
+ 	       multiple: true
+ 	     });
+ 		
+ 		
+ 		var options = {
+		    title: 'Add Gallery',
+		    state:"gallery",	//gallery-library, gallery-edit
+		    library: {
+		    	orderby:"date",
+		        query:"true"
+		    },
+		    multiple: true,
+		    modal:true,
+		    mode:["select"],
+		  //  selection: objSelection,
+		    uploader:true
+ 		};	
+ 		
+ 		//var objFrame = wp.media(options);
+ 		//objFrame.open();
+ 		
+ 		
+ 		/*
+		wp.media()
+		// On select, get the selected images
+		.on('select', function() {
+			
+			trace("select");
+			
+		})
+		// Open the dialog
+		.open(options);
+ 		 		
+		var objFrame = wp.media.editor.open( null, options );
+		objFrame.on("select",function(){
+			
+			trace("select!!!");
+			
+		});
+				
+		//wp.media.gallery.edit('[gallery ids=""]');
+		return(false);
+		*/
 	}
 	
 	

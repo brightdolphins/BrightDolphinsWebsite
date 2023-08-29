@@ -14,7 +14,7 @@ use Elementor\Core\Schemes\Typography;
 use Elementor\Repeater;
 use Elementor\Group_Control_Image_Size;
 use WprAddons\Classes\Utilities;
-use WprAddons\Classes\WPR_Post_Likes;
+use WprAddons\Classes\Modules\WPR_Post_Likes;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -79,9 +79,9 @@ class Wpr_Media_Grid extends Widget_Base {
 					'date' => esc_html__( 'Date', 'wpr-addons'),
 					'pro-tl' => esc_html__( 'Title (Pro)', 'wpr-addons'),
 					'pro-mf' => esc_html__( 'Last Modified (Pro)', 'wpr-addons'),
-					'pro-d' => esc_html__( 'Post ID', 'wpr-addons' ),
-					'pro-ar' => esc_html__( 'Post Author', 'wpr-addons' ),
-					'pro-cc' => esc_html__( 'Comment Count', 'wpr-addons' )
+					'pro-d' => esc_html__( 'Post ID (Pro)', 'wpr-addons' ),
+					'pro-ar' => esc_html__( 'Post Author (Pro)', 'wpr-addons' ),
+					'pro-cc' => esc_html__( 'Comment Count (Pro)', 'wpr-addons' )
 				],
 				'condition' => [
 					'query_randomize!' => 'rand',
@@ -176,6 +176,30 @@ class Wpr_Media_Grid extends Widget_Base {
 					'pro-6' => esc_html__( 'Six (Pro)', 'wpr-addons' ),
 				],
 				'prefix_class' => 'wpr-grid-slider-columns-%s',
+				'frontend_available' => true,
+				'render_type' => 'template',
+				'separator' => 'before',
+				'condition' => [
+					'layout_select' => 'slider',
+				],
+			]
+		);
+	}
+
+	public function add_control_layout_slider_rows() {
+		$this->add_control(
+			'layout_slider_rows',
+			[
+				'label' => esc_html__( 'Rows (Carousel)', 'wpr-addons' ),
+				'type' => Controls_Manager::SELECT,
+				'label_block' => false,
+				'default' => 1,
+				'classes' => 'wpr-pro-control no-distance',
+				'options' => [
+					1 => esc_html__( 'One', 'wpr-addons' ),
+					1 => esc_html__( 'Two (Pro)', 'wpr-addons' ),
+					1 => esc_html__( 'Three (Pro)', 'wpr-addons' ),
+				],
 				'frontend_available' => true,
 				'render_type' => 'template',
 				'separator' => 'before',
@@ -560,7 +584,7 @@ class Wpr_Media_Grid extends Widget_Base {
 				'type' => Controls_Manager::SELECT,
 				'default' => 'dynamic',
 				'options' => [
-					'dynamic' => esc_html__( 'Dynamic', 'wpr-addons' ),
+					'dynamic' => esc_html__( 'Auto', 'wpr-addons' ),
 					'manual' => esc_html__( 'Manual', 'wpr-addons' ),
 				],
 			]
@@ -654,10 +678,13 @@ class Wpr_Media_Grid extends Widget_Base {
 			[
 				'label' => esc_html__( 'Add Images', 'wpr-addons' ),
 				'type' => Controls_Manager::GALLERY,
+				'separator' => 'before',
+				'dynamic' => [
+					'active' => true,
+				],
 				'condition' => [
 					'query_selection' => 'manual',
 				],
-				'separator' => 'before',
 			]
 		);
 
@@ -689,6 +716,9 @@ class Wpr_Media_Grid extends Widget_Base {
 			[
 				'label' => esc_html__( 'Not Found Text', 'wpr-addons' ),
 				'type' => Controls_Manager::TEXT,
+				'dynamic' => [
+					'active' => true,
+				],
 				'default' => 'No Images Found!',
 				'condition' => [
 					'query_selection' => 'dynamic',
@@ -759,12 +789,30 @@ class Wpr_Media_Grid extends Widget_Base {
 			);
 		}
 
-		$this->add_control(
+		$this->add_responsive_control(
 			'layout_gutter_hr',
 			[
 				'label' => esc_html__( 'Horizontal Gutter', 'wpr-addons' ),
 				'type' => Controls_Manager::SLIDER,
 				'default' => [
+					'size' => 10,
+				],
+				'widescreen_default' => [
+					'size' => 10,
+				],
+				'laptop_default' => [
+					'size' => 10,
+				],
+				'tablet_extra_default' => [
+					'size' => 10,
+				],
+				'tablet_default' => [
+					'size' => 10,
+				],
+				'mobile_extra_default' => [
+					'size' => 10,
+				],
+				'mobile_default' => [
 					'size' => 10,
 				],
 				'range' => [
@@ -780,12 +828,30 @@ class Wpr_Media_Grid extends Widget_Base {
 			]
 		);
 
-		$this->add_control(
+		$this->add_responsive_control(
 			'layout_gutter_vr',
 			[
 				'label' => esc_html__( 'Vertical Gutter', 'wpr-addons' ),
 				'type' => Controls_Manager::SLIDER,
 				'default' => [
+					'size' => 10,
+				],
+				'widescreen_default' => [
+					'size' => 10,
+				],
+				'laptop_default' => [
+					'size' => 10,
+				],
+				'tablet_extra_default' => [
+					'size' => 10,
+				],
+				'tablet_default' => [
+					'size' => 10,
+				],
+				'mobile_extra_default' => [
+					'size' => 10,
+				],
+				'mobile_default' => [
 					'size' => 10,
 				],
 				'range' => [
@@ -825,6 +891,7 @@ class Wpr_Media_Grid extends Widget_Base {
 			'layout_pagination',
 			[
 				'label' => esc_html__( 'Show Pagination', 'wpr-addons' ),
+				'description' => esc_html__('Please note that Pagination doesn\'t work in editor', 'wpr-addons'),
 				'type' => Controls_Manager::SWITCHER,
 				'default' => 'yes',
 				'return_value' => 'yes',
@@ -874,6 +941,8 @@ class Wpr_Media_Grid extends Widget_Base {
 
 		$this->add_control_layout_slider_amount();
 
+		$this->add_control_layout_slider_rows();
+
 		$this->add_control(
 			'layout_slides_to_scroll',
 			[
@@ -908,13 +977,17 @@ class Wpr_Media_Grid extends Widget_Base {
 				],			
 				'selectors' => [
 					'{{WRAPPER}} .wpr-grid .slick-slide' => 'margin-left: {{SIZE}}{{UNIT}};',
+					'{{WRAPPER}}.wpr-grid-slider-rows-2 .wpr-grid .wpr-grid-item' => 'margin-bottom: {{SIZE}}{{UNIT}};',
+					'{{WRAPPER}}.wpr-grid-slider-rows-3 .wpr-grid .wpr-grid-item' => 'margin-bottom: {{SIZE}}{{UNIT}};',
 					'{{WRAPPER}} .wpr-grid .slick-list' => 'margin-left: -{{SIZE}}{{UNIT}};',
+					'{{WRAPPER}}.wpr-grid-slider-rows-2 .wpr-grid .slick-list' => 'margin-bottom: -{{SIZE}}{{UNIT}};',
+					'{{WRAPPER}}.wpr-grid-slider-rows-3 .wpr-grid .slick-list' => 'margin-bottom: -{{SIZE}}{{UNIT}};'
 				],
 				'render_type' => 'template',
 				'condition' => [
 					'layout_slider_amount!' => '1',
 					'layout_select' => 'slider',
-				],
+				]
 			]
 		);
 
@@ -1281,6 +1354,9 @@ class Wpr_Media_Grid extends Widget_Base {
 			[
 				'label' => esc_html__( 'Separator', 'wpr-addons' ),
 				'type' => Controls_Manager::TEXT,
+				'dynamic' => [
+					'active' => true,
+				],
 				'default' => ', ',
 				'condition' => [
 					'element_select!' => [
@@ -1410,6 +1486,9 @@ class Wpr_Media_Grid extends Widget_Base {
 			[
 				'label' => esc_html__( 'Extra Text', 'wpr-addons' ),
 				'type' => Controls_Manager::TEXT,
+				'dynamic' => [
+					'active' => true,
+				],
 				'default' => '',
 				'condition' => [
 					'element_select!' => [
@@ -2108,6 +2187,9 @@ class Wpr_Media_Grid extends Widget_Base {
 			[
 				'label' => esc_html__( '"All" Filter Text', 'wpr-addons' ),
 				'type' => Controls_Manager::TEXT,
+				'dynamic' => [
+					'active' => true,
+				],
 				'default' => 'All Photos',
 				'condition' => [
 					'filters_all' => 'yes',
@@ -2133,6 +2215,9 @@ class Wpr_Media_Grid extends Widget_Base {
 			[
 				'label' => esc_html__( 'Separator', 'wpr-addons' ),
 				'type' => Controls_Manager::TEXT,
+				'dynamic' => [
+					'active' => true,
+				],
 				'default' => '',
 				'separator' => 'before',
 			]
@@ -2250,6 +2335,9 @@ class Wpr_Media_Grid extends Widget_Base {
 			[
 				'label' => esc_html__( 'Older Posts Text', 'wpr-addons' ),
 				'type' => Controls_Manager::TEXT,
+				'dynamic' => [
+					'active' => true,
+				],
 				'default' => 'Older Posts',
 				'condition' => [
 					'pagination_type' => 'default',
@@ -2262,6 +2350,9 @@ class Wpr_Media_Grid extends Widget_Base {
 			[
 				'label' => esc_html__( 'Newer Posts Text', 'wpr-addons' ),
 				'type' => Controls_Manager::TEXT,
+				'dynamic' => [
+					'active' => true,
+				],
 				'default' => 'Newer Posts',
 				'condition' => [
 					'pagination_type' => 'default',
@@ -2309,6 +2400,9 @@ class Wpr_Media_Grid extends Widget_Base {
 			[
 				'label' => esc_html__( 'Prev Page Text', 'wpr-addons' ),
 				'type' => Controls_Manager::TEXT,
+				'dynamic' => [
+					'active' => true,
+				],
 				'default' => 'Previous Page',
 				'condition' => [
 					'pagination_type' => 'numbered',
@@ -2322,6 +2416,9 @@ class Wpr_Media_Grid extends Widget_Base {
 			[
 				'label' => esc_html__( 'Next Page Text', 'wpr-addons' ),
 				'type' => Controls_Manager::TEXT,
+				'dynamic' => [
+					'active' => true,
+				],
 				'default' => 'Next Page',
 				'condition' => [
 					'pagination_type' => 'numbered',
@@ -2371,6 +2468,9 @@ class Wpr_Media_Grid extends Widget_Base {
 			[
 				'label' => esc_html__( 'First Page Text', 'wpr-addons' ),
 				'type' => Controls_Manager::TEXT,
+				'dynamic' => [
+					'active' => true,
+				],
 				'default' => 'First Page',
 				'condition' => [
 					'pagination_type' => 'numbered',
@@ -2384,6 +2484,9 @@ class Wpr_Media_Grid extends Widget_Base {
 			[
 				'label' => esc_html__( 'Last Page Text', 'wpr-addons' ),
 				'type' => Controls_Manager::TEXT,
+				'dynamic' => [
+					'active' => true,
+				],
 				'default' => 'Last Page',
 				'condition' => [
 					'pagination_type' => 'numbered',
@@ -2446,6 +2549,9 @@ class Wpr_Media_Grid extends Widget_Base {
 			[
 				'label' => esc_html__( 'Load More Text', 'wpr-addons' ),
 				'type' => Controls_Manager::TEXT,
+				'dynamic' => [
+					'active' => true,
+				],
 				'default' => 'Load More',
 				'condition' => [
 					'pagination_type' => 'load-more',
@@ -2458,6 +2564,9 @@ class Wpr_Media_Grid extends Widget_Base {
 			[
 				'label' => esc_html__( 'Finish Text', 'wpr-addons' ),
 				'type' => Controls_Manager::TEXT,
+				'dynamic' => [
+					'active' => true,
+				],
 				'default' => 'End of Content.',
 				'condition' => [
 					'pagination_type' => [ 'load-more', 'infinite-scroll' ],
@@ -2526,7 +2635,6 @@ class Wpr_Media_Grid extends Widget_Base {
 
 		// Section: Pro Features
 		Utilities::pro_features_list_section( $this, '', Controls_Manager::RAW_HTML, 'media-grid', [
-			'Posts Order',
 			'Grid Columns 1,2,3,4,5,6,7,8',
 			'Masonry Layout',
 			'Random Images Query',
@@ -2549,6 +2657,7 @@ class Wpr_Media_Grid extends Widget_Base {
 			'Grid Category Filter Count',
 			'Grid Item Even/Odd Background Color',
 			'Title & Category Advanced Link Hover Animations',
+			'Image Order'
 		] );
 		
 		// Styles ====================
@@ -3278,7 +3387,8 @@ class Wpr_Media_Grid extends Widget_Base {
 				'type' => Controls_Manager::COLOR,
 				'default' => '#9C9C9C',
 				'selectors' => [
-					'{{WRAPPER}} .wpr-grid-item-date .inner-block i[class*="wpr-grid-extra-icon"]' => 'color: {{VALUE}}',
+					'{{WRAPPER}} .wpr-grid-item-date .inner-block [class*="wpr-grid-extra-icon"] i' => 'color: {{VALUE}}',
+					'{{WRAPPER}} .wpr-grid-item-date .inner-block [class*="wpr-grid-extra-icon"] svg' => 'fill: {{VALUE}}'
 				],
 				'separator' => 'after',
 			]
@@ -3490,7 +3600,8 @@ class Wpr_Media_Grid extends Widget_Base {
 				'type' => Controls_Manager::COLOR,
 				'default' => '#9C9C9C',
 				'selectors' => [
-					'{{WRAPPER}} .wpr-grid-item-time .inner-block i[class*="wpr-grid-extra-icon"]' => 'color: {{VALUE}}',
+					'{{WRAPPER}} .wpr-grid-item-time .inner-block [class*="wpr-grid-extra-icon"] i' => 'color: {{VALUE}}',
+					'{{WRAPPER}} .wpr-grid-item-time .inner-block [class*="wpr-grid-extra-icon"] svg' => 'fill: {{VALUE}}'
 				],
 				'separator' => 'after',
 			]
@@ -4576,7 +4687,8 @@ class Wpr_Media_Grid extends Widget_Base {
 				'type' => Controls_Manager::COLOR,
 				'default' => '#9C9C9C',
 				'selectors' => [
-					'{{WRAPPER}} .wpr-grid-tax-style-1 .inner-block i[class*="wpr-grid-extra-icon"]' => 'color: {{VALUE}}',
+					'{{WRAPPER}} .wpr-grid-tax-style-1 .inner-block [class*="wpr-grid-extra-icon"] i' => 'color: {{VALUE}}',
+					'{{WRAPPER}} .wpr-grid-tax-style-1 .inner-block [class*="wpr-grid-extra-icon"] svg' => 'fill: {{VALUE}}'
 				],
 				'separator' => 'after',
 			]
@@ -5652,6 +5764,15 @@ class Wpr_Media_Grid extends Widget_Base {
 			]
 		);
 
+		$this->add_control(
+			'active_styles_notice',
+			[
+				'type' => Controls_Manager::RAW_HTML,
+				'raw' => esc_html__('Apply active filter styles from the hover tab.', 'wpr-addons'),
+				'content_classes' => 'elementor-panel-alert elementor-panel-alert-info'
+			]
+		);
+
 		$this->start_controls_tabs( 'tabs_grid_filters_style' );
 
 		$this->start_controls_tab(
@@ -6433,7 +6554,7 @@ class Wpr_Media_Grid extends Widget_Base {
 
 	// Main Query Args
 	public function get_main_query_args() {
-		$settings = $this->get_settings();
+		$settings = $this->get_settings_for_display();
 		$author = ! empty( $settings[ 'query_author' ] ) ? implode( ',', $settings[ 'query_author' ] ) : '';
 
 		// Get Paged
@@ -6444,7 +6565,11 @@ class Wpr_Media_Grid extends Widget_Base {
 		} else {
 			$paged = 1;
 		}
-
+		
+		if ( empty($settings['query_offset']) ) {
+			$settings[ 'query_offset' ] = 0;
+		}
+		
 		$offset = ( $paged - 1 ) * $settings['query_posts_per_page'] + $settings[ 'query_offset' ];
 
 		if ( ! wpr_fs()->can_use_premium_code() ) {
@@ -6475,7 +6600,15 @@ class Wpr_Media_Grid extends Widget_Base {
 		if ( 'manual' === $settings[ 'query_selection' ] ) {
 			$post_ids = [''];
 
-			for ( $i = 0; $i < count($settings['query_manual_attachment']); $i++ ) { 
+			$attachments = $settings['query_manual_attachment'];
+
+			$attachments_count = 0;
+
+			if (!empty($attachments) ) {
+				$attachments_count = count($attachments);
+			}
+
+			for ( $i = 0; $i < $attachments_count; $i++ ) { 
 				array_push( $post_ids, $settings['query_manual_attachment'][$i]['id'] );
 			}
 
@@ -6566,7 +6699,7 @@ class Wpr_Media_Grid extends Widget_Base {
 		$src = Group_Control_Image_Size::get_attachment_image_src( $id, 'layout_image_crop', $settings );
 		$alt = '' === wp_get_attachment_caption( $id ) ? get_the_title() : wp_get_attachment_caption( $id );
 
-		echo '<div class="wpr-grid-image-wrap" data-src="'. esc_url( $src ) .'">';
+		echo '<div class="wpr-grid-image-wrap" data-src="'. esc_url( wp_get_attachment_url( $id ) ) .'">';
 			echo '<img src="'. esc_url( $src ) .'" alt="'. esc_attr( $alt ) .'" class="wpr-anim-timing-'. esc_html($settings[ 'image_effects_animation_timing']) .'">';
 		echo '</div>';
 	}
@@ -6629,7 +6762,13 @@ class Wpr_Media_Grid extends Widget_Base {
 				}
 				// Icon: Before
 				if ( 'before' === $settings['element_extra_icon_pos'] ) {
-					echo '<i class="wpr-grid-extra-icon-left '. esc_attr( $settings['element_extra_icon']['value'] ) .'"></i>';
+					ob_start();
+					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
+					$extra_icon = ob_get_clean();
+
+					echo '<span class="wpr-grid-extra-icon-left">';
+						echo $extra_icon;
+					echo '</span>';
 				}
 
 				// Date
@@ -6637,7 +6776,13 @@ class Wpr_Media_Grid extends Widget_Base {
 
 				// Icon: After
 				if ( 'after' === $settings['element_extra_icon_pos'] ) {
-					echo '<i class="wpr-grid-extra-icon-right '. esc_attr( $settings['element_extra_icon']['value'] ) .'"></i>';
+					ob_start();
+					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
+					$extra_icon = ob_get_clean();
+
+					echo '<span class="wpr-grid-extra-icon-right">';
+						echo $extra_icon;
+					echo '</span>';
 				}
 				// Text: After
 				if ( 'after' === $settings['element_extra_text_pos'] ) {
@@ -6659,7 +6804,13 @@ class Wpr_Media_Grid extends Widget_Base {
 				}
 				// Icon: Before
 				if ( 'before' === $settings['element_extra_icon_pos'] ) {
-					echo '<i class="wpr-grid-extra-icon-left '. esc_attr( $settings['element_extra_icon']['value'] ) .'"></i>';
+					ob_start();
+					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
+					$extra_icon = ob_get_clean();
+
+					echo '<span class="wpr-grid-extra-icon-left">';
+						echo $extra_icon;
+					echo '</span>';
 				}
 
 				// Time
@@ -6667,7 +6818,13 @@ class Wpr_Media_Grid extends Widget_Base {
 
 				// Icon: After
 				if ( 'after' === $settings['element_extra_icon_pos'] ) {
-					echo '<i class="wpr-grid-extra-icon-right '. esc_attr( $settings['element_extra_icon']['value'] ) .'"></i>';
+					ob_start();
+					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
+					$extra_icon = ob_get_clean();
+
+					echo '<span class="wpr-grid-extra-icon-right">';
+						echo $extra_icon;
+					echo '</span>';
 				}
 				// Text: After
 				if ( 'after' === $settings['element_extra_text_pos'] ) {
@@ -6694,7 +6851,13 @@ class Wpr_Media_Grid extends Widget_Base {
 
 				// Icon: Before
 				if ( 'before' === $settings['element_extra_icon_pos'] ) {
-					echo '<i class="wpr-grid-extra-icon-left '. esc_attr( $settings['element_extra_icon']['value'] ) .'"></i>';
+					ob_start();
+					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
+					$extra_icon = ob_get_clean();
+
+					echo '<span class="wpr-grid-extra-icon-left">';
+						echo $extra_icon;
+					echo '</span>';
 				}
 					if ( 'yes' === $settings['element_show_avatar'] ) {
 						echo get_avatar( $author_id, $settings['element_avatar_size'] );
@@ -6704,7 +6867,13 @@ class Wpr_Media_Grid extends Widget_Base {
 
 				// Icon: After
 				if ( 'after' === $settings['element_extra_icon_pos'] ) {
-					echo '<i class="wpr-grid-extra-icon-right '. esc_attr( $settings['element_extra_icon']['value'] ) .'"></i>';
+					ob_start();
+					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
+					$extra_icon = ob_get_clean();
+
+					echo '<span class="wpr-grid-extra-icon-right">';
+						echo $extra_icon;
+					echo '</span>';
 				}
 				echo '</a>';
 
@@ -6778,6 +6947,10 @@ class Wpr_Media_Grid extends Widget_Base {
 					}
 				}
 
+				if ( $lightbox_source == false ) {
+					$lightbox_source = wp_get_attachment_url( $post_id );
+				}
+
 				// Lightbox Button
 				echo '<span data-src="'. esc_url( $lightbox_source ) .'">';
 				
@@ -6839,7 +7012,13 @@ class Wpr_Media_Grid extends Widget_Base {
 				}
 				// Icon: Before
 				if ( 'before' === $settings['element_extra_icon_pos'] ) {
-					echo '<i class="wpr-grid-extra-icon-left '. esc_attr( $settings['element_extra_icon']['value'] ) .'"></i>';
+					ob_start();
+					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
+					$extra_icon = ob_get_clean();
+
+					echo '<span class="wpr-grid-extra-icon-left">';
+						echo $extra_icon;
+					echo '</span>';
 				}
 
 				// Taxonomies
@@ -6853,7 +7032,13 @@ class Wpr_Media_Grid extends Widget_Base {
 
 				// Icon: After
 				if ( 'after' === $settings['element_extra_icon_pos'] ) {
-					echo '<i class="wpr-grid-extra-icon-right '. esc_attr( $settings['element_extra_icon']['value'] ) .'"></i>';
+					ob_start();
+					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
+					$extra_icon = ob_get_clean();
+
+					echo '<span class="wpr-grid-extra-icon-right">';
+						echo $extra_icon;
+					echo '</span>';
 				}
 				// Text: After
 				if ( 'after' === $settings['element_extra_text_pos'] ) {
@@ -7326,12 +7511,41 @@ class Wpr_Media_Grid extends Widget_Base {
 				$settings['filters_animation'] = 'zoom';
 			}
 		}
+
+		$gutter_hr_widescreen = isset($settings['layout_gutter_hr_widescreen']['size']) ? $settings['layout_gutter_hr_widescreen']['size'] : $settings['layout_gutter_hr']['size'];
+		$gutter_hr_desktop = $settings['layout_gutter_hr']['size'];
+		$gutter_hr_laptop = isset($settings['layout_gutter_hr_laptop']['size']) ? $settings['layout_gutter_hr_laptop']['size'] : $gutter_hr_desktop;
+		$gutter_hr_tablet_extra = isset($settings['layout_gutter_hr_tablet_extra']['size']) ? $settings['layout_gutter_hr_tablet_extra']['size'] : $gutter_hr_laptop;
+		$gutter_hr_tablet = isset($settings['layout_gutter_hr_tablet']['size']) ? $settings['layout_gutter_hr_tablet']['size'] : $gutter_hr_tablet_extra;
+		$gutter_hr_mobile_extra = isset($settings['layout_gutter_hr_mobile_extra']['size']) ? $settings['layout_gutter_hr_mobile_extra']['size'] : $gutter_hr_tablet;
+		$gutter_hr_mobile = isset($settings['layout_gutter_hr_mobile']['size']) ? $settings['layout_gutter_hr_mobile']['size'] : $gutter_hr_mobile_extra;
+
+		$gutter_vr_widescreen = isset($settings['layout_gutter_vr_widescreen']['size']) ? $settings['layout_gutter_vr_widescreen']['size'] : $settings['layout_gutter_vr']['size'];
+		$gutter_vr_desktop = $settings['layout_gutter_vr']['size'];
+		$gutter_vr_laptop = isset($settings['layout_gutter_vr_laptop']['size']) ? $settings['layout_gutter_vr_laptop']['size'] : $gutter_vr_desktop;
+		$gutter_vr_tablet_extra = isset($settings['layout_gutter_vr_tablet_extra']['size']) ? $settings['layout_gutter_vr_tablet_extra']['size'] : $gutter_vr_laptop;
+		$gutter_vr_tablet = isset($settings['layout_gutter_vr_tablet']['size']) ? $settings['layout_gutter_vr_tablet']['size'] : $gutter_vr_tablet_extra;
+		$gutter_vr_mobile_extra = isset($settings['layout_gutter_vr_mobile_extra']['size']) ? $settings['layout_gutter_vr_mobile_extra']['size'] : $gutter_vr_tablet;
+		$gutter_vr_mobile = isset($settings['layout_gutter_vr_mobile']['size']) ? $settings['layout_gutter_vr_mobile']['size'] : $gutter_vr_mobile_extra;
+
 		//:TODO
 		$layout_settings = [
 			'layout' => $settings['layout_select'],
 			'columns_desktop' => $settings['layout_columns'],
-			'gutter_hr' => $settings['layout_gutter_hr']['size'],
-			'gutter_vr' => $settings['layout_gutter_vr']['size'],
+			'gutter_hr' => $gutter_hr_desktop,
+			'gutter_hr_mobile' => $gutter_hr_mobile,
+			'gutter_hr_mobile_extra' => $gutter_hr_mobile_extra,
+			'gutter_hr_tablet' => $gutter_hr_tablet,
+			'gutter_hr_tablet_extra' => $gutter_hr_tablet_extra,
+			'gutter_hr_laptop' => $gutter_hr_laptop,
+			'gutter_hr_widescreen' => $gutter_hr_widescreen,
+			'gutter_vr' => $gutter_vr_desktop,
+			'gutter_vr_mobile' => $gutter_vr_mobile,
+			'gutter_vr_mobile_extra' => $gutter_vr_mobile_extra,
+			'gutter_vr_tablet' => $gutter_vr_tablet,
+			'gutter_vr_tablet_extra' => $gutter_vr_tablet_extra,
+			'gutter_vr_laptop' => $gutter_vr_laptop,
+			'gutter_vr_widescreen' => $gutter_vr_widescreen,
 			'animation' => $settings['layout_animation'],
 			'animation_duration' => $settings['layout_animation_duration'],
 			'animation_delay' => $settings['layout_animation_delay'],
@@ -7403,6 +7617,7 @@ class Wpr_Media_Grid extends Widget_Base {
 			'prevArrow' => '#wpr-grid-slider-prev-'. $this->get_id(),
 			'nextArrow' => '#wpr-grid-slider-next-'. $this->get_id(),
 			'sliderSlidesToScroll' => +$settings['layout_slides_to_scroll'],
+			'sliderRows' => isset($settings['layout_slider_rows']) ? $settings['layout_slider_rows'] : 1
 		];
 
 		if ( ! wpr_fs()->can_use_premium_code() ) {
@@ -7427,7 +7642,7 @@ class Wpr_Media_Grid extends Widget_Base {
 			'share' => $settings['lightbox_popup_sharing'],
 			'zoom' => $settings['lightbox_popup_zoom'],
 			'fullScreen' => $settings['lightbox_popup_fullscreen'],
-			'download' => $settings['lightbox_popup_download'],
+			'download' => $settings['lightbox_popup_download']
 		];
 
 		if ( $settings['layout_slider_amount'] === 1 && $settings['layout_slider_effect'] === 'fade' ) {
@@ -7445,7 +7660,6 @@ class Wpr_Media_Grid extends Widget_Base {
 		$settings = $this->get_settings();
 		// Get Posts
 		$posts = new \WP_Query( $this->get_main_query_args() );
-
 
 		// Loop: Start
 		if ( $posts->have_posts() ) :
@@ -7475,6 +7689,10 @@ class Wpr_Media_Grid extends Widget_Base {
 			// if ( Utilities::is_new_free_user() && $post_index > 12 ) {
 			// 	return;
 			// }
+
+			if ( ! wp_attachment_is( 'image', get_the_ID() ) ) {
+				continue;
+			}
 
 			// Post Class
 			$post_class = implode( ' ', get_post_class( 'wpr-grid-item elementor-clearfix', get_the_ID() ) );

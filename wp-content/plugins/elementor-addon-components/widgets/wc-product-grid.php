@@ -8,9 +8,7 @@
  * dans différents modes, masonry, grille ou slider avec différents filtres
  *
  * @since 1.9.8
- * @since 1.9.9 Ajout et traitement du badge 'Nouveau produit'
- * @since 2.0.0 Amélioration du chargement des images
- * @since 2.0.1 L'intégration WC est déportée dans la page de configuration du plugin onglet 'WC intégration'
+ * @since 2.1.1 Lazyload attribut
  */
 
 namespace EACCustomWidgets\Widgets;
@@ -49,24 +47,27 @@ class WC_Product_Grid_Widget extends Widget_Base {
 
 	/**
 	 * Constructeur de la class WC_Product_Grid_Widget
-	 *
-	 * Enregistre les scripts et les styles
-	 *
-	 * @since 1.9.8
 	 */
 	public function __construct( $data = array(), $args = null ) {
 		parent::__construct( $data, $args );
 
-		wp_register_script( 'swiper', 'https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js', array( 'jquery' ), '8.3.2', true );
-		wp_register_style( 'swiper', 'https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.css', array(), '8.3.2' );
-
+		wp_register_script( 'swiper', 'https://cdnjs.cloudflare.com/ajax/libs/Swiper/8.3.2/swiper-bundle.min.js', array( 'jquery' ), '8.3.2', true );
 		wp_register_script( 'isotope', EAC_ADDONS_URL . 'assets/js/isotope/isotope.pkgd.min.js', array( 'jquery' ), '3.0.6', true );
+		//wp_register_script( 'eac-fit-rows', EAC_Plugin::instance()->get_script_url( 'assets/js/isotope/fit-rows' ), array( 'isotope' ), '2.1.1', true );
+		wp_register_script( 'eac-imagesloaded', EAC_ADDONS_URL . 'assets/js/isotope/imagesloaded.pkgd.min.js', array( 'jquery' ), '4.1.4', true );
 		wp_register_script( 'eac-infinite-scroll', EAC_ADDONS_URL . 'assets/js/isotope/infinite-scroll.pkgd.min.js', array( 'jquery' ), '3.0.5', true );
-		wp_register_script( 'eac-post-grid', EAC_Plugin::instance()->get_register_script_url( 'eac-post-grid' ), array( 'jquery', 'elementor-frontend', 'isotope', 'eac-infinite-scroll', 'swiper' ), '1.0.0', true );
 
-		wp_register_style( 'eac-swiper', EAC_Plugin::instance()->get_register_style_url( 'swiper' ), array( 'eac', 'swiper' ), '1.9.7' );
-		wp_register_style( 'eac-post-grid', EAC_Plugin::instance()->get_register_style_url( 'post-grid' ), array( 'eac' ), '1.0.0' );
-		wp_register_style( 'eac-product', EAC_Plugin::instance()->get_register_style_url( 'wc-product' ), array( 'eac', 'eac-post-grid' ), '1.9.8' );
+		/** C'est un thème basé sur les blocks */
+		if ( Eac_Config_Elements::is_a_block_theme() ) {
+			add_action( 'wp_enqueue_scripts', array( $this, 'force_load_script_for_fse' ), 9999 );
+		} else {
+			wp_register_script( 'eac-post-grid', EAC_Plugin::instance()->get_script_url( 'assets/js/elementor/eac-post-grid' ), array( 'jquery', 'elementor-frontend', 'isotope', 'eac-infinite-scroll', 'swiper', 'eac-imagesloaded' ), EAC_ADDONS_VERSION, true );
+		}
+
+		wp_register_style( 'swiper-bundle', 'https://cdnjs.cloudflare.com/ajax/libs/Swiper/8.3.2/swiper-bundle.min.css', array(), '8.3.2' );
+		wp_enqueue_style( 'eac-swiper', EAC_Plugin::instance()->get_style_url( 'assets/css/swiper' ), array(), '1.9.8' );
+		wp_enqueue_style( 'eac-post-grid', EAC_Plugin::instance()->get_style_url( 'assets/css/post-grid' ), array( 'eac-swiper' ), '1.9.8' );
+		wp_enqueue_style( 'eac-product', EAC_Plugin::instance()->get_style_url( 'assets/css/wc-product' ), array( 'eac-post-grid' ), '1.9.8' );
 
 		// Supprime les callbacks du filtre de la liste 'orderby'
 		remove_all_filters( 'eac/tools/post_orderby' );
@@ -81,6 +82,14 @@ class WC_Product_Grid_Widget extends Widget_Base {
 			10
 		);
 	}
+
+	/**
+	 * La taille de l'image par défaut
+	 *
+	 * @var IMAGE_SIZE
+	 *
+	 */
+	const IMAGE_SIZE = '640';
 
 	/**
 	 * Le nom de la clé du composant dans le fichier de configuration
@@ -144,7 +153,11 @@ class WC_Product_Grid_Widget extends Widget_Base {
 	 * @return libraries list.
 	 */
 	public function get_script_depends() {
-		return array( 'isotope', 'eac-imagesloaded', 'eac-infinite-scroll', 'swiper', 'eac-post-grid' );
+		if ( Eac_Config_Elements::is_a_block_theme() ) {
+			return array( 'isotope', 'eac-imagesloaded', 'eac-infinite-scroll', 'swiper' );
+		} else {
+			return array( 'isotope', 'eac-imagesloaded', 'eac-infinite-scroll', 'swiper', 'eac-post-grid' );
+		}
 	}
 
 	/**
@@ -156,7 +169,7 @@ class WC_Product_Grid_Widget extends Widget_Base {
 	 * @return CSS list.
 	 */
 	public function get_style_depends() {
-		return array( 'swiper', 'eac-swiper', 'eac-post-grid', 'eac-product' );
+		return array( 'swiper-bundle' );
 	}
 
 	/**
@@ -366,7 +379,6 @@ class WC_Product_Grid_Widget extends Widget_Base {
 								'CHAR'          => esc_html__( 'Caractère', 'eac-components' ),
 								'NUMERIC'       => esc_html__( 'Numérique', 'eac-components' ),
 								'DECIMAL(10,2)' => esc_html__( 'Décimal', 'eac-components' ),
-								// 'DATE'        => esc_html__('Date', 'eac-components'),
 								'TIMESTAMP'     => esc_html__( 'TimeStamp', 'eac-components' ),
 							),
 							'default'     => 'CHAR',
@@ -592,16 +604,18 @@ class WC_Product_Grid_Widget extends Widget_Base {
 			// Add default values for all active breakpoints.
 			$columns_device_args = array();
 		foreach ( $active_breakpoints as $breakpoint_name => $breakpoint_instance ) {
-			if ( ! in_array( $breakpoint_name, array( Breakpoints_manager::BREAKPOINT_KEY_WIDESCREEN ) ) ) {
-				if ( Breakpoints_manager::BREAKPOINT_KEY_MOBILE === $breakpoint_name ) {
-					$columns_device_args[ $breakpoint_name ] = array( 'default' => '1' );
-				} elseif ( Breakpoints_manager::BREAKPOINT_KEY_MOBILE_EXTRA === $breakpoint_name ) {
-					$columns_device_args[ $breakpoint_name ] = array( 'default' => '2' );
-				} elseif ( Breakpoints_manager::BREAKPOINT_KEY_LAPTOP === $breakpoint_name ) {
+			if ( Breakpoints_manager::BREAKPOINT_KEY_WIDESCREEN === $breakpoint_name ) {
+				$columns_device_args[ $breakpoint_name ] = array( 'default' => '4' );
+			} elseif ( Breakpoints_manager::BREAKPOINT_KEY_LAPTOP === $breakpoint_name ) {
+				$columns_device_args[ $breakpoint_name ] = array( 'default' => '3' );
+			} elseif ( Breakpoints_manager::BREAKPOINT_KEY_TABLET_EXTRA === $breakpoint_name ) {
 					$columns_device_args[ $breakpoint_name ] = array( 'default' => '3' );
-				} else {
+			} elseif ( Breakpoints_manager::BREAKPOINT_KEY_TABLET === $breakpoint_name ) {
 					$columns_device_args[ $breakpoint_name ] = array( 'default' => '3' );
-				}
+			} elseif ( Breakpoints_manager::BREAKPOINT_KEY_MOBILE_EXTRA === $breakpoint_name ) {
+				$columns_device_args[ $breakpoint_name ] = array( 'default' => '2' );
+			} elseif ( Breakpoints_manager::BREAKPOINT_KEY_MOBILE === $breakpoint_name ) {
+				$columns_device_args[ $breakpoint_name ] = array( 'default' => '1' );
 			}
 		}
 
@@ -733,7 +747,6 @@ class WC_Product_Grid_Widget extends Widget_Base {
 						),
 					),
 					'default'   => 'left',
-					'toggle'    => true,
 					'selectors' => array(
 						'{{WRAPPER}} .al-filters__wrapper, {{WRAPPER}} .al-filters__wrapper-select' => 'text-align: {{VALUE}};',
 					),
@@ -763,6 +776,18 @@ class WC_Product_Grid_Widget extends Widget_Base {
 						array(
 							'label' => esc_html__( 'Produit', 'eac-components' ),
 							'type'  => Controls_Manager::HEADING,
+						)
+					);
+
+					$this->add_control(
+						'al_title',
+						array(
+							'label'        => esc_html__( 'Titre', 'eac-components' ),
+							'type'         => Controls_Manager::SWITCHER,
+							'label_on'     => esc_html__( 'oui', 'eac-components' ),
+							'label_off'    => esc_html__( 'non', 'eac-components' ),
+							'return_value' => 'yes',
+							'default'      => 'yes',
 						)
 					);
 
@@ -816,7 +841,6 @@ class WC_Product_Grid_Widget extends Widget_Base {
 							'label_off'    => esc_html__( 'non', 'eac-components' ),
 							'return_value' => 'yes',
 							'default'      => 'yes',
-							//'condition'    => array( 'shop_is_a_catalog' => 'false' ),
 						)
 					);
 
@@ -833,8 +857,7 @@ class WC_Product_Grid_Widget extends Widget_Base {
 							),
 							'default'   => 'regular',
 							'condition' => array(
-								'al_prices'         => 'yes',
-								//'shop_is_a_catalog' => 'false',
+								'al_prices' => 'yes',
 							),
 						)
 					);
@@ -868,6 +891,7 @@ class WC_Product_Grid_Widget extends Widget_Base {
 								),
 							),
 							'default'   => 'yes',
+							'toggle'    => false,
 							'condition' => array(
 								'al_stock'          => 'yes',
 								'shop_is_a_catalog' => 'false',
@@ -901,7 +925,6 @@ class WC_Product_Grid_Widget extends Widget_Base {
 								'al_quantity_sold'  => 'yes',
 								'shop_is_a_catalog' => 'false',
 							),
-							// 'render_type' => 'ui',
 						)
 					);
 
@@ -930,7 +953,7 @@ class WC_Product_Grid_Widget extends Widget_Base {
 						)
 					);
 
-					$this->add_control(
+					$this->add_responsive_control(
 						'al_content_text_align_v',
 						array(
 							'label'       => esc_html__( 'Alignement vertical', 'eac-components' ),
@@ -963,22 +986,10 @@ class WC_Product_Grid_Widget extends Widget_Base {
 							),
 							'default'     => 'flex-start',
 							'label_block' => true,
-							'selectors'   => array( '{{WRAPPER}} .shop-products__wrapper .al-post__text-wrapper' => 'justify-content: {{VALUE}};' ),
-							'conditions'  => array(
-								'relation' => 'or',
-								'terms'    => array(
-									array(
-										'name'     => 'al_layout_texte',
-										'operator' => '===',
-										'value'    => 'yes',
-									),
-									array(
-										'name'     => 'al_layout_texte_left',
-										'operator' => '===',
-										'value'    => 'yes',
-									),
-								),
+							'selectors'   => array(
+								'{{WRAPPER}} .shop-products__wrapper .al-post__text-wrapper' => 'justify-content: {{VALUE}};',
 							),
+							'condition'  => array( 'al_layout_type' => 'slider' ),
 						)
 					);
 
@@ -1281,33 +1292,25 @@ class WC_Product_Grid_Widget extends Widget_Base {
 			$this->add_responsive_control(
 				'al_image_width',
 				array(
-					'label'          => esc_html__( 'Largeur image (%)', 'eac-components' ),
-					'type'           => Controls_Manager::SLIDER,
-					'size_units'     => array( '%' ),
-					'default'        => array(
+					'label'      => esc_html__( "Largeur de l'image (%)", 'eac-components' ),
+					'type'       => Controls_Manager::SLIDER,
+					'size_units' => array( '%' ),
+					'default'    => array(
 						'unit' => '%',
 						'size' => 100,
 					),
-					'tablet_default' => array(
-						'unit' => '%',
-						'size' => 60,
-					),
-					'mobile_default' => array(
-						'unit' => '%',
-						'size' => 100,
-					),
-					'range'          => array(
+					'range'      => array(
 						'%' => array(
 							'min'  => 20,
 							'max'  => 100,
 							'step' => 10,
 						),
 					),
-					'selectors'      => array(
+					'selectors'  => array(
 						'{{WRAPPER}}.layout-text__right-yes .al-post__content-wrapper .al-post__image-wrapper,
 						{{WRAPPER}}.layout-text__left-yes .al-post__content-wrapper .al-post__image-wrapper' => 'width: {{SIZE}}%;',
 					),
-					'conditions'     => array(
+					'conditions' => array(
 						'relation' => 'or',
 						'terms'    => array(
 							array(
@@ -1357,7 +1360,6 @@ class WC_Product_Grid_Widget extends Widget_Base {
 						),
 					),
 					'selectors'   => array( '{{WRAPPER}} .al-posts__wrapper.al-posts__image-ratio .al-post__image' => 'padding-bottom:calc({{SIZE}} * 100%);' ),
-					// 'selectors' => ['{{WRAPPER}} .al-posts__wrapper.al-posts__image-ratio .al-post__image' => 'padding-bottom:calc({{SIZE}} / 100 * 100%);'],
 					'condition'   => array(
 						'al_enable_image_ratio' => 'yes',
 						'al_layout_type'        => 'fitRows',
@@ -1396,9 +1398,9 @@ class WC_Product_Grid_Widget extends Widget_Base {
 		$this->start_controls_section(
 			'al_title_settings',
 			array(
-				'label' => esc_html__( 'Titre', 'eac-components' ),
-				'tab'   => Controls_Manager::TAB_CONTENT,
-			   // 'condition' => ['al_content_title' => 'yes'],
+				'label'     => esc_html__( 'Titre', 'eac-components' ),
+				'tab'       => Controls_Manager::TAB_CONTENT,
+				'condition' => array( 'al_title' => 'yes' ),
 			)
 		);
 
@@ -1541,6 +1543,7 @@ class WC_Product_Grid_Widget extends Widget_Base {
 						),
 					),
 					'default'      => 'left',
+					'toggle'       => false,
 					'prefix_class' => 'badge-cart-quantity-pos-',
 				)
 			);
@@ -1709,6 +1712,14 @@ class WC_Product_Grid_Widget extends Widget_Base {
 				)
 			);
 
+			$this->add_group_control(
+				Group_Control_Border::get_type(),
+				array(
+					'name'     => 'al_image_border',
+					'selector' => '{{WRAPPER}} .al-post__image-wrapper img',
+				)
+			);
+
 			$this->add_control(
 				'al_image_radius',
 				array(
@@ -1730,20 +1741,13 @@ class WC_Product_Grid_Widget extends Widget_Base {
 				)
 			);
 
-			$this->add_group_control(
-				Group_Control_Border::get_type(),
-				array(
-					'name'     => 'al_image_border',
-					'selector' => '{{WRAPPER}} .al-post__image-wrapper img',
-				)
-			);
-
 			/** Titre */
 			$this->add_control(
 				'al_title_style',
 				array(
 					'label'     => esc_html__( 'Titre', 'eac-components' ),
 					'type'      => Controls_Manager::HEADING,
+					'condition' => array( 'al_title' => 'yes' ),
 					'separator' => 'before',
 				)
 			);
@@ -1755,6 +1759,7 @@ class WC_Product_Grid_Widget extends Widget_Base {
 					'type'      => Controls_Manager::COLOR,
 					'global'    => array( 'default' => Global_Colors::COLOR_PRIMARY ),
 					'selectors' => array( '{{WRAPPER}} .al-post__content-title a' => 'color: {{VALUE}};' ),
+					'condition' => array( 'al_title' => 'yes' ),
 				)
 			);
 
@@ -1765,6 +1770,7 @@ class WC_Product_Grid_Widget extends Widget_Base {
 					'label'    => esc_html__( 'Typographie', 'eac-components' ),
 					'global'   => array( 'default' => Global_Typography::TYPOGRAPHY_PRIMARY ),
 					'selector' => '{{WRAPPER}} .al-post__content-title',
+					'condition' => array( 'al_title' => 'yes' ),
 				)
 			);
 
@@ -1849,8 +1855,7 @@ class WC_Product_Grid_Widget extends Widget_Base {
 					'type'      => Controls_Manager::HEADING,
 					'separator' => 'before',
 					'condition' => array(
-						'al_prices'         => 'yes',
-						//'shop_is_a_catalog' => 'false',
+						'al_prices' => 'yes',
 					),
 				)
 			);
@@ -1863,8 +1868,7 @@ class WC_Product_Grid_Widget extends Widget_Base {
 					'global'    => array( 'default' => Global_Colors::COLOR_SECONDARY ),
 					'selectors' => array( '{{WRAPPER}} .shop-product__prices-wrapper' => 'color: {{VALUE}};' ),
 					'condition' => array(
-						'al_prices'         => 'yes',
-						//'shop_is_a_catalog' => 'false',
+						'al_prices' => 'yes',
 					),
 				)
 			);
@@ -1877,8 +1881,7 @@ class WC_Product_Grid_Widget extends Widget_Base {
 					'global'    => array( 'default' => Global_Typography::TYPOGRAPHY_SECONDARY ),
 					'selector'  => '{{WRAPPER}} .shop-product__prices-wrapper',
 					'condition' => array(
-						'al_prices'         => 'yes',
-						//'shop_is_a_catalog' => 'false',
+						'al_prices' => 'yes',
 					),
 				)
 			);
@@ -2212,28 +2215,6 @@ class WC_Product_Grid_Widget extends Widget_Base {
 				)
 			);
 
-			$this->add_control(
-				'al_avatar_border_radius',
-				array(
-					'label'              => esc_html__( 'Rayon de la bordure', 'eac-components' ),
-					'type'               => Controls_Manager::DIMENSIONS,
-					'size_units'         => array( 'px', '%' ),
-					'allowed_dimensions' => array( 'top', 'right', 'bottom', 'left' ),
-					'default'            => array(
-						'top'      => 50,
-						'right'    => 50,
-						'bottom'   => 50,
-						'left'     => 50,
-						'unit'     => '%',
-						'isLinked' => true,
-					),
-					'selectors'          => array(
-						'{{WRAPPER}} .al-post__avatar-wrapper img' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
-					),
-					'separator'          => 'before',
-				)
-			);
-
 			$this->add_group_control(
 				Group_Control_Border::get_type(),
 				array(
@@ -2253,6 +2234,27 @@ class WC_Product_Grid_Widget extends Widget_Base {
 					),
 					'selector'       => '{{WRAPPER}} .al-post__avatar-wrapper img',
 					'separator'      => 'before',
+				)
+			);
+
+			$this->add_control(
+				'al_avatar_border_radius',
+				array(
+					'label'              => esc_html__( 'Rayon de la bordure', 'eac-components' ),
+					'type'               => Controls_Manager::DIMENSIONS,
+					'size_units'         => array( 'px', '%' ),
+					'allowed_dimensions' => array( 'top', 'right', 'bottom', 'left' ),
+					'default'            => array(
+						'top'      => 50,
+						'right'    => 50,
+						'bottom'   => 50,
+						'left'     => 50,
+						'unit'     => '%',
+						'isLinked' => true,
+					),
+					'selectors'          => array(
+						'{{WRAPPER}} .al-post__avatar-wrapper img' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+					),
 				)
 			);
 
@@ -2414,25 +2416,26 @@ class WC_Product_Grid_Widget extends Widget_Base {
 		$has_scrollbar  = $has_swiper && 'yes' === $settings['slider_scrollbar'] ? true : false;
 
 		if ( $has_swiper ) { ?>
-			<div id="<?php echo $id; ?>" class="eac-articles-liste swiper-container">
+			<div id="<?php echo esc_attr( $id ); ?>" class="eac-articles-liste swiper-container">
 		<?php } else { ?>
 			<div class="eac-articles-liste">
+			<?php
+		}
+			/** @since 2.0.1 Ajout d'un message avant la grille si mode catalog */
+		if ( 'true' === $settings['shop_is_a_catalog'] ) {
+			$message = '';
+			$message = apply_filters( 'eac_woo_catalog_product_message', $message );
+			if ( ! empty( $message ) ) {
+				?>
+					<div class="woocommerce-info"><?php echo esc_html( $message ); ?></div>
 				<?php
-				/** @since 2.0.1 Ajout d'un message avant la grille si mode catalog */
-				if ( 'true' === $settings['shop_is_a_catalog'] ) {
-					//$message = esc_html__( "L'achat de produits en ligne est provisoirement fermé" );
-					$message = '';
-					$message = apply_filters( 'eac_woo_catalog_product_message', $message );
-					if ( ! empty( $message ) ) { ?>
-						<div class="woocommerce-info"><?php echo esc_html( $message ); ?></div>
-				<?php
-					}
-				}
+			}
 		}
 
-				$this->render_articles();
+			$this->render_articles();
 
-				if ( $has_navigation ) { ?>
+		if ( $has_navigation ) {
+			?>
 					<div class="swiper-button-prev"></div>
 					<div class="swiper-button-next"></div>
 				<?php } ?>
@@ -2468,6 +2471,7 @@ class WC_Product_Grid_Widget extends Widget_Base {
 		$has_term   = 'yes' === $settings['al_term'] ? true : false;
 		$has_auteur = 'yes' === $settings['al_author'] ? true : false;
 		$has_date   = 'yes' === $settings['al_date'] ? true : false;
+		$has_title  = 'yes' === $settings['al_title'] ? true : false;
 		$has_resum  = 'yes' === $settings['al_excerpt'] ? true : false;
 
 		$has_stock_badge_initial = 'yes' === $settings['stock_activate'] ? true : false;
@@ -2491,8 +2495,8 @@ class WC_Product_Grid_Widget extends Widget_Base {
 		$prices_format     = $settings['al_prices_format'];
 		$has_promo_percent = 'yes' === $settings['promo_format'] ? true : false;
 
-		$has_more        = 'yes' === $settings['button_more'] ? true : false;
-		$has_more_button = 'yes' === $settings['button_add_more_picto'] && ! empty( $settings['button_more_picto'] ) ? true : false;
+		$has_more_button       = 'yes' === $settings['button_more'] ? true : false;
+		$has_more_button_picto = 'yes' === $settings['button_add_more_picto'] && ! empty( $settings['button_more_picto'] ) ? true : false;
 
 		$has_cart_initial = ! $is_a_catalog && 'yes' === $settings['button_cart'] ? true : false;
 		$has_cart_button  = 'yes' === $settings['button_add_cart_picto'] && ! empty( $settings['button_cart_picto'] ) ? true : false;
@@ -2558,7 +2562,7 @@ class WC_Product_Grid_Widget extends Widget_Base {
 		$this->add_render_attribute( 'content_wrapper', 'class', 'al-post__content-wrapper' );
 
 		// Bouton 'Load more'
-		$button_text = '<button class="al-more-button">' . esc_html__( 'Plus de produits', 'eac-components' ) . ' ' . '<span class="al-more-button-paged">' . $the_query->query_vars['paged'] . '</span>' . '/' . $the_query->max_num_pages . '</button>';
+		$button_text = '<button class="al-more-button" type="button">' . esc_html__( 'Plus de produits', 'eac-components' ) . ' <span class="al-more-button-paged">' . $the_query->query_vars['paged'] . '</span>/' . $the_query->max_num_pages . '</button>';
 
 		/** Affiche les arguments de la requête */
 		if ( 'yes' === $settings['al_display_content_args'] && \Elementor\Plugin::$instance->editor->is_edit_mode() ) {
@@ -2573,6 +2577,7 @@ class WC_Product_Grid_Widget extends Widget_Base {
 		if ( $the_query->have_posts() ) {
 			/** Création et affichage des filtres avant le widget */
 			if ( $has_filters ) {
+				// phpcs:disable WordPress.Security.EscapeOutput
 				if ( $has_users && ! $has_keys ) {
 					echo Eac_Helpers_Util::get_user_filters( $user_filters );
 				} elseif ( $has_keys ) {
@@ -2580,9 +2585,10 @@ class WC_Product_Grid_Widget extends Widget_Base {
 				} elseif ( ! empty( $taxonomy_filters ) ) {
 					echo Eac_Helpers_Util::get_taxo_tag_filters( $taxonomy_filters, $term_slug_filters );
 				}
+				// phpcs:enable WordPress.Security.EscapeOutput
 			}
 			?>
-			<div <?php echo $this->get_render_attribute_string( 'posts_wrapper' ); ?>>
+			<div <?php echo wp_kses_post( $this->get_render_attribute_string( 'posts_wrapper' ) ); ?>>
 				<?php if ( ! $has_swiper ) { ?>
 					<div class="al-posts__wrapper-sizer"></div>
 					<?php
@@ -2601,15 +2607,15 @@ class WC_Product_Grid_Widget extends Widget_Base {
 					}
 
 					$product_id               = $product->get_id();
-					$product_title            = esc_html( $product->get_name() );
-					$product_url              = esc_url( $product->get_permalink() );
+					$product_title            = $product->get_name();
+					$product_url              = $product->get_permalink();
 					$product_id_cart_quantity = 0;
-					$product_sold             = absint( $product->get_total_sales() );
+					$product_sold             = $product->get_total_sales();
 
 					if ( $has_cart_quantity && ! is_null( WC()->cart ) && ! WC()->cart->is_empty() ) {
 						foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
 							if ( $cart_item['product_id'] === $product_id ) {
-								$product_id_cart_quantity = absint( $cart_item['quantity'] );
+								$product_id_cart_quantity = $cart_item['quantity'];
 							}
 						}
 					}
@@ -2647,7 +2653,7 @@ class WC_Product_Grid_Widget extends Widget_Base {
 
 					// Redirection ?
 					if ( 'yes' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
-						$product_cart_url = esc_url( wc_get_cart_url() ) . '?add-to-cart=' . $product_id;
+						$product_cart_url = wc_get_cart_url() . '?add-to-cart=' . $product_id;
 					} else {
 						$product_cart_url = $product_url . '?add-to-cart=' . $product_id;
 					}
@@ -2678,7 +2684,7 @@ class WC_Product_Grid_Widget extends Widget_Base {
 
 					/** Champ user renseigné */
 					if ( $has_users && ! $has_keys ) {
-						$user                = get_the_author_meta( $field = 'display_name' );
+						$user                = get_the_author_meta( 'display_name' );
 						$terms_slug[ $user ] = sanitize_title( $user );
 						$terms_name[ $user ] = ucfirst( $user );
 					} elseif ( $has_keys ) {
@@ -2714,7 +2720,7 @@ class WC_Product_Grid_Widget extends Widget_Base {
 										$term_parent = get_term( $term->parent );
 										if ( ! is_wp_error( $term_parent ) ) {
 											if ( ! empty( $term_slug_filters ) ) {
-												if ( in_array( $term_parent->slug, $term_slug_filters ) ) {
+												if ( in_array( $term_parent->slug, $term_slug_filters, true ) ) {
 													$terms_slug[ $term_parent->slug ] = $term_parent->slug;
 													$terms_name[ $term_parent->name ] = ucfirst( $term_parent->name );
 												}
@@ -2725,7 +2731,7 @@ class WC_Product_Grid_Widget extends Widget_Base {
 										}
 									} //else {
 									if ( ! empty( $term_slug_filters ) ) {
-										if ( in_array( $term->slug, $term_slug_filters ) ) {
+										if ( in_array( $term->slug, $term_slug_filters, true ) ) {
 											$terms_slug[ $term->slug ] = $term->slug;
 											$terms_name[ $term->name ] = ucfirst( $term->name );
 										}
@@ -2743,6 +2749,7 @@ class WC_Product_Grid_Widget extends Widget_Base {
 					 * Ajout de l'ID Elementor du widget et de la liste des slugs dans la class pour gérer les filtres et le pagging.
 					 * Voir eac-post-grid.js:selectedItems
 					 * Surtout ne pas utiliser la fonction 'post_class'
+					 * @since 2.1.1 Ajout des attributs width et height pour le lazyload
 					 */
 					if ( ! $has_swiper ) {
 						$article_class = $unique_id . ' al-post__wrapper ' . implode( ' ', $terms_slug );
@@ -2751,7 +2758,7 @@ class WC_Product_Grid_Widget extends Widget_Base {
 					}
 					?>
 
-					<article id="<?php echo 'product-' . $product_id; ?>" class="<?php echo $article_class; ?>">
+					<article id="<?php echo 'product-' . esc_attr( $product_id ); ?>" class="<?php echo esc_attr( $article_class ); ?>">
 						<div class="al-post__inner-wrapper">
 
 							<?php if ( $product->is_on_sale() && ! $is_a_catalog ) : ?>
@@ -2764,31 +2771,32 @@ class WC_Product_Grid_Widget extends Widget_Base {
 								<span class="badge-new"><?php echo sanitize_text_field( $settings['new_text'] ); ?></span>
 							<?php endif; ?>
 
-							<div <?php echo $this->get_render_attribute_string( 'content_wrapper' ); ?>>
+							<div <?php echo wp_kses_post( $this->get_render_attribute_string( 'content_wrapper' ) ); ?>>
 								<!-- L'image -->
 								<?php if ( has_post_thumbnail() ) : ?>
 									<div class="al-post__image-wrapper">
-										<div class="al-post__image">
+										<div class="al-post__image" role="img" aria-label="<?php echo esc_attr( $product_title ); ?>">
 											<?php
-											$image = wp_get_attachment_image_src( get_post_thumbnail_id( $product_id ), $settings['al_image_dimension_size'], false );
+											$image = wp_get_attachment_image_src( get_post_thumbnail_id( $product_id ), $settings['al_image_dimension_size'] );
 											if ( ! $image ) {
 												$image    = array();
 												$image[0] = plugins_url() . '/elementor/assets/images/placeholder.png';
+												$image[1] = self::IMAGE_SIZE;
+												$image[2] = self::IMAGE_SIZE;
 											}
 											?>
 
 											<!-- Fancybox sur l'image mais pas en mode 'slider' -->
 											<?php if ( ! $has_swiper && $has_image_lightbox ) : ?>
-												<a class="swiper-no-swiping" href="<?php echo get_the_post_thumbnail_url(); ?>" data-elementor-open-lightbox="no" data-fancybox="al-gallery-<?php echo $unique_id; ?>" data-caption="<?php echo $product_title; ?>">
+												<a class="swiper-no-swiping" href="<?php echo esc_url( get_the_post_thumbnail_url() ); ?>" data-elementor-open-lightbox="no" data-fancybox="al-gallery-<?php echo esc_attr( $unique_id ); ?>" data-caption="<?php echo esc_attr( $product_title ); ?>">
 											<?php endif; ?>
 
 											<!-- Le lien du post est sur l'image -->
 											<?php if ( $has_image_link ) : ?>
-												<a class="swiper-no-swiping" href="<?php echo $product_url; ?>">
+												<a class="swiper-no-swiping" href="<?php echo esc_url( $product_url ); ?>">
 											<?php endif; ?>
 
-												<!-- @since 2.0.0 Suppression du paramètre 'ver' de l'image -->
-												<img class="al-post__image-loaded" src="<?php echo esc_url( $image[0] ); ?>" alt="<?php echo $product_title; ?>" />
+												<img class="al-post__image-loaded" src="<?php echo esc_url( $image[0] ); ?>" alt="<?php echo esc_attr( $product_title ); ?>" width="<?php echo esc_attr( $image[1] ); ?>" height="<?php echo esc_attr( $image[2] ); ?>" loading="eager" />
 
 											<?php if ( ( ! $has_swiper && $has_image_lightbox ) || $has_image_link ) : ?>
 												</a>
@@ -2797,15 +2805,19 @@ class WC_Product_Grid_Widget extends Widget_Base {
 									</div>
 								<?php endif; ?>
 
+								<?php if ( $has_title || $has_reviews || $has_prices || $has_stock || $has_quantity_sold || $has_more_button || $has_cart ) : ?>
 								<div class="al-post__text-wrapper">
+								<?php endif; ?>
 
-									<!-- Affiche les IDs du titre -->
-									<?php if ( $has_id ) : ?>
-										<?php echo $open_title; ?><a class="swiper-no-swiping" href="<?php echo $product_url; ?>" title="<?php echo $product_title; ?>"><?php echo $product_id . ' : ' . $product_title; ?></a><?php echo $close_title; ?>
-									<?php else : ?>
-										<?php echo $open_title; ?><a class="swiper-no-swiping" href="<?php echo $product_url; ?>" title="<?php echo $product_title; ?>"><?php echo $product_title; ?></a><?php echo $close_title; ?>
+									<!-- Affiche le titre -->
+									<?php if ( $has_title ) : ?>
+										<?php if ( $has_id ) : ?>
+											<?php echo $open_title; ?><a class="swiper-no-swiping" href="<?php echo esc_url( $product_url ); ?>"><?php echo $product_id . ' : ' . esc_html( $product_title ); ?></a><?php echo $close_title; ?>
+										<?php else : ?>
+											<?php echo $open_title; ?><a class="swiper-no-swiping" href="<?php echo esc_url( $product_url ); ?>"><?php echo esc_html( $product_title ); ?></a><?php echo $close_title; ?>
+										<?php endif; ?>
 									<?php endif; ?>
-								
+
 									<?php if ( $has_resum ) : ?>
 										<span class="shop-product__excerpt-wrapper">
 											<?php echo Eac_Tools_Util::get_post_excerpt( $product_id, absint( $settings['al_excerpt_length'] ) ); ?>
@@ -2839,10 +2851,11 @@ class WC_Product_Grid_Widget extends Widget_Base {
 												$notes = esc_html__( "Nombre d'avis", 'eac-components' ) . ' ' . absint( $product->get_review_count() );
 												break;
 										}
-										/*
+										/**
 										} else { ?>
 											<!--<span class="woocommerce shop-product__notes-wrapper"><?php //esc_html_e('Aucun avis', 'eac-components'); ?></span>-->
-										<?php }*/
+										<?php }
+										*/
 										if ( ! empty( $notes ) ) :
 											?>
 											<span class="woocommerce shop-product__notes-wrapper"><?php echo $notes; ?></span>
@@ -2894,8 +2907,15 @@ class WC_Product_Grid_Widget extends Widget_Base {
 
 									<!-- Quantité vendue -->
 									<?php
+									/** @since 2.0.2 Affiche le fallback quand le produit n'a pas été vendu et qu'il n'est pas en rupture de stock */
 									if ( $has_quantity_sold ) :
-										$quantity_sold = 0 !== $product_sold ? esc_html__( 'Quantité vendue', 'eac-components' ) . ' ' . $product_sold : $has_quantity_sold_fallback;
+										$quantity_sold = '';
+										if ( 0 !== absint( $product_sold ) ) :
+											$quantity_sold = esc_html__( 'Quantité vendue', 'eac-components' ) . ' ' . absint( $product_sold );
+										elseif ( 0 === absint( $product_sold ) && false === $has_stock_badge ) :
+											$quantity_sold = esc_html( $has_quantity_sold_fallback );
+										endif;
+
 										if ( ! empty( $quantity_sold ) ) :
 											?>
 											<span class="shop-product__sold-wrapper"><?php echo $quantity_sold; ?></span>
@@ -2903,18 +2923,18 @@ class WC_Product_Grid_Widget extends Widget_Base {
 									<?php endif; ?>
 
 									<!-- Les boutons -->
-									<?php if ( $has_more || $has_cart ) : ?>
+									<?php if ( $has_more_button || $has_cart ) : ?>
 										<div class="shop-product__buttons-wrapper">
-											<?php if ( $has_more ) : ?>
+											<?php if ( $has_more_button ) : ?>
 												<span class="shop-product__readmore-wrapper">
-													<a href="<?php echo $product_url; ?>" title="<?php echo $product_title; ?>">
+													<a href="<?php echo esc_url( $product_url ); ?>" aria-label="Single product page '<?php echo esc_attr( $product_title ); ?>'">
 														<button class="shop-product__button-readmore" type="button">
 														<?php
-														if ( $has_more_button && 'before' === $settings['button_more_position'] ) {
+														if ( $has_more_button_picto && 'before' === $settings['button_more_position'] ) {
 															Icons_Manager::render_icon( $settings['button_more_picto'], array( 'aria-hidden' => 'true' ) );
 														}
 														echo sanitize_text_field( $settings['button_more_label'] );
-														if ( $has_more_button && 'after' === $settings['button_more_position'] ) {
+														if ( $has_more_button_picto && 'after' === $settings['button_more_position'] ) {
 															Icons_Manager::render_icon( $settings['button_more_picto'], array( 'aria-hidden' => 'true' ) );
 														}
 														?>
@@ -2925,10 +2945,10 @@ class WC_Product_Grid_Widget extends Widget_Base {
 
 											<?php if ( $has_cart && $product->get_regular_price() ) : ?>
 												<span class="shop-product__cart-wrapper">
-													<?php if ( $has_cart_quantity && 0 !== $product_id_cart_quantity ) : ?>
+													<?php if ( $has_cart_quantity && 0 !== absint( $product_id_cart_quantity ) ) : ?>
 														<span class="badge-cart__quantity"><?php echo absint( $product_id_cart_quantity ); ?></span>
 													<?php endif; ?>
-													<a href="<?php echo $product_cart_url; ?>" title="<?php echo $product_title; ?>">
+													<a href="<?php echo esc_url( $product_cart_url ); ?>" aria-label="Add to cart '<?php echo esc_attr( $product_title ); ?>'">
 														<button class="shop-product__button-cart" type="button">
 														<?php
 														if ( $has_cart_button && 'before' === $settings['button_cart_position'] ) {
@@ -2945,22 +2965,29 @@ class WC_Product_Grid_Widget extends Widget_Base {
 											<?php endif; ?>
 										</div>
 									<?php endif; ?>
+								<?php if ( $has_title || $has_reviews || $has_prices || $has_stock || $has_quantity_sold || $has_more_button || $has_cart ) : ?>
 								</div>
+								<?php endif; ?>
 							</div>
 
 							<?php if ( $has_avatar || $has_term || $has_auteur || $has_date ) : ?>
 								<div class="al-post__meta-wrapper">
-									<!-- Avatar -->
+									<!-- @since 2.0.2 ajout de l'attribut 'loading' à l'avatar -->
 									<?php if ( $has_avatar ) : ?>
-										<?php $avatar = esc_url( get_avatar_url( get_the_author_meta( 'ID' ), array( 'size' => $avatar_size ) ) ); ?>
-										<div class="al-post__avatar-wrapper"><img class="avatar photo" src="<?php echo $avatar; ?>" alt="Avatar photo"/></div>
+										<?php
+										$avatar_url      = get_avatar_url( get_the_author_meta( 'ID' ), array( 'size' => $avatar_size ) );
+										$avatar_archives = get_author_posts_url( get_the_author_meta( 'ID' ) );
+										?>
+										<div class="al-post__avatar-wrapper">
+											<!-- <a href="<?php // echo esc_url( $avatar_archives ); ?>"><img class="avatar photo" src="<?php // echo esc_url( $avatar_url ); ?>" alt="Avatar photo" loading="lazy" /></a> -->
+											<img class="avatar photo" src="<?php echo esc_url( $avatar_url ); ?>" alt="Avatar photo" loading="lazy" />
+										</div>
 									<?php endif; ?>
 
 									<div class="al-post__meta">
 										<!-- Les étiquettes -->
 										<?php if ( $has_term ) : ?>
 											<span class="al-post__meta-tags">
-												<!--<i class="fa fa-tags" aria-hidden="true"></i><?php // echo $product_taxo; ?>-->
 												<i class="fa fa-tags" aria-hidden="true"></i><?php echo implode( '|', $terms_name ); ?>
 											</span>
 										<?php endif; ?>
@@ -2968,7 +2995,7 @@ class WC_Product_Grid_Widget extends Widget_Base {
 										<!-- L'auteur de l'article -->
 										<?php if ( $has_auteur ) : ?>
 											<span class="al-post__meta-author">
-												<i class="fa fa-user" aria-hidden="true"></i><?php echo the_author_meta( 'display_name' ); ?>
+												<i class="fa fa-user" aria-hidden="true"></i><?php echo esc_html( the_author_meta( 'display_name' ) ); ?>
 											</span>
 										<?php endif; ?>
 
@@ -2976,9 +3003,9 @@ class WC_Product_Grid_Widget extends Widget_Base {
 										<?php if ( $has_date ) : ?>
 											<span class="al-post__meta-date">
 												<?php if ( 'modified' === $settings['al_article_orderby'] ) : ?>
-													<i class="fa fa-calendar" aria-hidden="true"></i><?php echo $product->get_date_modified()->date( get_option( 'date_format' ) ); ?>
+													<i class="fa fa-calendar" aria-hidden="true"></i><?php echo esc_html( $product->get_date_modified()->date( get_option( 'date_format' ) ) ); ?>
 												<?php else : ?>
-													<i class="fa fa-calendar" aria-hidden="true"></i><?php echo $product->get_date_created()->date( get_option( 'date_format' ) ); ?>
+													<i class="fa fa-calendar" aria-hidden="true"></i><?php echo esc_html( $product->get_date_created()->date( get_option( 'date_format' ) ) ); ?>
 												<?php endif; ?>
 											</span>
 										<?php endif; ?>
@@ -2992,7 +3019,7 @@ class WC_Product_Grid_Widget extends Widget_Base {
 				?>
 			</div>
 			<?php if ( $has_pagging && $the_query->post_count < $the_query->found_posts ) : ?>
-				<div class="al-post__pagination" id="<?php echo $pagination_id; ?>">
+				<div class="al-post__pagination" id="<?php echo esc_attr( $pagination_id ); ?>">
 					<div class="al-pagination-next"><a href="#"><?php echo $button_text; ?></a></div>
 					<div class="al-page-load-status">
 						<div class="infinite-scroll-request eac__loader-spin"></div>
@@ -3007,7 +3034,7 @@ class WC_Product_Grid_Widget extends Widget_Base {
 		}
 		$output = ob_get_contents();
 		ob_end_clean();
-		echo $output;
+		echo $output; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**
@@ -3017,7 +3044,7 @@ class WC_Product_Grid_Widget extends Widget_Base {
 	 * Convert on JSON format
 	 * Modification de la règles 'data_filtre'
 	 *
-	 * @uses      json_encode()
+	 * @uses      wp_json_encode()
 	 *
 	 * @return    JSON oject
 	 *
@@ -3025,44 +3052,53 @@ class WC_Product_Grid_Widget extends Widget_Base {
 	 * @since     1.9.8
 	 */
 	protected function get_settings_json( $unique_id, $dataid, $pagingid, $dmp ) {
-		$module_settings = $this->get_settings_for_display();
+		$settings = $this->get_settings_for_display();
 
-		$effect = $module_settings['slider_effect'];
+		$effect = $settings['slider_effect'];
 		if ( in_array( $effect, array( 'fade', 'creative' ), true ) ) {
 			$nb_images = 1;
-		} elseif ( empty( $module_settings['slider_images_number'] ) || absint( $module_settings['slider_images_number'] ) === 0 ) {
+		} elseif ( isset( $settings['slider_images_centered'] ) && 'yes' === $settings['slider_images_centered'] ) {
+			$nb_images = 2;
+		} elseif ( empty( $settings['slider_images_number'] ) ) {
+			$nb_images = 3;
+		} elseif ( 0 === absint( $settings['slider_images_number'] ) ) {
 			$nb_images = 'auto';
 			$effect    = 'slide';
 		} else {
-			$nb_images = absint( $module_settings['slider_images_number'] );
+			$nb_images = absint( $settings['slider_images_number'] );
 		}
-		$has_swiper = 'slider' === $module_settings['al_layout_type'] ? true : false;
+
+		$has_swiper = 'slider' === $settings['al_layout_type'] ? true : false;
 
 		$settings = array(
 			'data_id'                  => $dataid,
 			'data_pagination_id'       => $pagingid,
-			'data_layout'              => $module_settings['al_layout_type'],
+			'data_layout'              => $settings['al_layout_type'],
 			'data_article'             => $unique_id,
-			'data_filtre'              => ! $has_swiper && 'yes' === $module_settings['al_filter'] ? true : false,
-			'data_fancybox'            => 'yes' === $module_settings['al_lightbox'] ? true : false,
+			'data_filtre'              => ! $has_swiper && 'yes' === $settings['al_filter'] ? true : false,
+			'data_fancybox'            => 'yes' === $settings['al_lightbox'] ? true : false,
 			'data_max_pages'           => $dmp,
 			'data_sw_id'               => 'eac_post_grid_' . $unique_id,
 			'data_sw_swiper'           => $has_swiper,
-			'data_sw_autoplay'         => 'yes' === $module_settings['slider_autoplay'] ? true : false,
-			'data_sw_loop'             => 'yes' === $module_settings['slider_loop'] ? true : false,
-			'data_sw_delay'            => absint( $module_settings['slider_delay'] ),
+			'data_sw_autoplay'         => 'yes' === $settings['slider_autoplay'] ? true : false,
+			'data_sw_loop'             => 'yes' === $settings['slider_loop'] ? true : false,
+			'data_sw_delay'            => absint( $settings['slider_delay'] ),
 			'data_sw_imgs'             => $nb_images,
+			'data_sw_centered'         => 'yes' === $settings['slider_images_centered'] ? true : false,
 			'data_sw_dir'              => 'horizontal',
-			'data_sw_rtl'              => 'right' === $module_settings['slider_rtl'] ? true : false,
+			'data_sw_rtl'              => 'right' === $settings['slider_rtl'] ? true : false,
 			'data_sw_effect'           => $effect,
 			'data_sw_free'             => true,
-			'data_sw_pagination_click' => 'yes' === $module_settings['slider_pagination'] && 'yes' === $module_settings['slider_pagination_click'] ? true : false,
+			'data_sw_pagination_click' => 'yes' === $settings['slider_pagination'] && 'yes' === $settings['slider_pagination_click'] ? true : false,
 		);
 
-		$settings = wp_json_encode( $settings );
-		return $settings;
+		return wp_json_encode( $settings );
+	}
+
+	/** Force le chargement du script sans dépendances */
+	public function force_load_script_for_fse() {
+		wp_enqueue_script( 'eac-post-grid', EAC_Plugin::instance()->get_script_url( 'assets/js/elementor/eac-post-grid' ), array( 'jquery' ), EAC_ADDONS_VERSION, true );
 	}
 
 	protected function content_template() {}
-
 }

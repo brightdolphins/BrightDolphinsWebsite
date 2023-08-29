@@ -5,9 +5,8 @@
  * @return La liste formatées des URL des médias sociaux pour l'utilisateur courant
  *
  * @since 1.6.0
- * @since 1.7.6 Tranférer la liste des réseaux sociaux dans la class 'Eac_Tools_Util'
- * @since 1.9.1 Ajouter le traitement de l'e-mail et du website
- *              Test de la Global $authordata
+ * @since 2.1.0 Affecte la global $authordata
+ *              Refonte de l'affichage des médias sociaux
  */
 
 namespace EACCustomWidgets\Includes\Elementor\DynamicTags\Tags;
@@ -21,7 +20,7 @@ use Elementor\Controls_Manager;
 use Elementor\Core\DynamicTags\Tag;
 use Elementor\Modules\DynamicTags\Module as TagsModule;
 
-class Eac_Author_Social_network extends Tag {
+class Eac_Author_Social_Network extends Tag {
 
 	public function get_name() {
 		return 'eac-addon-author-social-network';
@@ -55,7 +54,7 @@ class Eac_Author_Social_network extends Tag {
 				'label_block' => true,
 				'multiple'    => true,
 				'default'     => '',
-				'options'     => Eac_Tools_Util::get_all_social_networks(), // @since 1.7.6
+				'options'     => Eac_Tools_Util::get_all_social_medias_name(),
 			)
 		);
 	}
@@ -63,55 +62,47 @@ class Eac_Author_Social_network extends Tag {
 	public function render() {
 		global $authordata;
 
-		// @since 1.9.1 Global $authordata n'est pas instancié
-		if ( ! is_object( $authordata ) || ! isset( $authordata->ID ) ) {
-			return;
+		/**
+		 * La variable globale n'est pas définie
+		 *
+		 * @since 2.1.0
+		 */
+		if ( ! isset( $authordata->ID ) ) {
+			$post = get_post();
+			if ( $post ) {
+				$authordata = get_userdata( $post->post_author ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			}
 		}
 
-		/*
-		if (! isset($authordata->ID)) {   // La variable globale n'est pas définie
-			$post = get_post();			// L'article courant
-			$authordata = get_userdata($post->post_author);
-		}*/
+		// @since 1.9.1 Global $authordata n'est pas instanciée
+		if ( ! isset( $authordata->ID ) ) {
+			return;
+		}
 
 		$keys = $this->get_settings( 'author_social_network' );
 		if ( empty( $keys ) ) {
 			return;
 		}
 
-		$values = '<div class="dynamic-tags_social-container">';
-
+		/** @since 2.1.0 */
+		ob_start();
+		echo '<div class="dynamic-tags_social-container">';
 		foreach ( $keys as $key ) {
 			$value = get_the_author_meta( $key, $authordata->ID );
 
-			if ( $value !== '' ) {
-				// @since 1.9.1 Protection de l'adresse e-mail contre les spams
-				if ( $key === 'email' ) {
-					$href = '<a href="mailto:' . esc_html( antispambot( $value ) ) . '" rel="nofollow">';
+			if ( '' !== $value ) {
+				if ( 'email' === $key ) {
+					echo '<a href="' . esc_url( 'mailto:' . antispambot( sanitize_email( $value ) ) ) . '" rel="nofollow" aria-label="' . esc_attr( ucfirst( $key ) ) . '">';
 				} else {
-					$href = '<a href="' . $value . '" rel="nofollow">';
+					echo '<a href="' . esc_url( $value ) . '" rel="nofollow" aria-label="' . esc_attr( ucfirst( $key ) ) . '">';
 				}
-
-				$span = '<span class="dynamic-tags_social-icon ' . $key . '"' . ' title="' . ucfirst( $key ) . '">';
-
-				// @since 1.9.1 Différentes fontes awesome
-				if ( $key === 'tiktok' ) {
-					$faw = '<i class="fab fa-tiktok"></i></span></a>';
-				} elseif ( $key === 'github' ) {
-					$faw = '<i class="fab fa-github"></i></span></a>';
-				} elseif ( $key === 'email' ) {
-					$faw = '<i class="fa fa-envelope"></i></span></a>';
-				} elseif ( $key === 'url' ) {
-					$faw = '<i class="fa fa-globe"></i></span></a>';
-				} else {
-					$faw = '<i class="fa fa-' . $key . '"></i></span></a>';
-				}
-
-				$values .= $href . $span . $faw;
+				echo '<span class="dynamic-tags_social-icon ' . esc_attr( $key ) . '" title="' . esc_attr( ucfirst( $key ) ) . '">';
+				echo Eac_Tools_Util::get_social_media_icon( $key );  // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+				echo '</span></a>';
 			}
 		}
-		$values .= '</div>';
-
-		echo wp_kses_post( $values );
+		echo '</div>';
+		$output = ob_get_clean();
+		echo wp_kses_post( $output );
 	}
 }

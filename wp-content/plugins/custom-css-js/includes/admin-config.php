@@ -25,8 +25,8 @@ class CustomCSSandJS_AdminConfig {
         $settings_default = apply_filters( 'ccj_settings_default', array() );
 
         // Get the saved settings
-        $settings = get_option('ccj_settings');
-        if ( $settings == false ) {
+        $settings = get_option('ccj_settings', array());
+        if ( ! is_array( $settings ) || count( $settings ) === 0 ) {
             $settings = $settings_default;
         } else {
             foreach( $settings_default as $_key => $_value ) {
@@ -46,6 +46,7 @@ class CustomCSSandJS_AdminConfig {
         add_action( 'ccj_settings_form', array( $this, 'general_extra_form' ), 11 );
         add_filter( 'ccj_settings_default', array( $this, 'general_extra_default' ) );
         add_filter( 'ccj_settings_save', array( $this, 'general_extra_save' ) );
+        add_action( 'before_woocommerce_init', array( $this, 'before_woocommerce_init' ) );
     }
 
 
@@ -94,7 +95,7 @@ class CustomCSSandJS_AdminConfig {
 
             $data = apply_filters( 'ccj_settings_save', array() );
 
-            $settings = get_option('ccj_settings');
+            $settings = get_option('ccj_settings', array());
             if ( !isset($settings['add_role'] ) ) $settings['add_role'] = false;
             if ( !isset($settings['remove_comments'] ) ) $settings['remove_comments'] = false;
 
@@ -190,7 +191,7 @@ class CustomCSSandJS_AdminConfig {
     function general_extra_form() {
 
         // Get the setting
-        $settings = get_option('ccj_settings');
+        $settings = get_option('ccj_settings', array());
         $defaults = $this->general_extra_default();
 
         foreach( $defaults as $_key => $_value ) {
@@ -274,7 +275,14 @@ class CustomCSSandJS_AdminConfig {
         <?php
     }
 
-
+	/**
+	 * Declare compatibility with the WooCommerce COT (custom order tables) feature.
+	 */
+	function before_woocommerce_init() {
+		if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
+			\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', CCJ_PLUGIN_FILE, true );
+		}
+	}
 }
 
 return new CustomCSSandJS_AdminConfig();

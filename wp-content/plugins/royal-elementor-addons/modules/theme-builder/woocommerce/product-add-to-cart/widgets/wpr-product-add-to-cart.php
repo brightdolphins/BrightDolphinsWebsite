@@ -32,7 +32,7 @@ class Wpr_Product_AddToCart extends Widget_Base {
 	}
 
 	public function get_keywords() {
-		return [ 'qq', 'woocommerce', 'product-add-to-cart', 'product', 'add-to-cart' ];//tmp
+		return [ 'woocommerce', 'product-add-to-cart', 'product', 'add-to-cart' ];
 	}
 
 	public function get_script_depends() {
@@ -1791,7 +1791,7 @@ class Wpr_Product_AddToCart extends Widget_Base {
 		$this->add_control(
 			'variation_availability_color_out_of_stock',
 			[
-				'label'  => esc_html__( 'Out Of Stock Color', 'wpr-addons' ),
+				'label'  => esc_html__( 'Out of Stock Color', 'wpr-addons' ),
 				'type' => Controls_Manager::COLOR,
 				'default' => '#FF4F40',
 				'selectors' => [
@@ -2114,12 +2114,11 @@ class Wpr_Product_AddToCart extends Widget_Base {
 
 		// add_action( 'woocommerce_add_to_cart', 'action_woocommerce_add_to_cart', 10, 6 );
 		
-		add_action( 'woocommerce_reset_variations_link' , [$this, 'change_clear_text'], 15 );
+		// add_action( 'woocommerce_reset_variations_link' , [$this, 'change_clear_text'], 15 );
 
 		echo '<div '. $this->get_render_attribute_string( 'add_to_cart_wrapper' ) .'>';
 
 			woocommerce_template_single_add_to_cart();
-			// woocommerce_template_loop_add_to_cart();
 
 		echo '</div>';
 	}

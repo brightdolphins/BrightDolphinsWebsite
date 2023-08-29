@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <div>
 	<div class="eac-header-settings">
 		<div>
-			<img class="eac-logo" src="<?php echo EAC_ADDONS_URL . 'admin/images/EAC-coollogo.png'; ?>" />
+			<img class="eac-logo" src="<?php echo EAC_ADDONS_URL . 'admin/images/logos/eac-03.svg'; ?>" />
 		</div>
 		<div>
 			<h1 class="eac-title-main"><?php esc_html_e( 'Elementor Addon Components', 'eac-components' ); ?></h1>

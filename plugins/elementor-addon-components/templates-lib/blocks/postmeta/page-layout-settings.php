@@ -26,6 +26,7 @@ final class PageLayoutSettings {
 	public function __construct() {
 		add_action( 'init', array( $this, 'register' ), 10, 0 );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_scripts' ), 10, 0 );
+		//add_filter( 'script_loader_tag', array( $this, 'add_script_type_attribute' ), 10, 3 );
 		//add_action( 'current_screen', array( $this, 'get_current_screen_action' ) );
 	}
 
@@ -71,6 +72,21 @@ final class PageLayoutSettings {
 	}
 
 	/**
+	 * add_script_type_attribute
+	 *
+	 * @since 2.1.1 Ajout de l'attribut 'type="module"'
+	 */
+	public function add_script_type_attribute( $tag, $handle, $src ) {
+		if ( 'etb-meta-sidebar' !== $handle ) {
+			return $tag;
+		}
+
+		// change the script tag by adding type="module" and return it.
+		$tag = '<script type="module" src="' . esc_url( $src ) . '"></script>';
+		return $tag;
+	}
+
+	/**
 	 * Enqueue scripts
 	 *
 	 * @since 2.1.0 Ajout du script hormis pour les screen widgets, FSE, customizer et profile
@@ -83,7 +99,8 @@ final class PageLayoutSettings {
 		$screen = get_current_screen();
 
 		if ( is_object( $screen ) && ! in_array( $screen->id, array( 'widgets', 'site-editor', 'customize', 'profile' ), true ) ) {
-			wp_enqueue_script( 'etb-meta-sidebar', EAC_ADDONS_URL . 'templates-lib/assets/js/meta-sidebar.min.js', array( 'wp-blocks', 'wp-element', 'wp-components' ), EAC_ADDONS_VERSION, true );
+			wp_register_script( 'etb-meta-sidebar', EAC_ADDONS_URL . 'templates-lib/assets/js/meta-sidebar.min.js', array( 'wp-blocks', 'wp-element', 'wp-components' ), '2.1.0', true );
+			wp_enqueue_script( 'etb-meta-sidebar' );
 
 			wp_localize_script(
 				'etb-meta-sidebar',

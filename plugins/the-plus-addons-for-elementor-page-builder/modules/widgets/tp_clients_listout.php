@@ -5,26 +5,26 @@ Description: Different style of clients logo.
 Author: Theplus
 Author URI: https://posimyth.com
 */
+
 namespace TheplusAddons\Widgets;
 
 use Elementor\Widget_Base;
 use Elementor\Controls_Manager;
 use Elementor\Utils;
-use Elementor\Core\Schemes\Color;
 use Elementor\Group_Control_Typography;
 use Elementor\Group_Control_Border;
-use Elementor\Core\Schemes\Typography;
 use Elementor\Group_Control_Background;
 use Elementor\Group_Control_Box_Shadow;
 use Elementor\Group_Control_Css_Filter;
 use Elementor\Group_Control_Image_Size;
+use Elementor\Core\Kits\Documents\Tabs\Global_Typography;
 
-if (!defined('ABSPATH'))
-    exit; // Exit if accessed directly
-
+if (!defined('ABSPATH')) exit; // Exit if accessed directly
 
 class L_ThePlus_Clients_ListOut extends Widget_Base {
-		
+	
+	public $TpDoc = L_THEPLUS_Tpdoc;
+
 	public function get_name() {
 		return 'tp-clients-listout';
 	}
@@ -41,17 +41,21 @@ class L_ThePlus_Clients_ListOut extends Widget_Base {
         return array('plus-listing');
     }
 	
+	public function get_custom_help_url() {
+		$DocUrl = $this->TpDoc . "clients-listing";
+
+		return esc_url($DocUrl);
+	}
+
     protected function register_controls() {
 		
-		$this->start_controls_section(
-			'content_section',
+		$this->start_controls_section('content_section',
 			[
 				'label' => esc_html__( 'Content Layout', 'tpebl' ),
 				'tab' => Controls_Manager::TAB_CONTENT,
 			]
 		);
-		$this->add_control(
-			'style',
+		$this->add_control('style',
 			[
 				'label' => esc_html__( 'Style', 'tpebl' ),
 				'type' => Controls_Manager::SELECT,
@@ -59,9 +63,7 @@ class L_ThePlus_Clients_ListOut extends Widget_Base {
 				'options' => l_theplus_get_style_list(1),
 			]
 		);
-		
-		$this->add_control(
-			'layout',
+		$this->add_control('layout',
 			[
 				'label' => esc_html__( 'Layout', 'tpebl' ),
 				'type' => Controls_Manager::SELECT,
@@ -73,8 +75,25 @@ class L_ThePlus_Clients_ListOut extends Widget_Base {
 				],
 			]
 		);
-		$this->add_responsive_control(
-            'grid_minmum_height',
+		$this->add_control('how_it_works_grid',
+			[
+				'label' => wp_kses_post( "<a class='tp-docs-link' href='" . esc_url($this->TpDoc) . "show-elementor-client-logos-in-grid-layout/?utm_source=wpbackend&utm_medium=elementoreditor&utm_campaign=widget' target='_blank' rel='noopener noreferrer'> Learn How it works  <i class='eicon-help-o'></i> </a>", 'tpebl' ),
+				'type' => Controls_Manager::HEADING,
+				'condition' => [
+					'layout' => ['grid']
+				],
+			]
+		);
+		$this->add_control('how_it_works_masonry',
+			[
+				'label' => wp_kses_post( "<a class='tp-docs-link' href='" . esc_url($this->TpDoc) . "add-logo-showcase-in-masonry-grid-layout-in-elementor/?utm_source=wpbackend&utm_medium=elementoreditor&utm_campaign=widget' target='_blank' rel='noopener noreferrer'> Learn How it works  <i class='eicon-help-o'></i> </a>", 'tpebl' ),
+				'type' => Controls_Manager::HEADING,
+				'condition' => [
+					'layout' => ['masonry']
+				],
+			]
+		);
+		$this->add_responsive_control('grid_minmum_height',
             [
                 'type' => Controls_Manager::SLIDER,
 				'label' => esc_html__('Minimum Height', 'tpebl'),
@@ -85,13 +104,13 @@ class L_ThePlus_Clients_ListOut extends Widget_Base {
 				],
 				'range' => [
 					'px' => [
-						'min'	=> 50,
-						'max'	=> 500,
+						'min' => 50,
+						'max' => 500,
 						'step' => 5,
 					],
 					'em' => [
-						'min'	=> 50,
-						'max'	=> 400,
+						'min' => 50,
+						'max' => 400,
 						'step' => 5,
 					],
 				],
@@ -104,15 +123,23 @@ class L_ThePlus_Clients_ListOut extends Widget_Base {
 				],
             ]
         );
-		$this->add_control(
-			'clientContentFrom',
+		$this->add_control('clientContentFrom',
 			[
-				'label' => esc_html__( 'Select Source', 'theplus' ),
+				'label' => esc_html__( 'Select Source', 'tpebl' ),
 				'type' => Controls_Manager::SELECT,
 				'default' => 'clcontent',
 				'options' => [
-					'clcontent' => esc_html__( 'Post Type', 'theplus' ),
-					'clrepeater' => esc_html__( 'Repeater', 'theplus' ),
+					'clcontent' => esc_html__( 'Post Type', 'tpebl' ),
+					'clrepeater' => esc_html__( 'Repeater', 'tpebl' ),
+				],
+			]
+		);
+		$this->add_control('how_works_Post_Type',
+			[
+				'label' => wp_kses_post( "<a class='tp-docs-link' href='" . esc_url($this->TpDoc) . "add-logo-showcase-from-dynamic-custom-post-type-in-elementor/?utm_source=wpbackend&utm_medium=elementoreditor&utm_campaign=widget' target='_blank' rel='noopener noreferrer'> Learn How it works  <i class='eicon-help-o'></i> </a>", 'tpebl' ),
+				'type' => Controls_Manager::HEADING,
+				'condition' => [
+					'clientContentFrom' => 'clcontent',
 				],
 			]
 		);
@@ -120,27 +147,28 @@ class L_ThePlus_Clients_ListOut extends Widget_Base {
 		$repeater->add_control(
 			'clientLinkMaskLabel',
 			[
-				'label' => esc_html__( 'Client Name', 'theplus' ),
+				'label' => esc_html__( 'Client Name', 'tpebl' ),
 				'type' => Controls_Manager::TEXT,
 				'dynamic' => ['active' => true,],
 				'default' => '',
-				'placeholder' => esc_html__( 'Enter Client Name', 'theplus' ),
+				'placeholder' => esc_html__( 'Enter Client Name', 'tpebl' ),
 			]
 		);
 		$repeater->add_control(
 			'clientlink',
 			[
-				'label' => esc_html__( 'Client URL', 'theplus' ),
+				'label' => esc_html__( 'Client URL', 'tpebl' ),
 				'type' => Controls_Manager::URL,
-				'placeholder' => esc_html__( 'https://your-link.com', 'theplus' ),
+				'placeholder' => esc_html__( 'https://your-link.com', 'tpebl' ),
 				'show_external' => true,
 				'default' => ['url' => '#',],
 				'dynamic' => ['active'   => true,],
 			]
 		);
 		$repeater->add_control(
-			'clientImage',[
-				'label' => esc_html__( 'Client Logo', 'theplus' ),
+			'clientImage',
+			[
+				'label' => esc_html__( 'Client Logo', 'tpebl' ),
 				'type' => Controls_Manager::MEDIA,
 				'dynamic' => ['active'   => true,],
 			]
@@ -148,22 +176,14 @@ class L_ThePlus_Clients_ListOut extends Widget_Base {
 		$this->add_control(
 			'clientLinkMaskList',
 			[
-				'label' => esc_html__( 'Manage Clients', 'theplus' ),
+				'label' => esc_html__( 'Manage Clients', 'tpebl' ),
 				'type' => \Elementor\Controls_Manager::REPEATER,
 				'fields' => $repeater->get_controls(),			
 				'default' => [
-					[
-						'clientLinkMaskLabel' => esc_html__( 'SoftPro Solutions', 'theplus' ),						
-					],
-					[						
-						'clientLinkMaskLabel' => esc_html__( 'TechZone Systems', 'theplus' ),	
-					],
-					[						
-						'clientLinkMaskLabel' => esc_html__( 'DataPro Technologies', 'theplus' ),
-					],
-					[						
-						'clientLinkMaskLabel' => esc_html__( 'CodeWorks Inc.', 'theplus' ),
-					],
+					['clientLinkMaskLabel' => esc_html__( 'SoftPro Solutions', 'tpebl' ),],
+					['clientLinkMaskLabel' => esc_html__( 'TechZone Systems', 'tpebl' ),],
+					['clientLinkMaskLabel' => esc_html__( 'DataPro Technologies', 'tpebl' ),],
+					['clientLinkMaskLabel' => esc_html__( 'CodeWorks Inc.', 'tpebl' ),],
 				],
 				'title_field' => '{{{ clientLinkMaskLabel }}}',
 				'condition' => [
@@ -185,8 +205,7 @@ class L_ThePlus_Clients_ListOut extends Widget_Base {
 			]
 		);
 		$this->end_controls_section();
-		$this->start_controls_section(
-			'content_source_section',
+		$this->start_controls_section('content_source_section',
 			[
 				'label' => esc_html__( 'Content Source', 'tpebl' ),
 				'tab' => Controls_Manager::TAB_CONTENT,
@@ -195,20 +214,18 @@ class L_ThePlus_Clients_ListOut extends Widget_Base {
 				],
 			]
 		);
-		$this->add_control(
-			'post_category',
+		$this->add_control('post_category',
 			[
 				'type' => Controls_Manager::SELECT2,
-				'label'      => esc_html__( 'Select Category', 'tpebl' ),
-				'default'    => '',
+				'label' => esc_html__( 'Select Category', 'tpebl' ),
+				'default' => '',
 				'label_block' => true,
-				'multiple'   => true,
+				'multiple' => true,
 				'options' => l_theplus_get_client_categories(),
 				'separator' => 'before',
 			]
 		);
-		$this->add_control(
-			'display_posts',
+		$this->add_control('display_posts',
 			[
 				'label' => esc_html__( 'Maximum Posts Display', 'tpebl' ),
 				'type' => Controls_Manager::NUMBER,
@@ -219,8 +236,7 @@ class L_ThePlus_Clients_ListOut extends Widget_Base {
 				'separator' => 'before',
 			]
 		);
-		$this->add_control(
-			'post_offset',
+		$this->add_control('post_offset',
 			[
 				'label' => esc_html__( 'Offset Posts', 'tpebl' ),
 				'type' => Controls_Manager::NUMBER,
@@ -231,8 +247,7 @@ class L_ThePlus_Clients_ListOut extends Widget_Base {
 				'description' => esc_html__('Hide posts from the beginning of listing.','tpebl'),
 			]
 		);
-		$this->add_control(
-			'post_order_by',
+		$this->add_control('post_order_by',
 			[
 				'label' => esc_html__( 'Order By', 'tpebl' ),
 				'type' => Controls_Manager::SELECT,
@@ -240,8 +255,7 @@ class L_ThePlus_Clients_ListOut extends Widget_Base {
 				'options' => l_theplus_orderby_arr(),
 			]
 		);
-		$this->add_control(
-			'post_order',
+		$this->add_control('post_order',
 			[
 				'label' => esc_html__( 'Order', 'tpebl' ),
 				'type' => Controls_Manager::SELECT,
@@ -249,11 +263,9 @@ class L_ThePlus_Clients_ListOut extends Widget_Base {
 				'options' => l_theplus_order_arr(),
 			]
 		);
-		
 		$this->end_controls_section();
 		/*columns*/
-		$this->start_controls_section(
-			'columns_section',
+		$this->start_controls_section('columns_section',
 			[
 				'label' => esc_html__( 'Columns Manage', 'tpebl' ),
 				'tab' => Controls_Manager::TAB_CONTENT,
@@ -262,8 +274,7 @@ class L_ThePlus_Clients_ListOut extends Widget_Base {
 				],
 			]
 		);
-		$this->add_control(
-			'desktop_column',
+		$this->add_control('desktop_column',
 			[
 				'label' => esc_html__( 'Desktop Column', 'tpebl' ),
 				'type' => Controls_Manager::SELECT,
@@ -274,8 +285,7 @@ class L_ThePlus_Clients_ListOut extends Widget_Base {
 				],
 			]
 		);
-		$this->add_control(
-			'tablet_column',
+		$this->add_control('tablet_column',
 			[
 				'label' => esc_html__( 'Tablet Column', 'tpebl' ),
 				'type' => Controls_Manager::SELECT,
@@ -286,8 +296,7 @@ class L_ThePlus_Clients_ListOut extends Widget_Base {
 				],
 			]
 		);
-		$this->add_control(
-			'mobile_column',
+		$this->add_control('mobile_column',
 			[
 				'label' => esc_html__( 'Mobile Column', 'tpebl' ),
 				'type' => Controls_Manager::SELECT,
@@ -298,8 +307,7 @@ class L_ThePlus_Clients_ListOut extends Widget_Base {
 				],
 			]
 		);
-		$this->add_responsive_control(
-			'columns_gap',
+		$this->add_responsive_control('columns_gap',
 			[
 				'label' => esc_html__( 'Columns Gap/Space Between', 'tpebl' ),
 				'type' => Controls_Manager::DIMENSIONS,
@@ -324,15 +332,13 @@ class L_ThePlus_Clients_ListOut extends Widget_Base {
 		$this->end_controls_section();
 		/*columns*/
 		/*post Extra options*/
-		$this->start_controls_section(
-			'extra_option_section',
+		$this->start_controls_section('extra_option_section',
 			[
 				'label' => esc_html__( 'Extra Options', 'tpebl' ),
 				'tab' => Controls_Manager::TAB_CONTENT,
 			]
 		);
-		$this->add_control(
-			'post_title_tag',
+		$this->add_control('post_title_tag',
 			[
 				'label' => esc_html__( 'Title Tag', 'tpebl' ),
 				'type' => Controls_Manager::SELECT,
@@ -341,8 +347,7 @@ class L_ThePlus_Clients_ListOut extends Widget_Base {
 				'separator' => 'after',
 			]
 		);
-		$this->add_control(
-			'display_post_title',
+		$this->add_control('display_post_title',
 			[
 				'label' => esc_html__( 'Display Client Title', 'tpebl' ),
 				'type' => Controls_Manager::SWITCHER,
@@ -351,8 +356,7 @@ class L_ThePlus_Clients_ListOut extends Widget_Base {
 				'default' => 'yes',
 			]
 		);
-		$this->add_control(
-			'disable_link',
+		$this->add_control('disable_link',
 			[
 				'label' => esc_html__( 'Disable Link', 'tpebl' ),
 				'type' => Controls_Manager::SWITCHER,
@@ -362,8 +366,7 @@ class L_ThePlus_Clients_ListOut extends Widget_Base {
 				'separator' => 'before',
 			]
 		);
-		$this->add_control(
-			'disable_link_options',
+		$this->add_control('disable_link_options',
 			[
 				'label' => esc_html__( 'Unlock more possibilities', 'tpebl' ),
 				'type' => Controls_Manager::TEXT,
@@ -375,8 +378,7 @@ class L_ThePlus_Clients_ListOut extends Widget_Base {
 				],
 			]
 		);
-		$this->add_control(
-			'display_thumbnail',
+		$this->add_control('display_thumbnail',
 			[
 				'label' => esc_html__( 'Display Image Size', 'tpebl' ),
 				'type' => Controls_Manager::SWITCHER,
@@ -386,8 +388,7 @@ class L_ThePlus_Clients_ListOut extends Widget_Base {
 				'separator' => 'before',				
 			]
 		);
-		$this->add_control(
-			'display_thumbnail_options',
+		$this->add_control('display_thumbnail_options',
 			[
 				'label' => esc_html__( 'Unlock more possibilities', 'tpebl' ),
 				'type' => Controls_Manager::TEXT,
@@ -399,8 +400,7 @@ class L_ThePlus_Clients_ListOut extends Widget_Base {
 				],
 			]
 		);
-		$this->add_control(
-			'filter_category',
+		$this->add_control('filter_category',
 			[
 				'label' => esc_html__( 'Category Wise Filter', 'tpebl' ),
 				'type' => \Elementor\Controls_Manager::SWITCHER,
@@ -413,8 +413,7 @@ class L_ThePlus_Clients_ListOut extends Widget_Base {
 				],
 			]
 		);
-		$this->add_control(
-			'filter_category_options',
+		$this->add_control('filter_category_options',
 			[
 				'label' => esc_html__( 'Unlock more possibilities', 'tpebl' ),
 				'type' => Controls_Manager::TEXT,
@@ -426,8 +425,7 @@ class L_ThePlus_Clients_ListOut extends Widget_Base {
 				],
 			]
 		);
-		$this->add_control(
-			'post_extra_option',
+		$this->add_control('post_extra_option',
 			[
 				'label' => esc_html__( 'More Post Loading Options (Pro)', 'tpebl' ),
 				'type' => Controls_Manager::SELECT,
@@ -440,8 +438,7 @@ class L_ThePlus_Clients_ListOut extends Widget_Base {
 				],
 			]
 		);
-		$this->add_control(
-			'post_extra_option_options',
+		$this->add_control('post_extra_option_options',
 			[
 				'label' => esc_html__( 'Unlock more possibilities', 'tpebl' ),
 				'type' => Controls_Manager::TEXT,
@@ -472,7 +469,9 @@ class L_ThePlus_Clients_ListOut extends Widget_Base {
 			[
 				'name' => 'title_typography',
 				'label' => esc_html__( 'Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_1,
+				'global' => [
+					'default' => \Elementor\Core\Kits\Documents\Tabs\Global_Typography::TYPOGRAPHY_PRIMARY
+				],
 				'selector' => '{{WRAPPER}} .clients-list .post-inner-loop .post-title,{{WRAPPER}} .clients-list .post-inner-loop .post-title a',
 			]
 		);
@@ -1025,16 +1024,17 @@ class L_ThePlus_Clients_ListOut extends Widget_Base {
             ]
         );
 		$this->end_controls_section();
-	}
-		
-	 protected function render() {
 
+		include L_THEPLUS_PATH. 'modules/widgets/theplus-needhelp.php';
+	}
+
+	protected function render() {
         $settings = $this->get_settings_for_display();
 		$query_args = $this->get_query_args();
 		$query = new \WP_Query( $query_args );
 		$clients_name=l_theplus_client_post_name();
 		$clients_taxonomy=l_theplus_client_post_category();
-		
+
 		$style=$settings["style"];
 		$layout=$settings["layout"];
 		$layout_style=($settings["layout_style"]!='none') ? $settings["layout_style"] : '';
@@ -1046,9 +1046,9 @@ class L_ThePlus_Clients_ListOut extends Widget_Base {
 		$clientLinkMaskList = !empty($settings['clientLinkMaskList']) ? $settings['clientLinkMaskList'] : [];
 		
 		//animation load
-		$animation_effects=$settings["animation_effects"];
-		$animation_delay= (!empty($settings["animation_delay"]["size"])) ? $settings["animation_delay"]["size"] : 50;
-		$animation_stagger=(!empty($settings["animation_stagger"]["size"])) ? $settings["animation_stagger"]["size"] : 150;
+		$animation_effects = $settings["animation_effects"];
+		$animation_delay = (!empty($settings["animation_delay"]["size"])) ? $settings["animation_delay"]["size"] : 50;
+		$animation_stagger = (!empty($settings["animation_stagger"]["size"])) ? $settings["animation_stagger"]["size"] : 150;
 		$animated_columns='';		
 		if($animation_effects=='no-animation'){
 			$animated_class='';

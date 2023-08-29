@@ -7,9 +7,8 @@
  * Description: Affiche la miniature d'un site web local ou distant
  *
  * @since 1.7.70
- * @since 1.9.0 Intégration des scripts et des styles dans le constructeur de la class
- *              Ajout d'un overlay pour couvrir l'ensemble du widget avec le lien
  * @since 1.9.2 Ajout des attributs "noopener noreferrer" pour les liens ouverts dans un autre onglet
+ * @since 2.1.1 Ajout de l'attribut lazy load dans l'iframe
  */
 
 namespace EACCustomWidgets\Widgets;
@@ -362,7 +361,7 @@ class Site_Thumbnails_Widget extends Widget_Base {
 				<?php } ?>
 				<div class="thumbnail-container" title="<?php echo esc_attr( $url ); ?>">
 					<div class="thumbnail">
-						<iframe src="<?php echo esc_url( $url ); ?>" frameborder="0" onload="var that=this;setTimeout(function() { that.style.opacity=1 }, 500)"></iframe>
+						<iframe src="<?php echo esc_url( $url ); ?>" frameborder="0" onload="var that=this;setTimeout(function() { that.style.opacity=1 }, 500)" loading="lazy"></iframe>
 					</div>
 				</div>
 			</div>

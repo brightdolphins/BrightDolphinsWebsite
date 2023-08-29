@@ -5,15 +5,14 @@ Description: Third party plugin contact form 7 style.
 Author: Theplus
 Author URI: https://posimyth.com
 */
+
 namespace TheplusAddons\Widgets;
 
 use Elementor\Widget_Base;
 use Elementor\Controls_Manager;
 use Elementor\Utils;
-use Elementor\Core\Schemes\Color;
 use Elementor\Group_Control_Typography;
 use Elementor\Group_Control_Border;
-use Elementor\Core\Schemes\Typography;
 use Elementor\Group_Control_Box_Shadow;
 use Elementor\Group_Control_Background;
 

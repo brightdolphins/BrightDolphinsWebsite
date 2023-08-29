@@ -15,6 +15,7 @@
  * @since 1.9.8 Intégration de la configuration avec l'objet 'Eac_Config_Elements'
  * @since 2.0.1 Gestion du contenu de l'onglet 'tab-5' pour l'intégration WooCommerce
  *              Création d'une seule instance de la class
+ * @since 2.1.1 Ajout de la boîte de dialogue d'upload des fichiers JSON et SVG
  */
 
 namespace EACCustomWidgets\Admin\Settings;
@@ -104,20 +105,20 @@ class EAC_Admin_Settings {
 	 * Charge le css 'eac-admin' et le script 'eac-admin' d'administration des composants
 	 * Lance le chargement des options
 	 *
-	 * @since 0.0.9
+	 * @since 1.0.0
 	 * @since 1.8.4 Simplification du chargement des options
 	 * @since 1.8.7 Chargement du script de la boîte de dialogue 'acf-json'
 	 */
 	public function admin_page_scripts() {
+
+		/** Le script de la page de configuration du plugin */
+		wp_enqueue_script( 'eac-admin', EAC_Plugin::instance()->get_script_url( 'admin/js/eac-admin' ), array( 'jquery', 'jquery-ui-dialog' ), '1.0.0', true );
 
 		/** Le style de la page de configuration du plugin */
 		wp_enqueue_style( 'eac-admin', EAC_Plugin::instance()->get_style_url( 'admin/css/eac-admin' ), array(), '1.0.0' );
 
 		/** @since 1.8.7 */
 		wp_enqueue_style( 'wp-jquery-ui-dialog' );
-
-		/** Le script de la page de configuration du plugin */
-		wp_enqueue_script( 'eac-admin', EAC_Plugin::instance()->get_script_url( 'admin/js/eac-admin' ), array( 'jquery', 'jquery-ui-dialog' ), EAC_ADDONS_VERSION, true );
 	}
 
 	/**
@@ -160,6 +161,7 @@ class EAC_Admin_Settings {
 		 *
 		 * @since 1.9.2 Ajout des attributs "noopener noreferrer" dans les formulaires
 		 * @since 2.0.1 Chargement du fichier 'tab-5'
+		 * @since 2.1.1 Ajout de la boîte de dialogue d'upload des fichiers JSON
 		 */
 		require_once 'eac-components-header.php';
 		require_once 'eac-components-tabs-nav.php';
@@ -175,6 +177,7 @@ class EAC_Admin_Settings {
 		</div>
 		<?php require_once 'eac-admin-popup-acf.php'; ?>
 		<?php require_once 'eac-admin-popup-grant-option.php'; ?>
+		<?php require_once 'eac-admin-popup-grant-medias.php'; ?>
 		<?php
 	}
 

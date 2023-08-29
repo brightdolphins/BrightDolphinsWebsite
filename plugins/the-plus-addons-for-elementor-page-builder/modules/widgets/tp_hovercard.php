@@ -5,15 +5,14 @@ Description: Hover Card
 Author: Theplus
 Author URI: https://posimyth.com
 */
+
 namespace TheplusAddons\Widgets;
 
 use Elementor\Widget_Base;
 use Elementor\Controls_Manager;
 use Elementor\Utils;
-use Elementor\Core\Schemes\Color;
 use Elementor\Group_Control_Typography;
 use Elementor\Group_Control_Border;
-use Elementor\Core\Schemes\Typography;
 use Elementor\Group_Control_Background;
 use Elementor\Group_Control_Box_Shadow;
 use Elementor\Group_Control_Text_Shadow;
@@ -21,12 +20,13 @@ use Elementor\Group_Control_Image_Size;
 use Elementor\Group_Control_Css_Filter;
 
 use TheplusAddons\L_Theplus_Element_Load;
-if (!defined('ABSPATH'))
-    exit; // Exit if accessed directly
 
+if (!defined('ABSPATH')) exit; // Exit if accessed directly
 
 class L_ThePlus_Hovercard extends Widget_Base {
-		
+	
+	public $TpDoc = L_THEPLUS_Tpdoc;
+
 	public function get_name() {
 		return 'tp-hovercard';
 	}
@@ -43,15 +43,21 @@ class L_ThePlus_Hovercard extends Widget_Base {
         return array('plus-essential');
     }
 
+	public function get_custom_help_url() {
+		$DocUrl = $this->TpDoc . "hover-card";
+
+		return esc_url($DocUrl);
+	}
+
     protected function register_controls() {
 		
-		$this->start_controls_section(
-			'content_section',
+		$this->start_controls_section('content_section',
 			[
 				'label' => esc_html__( 'Hover Card', 'tpebl' ),
 				'tab' => Controls_Manager::TAB_CONTENT,
 			]
 		);
+
 		$repeater = new \Elementor\Repeater();
 		$repeater->start_controls_tabs( 'tabs_tag_open_close' );
 
@@ -143,40 +149,42 @@ class L_ThePlus_Hovercard extends Widget_Base {
 		$repeater->end_controls_tab();
 		$repeater->end_controls_tabs();	
 		
-		$repeater->add_control(
-            'content_tag', [
+		$repeater->add_control('content_tag', 
+			[
                 'type' => Controls_Manager::SELECT,
                 'label' => esc_html__('Content', 'tpebl'),
                 'default' => 'none',
                 'options' => [
-					'none'  => esc_html__( 'None', 'tpebl' ),
-					'text'  => esc_html__( 'Text', 'tpebl' ),
-					'image'  => esc_html__( 'Image', 'tpebl' ),
-					'html'  => esc_html__( 'HTML', 'tpebl' ),
-					'style'  => esc_html__( 'Style', 'tpebl' ),
-					'script'  => esc_html__( 'Script', 'tpebl' ),
+					'none' => esc_html__( 'None', 'tpebl' ),
+					'text' => esc_html__( 'Text', 'tpebl' ),
+					'image' => esc_html__( 'Image', 'tpebl' ),
+					'html' => esc_html__( 'HTML', 'tpebl' ),
+					'style' => esc_html__( 'Style', 'tpebl' ),
+					'script' => esc_html__( 'Script', 'tpebl' ),
 				],
 				'separator' => 'before',
             ]
         );
-		$repeater->add_control(
-			'text_content',
+		$repeater->add_control('text_content',
 			[
-				'label'     => esc_html__( 'Text', 'tpebl' ),
-				'type'      => Controls_Manager::TEXTAREA,
-				'dynamic'   => ['active' => true,],
+				'label' => wp_kses_post( "Text <a class='tp-docs-link' href='" . esc_url($this->TpDoc) . "use-text-content-with-hover-card-in-elementor/?utm_source=wpbackend&utm_medium=elementoreditor&utm_campaign=widget' target='_blank' rel='noopener noreferrer'> <i class='eicon-help-o'></i> </a>", 'tpebl' ),
+				'type' => Controls_Manager::TEXTAREA,
+				'dynamic' => [
+					'active' => true,
+				],
 				'default' => esc_html__( 'The Plus', 'tpebl' ),
 				'condition' => [
 					'content_tag' => 'text',
 				],
 			]
 		);
-		$repeater->add_control(
-			'media_content',
+		$repeater->add_control('media_content',
 			[
 				'type' => Controls_Manager::MEDIA,
-				'label' => esc_html__('Media', 'tpebl'),
-				'dynamic' => ['active'   => true,],
+				'label' => wp_kses_post( "Media <a class='tp-docs-link' href='" . esc_url($this->TpDoc) . "use-image-content-with-hover-card-in-elementor/?utm_source=wpbackend&utm_medium=elementoreditor&utm_campaign=widget' target='_blank' rel='noopener noreferrer'> <i class='eicon-help-o'></i> </a>", 'tpebl' ),
+				'dynamic' => [
+					'active' => true,
+				],
 				'default' => [
 					'url' => \Elementor\Utils::get_placeholder_image_src(),
 				],
@@ -185,10 +193,9 @@ class L_ThePlus_Hovercard extends Widget_Base {
 				],
 			]
 		);
-		$repeater->add_control(
-			'html_content',
+		$repeater->add_control('html_content',
 			[
-				'label' => esc_html__( 'HTML Content', 'tpebl' ),
+				'label' => wp_kses_post( "HTML Content <a class='tp-docs-link' href='" . esc_url($this->TpDoc) . "use-html-content-with-hover-card-in-elementor/?utm_source=wpbackend&utm_medium=elementoreditor&utm_campaign=widget' target='_blank' rel='noopener noreferrer'> <i class='eicon-help-o'></i> </a>", 'tpebl' ),
 				'type' => Controls_Manager::WYSIWYG,				
 				'default' => esc_html__( 'I am text block. Click edit button to change this text.', 'tpebl' ),
 				'dynamic' => ['active'   => true,],
@@ -197,32 +204,34 @@ class L_ThePlus_Hovercard extends Widget_Base {
 				],
 			]
 		);
-		$repeater->add_control(
-			'style_content',
+		$repeater->add_control('style_content',
 			[
-				'label'     => esc_html__( 'Custom Style', 'tpebl' ),
-				'type'      => Controls_Manager::TEXTAREA,
-				'dynamic'   => ['active' => true,],
-				'default' =>'',
+				'label' => wp_kses_post( "Custom Style <a class='tp-docs-link' href='" . esc_url($this->TpDoc) . "use-style-content-with-hover-card-in-elementor/?utm_source=wpbackend&utm_medium=elementoreditor&utm_campaign=widget' target='_blank' rel='noopener noreferrer'> <i class='eicon-help-o'></i> </a>", 'tpebl' ),
+				'type' => Controls_Manager::TEXTAREA,
+				'dynamic' => [
+					'active' => true,
+				],
+				'default' => '',
 				'condition' => [
 					'content_tag' => 'style',
 				],
 			]
 		);
-		$repeater->add_control(
-			'script_content',
+		$repeater->add_control('script_content',
 			[
-				'label'     => esc_html__( 'Custom Script', 'tpebl' ),
-				'type'      => Controls_Manager::TEXTAREA,
-				'dynamic'   => ['active' => true,],
+				'label' => wp_kses_post( "Custom Script <a class='tp-docs-link' href='" . esc_url($this->TpDoc) . "use-script-content-with-hover-card-in-elementor/?utm_source=wpbackend&utm_medium=elementoreditor&utm_campaign=widget' target='_blank' rel='noopener noreferrer'> <i class='eicon-help-o'></i> </a>", 'tpebl' ),
+				'type' => Controls_Manager::TEXTAREA,
+				'dynamic' => [
+					'active' => true,
+				],
 				'default' => '',
 				'condition' => [
 					'content_tag' => 'script',
 				],
 			]
 		);
-		$repeater->add_control(
-			'style_heading',[
+		$repeater->add_control('style_heading',
+			[
 				'label' => esc_html__( 'Style', 'tpebl' ),
 				'type' => Controls_Manager::HEADING,
 				'separator' => 'before',
@@ -231,35 +240,35 @@ class L_ThePlus_Hovercard extends Widget_Base {
 				],
 			]
 		);
-		$repeater->add_control(
-            'position', [
+		$repeater->add_control('position', 
+			[
                 'type' => Controls_Manager::SELECT,
                 'label' => esc_html__('Position', 'tpebl'),
                 'default' => 'relative',
                 'options' => [
-					'relative'  => esc_html__( 'Relative', 'tpebl' ),
-					'absolute'  => esc_html__( 'Absolute', 'tpebl' ),
+					'relative' => esc_html__( 'Relative', 'tpebl' ),
+					'absolute' => esc_html__( 'Absolute', 'tpebl' ),
 				],
 				'selectors' => [
 					'{{WRAPPER}} {{CURRENT_ITEM}}'=> 'position: {{VALUE}}',
 				],
-				'condition'    => [
+				'condition' => [
 					'open_tag!' => 'none',
 				],
             ]
         );
-		$repeater->add_control(
-            'display', [
+		$repeater->add_control('display', 
+			[
                 'type' => Controls_Manager::SELECT,
                 'label' => esc_html__('Display', 'tpebl'),
                 'default' => 'initial',
                 'options' => [
-					'block'  => esc_html__( 'Block', 'tpebl' ),
-					'inline-block'  => esc_html__( 'Inline Block', 'tpebl' ),
-					'flex'  => esc_html__( 'Flex', 'tpebl' ),
-					'inline-flex'  => esc_html__( 'Inline Flex', 'tpebl' ),
-					'initial'  => esc_html__( 'Initial', 'tpebl' ),
-					'inherit'  => esc_html__( 'Inherit', 'tpebl' ),
+					'block' => esc_html__( 'Block', 'tpebl' ),
+					'inline-block' => esc_html__( 'Inline Block', 'tpebl' ),
+					'flex' => esc_html__( 'Flex', 'tpebl' ),
+					'inline-flex' => esc_html__( 'Inline Flex', 'tpebl' ),
+					'initial' => esc_html__( 'Initial', 'tpebl' ),
+					'inherit' => esc_html__( 'Inherit', 'tpebl' ),
 				],
 				'selectors' => [
 					'{{WRAPPER}} {{CURRENT_ITEM}} ' => 'display: {{VALUE}}',
@@ -269,8 +278,8 @@ class L_ThePlus_Hovercard extends Widget_Base {
 				],
             ]
         );
-		$repeater->add_control(
-            'flex_direction', [
+		$repeater->add_control('flex_direction', 
+			[
                 'type' => Controls_Manager::SELECT,
                 'label' => esc_html__('Flex Direction', 'tpebl'),
                 'default' => 'unset',
@@ -309,11 +318,11 @@ class L_ThePlus_Hovercard extends Widget_Base {
 				'default' => 'center',
 				'options' => [
 					'left'  => esc_html__( 'Left', 'tpebl' ),
-					'center'  => esc_html__( 'Center', 'tpebl' ),
-					'right'  => esc_html__( 'Right', 'tpebl' ),
+					'center' => esc_html__( 'Center', 'tpebl' ),
+					'right' => esc_html__( 'Right', 'tpebl' ),
 				],
 				'selectors' => [
-					'{{WRAPPER}} {{CURRENT_ITEM}} ' => 'text-align:{{VALUE}};',
+					'{{WRAPPER}} {{CURRENT_ITEM}}' => 'text-align:{{VALUE}};',
 				],
 				'condition' => [
 					'open_tag!' => 'none',
@@ -321,19 +330,18 @@ class L_ThePlus_Hovercard extends Widget_Base {
 				],
 			]
 		);
-		$repeater->add_control(
-			'align_items',
+		$repeater->add_control('align_items',
 			[
 				'label' => esc_html__( 'Align Items', 'tpebl' ),
 				'type' => Controls_Manager::SELECT,
 				'default' => 'center',
 				'options' => [
-					'flex-start'  => esc_html__( 'Flex Start', 'tpebl' ),
-					'center'  => esc_html__( 'Center', 'tpebl' ),
-					'flex-end'  => esc_html__( 'Flex End', 'tpebl' ),
+					'flex-start' => esc_html__( 'Flex Start', 'tpebl' ),
+					'center' => esc_html__( 'Center', 'tpebl' ),
+					'flex-end' => esc_html__( 'Flex End', 'tpebl' ),
 				],
 				'selectors' => [
-					'{{WRAPPER}} {{CURRENT_ITEM}} ' => 'align-items:{{VALUE}};',
+					'{{WRAPPER}} {{CURRENT_ITEM}}' => 'align-items:{{VALUE}};',
 				],
 				'condition' => [
 					'open_tag!' => 'none',
@@ -342,22 +350,21 @@ class L_ThePlus_Hovercard extends Widget_Base {
 				],
 			]
 		);
-		$repeater->add_control(
-			'justify_content',
+		$repeater->add_control('justify_content',
 			[
 				'label' => esc_html__( 'Justify Content', 'tpebl' ),
 				'type' => Controls_Manager::SELECT,
 				'default' => 'center',
 				'options' => [
-					'flex-start'  => esc_html__( 'Flex Start', 'tpebl' ),
-					'center'  => esc_html__( 'Center', 'tpebl' ),
-					'flex-end'  => esc_html__( 'Flex End', 'tpebl' ),
-					'space-around'  => esc_html__( 'Space Around', 'tpebl' ),
-					'space-between'  => esc_html__( 'Space Between', 'tpebl' ),
-					'space-evenly'  => esc_html__( 'Space Evenly', 'tpebl' ),
+					'flex-start' => esc_html__( 'Flex Start', 'tpebl' ),
+					'center' => esc_html__( 'Center', 'tpebl' ),
+					'flex-end' => esc_html__( 'Flex End', 'tpebl' ),
+					'space-around' => esc_html__( 'Space Around', 'tpebl' ),
+					'space-between' => esc_html__( 'Space Between', 'tpebl' ),
+					'space-evenly' => esc_html__( 'Space Evenly', 'tpebl' ),
 				],
 				'selectors' => [
-					'{{WRAPPER}} {{CURRENT_ITEM}} ' => 'justify-content:{{VALUE}};',
+					'{{WRAPPER}} {{CURRENT_ITEM}}' => 'justify-content:{{VALUE}};',
 				],
 				'condition' => [
 					'open_tag!' => 'none',
@@ -366,19 +373,18 @@ class L_ThePlus_Hovercard extends Widget_Base {
 				],
 			]
 		);
-		$repeater->add_control(
-			'vertical_align',
+		$repeater->add_control('vertical_align',
 			[
 				'label' => esc_html__( 'Vertical Align', 'tpebl' ),
 				'type' => Controls_Manager::SELECT,
 				'default' => 'middle',
 				'options' => [
 					'top'  => esc_html__( 'Top', 'tpebl' ),
-					'middle'  => esc_html__( 'Middle', 'tpebl' ),
-					'bottom'  => esc_html__( 'Bottom', 'tpebl' ),
+					'middle' => esc_html__( 'Middle', 'tpebl' ),
+					'bottom' => esc_html__( 'Bottom', 'tpebl' ),
 				],
 				'selectors' => [
-					'{{WRAPPER}} {{CURRENT_ITEM}} ' => 'vertical-align:{{VALUE}};',
+					'{{WRAPPER}} {{CURRENT_ITEM}}' => 'vertical-align:{{VALUE}};',
 				],
 				'condition' => [
 					'open_tag!' => 'none',
@@ -387,14 +393,13 @@ class L_ThePlus_Hovercard extends Widget_Base {
 				],
 			]
 		);
-		$repeater->add_responsive_control(
-			'margin',
+		$repeater->add_responsive_control('margin',
 			[
 				'label' => esc_html__( 'Margin', 'tpebl' ),
 				'type' => Controls_Manager::DIMENSIONS,
 				'size_units' => [ 'px', 'em', '%' ],				
 				'selectors' => [
-					'{{WRAPPER}} {{CURRENT_ITEM}} ' => 'margin: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+					'{{WRAPPER}} {{CURRENT_ITEM}}' => 'margin: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
 				],
 				'separator' => 'before',
 				'condition' => [
@@ -402,24 +407,23 @@ class L_ThePlus_Hovercard extends Widget_Base {
 				],
 			]
 		);
-		$repeater->add_responsive_control(
-			'padding',
+		$repeater->add_responsive_control('padding',
 			[
 				'label' => esc_html__( 'Padding', 'tpebl' ),
 				'type' => Controls_Manager::DIMENSIONS,
 				'size_units' => [ 'px', 'em'],				
 				'selectors' => [
-					'{{WRAPPER}} {{CURRENT_ITEM}} ' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+					'{{WRAPPER}} {{CURRENT_ITEM}}' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
 				],
 				'condition' => [
 					'open_tag!' => 'none',
 				],
 			]
 		);
-		$repeater->add_control(
-			'top_offset_switch', [
-				'label'   => esc_html__( 'Top (Auto / PX)', 'tpebl' ),
-				'type'    => Controls_Manager::SWITCHER,
+		$repeater->add_control('top_offset_switch', 
+			[
+				'label' => esc_html__( 'Top (Auto / PX)', 'tpebl' ),
+				'type' => Controls_Manager::SWITCHER,
 				'default' => 'no',
 				'label_on' => esc_html__( 'PX', 'tpebl' ),
 				'label_off' => esc_html__( 'Auto', 'tpebl' ),
@@ -429,16 +433,15 @@ class L_ThePlus_Hovercard extends Widget_Base {
 				],
 			]
 		);
-		$repeater->add_control(
-            'top_offset',
+		$repeater->add_control('top_offset',
             [
                 'type' => Controls_Manager::SLIDER,
 				'label' => esc_html__('Top Offset', 'tpebl'),
 				'size_units' => [ 'px' ],				
 				'range' => [
 					'px' => [
-						'min'	=> -300,
-						'max'	=> 300,
+						'min' => -300,
+						'max' => 300,
 						'step' => 1,
 					],
 				],
@@ -450,10 +453,10 @@ class L_ThePlus_Hovercard extends Widget_Base {
 				],
             ]
         );
-		$repeater->add_control(
-			'bottom_offset_switch', [
-				'label'   => esc_html__( 'Bottom (Auto / PX)', 'tpebl' ),
-				'type'    => Controls_Manager::SWITCHER,
+		$repeater->add_control('bottom_offset_switch', 
+			[
+				'label' => esc_html__( 'Bottom (Auto / PX)', 'tpebl' ),
+				'type' => Controls_Manager::SWITCHER,
 				'default' => 'no',
 				'label_on' => esc_html__( 'PX', 'tpebl' ),
 				'label_off' => esc_html__( 'Auto', 'tpebl' ),
@@ -463,16 +466,15 @@ class L_ThePlus_Hovercard extends Widget_Base {
 				],
 			]
 		);
-		$repeater->add_control(
-            'bottom_offset',
+		$repeater->add_control('bottom_offset',
             [
                 'type' => Controls_Manager::SLIDER,
 				'label' => esc_html__('Bottom Offset', 'tpebl'),
 				'size_units' => [ 'px' ],				
 				'range' => [
 					'px' => [
-						'min'	=> -300,
-						'max'	=> 300,
+						'min' => -300,
+						'max' => 300,
 						'step' => 1,
 					],
 				],
@@ -484,10 +486,10 @@ class L_ThePlus_Hovercard extends Widget_Base {
 				],
             ]
         );
-		$repeater->add_control(
-			'left_offset_switch', [
-				'label'   => esc_html__( 'Left (Auto / PX)', 'tpebl' ),
-				'type'    => Controls_Manager::SWITCHER,
+		$repeater->add_control('left_offset_switch', 
+			[
+				'label' => esc_html__( 'Left (Auto / PX)', 'tpebl' ),
+				'type' => Controls_Manager::SWITCHER,
 				'default' => 'no',
 				'label_on' => esc_html__( 'PX', 'tpebl' ),
 				'label_off' => esc_html__( 'Auto', 'tpebl' ),
@@ -497,16 +499,15 @@ class L_ThePlus_Hovercard extends Widget_Base {
 				],
 			]
 		);
-		$repeater->add_control(
-            'left_offset',
+		$repeater->add_control('left_offset',
             [
                 'type' => Controls_Manager::SLIDER,
 				'label' => esc_html__('Left Offset', 'tpebl'),
 				'size_units' => [ 'px' ],				
 				'range' => [
 					'px' => [
-						'min'	=> -300,
-						'max'	=> 300,
+						'min' => -300,
+						'max' => 300,
 						'step' => 1,
 					],
 				],
@@ -518,10 +519,10 @@ class L_ThePlus_Hovercard extends Widget_Base {
 				],
             ]
         );
-		$repeater->add_control(
-			'right_offset_switch', [
-				'label'   => esc_html__( 'Right (Auto / PX)', 'tpebl' ),
-				'type'    => Controls_Manager::SWITCHER,
+		$repeater->add_control('right_offset_switch', 
+			[
+				'label' => esc_html__( 'Right (Auto / PX)', 'tpebl' ),
+				'type' => Controls_Manager::SWITCHER,
 				'default' => 'no',
 				'label_on' => esc_html__( 'PX', 'tpebl' ),
 				'label_off' => esc_html__( 'Auto', 'tpebl' ),
@@ -531,16 +532,15 @@ class L_ThePlus_Hovercard extends Widget_Base {
 				],
 			]
 		);
-		$repeater->add_control(
-            'right_offset',
+		$repeater->add_control('right_offset',
             [
                 'type' => Controls_Manager::SLIDER,
 				'label' => esc_html__('Right Offset', 'tpebl'),
 				'size_units' => [ 'px' ],				
 				'range' => [
 					'px' => [
-						'min'	=> -300,
-						'max'	=> 300,
+						'min' => -300,
+						'max' => 300,
 						'step' => 1,
 					],
 				],
@@ -552,10 +552,10 @@ class L_ThePlus_Hovercard extends Widget_Base {
 				],
             ]
         );
-		$repeater->add_control(
-			'width_height', [
-				'label'   => esc_html__( 'Width/Height Options', 'tpebl' ),
-				'type'    => Controls_Manager::SWITCHER,
+		$repeater->add_control('width_height', 
+			[
+				'label' => esc_html__( 'Width/Height Options', 'tpebl' ),
+				'type' => Controls_Manager::SWITCHER,
 				'default' => 'no',
 				'label_on' => esc_html__( 'Enable', 'tpebl' ),
 				'label_off' => esc_html__( 'Disable', 'tpebl' ),
@@ -564,8 +564,7 @@ class L_ThePlus_Hovercard extends Widget_Base {
 				],
 			]
 		);
-		$repeater->add_responsive_control(
-            'width',
+		$repeater->add_responsive_control('width',
             [
                 'type' => Controls_Manager::SLIDER,
 				'label' => esc_html__('Width', 'tpebl'),
@@ -597,16 +596,15 @@ class L_ThePlus_Hovercard extends Widget_Base {
 				],
             ]
         );
-		$repeater->add_responsive_control(
-            'min_width',
+		$repeater->add_responsive_control('min_width',
             [
                 'type' => Controls_Manager::SLIDER,
 				'label' => esc_html__('Min. Width', 'tpebl'),
 				'size_units' => [ 'px','%','vh' ],				
 				'range' => [
 					'px' => [
-						'min'	=> 0,
-						'max'	=> 1000,
+						'min' => 0,
+						'max' => 1000,
 						'step' => 1,
 					],
 					'%' => [
@@ -622,7 +620,7 @@ class L_ThePlus_Hovercard extends Widget_Base {
 				],
 				'render_type' => 'ui',				
 				'selectors' => [
-					'{{WRAPPER}} {{CURRENT_ITEM}} ' => 'min-width: {{SIZE}}{{UNIT}};',
+					'{{WRAPPER}} {{CURRENT_ITEM}}' => 'min-width: {{SIZE}}{{UNIT}};',
 				],
 				'condition' => [
 					'open_tag!' => 'none',
@@ -630,8 +628,7 @@ class L_ThePlus_Hovercard extends Widget_Base {
 				],
             ]
         );
-		$repeater->add_responsive_control(
-            'height',
+		$repeater->add_responsive_control('height',
             [
                 'type' => Controls_Manager::SLIDER,
 				'label' => esc_html__('Height', 'tpebl'),
@@ -655,7 +652,7 @@ class L_ThePlus_Hovercard extends Widget_Base {
 				],
 				'render_type' => 'ui',				
 				'selectors' => [
-					'{{WRAPPER}} {{CURRENT_ITEM}} ' => 'height: {{SIZE}}{{UNIT}};',
+					'{{WRAPPER}} {{CURRENT_ITEM}}' => 'height: {{SIZE}}{{UNIT}};',
 				],
 				'condition' => [
 					'open_tag!' => 'none',
@@ -663,16 +660,15 @@ class L_ThePlus_Hovercard extends Widget_Base {
 				],
             ]
         );
-		$repeater->add_responsive_control(
-            'min_height',
+		$repeater->add_responsive_control('min_height',
             [
                 'type' => Controls_Manager::SLIDER,
 				'label' => esc_html__('Min. Height', 'tpebl'),
 				'size_units' => [ 'px','%','vh' ],				
 				'range' => [
 					'px' => [
-						'min'	=> 0,
-						'max'	=> 700,
+						'min' => 0,
+						'max' => 700,
 						'step' => 1,
 					],
 					'%' => [
@@ -696,16 +692,15 @@ class L_ThePlus_Hovercard extends Widget_Base {
 				],
             ]
         );
-		$repeater->add_responsive_control(
-            'z_index',
+		$repeater->add_responsive_control('z_index',
             [
                 'type' => Controls_Manager::SLIDER,
 				'label' => esc_html__('Z-Index', 'tpebl'),
 				'size_units' => [ 'px' ],				
 				'range' => [
 					'px' => [
-						'min'	=> 0,
-						'max'	=> 1000,
+						'min' => 0,
+						'max' => 1000,
 						'step' => 1,
 					],
 				],
@@ -718,34 +713,32 @@ class L_ThePlus_Hovercard extends Widget_Base {
 				],
             ]
         );
-		$repeater->add_control(
-			'overflow',
+		$repeater->add_control('overflow',
 			[
 				'label' => esc_html__( 'Overflow', 'tpebl' ),
 				'type' => Controls_Manager::SELECT,
 				'default' => 'visible',
 				'options' => [
-					'hidden'  => esc_html__( 'Hidden', 'tpebl' ),
-					'visible'  => esc_html__( 'Visible', 'tpebl' ),
+					'hidden' => esc_html__( 'Hidden', 'tpebl' ),
+					'visible' => esc_html__( 'Visible', 'tpebl' ),
 				],
 				'selectors' => [
-					'{{WRAPPER}} {{CURRENT_ITEM}} ' => 'overflow:{{VALUE}} !important;',
+					'{{WRAPPER}} {{CURRENT_ITEM}}' => 'overflow:{{VALUE}} !important;',
 				],
 				'condition' => [
 					'open_tag!' => 'none',
 				],
 			]
 		);
-		$repeater->add_control(
-			'visibility',
+		$repeater->add_control('visibility',
 			[
 				'label' => esc_html__( 'Visibility', 'tpebl' ),
 				'type' => Controls_Manager::SELECT,
 				'default' => 'unset',
 				'options' => [
-					'unset'  => esc_html__( 'Unset', 'tpebl' ),
-					'hidden'  => esc_html__( 'Hidden', 'tpebl' ),
-					'visible'  => esc_html__( 'Visible', 'tpebl' ),
+					'unset' => esc_html__( 'Unset', 'tpebl' ),
+					'hidden' => esc_html__( 'Hidden', 'tpebl' ),
+					'visible' => esc_html__( 'Visible', 'tpebl' ),
 				],
 				'selectors' => [
 					'{{WRAPPER}} {{CURRENT_ITEM}} ' => 'visibility:{{VALUE}} !important;',
@@ -755,20 +748,20 @@ class L_ThePlus_Hovercard extends Widget_Base {
 				],
 			]
 		);
-		$repeater->add_control(
-			'bg_opt_heading',[
+		$repeater->add_control('bg_opt_heading',
+			[
 				'label' => esc_html__( 'Background Style', 'tpebl' ),
 				'type' => Controls_Manager::HEADING,
 				'separator' => 'before',
-				'condition'    => [
+				'condition' => [
 					'open_tag!' => 'none',
 				],
 			]
-		);	
-		$repeater->add_control(
-			'bg_opt', [
-				'label'   => esc_html__( 'Background', 'tpebl' ),
-				'type'    => Controls_Manager::SWITCHER,
+		);
+		$repeater->add_control('bg_opt', 
+			[
+				'label' => esc_html__( 'Background', 'tpebl' ),
+				'type' => Controls_Manager::SWITCHER,
 				'default' => 'no',
 				'label_on' => esc_html__( 'Enable', 'tpebl' ),
 				'label_off' => esc_html__( 'Disable', 'tpebl' ),
@@ -778,8 +771,7 @@ class L_ThePlus_Hovercard extends Widget_Base {
 			]
 		);
 		$repeater->start_controls_tabs( 'tabs_background_options' );
-			$repeater->start_controls_tab(
-				'bg_opt_normal',
+			$repeater->start_controls_tab('bg_opt_normal',
 				[
 					'label' => esc_html__( 'Normal', 'tpebl' ),
 					'condition' => [
@@ -788,11 +780,10 @@ class L_ThePlus_Hovercard extends Widget_Base {
 					],
 				]
 			);
-			$repeater->add_group_control(
-				Group_Control_Background::get_type(),
+			$repeater->add_group_control(Group_Control_Background::get_type(),
 				[
-					'name'      => 'bg_opt_bg',
-					'types'     => [ 'classic', 'gradient' ],
+					'name' => 'bg_opt_bg',
+					'types' => [ 'classic', 'gradient' ],
 					'selector' => '{{WRAPPER}} {{CURRENT_ITEM}}',
 					'condition' => [
 						'open_tag!' => 'none',
@@ -800,23 +791,21 @@ class L_ThePlus_Hovercard extends Widget_Base {
 					],
 				]
 			);
-			$repeater->add_group_control(
-			Group_Control_Border::get_type(),
-			[
-				'name' => 'bg_opt_border',
-				'label' => esc_html__( 'Border', 'tpebl' ),
-				'selector' => '{{WRAPPER}} {{CURRENT_ITEM}}',
-				'condition' => [
-					'open_tag!' => 'none',
-					'bg_opt' => 'yes',						
-				],
-			]
-			);
-			$repeater->add_responsive_control(
-				'bg_opt_br',
+			$repeater->add_group_control(Group_Control_Border::get_type(),
 				[
-					'label'      => esc_html__( 'Border Radius', 'tpebl' ),
-					'type'       => Controls_Manager::DIMENSIONS,
+					'name' => 'bg_opt_border',
+					'label' => esc_html__( 'Border', 'tpebl' ),
+					'selector' => '{{WRAPPER}} {{CURRENT_ITEM}}',
+					'condition' => [
+						'open_tag!' => 'none',
+						'bg_opt' => 'yes',
+					],
+				]
+			);
+			$repeater->add_responsive_control('bg_opt_br',
+				[
+					'label' => esc_html__( 'Border Radius', 'tpebl' ),
+					'type' => Controls_Manager::DIMENSIONS,
 					'size_units' => [ 'px', '%' ],
 					'selectors'  => [
 						'{{WRAPPER}} {{CURRENT_ITEM}}' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
@@ -827,10 +816,9 @@ class L_ThePlus_Hovercard extends Widget_Base {
 					],
 				]
 			);
-			$repeater->add_group_control(
-			Group_Control_Box_Shadow::get_type(),
+			$repeater->add_group_control(Group_Control_Box_Shadow::get_type(),
 				[
-					'name'     => 'bg_opt_shadow',
+					'name' => 'bg_opt_shadow',
 					'selector' => '{{WRAPPER}} {{CURRENT_ITEM}}',
 					'condition' => [
 						'open_tag!' => 'none',
@@ -838,8 +826,7 @@ class L_ThePlus_Hovercard extends Widget_Base {
 					],
 				]
 			);
-			$repeater->add_control(
-				'transition',
+			$repeater->add_control('transition',
 				[
 					'label' => esc_html__( 'Transition css', 'tpebl' ),
 					'type' => Controls_Manager::TEXT,				
@@ -854,8 +841,7 @@ class L_ThePlus_Hovercard extends Widget_Base {
 					'separator' => 'before',
 				]
 			);
-			$repeater->add_control(
-				'transform',
+			$repeater->add_control('transform',
 				[
 					'label' => esc_html__( 'Transform css', 'tpebl' ),
 					'type' => Controls_Manager::TEXT,				
@@ -869,8 +855,7 @@ class L_ThePlus_Hovercard extends Widget_Base {
 					],
 				]
 			);
-			$repeater->add_group_control(
-				Group_Control_Css_Filter::get_type(),
+			$repeater->add_group_control(Group_Control_Css_Filter::get_type(),
 				[
 					'name' => 'css_filters',
 					'selector' => '{{WRAPPER}} {{CURRENT_ITEM}}',
@@ -901,8 +886,7 @@ class L_ThePlus_Hovercard extends Widget_Base {
 				]
 			);
 			$repeater->end_controls_tab();
-			$repeater->start_controls_tab(
-				'bg_opt_hover',
+			$repeater->start_controls_tab('bg_opt_hover',
 				[
 					'label' => esc_html__( 'Hover', 'tpebl' ),
 					'condition' => [
@@ -911,10 +895,10 @@ class L_ThePlus_Hovercard extends Widget_Base {
 					],
 				]
 			);
-			$repeater->add_control(
-				'cst_hover', [
-					'label'   => esc_html__( 'Custom Hover', 'tpebl' ),
-					'type'    => Controls_Manager::SWITCHER,
+			$repeater->add_control('cst_hover', 
+				[
+					'label' => wp_kses_post( "Custom Hover <a class='tp-docs-link' href='" . esc_url($this->TpDoc) . "add-hover-effect-with-custom-hover-class-in-elementor-hover-card/?utm_source=wpbackend&utm_medium=elementoreditor&utm_campaign=widget' target='_blank' rel='noopener noreferrer'> <i class='eicon-help-o'></i> </a>", 'tpebl' ),
+					'type' => Controls_Manager::SWITCHER,
 					'default' => 'no',
 					'label_on' => esc_html__( 'Enable', 'tpebl' ),
 					'label_off' => esc_html__( 'Disable', 'tpebl' ),
@@ -924,8 +908,7 @@ class L_ThePlus_Hovercard extends Widget_Base {
 					],
 				]
 			);
-			$repeater->add_control(
-				'cst_hover_class',
+			$repeater->add_control('cst_hover_class',
 				[
 					'label' => esc_html__( 'Enter Class', 'tpebl' ),
 					'type' => Controls_Manager::TEXT,
@@ -939,11 +922,10 @@ class L_ThePlus_Hovercard extends Widget_Base {
 					],
 				]
 			);
-			$repeater->add_group_control(
-				Group_Control_Background::get_type(),
+			$repeater->add_group_control(Group_Control_Background::get_type(),
 				[
-					'name'      => 'bg_opt_bg_hover',
-					'types'     => [ 'classic', 'gradient' ],
+					'name' => 'bg_opt_bg_hover',
+					'types' => [ 'classic', 'gradient' ],
 					'selector' => '{{WRAPPER}} {{CURRENT_ITEM}}:hover',
 					'condition' => [
 						'open_tag!' => 'none',
@@ -952,8 +934,7 @@ class L_ThePlus_Hovercard extends Widget_Base {
 					],
 				]
 			);
-			$repeater->add_group_control(
-				Group_Control_Border::get_type(),
+			$repeater->add_group_control(Group_Control_Border::get_type(),
 				[
 					'name' => 'bg_opt_border_hover',
 					'label' => esc_html__( 'Border', 'tpebl' ),
@@ -965,13 +946,12 @@ class L_ThePlus_Hovercard extends Widget_Base {
 					],
 				]
 			);
-			$repeater->add_responsive_control(
-				'bg_opt_br_hover',
+			$repeater->add_responsive_control('bg_opt_br_hover',
 				[
-					'label'      => esc_html__( 'Border Radius', 'tpebl' ),
-					'type'       => Controls_Manager::DIMENSIONS,
+					'label' => esc_html__( 'Border Radius', 'tpebl' ),
+					'type' => Controls_Manager::DIMENSIONS,
 					'size_units' => [ 'px', '%' ],
-					'selectors'  => [
+					'selectors' => [
 						'{{WRAPPER}} {{CURRENT_ITEM}}:hover' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
 					],
 					'condition' => [
@@ -2507,8 +2487,13 @@ class L_ThePlus_Hovercard extends Widget_Base {
 		$repeater->end_controls_tab();
 		$repeater->end_controls_tabs();	
 		
-		$this->add_control(
-            'hover_card_content',
+		$this->add_control('how_it_works',
+			[
+				'label' => wp_kses_post( "<a class='tp-docs-link' href='" . esc_url($this->TpDoc) . "create-custom-layout-with-hover-card-in-elementor/?utm_source=wpbackend&utm_medium=elementoreditor&utm_campaign=widget' target='_blank' rel='noopener noreferrer'> Learn How it works  <i class='eicon-help-o'></i> </a>", 'tpebl' ),
+				'type' => Controls_Manager::HEADING,
+			]
+		);
+		$this->add_control('hover_card_content',
             [
 				'label' => esc_html__( 'Content [ Start Tag -- End Tag ]', 'tpebl' ),
                 'type' => Controls_Manager::REPEATER,               
@@ -2517,17 +2502,20 @@ class L_ThePlus_Hovercard extends Widget_Base {
             ]
         );
 		$this->end_controls_section();
+
+		include L_THEPLUS_PATH. 'modules/widgets/theplus-needhelp.php';
 	}
+
 	private $post_id;
-	 protected function render() {
+
+	protected function render() {
 		 $settings = $this->get_settings_for_display();
 		 
 		  $loopitem=$loopcss='';
 			$i=1;
 			$hover_card = '<div class="tp-hover-card-wrapper">';
 			
-				foreach($settings['hover_card_content'] as $item) {					
-						
+				foreach($settings['hover_card_content'] as $item) {
 						$open_tag='';
 						if(!empty($item['open_tag']) && $item['open_tag']!='none'){
 							$open_tag = l_theplus_validate_html_tag($item['open_tag']);

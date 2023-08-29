@@ -259,7 +259,7 @@ class Site_Title_Widget extends Widget_Base {
 					'label'     => esc_html__( 'Couleur', 'eac-components' ),
 					'type'      => Controls_Manager::COLOR,
 					'global'    => array(
-						'default' => Global_Colors::COLOR_PRIMARY,
+						'default' => Global_Colors::COLOR_TEXT,
 					),
 					'default'   => '#000000',
 					'selectors' => array(

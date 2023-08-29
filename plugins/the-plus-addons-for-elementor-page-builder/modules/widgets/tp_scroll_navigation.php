@@ -5,22 +5,21 @@ Description: navigation bar Scrolling Effect scroll event.
 Author: Theplus
 Author URI: https://posimyth.com
 */
+
 namespace TheplusAddons\Widgets;
 
 use Elementor\Widget_Base;
 use Elementor\Controls_Manager;
 use Elementor\Utils;
-use Elementor\Core\Schemes\Color;
 use Elementor\Group_Control_Typography;
 use Elementor\Group_Control_Border;
 use Elementor\Group_Control_Background;
 use Elementor\Group_Control_Box_Shadow;
-use Elementor\Core\Schemes\Typography;
+use Elementor\Core\Kits\Documents\Tabs\Global_Typography;
 
 use TheplusAddons\L_Theplus_Element_Load;
-if (!defined('ABSPATH'))
-    exit; // Exit if accessed directly
 
+if (!defined('ABSPATH')) exit; // Exit if accessed directly
 
 class L_ThePlus_Scroll_Navigation extends Widget_Base {
 		
@@ -724,12 +723,13 @@ class L_ThePlus_Scroll_Navigation extends Widget_Base {
 				],
 			]
 		);		
-		$this->add_group_control(
-			Group_Control_Typography::get_type(),
+		$this->add_group_control(Group_Control_Typography::get_type(),
 			[
 				'name' => 'navigation_tooltip_typography',
 				'label' => esc_html__( 'Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_3,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_TEXT
+				],
 				'selector' => '{{WRAPPER}} .theplus-scroll-navigation .theplus-scroll-navigation__dot span.tooltiptext',
 				'condition'    => [
 					'scroll_navigation_style' => 'style-1',

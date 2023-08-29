@@ -40,12 +40,14 @@
 						speed: 1000,
 						grabCursor: true,
 						watchSlidesProgress: true,
+						slidesPerView: settings.data_sw_imgs,
+						centeredSlides: settings.data_sw_centered,
+						loopedSlides: settings.data_sw_imgs === 'auto' ? 2 : null,
 						effect: settings.data_sw_effect,
 						freeMode: {
 							enabled: settings.data_sw_free,
 							momentumRatio: 1,
 						},
-						loopedSlides: settings.data_sw_imgs === 'auto' ? 2 : null,
 						spaceBetween: parseInt($(':root').css('--eac-acf-relationship-grid-margin')),
 						coverflowEffect: {
 							rotate: 45,
@@ -72,7 +74,6 @@
 						scrollbar: {
 							el: '.swiper-scrollbar',
 						},
-						slidesPerView: settings.data_sw_imgs,
 						breakpoints: {
 							// when window width is >= 0px
 							0: {

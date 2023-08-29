@@ -2,11 +2,11 @@
 Contributors: EAC Team
 Tags: page-builder, elementor, components, addon, widget, dynamic tags, custom css, template, image, TOC, OpenStreetMap, PDF viewer, WooCommerce
 Wordpress tested up to: 6.2.2
-Elementor tested up to: 3.12.2
+Elementor tested up to: 3.14.1
 WC requires at least: 6.9.0
-WC tested up to: 7.1.0
-ACF tested up to: 6.0.3
-Stable tag: 2.0.2
+WC tested up to: 7.8.0
+ACF tested up to: 6.1.6
+Stable tag: 2.1.0
 License: GPLv3 or later License
 URI: http://www.gnu.org/licenses/gpl-3.0.html
 "Elementor Addon Components" is distributed in the hope that it will be useful,
@@ -29,6 +29,27 @@ See the GPL General Public License for more details.
 * "English (United States)" is the default language of the plugin except for wordpress sites whose language setting is French.
  
 == Change Log ==
+
+= V2.1.2 - 08/07/2023 =
+* Fix: 'Breadcrumbs' widget critical error with Yoast SEO.
+* Fix: Showing product description of 'Product Grid' widget does not check if woocommerce is still active.
+* Fix: 'Chart' widget does not use a strict comparison to check an external URL.
+* Fix: 'ACF Relationship Grid' widget title style disappears when featured image option is disabled.
+
+= V2.1.1 - 07/24/2023 =
+* New: added 'Breadcrumbs' widget for the 'Header & Footer builder' feature.
+* New: added 'Reading progress bar' widget for the 'Header & Footer builder' feature.
+* New: added 'Unfiltered medias' feature to improve security when adding external JSON URL for Openstreetmap and Lottie widgets (Settings page 'EAC components/WordPress' tab).
+* Updated: 'Image gallery' inline editing of button label, description and title.
+* Updated: 'Team members' inline editing of name, job title and biography.
+* Updated: Slider mode now supports image centering.
+* Fix: 'Simple menu' appears briefly when the responsive device 'Hamburger menu' is triggered.
+* Fix: 'PDF viewer' button icon not displayed.
+* Fix: 'PDF viewer' button or text alignment is not correct.
+* Improved: added lazyload for images loaded in main components like Post grid, Product grid, Image gallery, ACF relationship, Team members.
+* Improved: navigation menu display for header and footer builder is optimized.
+* Improved: compatibility with Elementor 3.14.1
+* Notice: 36 components and 17 features always available for free.
 
 = V2.1.0 - 06/13/2023 =
 * Notice: due to a big change with the new features, the plugin requires at least WordPress 5.9 and PHP 7.4

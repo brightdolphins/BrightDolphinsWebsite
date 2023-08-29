@@ -75,7 +75,7 @@ echo '<div class="theplus-panel-welcome-page">';
 					$memory_check_req = '<span class="check-req-wrong">'.$check_wrong_req.'</span>';
 				}
 				echo '<div class="sys-req-label theplus-bm-0"><span>'.esc_html__('Memory Limit : ','tpebl').'</br>'.ini_get('memory_limit').esc_html__(' Uncheck Required 512M','tpebl').'</span>'.$memory_check_req.'</div>';
-				
+
 				echo '<a href="http://docs.posimyth.com/tpae/system-requirements-configurations/" class="theplus-panel-btn theplus-mt-8" title="'.esc_attr__('Know More & Resolve','tpebl').'" target="_blank">'.esc_html__('Know More & Resolve','tpebl').'</a>';
 			echo '</div>';
 			/*Welcome System Requirement*/
@@ -87,10 +87,9 @@ echo '<div class="theplus-panel-welcome-page">';
 				echo '<div class="theplus-sec-subtitle">'.esc_html__('Notable additions made to The Plus Addons for Elementor.','tpebl').'</div>';
 				echo '<div class="theplus-sec-border"></div>';
 				echo '<div class="theplus-changelog-list">';
-					echo '<div class="changelog-date">July 11, 2023 <span class="changelog-version">Lite Version 5.2.11</span></div>';
+					echo '<div class="changelog-date">August 25, 2023 <span class="changelog-version">Lite Version 5.2.15</span></div>';
 						echo '<ul class="changelog-list">';
-							echo '<li>'.esc_html__('Update : Button : Condition Improvement', 'tpebl').'</li>';
-							echo '<li>'.esc_html__('Update : Social Icon : UI Improvement', 'tpebl').'</li>';
+							echo '<li>'.esc_html__('Deprecated : Elementor Widget Disabled', 'tpebl').'</li>';
 							echo '<li>'.esc_html__('Fix : Minor bug fixes & Improvements', 'tpebl').'</li>';
 						echo '</ul>';
 				echo '</div>';
@@ -98,12 +97,12 @@ echo '<div class="theplus-panel-welcome-page">';
 
 				echo '<div class="theplus-sec-border" style="width:100%;height:1px;background:#DBDBDB;"></div>';
 				echo '<div class="theplus-changelog-list">';
-					echo '<div class="changelog-date">July 5, 2023 <span class="changelog-version">Pro Version 5.2.12</span></div>';
+					echo '<div class="changelog-date">August 25, 2023 <span class="changelog-version">Pro Version 5.2.15</span></div>';
 						echo '<ul class="changelog-list">';	
-							echo '<li>'.esc_html__('Add : Advanced Typography : Responsive Option For Marquee Width Controller', 'tpebl').'</li>';
-							echo '<li>'.esc_html__('Add : Blog Listing : Add Padding Controller For Title & Excerpt/Content', 'tpebl').'</li>';
-							echo '<li>'.esc_html__('Add : Heading Title : Add Padding Controller For Main Title and Sub Title ', 'tpebl').'</li>';
-						echo '</ul>';					
+							echo '<li>'.esc_html__('Add : Advanced Typography : Responsive Option Marquee Text Width', 'tpebl').'</li>';
+							echo '<li>'.esc_html__('Add : Progress Bar : Style 3 Merging Option', 'tpebl').'</li>';
+							echo '<li>'.esc_html__('Fix : Minor bug fixes & Improvements', 'tpebl').'</li>';
+						echo '</ul>';
 				echo '</div>';
 				echo '<a href="https://roadmap.theplusaddons.com/changelog" class="theplus-panel-btn theplus-mt-8" title="'.esc_attr__('change log','tpebl').'" target="_blank">'.esc_html__('Pro Full Change log','tpebl').'</a>';
 			echo '</div>';

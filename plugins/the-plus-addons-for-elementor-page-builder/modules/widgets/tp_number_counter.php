@@ -5,23 +5,22 @@ Description: Display style of count numbers.
 Author: Theplus
 Author URI: https://posimyth.com
 */
+
 namespace TheplusAddons\Widgets;
 
 use Elementor\Widget_Base;
 use Elementor\Controls_Manager;
 use Elementor\Utils;
-use Elementor\Core\Schemes\Color;
 use Elementor\Group_Control_Typography;
 use Elementor\Group_Control_Border;
-use Elementor\Core\Schemes\Typography;
 use Elementor\Group_Control_Background;
 use Elementor\Group_Control_Box_Shadow;
 use Elementor\Group_Control_Image_Size;
+use Elementor\Core\Kits\Documents\Tabs\Global_Typography;
 
 use TheplusAddons\L_Theplus_Element_Load;
-if (!defined('ABSPATH'))
-    exit; // Exit if accessed directly
 
+if (!defined('ABSPATH')) exit; // Exit if accessed directly
 
 class L_ThePlus_Number_Counter extends Widget_Base {
 		
@@ -1251,9 +1250,10 @@ class L_ThePlus_Number_Counter extends Widget_Base {
 			[
 				'name' => 'digit_typography',
 				'label' => esc_html__( 'Digit Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_1,
-				
-			'selector' => '{{WRAPPER}} .plus-number-counter .number-counter-inner-block .counter-number',
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_PRIMARY
+				],
+				'selector' => '{{WRAPPER}} .plus-number-counter .number-counter-inner-block .counter-number',
 	       ]
 		);
 		$this->add_control(

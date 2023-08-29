@@ -15,12 +15,12 @@
 	color: #777;
 }
 
-.shop-products__wrapper .al-post__content-wrapper {
+/*.shop-products__wrapper .al-post__content-wrapper {
 	display: flex;
 	flex-wrap: nowrap;
 	flex-direction: column;
 	margin-bottom: 5px;
-}
+}*/
 
 /**
 * Le texte est aligné à droite ou à gauche
@@ -157,6 +157,7 @@
 	align-items: center;
 	justify-content: flex-start;
 	width: 100%;
+	margin-bottom: 5px;
 }
 
 .shop-products__wrapper .shop-product__readmore-wrapper,

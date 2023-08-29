@@ -3387,7 +3387,8 @@ class Wpr_Media_Grid extends Widget_Base {
 				'type' => Controls_Manager::COLOR,
 				'default' => '#9C9C9C',
 				'selectors' => [
-					'{{WRAPPER}} .wpr-grid-item-date .inner-block i[class*="wpr-grid-extra-icon"]' => 'color: {{VALUE}}',
+					'{{WRAPPER}} .wpr-grid-item-date .inner-block [class*="wpr-grid-extra-icon"] i' => 'color: {{VALUE}}',
+					'{{WRAPPER}} .wpr-grid-item-date .inner-block [class*="wpr-grid-extra-icon"] svg' => 'fill: {{VALUE}}'
 				],
 				'separator' => 'after',
 			]
@@ -3599,7 +3600,8 @@ class Wpr_Media_Grid extends Widget_Base {
 				'type' => Controls_Manager::COLOR,
 				'default' => '#9C9C9C',
 				'selectors' => [
-					'{{WRAPPER}} .wpr-grid-item-time .inner-block i[class*="wpr-grid-extra-icon"]' => 'color: {{VALUE}}',
+					'{{WRAPPER}} .wpr-grid-item-time .inner-block [class*="wpr-grid-extra-icon"] i' => 'color: {{VALUE}}',
+					'{{WRAPPER}} .wpr-grid-item-time .inner-block [class*="wpr-grid-extra-icon"] svg' => 'fill: {{VALUE}}'
 				],
 				'separator' => 'after',
 			]
@@ -4685,7 +4687,8 @@ class Wpr_Media_Grid extends Widget_Base {
 				'type' => Controls_Manager::COLOR,
 				'default' => '#9C9C9C',
 				'selectors' => [
-					'{{WRAPPER}} .wpr-grid-tax-style-1 .inner-block i[class*="wpr-grid-extra-icon"]' => 'color: {{VALUE}}',
+					'{{WRAPPER}} .wpr-grid-tax-style-1 .inner-block [class*="wpr-grid-extra-icon"] i' => 'color: {{VALUE}}',
+					'{{WRAPPER}} .wpr-grid-tax-style-1 .inner-block [class*="wpr-grid-extra-icon"] svg' => 'fill: {{VALUE}}'
 				],
 				'separator' => 'after',
 			]
@@ -6597,7 +6600,15 @@ class Wpr_Media_Grid extends Widget_Base {
 		if ( 'manual' === $settings[ 'query_selection' ] ) {
 			$post_ids = [''];
 
-			for ( $i = 0; $i < count($settings['query_manual_attachment']); $i++ ) { 
+			$attachments = $settings['query_manual_attachment'];
+
+			$attachments_count = 0;
+
+			if (!empty($attachments) ) {
+				$attachments_count = count($attachments);
+			}
+
+			for ( $i = 0; $i < $attachments_count; $i++ ) { 
 				array_push( $post_ids, $settings['query_manual_attachment'][$i]['id'] );
 			}
 
@@ -6751,7 +6762,13 @@ class Wpr_Media_Grid extends Widget_Base {
 				}
 				// Icon: Before
 				if ( 'before' === $settings['element_extra_icon_pos'] ) {
-					echo '<i class="wpr-grid-extra-icon-left '. esc_attr( $settings['element_extra_icon']['value'] ) .'"></i>';
+					ob_start();
+					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
+					$extra_icon = ob_get_clean();
+
+					echo '<span class="wpr-grid-extra-icon-left">';
+						echo $extra_icon;
+					echo '</span>';
 				}
 
 				// Date
@@ -6759,7 +6776,13 @@ class Wpr_Media_Grid extends Widget_Base {
 
 				// Icon: After
 				if ( 'after' === $settings['element_extra_icon_pos'] ) {
-					echo '<i class="wpr-grid-extra-icon-right '. esc_attr( $settings['element_extra_icon']['value'] ) .'"></i>';
+					ob_start();
+					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
+					$extra_icon = ob_get_clean();
+
+					echo '<span class="wpr-grid-extra-icon-right">';
+						echo $extra_icon;
+					echo '</span>';
 				}
 				// Text: After
 				if ( 'after' === $settings['element_extra_text_pos'] ) {
@@ -6781,7 +6804,13 @@ class Wpr_Media_Grid extends Widget_Base {
 				}
 				// Icon: Before
 				if ( 'before' === $settings['element_extra_icon_pos'] ) {
-					echo '<i class="wpr-grid-extra-icon-left '. esc_attr( $settings['element_extra_icon']['value'] ) .'"></i>';
+					ob_start();
+					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
+					$extra_icon = ob_get_clean();
+
+					echo '<span class="wpr-grid-extra-icon-left">';
+						echo $extra_icon;
+					echo '</span>';
 				}
 
 				// Time
@@ -6789,7 +6818,13 @@ class Wpr_Media_Grid extends Widget_Base {
 
 				// Icon: After
 				if ( 'after' === $settings['element_extra_icon_pos'] ) {
-					echo '<i class="wpr-grid-extra-icon-right '. esc_attr( $settings['element_extra_icon']['value'] ) .'"></i>';
+					ob_start();
+					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
+					$extra_icon = ob_get_clean();
+
+					echo '<span class="wpr-grid-extra-icon-right">';
+						echo $extra_icon;
+					echo '</span>';
 				}
 				// Text: After
 				if ( 'after' === $settings['element_extra_text_pos'] ) {
@@ -6816,7 +6851,13 @@ class Wpr_Media_Grid extends Widget_Base {
 
 				// Icon: Before
 				if ( 'before' === $settings['element_extra_icon_pos'] ) {
-					echo '<i class="wpr-grid-extra-icon-left '. esc_attr( $settings['element_extra_icon']['value'] ) .'"></i>';
+					ob_start();
+					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
+					$extra_icon = ob_get_clean();
+
+					echo '<span class="wpr-grid-extra-icon-left">';
+						echo $extra_icon;
+					echo '</span>';
 				}
 					if ( 'yes' === $settings['element_show_avatar'] ) {
 						echo get_avatar( $author_id, $settings['element_avatar_size'] );
@@ -6826,7 +6867,13 @@ class Wpr_Media_Grid extends Widget_Base {
 
 				// Icon: After
 				if ( 'after' === $settings['element_extra_icon_pos'] ) {
-					echo '<i class="wpr-grid-extra-icon-right '. esc_attr( $settings['element_extra_icon']['value'] ) .'"></i>';
+					ob_start();
+					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
+					$extra_icon = ob_get_clean();
+
+					echo '<span class="wpr-grid-extra-icon-right">';
+						echo $extra_icon;
+					echo '</span>';
 				}
 				echo '</a>';
 
@@ -6965,7 +7012,13 @@ class Wpr_Media_Grid extends Widget_Base {
 				}
 				// Icon: Before
 				if ( 'before' === $settings['element_extra_icon_pos'] ) {
-					echo '<i class="wpr-grid-extra-icon-left '. esc_attr( $settings['element_extra_icon']['value'] ) .'"></i>';
+					ob_start();
+					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
+					$extra_icon = ob_get_clean();
+
+					echo '<span class="wpr-grid-extra-icon-left">';
+						echo $extra_icon;
+					echo '</span>';
 				}
 
 				// Taxonomies
@@ -6979,7 +7032,13 @@ class Wpr_Media_Grid extends Widget_Base {
 
 				// Icon: After
 				if ( 'after' === $settings['element_extra_icon_pos'] ) {
-					echo '<i class="wpr-grid-extra-icon-right '. esc_attr( $settings['element_extra_icon']['value'] ) .'"></i>';
+					ob_start();
+					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
+					$extra_icon = ob_get_clean();
+
+					echo '<span class="wpr-grid-extra-icon-right">';
+						echo $extra_icon;
+					echo '</span>';
 				}
 				// Text: After
 				if ( 'after' === $settings['element_extra_text_pos'] ) {

@@ -5,6 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 use EACCustomWidgets\Core\Eac_Config_Elements;
 ?>
 <form action="" method="POST" id="eac-form-features" name="eac-form-features">
+	<!-- Onglet 'Features' -->
 	<div id="tab-4" style="display: none;">
 		<div class="eac-settings-tabs">
 			<div class="eac-elements__table-common">
@@ -59,8 +60,9 @@ use EACCustomWidgets\Core\Eac_Config_Elements;
 				?>
 			</div> <!-- Table common -->
 		</div> <!-- Settings TAB -->
-	</div> <!-- TAB 3-->
+	</div> <!-- TAB 4 -->
 
+	<!-- Onglet 'WordPress' -->
 	<div id="tab-5" style="display: none;">
 		<div class="eac-settings-tabs">
 			<div class="eac-elements__table-common">
@@ -115,7 +117,7 @@ use EACCustomWidgets\Core\Eac_Config_Elements;
 				?>
 			</div> <!-- Table common -->
 		</div> <!-- Settings TAB -->
-	</div> <!-- TAB 4-->
+	</div> <!-- TAB 5 -->
 
 	<div class="eac-saving-box">
 		<div id="eac-features-to-save"><?php esc_html_e( 'Vous devez enregistrer les réglages', 'eac-components' ); ?></div>

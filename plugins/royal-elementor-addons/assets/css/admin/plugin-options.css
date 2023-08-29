@@ -37,6 +37,16 @@
       align-self: flex-start;
 }
 
+.wpr-settings-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.wpr-settings-navigation a {
+  text-decoration: none;
+}
+
 .button.wpr-options-button .dashicons {
   line-height: 30px;
   font-size: 16px;
@@ -433,6 +443,30 @@
   font-size: 12px;
   -webkit-box-shadow: none !important;
           box-shadow: none !important;
+}
+
+.wpr-sticky-video-tutorial,
+.wpr-sticky-video-tutorial:hover {
+  color: #f51f3d !important;
+}
+
+.wpr-inline-link {
+  display: inline-block !important;
+  margin-right: 10px;
+}
+
+.wpr-sticky-advanced-demos-title {
+  margin-bottom: 0 !important;
+}
+
+.wpr-sticky-advanced-demos {
+  margin: 0;
+}
+
+.wpr-sticky-advanced-demos a,
+.wpr-sticky-advanced-demos span {
+  display: inline;
+  text-decoration: none;
 }
 
 .wpr-woo-template-info input,

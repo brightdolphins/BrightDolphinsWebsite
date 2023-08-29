@@ -13,6 +13,16 @@
 	}
 }
 
+/*@supports selector(:has(*)) {
+	.swiper-container:has(div):has(.swiper-scrollbar-horizontal) .swiper-wrapper {
+		margin-bottom: 5px;
+	}
+}*/
+
+.swiper-container .swiper-wrapper {
+	margin-bottom: 10px !important;
+}
+
 /** Width pour 'slidesPerView = auto' */
 .swiper-container .swiper-wrapper .swiper-slide {
 	width: auto;
@@ -382,26 +392,4 @@ div[class*='slider-ratio-'] .swiper-container .swiper-wrapper .swiper-slide img:
 .swiper-container .swiper-pagination-bullets.swiper-pagination-horizontal .swiper-pagination-bullet.swiper-pagination-bullet-active {
 	background-color: red;
 	opacity: 1;
-}
-
-/* La barre de défilement */
-.swiper-horizontal>.swiper-scrollbar,
-.swiper-scrollbar.swiper-scrollbar-horizontal {
-	position: relative;
-	z-index: 50;
-	height: 4px;
-	width: 50%;
-	margin: 10px auto 0;
-	left: unset;
-	bottom: unset;
-}
-
-.swiper-scrollbar {
-	background: rgba(0, 0, 0, .1);
-}
-
-.swiper-scrollbar-drag {
-	left: unset;
-	top: unset;
-	background: rgba(0, 0, 0, .5);
 }

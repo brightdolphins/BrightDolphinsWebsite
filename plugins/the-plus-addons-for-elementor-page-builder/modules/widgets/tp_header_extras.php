@@ -4,23 +4,22 @@ Widget Name: Header Extras
 Description: header extra icons search bar, mini cart and toggle content..etc
 Author: Theplus
 */
+
 namespace TheplusAddons\Widgets;
 
 use Elementor\Widget_Base;
 use Elementor\Controls_Manager;
 use Elementor\Utils;
-use Elementor\Core\Schemes\Color;
 use Elementor\Group_Control_Typography;
 use Elementor\Group_Control_Border;
 use Elementor\Group_Control_Background;
 use Elementor\Group_Control_Box_Shadow;
-use Elementor\Core\Schemes\Typography;
 use Elementor\Group_Control_Image_Size;
+use Elementor\Core\Kits\Documents\Tabs\Global_Typography;
 
 use TheplusAddons\L_Theplus_Element_Load;
-if (!defined('ABSPATH'))
-    exit; // Exit if accessed directly
 
+if (!defined('ABSPATH')) exit; // Exit if accessed directly
 
 class L_ThePlus_Header_Extras extends Widget_Base {
 		
@@ -358,7 +357,9 @@ protected function register_controls() {
 			[
 				'name' => 'search_field_typography',
 				'label' => esc_html__( 'Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_3,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_TEXT
+				],
 				'selector' => '{{WRAPPER}} .plus-search-form.plus-search-form-content input.plus-search-field',				
 			]
 		);
@@ -1128,7 +1129,9 @@ protected function register_controls() {
 			[
 				'name' => 'cart_count_typography',
 				'label' => esc_html__( 'Cart Count Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_3,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_TEXT
+				],
 				'selector' => '{{WRAPPER}} .header-extra-icons li.mini-cart-icon .plus-cart-icon .cart-wrap span',				
 			]
 		);
@@ -1292,7 +1295,9 @@ protected function register_controls() {
 			[
 				'name' => 'mini_cart_etext_typography',
 				'label' => esc_html__( 'Cart Title Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_3,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_TEXT
+				],
 				'selector' => '{{WRAPPER}} .header-extra-icons .mini-cart-icon .mc-extra-bottom-con',				
 			]
 		);
@@ -1495,7 +1500,9 @@ protected function register_controls() {
 			[
 				'name' => 'mini_cart_title_typography',
 				'label' => esc_html__( 'Cart Title Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_3,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_TEXT
+				],
 				'selector' => '{{WRAPPER}} .header-extra-icons .mini-cart-icon .widget_shopping_cart .cart_list li > a:not(.remove)',				
 			]
 		);
@@ -1550,7 +1557,9 @@ protected function register_controls() {
 			[
 				'name' => 'mini_cart_quantity_typography',
 				'label' => esc_html__( 'Cart Quantity Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_3,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_TEXT
+				],
 				'selector' => '{{WRAPPER}} .header-extra-icons .mini-cart-icon .widget_shopping_cart .cart_list li .quantity',				
 			]
 		);
@@ -1737,7 +1746,9 @@ protected function register_controls() {
 			[
 				'name' => 'mini_cart_subtotal_typography',
 				'label' => esc_html__( 'Sub-Total Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_3,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_TEXT
+				],
 				'selector' => '{{WRAPPER}} .header-extra-icons .mini-cart-icon .total strong',
 			]
 		);
@@ -1764,7 +1775,9 @@ protected function register_controls() {
 			[
 				'name' => 'mini_cart_price_typography',
 				'label' => esc_html__( 'Total Price Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_3,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_TEXT
+				],
 				'selector' => '{{WRAPPER}} .header-extra-icons .mini-cart-icon .widget_shopping_cart .total span.amount',
 			]
 		);

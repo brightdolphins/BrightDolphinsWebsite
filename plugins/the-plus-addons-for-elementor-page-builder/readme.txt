@@ -2,9 +2,9 @@
 Contributors: posimyththemes, nirmalkavaiya, devangvachheta, sagarpatel124
 Tags: Elementor, elementor widgets, elements, elementor addon, elementor templates, elementor widgets, extensions
 Requires at least: 5.7.0
-Tested up to: 6.2
+Tested up to: 6.3
 Requires PHP: 5.6
-Stable tag: 5.2.11
+Stable tag: 5.2.15
 License: GPLv3
 License URI: https://opensource.org/licenses/GPL-3.0
 
@@ -282,6 +282,30 @@ We have the most advanced caching architecture, Which will never bloat your site
 12. Unique 22+ Elementor Extensions
 
 == Changelog ==
+
+= 5.2.15 =
+Add : Deprecated : Elementor Widget Disabled
+Fix : Minor bug fixes & Improvements
+
+= 5.2.14 =
+Add : Gallery Listing : Featured Image Border Radius
+Add : Pricing Table : Box Hover Option For Button 
+Add : Testimonial : Background Border Option
+Fix : Countdown : Contoller Improvment
+Fix : Heading Title : Main title Css Improvement
+Fix : Message Box : Icon Css Improvment
+Fix : Video Play : Image Size Css Improvment
+Fix : Minor bug fixes & Improvements
+
+= 5.2.13 =
+Compatibility : Elementor Free & Pro 3.15
+Fix : Minor bug fixes & Improvements
+
+= 5.2.12 =
+Update : Pricing Table : Condition Improvement
+Update : Hover card : Document Link
+Update : Client Listout : Document Link
+Fix : Minor bug fixes & Improvements
 
 = 5.2.11 =
 Update : Button : Condition Improvement

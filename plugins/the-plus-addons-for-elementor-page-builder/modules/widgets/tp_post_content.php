@@ -5,22 +5,21 @@ Description: Post Content
 Author: Theplus
 Author URI: https://posimyth.com
 */
+
 namespace TheplusAddons\Widgets;
 
 use Elementor\Widget_Base;
 use Elementor\Controls_Manager;
 use Elementor\Utils;
-use Elementor\Core\Schemes\Color;
 use Elementor\Group_Control_Typography;
 use Elementor\Group_Control_Border;
-use Elementor\Core\Schemes\Typography;
 use Elementor\Group_Control_Background;
 use Elementor\Group_Control_Box_Shadow;
+use Elementor\Core\Kits\Documents\Tabs\Global_Typography;
 
 use TheplusAddons\L_Theplus_Element_Load;
-if (!defined('ABSPATH'))
-    exit; // Exit if accessed directly
 
+if (!defined('ABSPATH')) exit; // Exit if accessed directly
 
 class L_ThePlus_Post_Content extends Widget_Base {
 		
@@ -142,7 +141,9 @@ class L_ThePlus_Post_Content extends Widget_Base {
 			[
 				'name' => 'excerptstypography',
 				'label' => esc_html__( 'Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_1,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_PRIMARY
+				],
 				'selector' => '{{WRAPPER}} > .elementor-widget-container',			
 			]
 		);
@@ -311,13 +312,13 @@ class L_ThePlus_Post_Content extends Widget_Base {
 					}
 
 					$posts[ $post->ID ] = true;
-					$editor = Theplus_Element_Load::elementor()->editor;
+					$editor = L_Theplus_Element_Load::elementor()->editor;
 					$editmode = $editor->is_edit_mode();
 
-					if ( Theplus_Element_Load::elementor()->preview->is_preview_mode( $post->ID ) ) {
-						$content = Theplus_Element_Load::elementor()->preview->builder_wrapper( '' );
+					if ( L_Theplus_Element_Load::elementor()->preview->is_preview_mode( $post->ID ) ) {
+						$content = L_Theplus_Element_Load::elementor()->preview->builder_wrapper( '' );
 					} else {
-						$document = Theplus_Element_Load::elementor()->documents->get( $post->ID );
+						$document = L_Theplus_Element_Load::elementor()->documents->get( $post->ID );
 						if ( $document ) {
 							$previewType = $document->get_settings( 'preview_type' );
 							$previewId = $document->get_settings( 'preview_id' );
@@ -331,10 +332,10 @@ class L_ThePlus_Post_Content extends Widget_Base {
 							}
 						}
 						$editor->set_edit_mode( false );
-						$content = Theplus_Element_Load::elementor()->frontend->get_builder_content( $post->ID, true );
+						$content = L_Theplus_Element_Load::elementor()->frontend->get_builder_content( $post->ID, true );
 	
 						if (empty($content)) {
-							Theplus_Element_Load::elementor()->frontend->remove_content_filter();
+							L_Theplus_Element_Load::elementor()->frontend->remove_content_filter();
 							setup_postdata( $post );
 							
 							$content = apply_filters( 'the_content', get_the_content() );
@@ -343,14 +344,14 @@ class L_ThePlus_Post_Content extends Widget_Base {
 								'before' => '<div class="page-links elementor-page-links"><span class="page-links-title elementor-page-links-title">' . __( 'Pages:', 'tpebl' ) . '</span>','after' => '</div>','link_before' => '<span>','link_after' => '</span>','pagelink' => '<span class="screen-reader-text">' . __( 'Page', 'tpebl' ) . ' </span>%','separator' => '<span class="screen-reader-text">, </span>',
 							] );
 	
-							Theplus_Element_Load::elementor()->frontend->add_content_filter();
+							L_Theplus_Element_Load::elementor()->frontend->add_content_filter();
 	
 							return;
 						}else{
 							$content = apply_filters( 'the_content', $content );
 						}
 					} 
-					Theplus_Element_Load::elementor()->editor->set_edit_mode( $editmode );
+					L_Theplus_Element_Load::elementor()->editor->set_edit_mode( $editmode );
 					
 					if ( $wrapper ) {
 						echo '<div class="tp-post-content">' . balanceTags( $content, true ) . '</div>';

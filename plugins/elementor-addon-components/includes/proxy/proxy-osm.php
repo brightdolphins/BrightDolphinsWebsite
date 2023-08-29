@@ -7,6 +7,7 @@
  * @return {Object[]} Le contenu du fichier GeoJSON distant
  * @since 1.8.8
  * @since 1.9.6 Gesion plus fine des erreurs 'file_get_contents'
+ * @since 2.1.1 Teste de la fonctionnalité de lecture des fichiers GeoJSON
  */
 
 namespace EACCustomWidgets\Proxy;
@@ -17,6 +18,8 @@ require_once $parse_uri[0] . 'wp-load.php';
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+use EACCustomWidgets\Core\Eac_Config_Elements;
 
 if ( ! isset( $_REQUEST['id'] ) || ! isset( $_REQUEST['nonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_REQUEST['nonce'] ) ), 'eac_file_osm_nonce_' . sanitize_text_field( wp_unslash( $_REQUEST['id'] ) ) ) ) {
 	header( 'Content-Type: text/plain' );
@@ -29,6 +32,13 @@ if ( ! ini_get( 'allow_url_fopen' ) || ! isset( $_REQUEST['url'] ) ) {
 	echo esc_html__( '"allow_url_fopen" est désactivé', 'eac-components' );
 	exit;
 }
+
+/** @since 2.1.1 Fonctionnalité active */
+/*if ( ! Eac_Config_Elements::is_feature_active( 'unfiltered-medias' ) ) {
+	header( 'Content-Type: text/plain' );
+	echo esc_html__( 'Activer la fonctionnalité "Télécharger les fichiers non filtrés" pour lire un flux JSON', 'eac-components' );
+	exit;
+}*/
 
 $file = filter_var( urldecode( $_REQUEST['url'] ), FILTER_SANITIZE_URL );
 

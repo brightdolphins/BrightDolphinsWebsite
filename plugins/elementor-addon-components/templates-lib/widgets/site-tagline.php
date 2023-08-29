@@ -196,7 +196,7 @@ class Site_Tagline_Widget extends Widget_Base {
 					'label'     => esc_html__( 'Couleur', 'eac-components' ),
 					'type'      => Controls_Manager::COLOR,
 					'global'    => array(
-						'default' => Global_Colors::COLOR_PRIMARY,
+						'default' => Global_Colors::COLOR_TEXT,
 					),
 					'selectors' => array(
 						'{{WRAPPER}} .eac-site_tagline' => 'color: {{VALUE}};',

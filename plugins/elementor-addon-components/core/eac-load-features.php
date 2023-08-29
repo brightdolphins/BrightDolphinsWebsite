@@ -8,7 +8,8 @@
  * @since 1.9.8 Initialisation des Dynamic tags standards, ACF et WooCommerce
  * @since 1.9.9 Déplacement des fichiers helper et utils sous le répertoire 'core/utils'
  *              Remplacer 'is_admin()' par 'current_user_can'
- * @since 2.0.1 Changement des droits pour le chargement de fichiers au format 'json'
+ * @since 2.0.1 Changement des droits pour le chargement de fichiers au format JSON
+ * @since 2.1.1 Droits de chargement des fichiers JSON
  */
 
 namespace EACCustomWidgets\Core;
@@ -67,16 +68,16 @@ class Eac_Load_Features {
 	 *
 	 * @var $mimes Array Les types mimes des fichiers supportés
 	 *
-	 * @since 1.9.3
-	 * @since 1.9.5 Ajout du widget 'Openstreetmap' dans le test
-	 * @since 1.9.9 Remplacer 'is_admin()' par 'current_user_can'
 	 * @since 2.0.1 Change les droits 'manage_options' par 'administrator'
+	 * @since 2.1.1 Teste si la fonctionnalité 'unfiltered-medias' est active
 	 */
 	public function add_json_mime_type( $mimes ) {
-		// Lottie animation ou Lottie background ou Openstreetmap sont activés et le user est un administrateur
-		if ( current_user_can( 'administrator' ) && ( Eac_Config_Elements::is_widget_active( 'lottie-background' ) || Eac_Config_Elements::is_widget_active( 'lottie-animations' ) || Eac_Config_Elements::is_widget_active( 'open-streetmap' ) ) ) {
-			if ( ! array_key_exists( 'json', $mimes ) ) {
-				$mimes['json'] = 'application/json';
+		if ( Eac_Config_Elements::is_feature_active( 'unfiltered-medias' ) && current_user_can( 'administrator' ) ) {
+			// Lottie animation ou Lottie background ou Openstreetmap sont activés et le user est un administrateur
+			if ( Eac_Config_Elements::is_widget_active( 'lottie-background' ) || Eac_Config_Elements::is_widget_active( 'lottie-animations' ) || Eac_Config_Elements::is_widget_active( 'open-streetmap' ) ) {
+				if ( ! array_key_exists( 'json', $mimes ) ) {
+					$mimes['json'] = 'application/json';
+				}
 			}
 		}
 		return $mimes;

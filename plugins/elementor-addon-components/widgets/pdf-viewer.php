@@ -7,7 +7,9 @@
  * Description: Affiche un fichier PDF avec des otions dans une iFrame ou dans la Fancybox
  *
  * @since 1.8.9
- * @since 1.9.3 Envoie le nonce dans un champ 'input hidden'
+ * @since 2.1.1 Fix: L'icone bouton ne s'affiche pas
+ *              Fix: alignement bouton/texte
+ *              Ajout de l'attribut lazy load dans l'iframe
  */
 
 namespace EACCustomWidgets\Widgets;
@@ -35,8 +37,6 @@ class Simple_PDF_Viewer_Widget extends Widget_Base {
 	 * Constructeur de la class Simple_PDF_Viewer_Widget
 	 *
 	 * Enregistre les scripts et les styles
-	 *
-	 * @since 1.8.9
 	 */
 	public function __construct( $data = array(), $args = null ) {
 		parent::__construct( $data, $args );
@@ -307,6 +307,7 @@ class Simple_PDF_Viewer_Widget extends Widget_Base {
 				)
 			);
 
+			/** @since 2.1.1 */
 			$this->add_control(
 				'fv_align_trigger',
 				array(
@@ -326,8 +327,13 @@ class Simple_PDF_Viewer_Widget extends Widget_Base {
 							'icon'  => 'eicon-h-align-right',
 						),
 					),
+					'selectors_dictionary' => array(
+						'left'   => '0 auto 0 0',
+						'center' => '0 auto',
+						'right'  => '0 0 0 auto',
+					),
 					'default'   => 'center',
-					'selectors' => array( '{{WRAPPER}} .fv-viewer__wrapper' => 'text-align: {{VALUE}};' ),
+					'selectors' => array( '{{WRAPPER}} .fv-viewer__wrapper-btn, {{WRAPPER}} .fv-viewer__wrapper-text' => 'margin: {{VALUE}};' ),
 				)
 			);
 
@@ -784,7 +790,10 @@ class Simple_PDF_Viewer_Widget extends Widget_Base {
 		// Unique ID du widget
 		$id = $this->get_id();
 
-		// Le déclencheur est un bouton
+		/**
+		 * Le déclencheur est un bouton
+		 * @since 2.1.1 Affichage de l'icone
+		 */
 		if ( 'button' === $trigger ) {
 			if ( 'yes' === $settings['fv_icon_activated'] && ! empty( $settings['fv_display_icon_button'] ) ) {
 				$icon_button = true;
@@ -810,11 +819,11 @@ class Simple_PDF_Viewer_Widget extends Widget_Base {
 						<?php if ( 'button' === $trigger ) : ?>
 							<button <?php echo wp_kses_post( $this->get_render_attribute_string( 'trigger' ) ); ?>>
 							<?php
-							if ( 'before' === $icon_button && $settings['fv_position_icon_button'] ) {
+							if ( $icon_button && 'before' === $settings['fv_position_icon_button'] ) {
 								Icons_Manager::render_icon( $settings['fv_display_icon_button'], array( 'aria-hidden' => 'true' ) );
 							}
 								echo sanitize_text_field( $settings['fv_display_text_button'] );
-							if ( 'after' === $icon_button && $settings['fv_position_icon_button'] ) {
+							if ( $icon_button && 'after' === $settings['fv_position_icon_button'] ) {
 								Icons_Manager::render_icon( $settings['fv_display_icon_button'], array( 'aria-hidden' => 'true' ) );
 							}
 							?>
@@ -829,7 +838,8 @@ class Simple_PDF_Viewer_Widget extends Widget_Base {
 				<?php else : ?>
 
 					<div id="fv-viewer_loader-wheel" class="eac__loader-spin"></div>
-					<iframe id="iframe-<?php echo esc_attr( $id ); ?>" class="fv-viewer__wrapper-iframe" src="" type="application/pdf"></iframe>
+					<!-- @since 2.1.2 attribut 'allow -->
+					<iframe id="iframe-<?php echo esc_attr( $id ); ?>" class="fv-viewer__wrapper-iframe" src="" loading="lazy" type="application/pdf" allow="fullscreen"></iframe>
 
 				<?php endif; ?>
 			</div>

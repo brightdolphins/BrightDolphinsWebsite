@@ -8,7 +8,7 @@
  * Description: Bandeau déroulant les nouvelles des journaux par leurs flux RSS.
  *
  * @since 1.9.2
- * @since 1.9.3 Envoie le nonce dans un champ 'input hidden'
+ * @since 1.9.3 Transmets le nonce dans un champ 'input hidden'
  */
 
 namespace EACCustomWidgets\Widgets;
@@ -36,8 +36,6 @@ class News_Ticker_Widget extends Widget_Base {
 	 * Constructeur de la class News_Ticker_Widget
 	 *
 	 * Enregistre les scripts et les styles
-	 *
-	 * @since 1.9.2
 	 */
 	public function __construct( $data = array(), $args = null ) {
 		parent::__construct( $data, $args );
@@ -699,20 +697,18 @@ class News_Ticker_Widget extends Widget_Base {
 			<input type="hidden" id="news_nonce" name="news_nonce" value="<?php echo wp_create_nonce( 'eac_rss_feed_' . $this->get_id() ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>" />
 			<div <?php echo wp_kses_post( $this->get_render_attribute_string( 'news_ticker' ) ); ?>>
 				<div class="news-ticker_wrapper-title">Breaking News: Taglines</div>
-				<div class="news-ticker_wrapper-content"><div class="animationPause animationHorizontal"></div></div>
+				<div class="news-ticker_wrapper-content" role="feed"><div class="animationPause animationHorizontal"></div></div>
 
-				<?php // if ($settings['news_wrapper_style'] !== 'style-10') : ?>
-					<div class="news-ticker_wrapper-control">
-						<?php if ( 'yes' === $settings['news_item_controls'] ) : ?>
-							<span class="left"><i class="far fa-caret-square-left"></i></span>
-						<?php endif; ?>
-						<span class="play"><i class="far fa-play-circle"></i></span>
-						<span class="pause"><i class="far fa-pause-circle"></i></span>
-						<?php if ( 'yes' === $settings['news_item_controls'] ) : ?>
-							<span class="right"><i class="far fa-caret-square-right"></i></span>
-						<?php endif; ?>
-					</div>
-				<?php // endif; ?>
+				<div class="news-ticker_wrapper-control">
+					<?php if ( 'yes' === $settings['news_item_controls'] ) : ?>
+						<span class="left" role="button" tabindex="0" aria-label="Backward the feed"><i class="far fa-caret-square-left"></i></span>
+					<?php endif; ?>
+					<span class="play" role="button" tabindex="0" aria-label="Start reading"><i class="far fa-play-circle"></i></span>
+					<span class="pause" role="button" tabindex="0" aria-label="Stop reading"><i class="far fa-pause-circle"></i></span>
+					<?php if ( 'yes' === $settings['news_item_controls'] ) : ?>
+						<span class="right" role="button" tabindex="0" aria-label=">Forward the feed"><i class="far fa-caret-square-right"></i></span>
+					<?php endif; ?>
+				</div>
 			</div>
 			<?php $this->render_galerie(); ?>
 		</div>

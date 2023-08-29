@@ -230,7 +230,7 @@ class Button_Back_Widget extends Widget_Base {
 
 		?>
 		<div class="button-top_icon-wrapper">
-		<button onclick="jQuery('html,body').animate({ scrollTop: 0 }, 300)" id="button-top_icon" class="button-top_icon" title="<?php echo esc_html__( 'Retour en haut', 'eac-components' ); ?>">
+		<button onclick="jQuery('html,body').animate({ scrollTop: 0 }, 300)" id="button-top_icon" class="button-top_icon" title="<?php echo esc_html__( 'Retour en haut', 'eac-components' ); ?>" aria-label="<?php echo esc_html__( 'Retour en haut', 'eac-components' ); ?>">
 			<?php Icons_Manager::render_icon( $settings['btt_icon'], array( 'aria-hidden' => 'true' ) ); ?>
 		</button>
 		</div>

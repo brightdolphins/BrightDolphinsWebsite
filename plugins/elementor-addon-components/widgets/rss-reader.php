@@ -40,14 +40,13 @@ class Lecteur_Rss_Widget extends Widget_Base {
 	 * Constructeur de la class Lecteur_Rss_Widget
 	 *
 	 * Enregistre les scripts et les styles
-	 *
-	 * @since 1.9.0
 	 */
 	public function __construct( $data = array(), $args = null ) {
 		parent::__construct( $data, $args );
 
-		wp_register_style( 'eac-rss-reader', EAC_Plugin::instance()->get_style_url( 'assets/css/rss-reader' ), array( 'eac' ), '1.0.0' );
 		wp_register_script( 'eac-rss-reader', EAC_Plugin::instance()->get_script_url( 'assets/js/elementor/eac-rss-reader' ), array( 'jquery', 'elementor-frontend' ), '1.0.0', true );
+
+		wp_register_style( 'eac-rss-reader', EAC_Plugin::instance()->get_style_url( 'assets/css/rss-reader' ), array( 'eac' ), '1.0.0' );
 	}
 
 	/**
@@ -264,7 +263,7 @@ class Lecteur_Rss_Widget extends Widget_Base {
 						),
 						array(
 							'rss_item_title' => "L'Équipe",
-							'rss_item_url'   => array( 'url' => 'https://www.lequipe.fr/rss/actu_rss.xml' ),
+							'rss_item_url'   => array( 'url' => 'https://dwh.lequipe.fr/api/edito/rss?path=/' ),
 						),
 						array(
 							'rss_item_title' => 'France TV - Info',
@@ -785,6 +784,7 @@ class Lecteur_Rss_Widget extends Widget_Base {
 		}
 		$this->add_render_attribute( 'rss_galerie', 'class', 'rss-galerie' );
 		$this->add_render_attribute( 'rss_galerie', 'id', 'rss-galerie' );
+		$this->add_render_attribute( 'rss_galerie', 'role', 'feed' );
 		$this->add_render_attribute( 'rss_galerie', 'data-settings', $this->get_settings_json() );
 		?>
 		<div class="eac-rss-galerie">
@@ -817,7 +817,7 @@ class Lecteur_Rss_Widget extends Widget_Base {
 				</select>
 			</div>
 			<div class="eac__button">
-				<button id="rss__read-button" class="eac__read-button" type="button" aria-expanded="false" aria-controls="rss-galerie">
+				<button id="rss__read-button" class="eac__read-button" type="button" tabindex="0" aria-expanded="false" aria-controls="rss-galerie">
 					<?php echo sanitize_text_field( $settings['rss_item_button_label'] ); ?>
 				</button>
 			</div>

@@ -38,8 +38,8 @@ trait Slider_Trait {
 			array(
 				'label'     => esc_html__( "Interval d'affichage (ms)", 'eac-components' ),
 				'type'      => Controls_Manager::NUMBER,
-				'min'       => 500,
-				'max'       => 5000,
+				'min'       => 0,
+				'max'       => 6000,
 				'step'      => 500,
 				'default'   => 2000,
 				'condition' => array( 'slider_autoplay' => 'yes' ),
@@ -76,7 +76,34 @@ trait Slider_Trait {
 				'max'       => 30,
 				'step'      => 1,
 				'default'   => 3,
-				'condition' => array( 'slider_effect!' => array( 'creative', 'fade' ) ),
+				'condition' => array(
+					'slider_effect!'         => array( 'creative', 'fade' ),
+					//'slider_images_centered' => 'no',
+				),
+			)
+		);
+
+		$this->add_control(
+			'slider_images_centered',
+			array(
+				'label'     => esc_html__( 'Diapositive centrée', 'eac-components' ),
+				'type'      => Controls_Manager::CHOOSE,
+				'options'   => array(
+					'yes' => array(
+						'title' => esc_html__( 'Oui', 'eac-components' ),
+						'icon'  => 'fa fa-check',
+					),
+					'no'  => array(
+						'title' => esc_html__( 'Non', 'eac-components' ),
+						'icon'  => 'fa fa-ban',
+					),
+				),
+				'default'   => 'no',
+				'toggle'  => false,
+				'condition' => array(
+					'slider_autoplay' => 'yes',
+					'slider_effect!' => array( 'creative', 'fade' ),
+				),
 			)
 		);
 

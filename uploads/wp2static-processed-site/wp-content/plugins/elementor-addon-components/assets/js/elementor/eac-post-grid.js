@@ -3,14 +3,8 @@
  * Description: Cette méthode est déclenchée lorsque les sections 'eac-addon-articles-liste' ou 'eac-addon-product-grid' sont chargées dans la page
  *
  * @param {selector} $scope. Le contenu de la section
- * @since 0.0.9
- * @since 1.4.6	InfiniteScroll Supprime le chargement automatique des pages suivantes
- * @since 1.5.2	Correctif du chevauchement des items
- * @since 1.6.0	Événement 'change' sur la liste des filtres
- *				Supression de la méthode 'layout'
- * @since 1.7.0	La class 'al-post__image-loaded' est déjà charger dans le code PHP
- * @since 1.9.7	Implémente le slider comme mode d'affichage
- * @since 1.9.8	Ajout d'un filtre pour la grille des produits
+ * @since 1.0.0
+ * @since 2.1.1 L'affichage du filtre est décalé
  */
 ; (function ($, elementor) {
 
@@ -32,7 +26,7 @@
 				$paginationId = $('#' + settings.data_pagination_id),
 				targetStatus = '#' + settings.data_pagination_id + ' .al-page-load-status',
 				targetButton = '#' + settings.data_pagination_id + ' button',
-				setIntervalIsotope = null,
+				setIntervalGrid = null,
 				isotopeOptions = {
 					itemSelector: '.al-post__wrapper',
 					percentPosition: true,
@@ -72,12 +66,14 @@
 						speed: 1000,
 						grabCursor: true,
 						watchSlidesProgress: true,
+						slidesPerView: settings.data_sw_imgs,
+						centeredSlides: settings.data_sw_centered,
+						loopedSlides: settings.data_sw_imgs === 'auto' ? 2 : null,
 						effect: settings.data_sw_effect,
 						freeMode: {
 							enabled: settings.data_sw_free,
 							momentumRatio: 1,
 						},
-						loopedSlides: settings.data_sw_imgs === 'auto' ? 2 : null,
 						coverflowEffect: {
 							rotate: 45,
 							slideShadows: true,
@@ -103,7 +99,6 @@
 						scrollbar: {
 							el: '.swiper-scrollbar',
 						},
-						slidesPerView: settings.data_sw_imgs,
 						breakpoints: {
 							// when window width is >= 0px
 							0: {
@@ -220,72 +215,29 @@
 						});
 					});
 				}
-
 				return;
 			}
-
-			// Force l'affichage des images pour contourner le lazyload
-			$imagesInstance.each(function () {
-				$(this).attr('src', $(this).data('src'));
-				if ($(this).complete) {
-					$(this).load();
-				}
-			});
 
 			// Init Isotope, charge les images et redessine le layout
 			$targetId.isotope(isotopeOptions);
 
 			// Get Isotope instance 
-			var isotopeInstance = $targetId.data('isotope')
+			var isotopeInstance = $targetId.data('isotope');
 
-			/** @since 1.7.0 */
+			// Charge les images
 			$targetId.imagesLoaded().progress(function (instance, image) {
-				if (image.isLoaded) {
-					//$(image.img).addClass('al-post__image-loaded');
-					//console.log($targetId.selector + ":" + instance.progressedCount);
+				//console.dir(image.img);
+				$targetId.isotope('layout');
+			}).done(function () {
+				$targetId.isotope('layout');
+				for (var i = 1; i < 4; i++) {
+					window.setTimeout(function () {
+						$targetId.isotope('layout');
+					}, i * 3000);
 				}
-			}).done(function (instance) {
-				if (isotopeInstance) {
-					/** @since 1.6.0 Supression de la méthode 'layout' */
-					$targetId.isotope();
-					//console.log('Post Grid::Isotope initialized');
-				} else {
-					//console.log('Post Grid::Isotope DONE::NOT initialized');
-				}
-
-				// @since 1.5.2 Chevauchement des items. Redessine tous les items après 5 secondes
-				if (navigator.userAgent.match(/SAMSUNG|SGH-[I|N|T]|GT-[I|P|N]|SM-[N|P|T|Z|G]|SHV-E|SCH-[I|J|R|S]|SPH-L/i)) {
-					// Pas très élégant
-					// Test Samsung phone UA: Mozilla/5.0 (Linux; Android 9; SAMSUNG SM-G960U) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/10.2 Chrome/71.0.3578.99 Mobile Safari/537.36
-					// https://developers.whatismybrowser.com/useragents/explore/software_name/samsung-browser/
-					setIntervalIsotope = window.setInterval(function () {
-						$targetId.isotope();
-						/*console.log('Samsung phone::' + $targetId.selector);*/
-					}, 5000);
-				}
-			}).fail(function (instance) {
-				console.log('Post Grid::Imagesloaded::All images loaded, at least one is broken');
 			});
-
-			// call equalHeights script on arrangeComplete
-			/*$targetId.on('arrangeComplete', function(event, filteredItems) {			
-				var $items = $targetId.find('.al-post__wrapper .al-post__inner-wrapper');
-				var margins = parseInt($items.eq(0).css('margin'), 10);
-				var $articles = $targetId.find('.al-post__wrapper');
-				var maxHeight = 0;
-				
-				$items.each(function() {
-					var $item = $(this);
-					var itemHeight = $item.innerHeight();
-					if(itemHeight > maxHeight) {
-						maxHeight = itemHeight;
-					}
-				});
-				if(maxHeight !== 0) {
-					maxHeight = maxHeight - (2 * margins);
-					$items.css('min-height', maxHeight + 'px');
-					$targetId.isotope();
-				}
+			/*.fail(function () {
+				console.log('Post Grid::Imagesloaded::All images loaded, at least one is broken');
 			});*/
 
 			/**
@@ -299,12 +251,11 @@
 				var urlParams = new URLSearchParams(queryString);
 				var filter = urlParams.has('filter') ? decodeURIComponent(urlParams.get('filter')) : false;
 				var domInterval = 0;
-				//console.log(filter);
 				if (filter) {
 					var domProgress = window.setInterval(function () {
 						if (domInterval < 5) {
 							var $data_filter = $("#al-filters__wrapper a[data-filter='." + filter + "']", $targetInstance);
-							var $data_select = $('#al-filters__wrapper-select .al-filter__select', $targetInstance);
+							var $data_select = $('#al-filters__wrapper-select .al-filters__select', $targetInstance);
 							if ($data_filter.length === 1 && $data_select.length === 1) {
 								window.clearInterval(domProgress);
 								domProgress = null;
@@ -322,14 +273,14 @@
 				}
 
 				// Événement click sur les filtres par défaut
-				$('#al-filters__wrapper a', $targetInstance).on('click', function (e) {
+				$('.al-filters__wrapper a', $targetInstance).on('click', function (e) {
 					var $this = $(this);
 					// L'item du filtre est déjà sélectionné
 					if ($this.parents('.al-filters__item').hasClass('al-active')) {
 						return false;
 					}
 
-					var $optionSet = $this.parents('#al-filters__wrapper');
+					var $optionSet = $this.parents('.al-filters__wrapper');
 					$optionSet.find('.al-active').removeClass('al-active');
 					$this.parents('.al-filters__item').addClass('al-active');
 					// Applique le filtre
@@ -339,7 +290,7 @@
 				});
 
 				// @since 1.6.0 Lier les filtres select/option de la liste à l'événement 'change'
-				$('.al-filter__select', $targetInstance).on('change', function () {
+				$('.al-filters__select', $targetInstance).on('change', function () {
 					// Récupère la valeur du filtre avec l'option sélectionnée
 					var filterValue = this.value;
 					// Applique le filtre
@@ -350,11 +301,6 @@
 
 			// La div status est affichée
 			if ($paginationId.length > 0) {
-				if (top.location.href !== self.location.href) {
-					//console.log('Top # self IFRAME:' + top.location.href + ":" + self.location.href);
-					//top.location.href = self.location.href;
-				}
-
 				// Initialisation infiniteScroll
 				$targetId.infiniteScroll({
 					path: function () { return location.pathname.replace(/\/?$/, '/') + "page/" + parseInt(this.pageIndex + 1); },

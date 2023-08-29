@@ -441,7 +441,7 @@ class Site_Search_Widget extends Widget_Base {
 				</div>
 			</form>
 			<div class="eac-search_select-wrapper">
-				<select class="eac-search_select-post-type" name="eac_advanced" id="eac_advanced">
+				<select class="eac-search_select-post-type" name="eac_advanced" id="eac_advanced" aria-label="Search form: filter post type">
 					<option value="any"><?php esc_html_e( 'Tous', 'eac-components' ); ?></option>
 					<option value="page"><?php esc_html_e( 'Page', 'eac-components' ); ?></option>
 					<option value="post"><?php esc_html_e( 'Article', 'eac-components' ); ?></option>

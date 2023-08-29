@@ -65,6 +65,8 @@
 	/** Header footer mega-menu */
 	/* Line-height horizontal top li et div toggle */
 	--eac-hrz-top-item-line-height: 60px;
+	/* Line-height buttons toggle */
+	--eac-buttons-toggle-line-height: 50px;
 	/* Line-height sub li */
 	--eac-hrz-sub-item-line-height: 25px;
 	/* Line-height top li responsive */

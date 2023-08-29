@@ -5,23 +5,23 @@ Description: Age gate
 Author: Theplus
 Author URI: https://posimyth.com
 */
+
 namespace TheplusAddons\Widgets;
 
 use Elementor\Widget_Base;
 use Elementor\Controls_Manager;
 use Elementor\Utils;
-use Elementor\Core\Schemes\Color;
 use Elementor\Group_Control_Typography;
 use Elementor\Group_Control_Text_Shadow;
-use Elementor\Core\Schemes\Typography;
 use Elementor\Group_Control_Background;
 use Elementor\Group_Control_Image_Size;
 use Elementor\Group_Control_Border;
 use Elementor\Group_Control_Box_Shadow;
+use Elementor\Core\Kits\Documents\Tabs\Global_Typography;
 
 use TheplusAddons\Theplus_Element_Load;
-if (!defined('ABSPATH'))
-    exit; // Exit if accessed directly
+
+if (!defined('ABSPATH')) exit; // Exit if accessed directly
 
 class L_ThePlus_Age_Gate extends Widget_Base {
 		
@@ -672,7 +672,9 @@ class L_ThePlus_Age_Gate extends Widget_Base {
 			[
 				'name' => 'title_typo',
 				'label' => esc_html__( 'Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_1,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_PRIMARY
+				],
 				'selector' => '{{WRAPPER}} .tp-agegate-boxes .tp-agegate-title',
 				'separator' => 'before',	
 			]
@@ -754,7 +756,9 @@ class L_ThePlus_Age_Gate extends Widget_Base {
 			[
 				'name' => 'desc_typo',
 				'label' => esc_html__( 'Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_1,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_PRIMARY
+				],
 				'selector' => '{{WRAPPER}} .tp-agegate-boxes .tp-agegate-description',				
 			]
 		);
@@ -891,7 +895,9 @@ class L_ThePlus_Age_Gate extends Widget_Base {
 			[
 				'name' => 'chktxt_typo',
 				'label' => esc_html__( 'Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_1,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_PRIMARY
+				],
 				'selector' => '{{WRAPPER}} .tp-agegate-boxes .tp-agegate-method .agc_checkbox',
 				'separator' => 'before',	
 			]
@@ -974,7 +980,9 @@ class L_ThePlus_Age_Gate extends Widget_Base {
 			[
 				'name' => 'inputdate_typo',
 				'label' => esc_html__( 'Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_1,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_PRIMARY
+				],
 				'selector' => '{{WRAPPER}} .tp-agegate-boxes .tp-agegate-method .age_verify_birthdate',
 			]
 		);
@@ -1126,10 +1134,10 @@ class L_ThePlus_Age_Gate extends Widget_Base {
 			[
 				'name' => 'fbtn_typo',
 				'label' => esc_html__( 'Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_1,
-				'selector' => '{{WRAPPER}} .tp-agegate-boxes .tp-agegate-method .age_vms .age_vmb,
-					{{WRAPPER}} .tp-agegate-boxes .tp-agegate-method .age_verify_method_btnsubmit,
-					{{WRAPPER}} .tp-agegate-boxes .tp-agegate-method .tp-age-btn-yes',				
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_PRIMARY
+				],
+				'selector' => '{{WRAPPER}} .tp-agegate-boxes .tp-agegate-method .age_vms .age_vmb,{{WRAPPER}} .tp-agegate-boxes .tp-agegate-method .age_verify_method_btnsubmit,{{WRAPPER}} .tp-agegate-boxes .tp-agegate-method .tp-age-btn-yes',				
 			]
 		);
 		$this->add_responsive_control(
@@ -1453,7 +1461,9 @@ class L_ThePlus_Age_Gate extends Widget_Base {
 			[
 				'name' => 'sbtn_typo',
 				'label' => esc_html__( 'Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_1,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_PRIMARY
+				],
 				'selector' => '{{WRAPPER}} .tp-agegate-boxes .tp-agegate-method .tp-age-btn-no',
 			]
 		);       
@@ -1777,7 +1787,9 @@ class L_ThePlus_Age_Gate extends Widget_Base {
 			[
 				'name' => 'info_typo',
 				'label' => esc_html__( 'Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_1,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_PRIMARY
+				],
 				'selector' => '{{WRAPPER}} .tp-agegate-boxes .tp-agegate-extra-info',
 				 'separator' => 'before',	
 			]
@@ -1859,7 +1871,9 @@ class L_ThePlus_Age_Gate extends Widget_Base {
 			[
 				'name' => 'msg_typo',
 				'label' => esc_html__( 'Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_1,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_PRIMARY
+				],
 				'selector' => '{{WRAPPER}} .tp-agegate-boxes .tp-age-wm',	
 			]
 		);

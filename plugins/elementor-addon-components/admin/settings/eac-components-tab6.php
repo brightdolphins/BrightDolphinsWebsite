@@ -118,6 +118,7 @@ if ( ! $active_product_catalog ) {
 ob_start();
 ?>
 <form action="" method="POST" id="eac-form-wc-integration" name="eac-form-wc-integration">
+	<!-- Onglet 'WC integration' -->
 	<div id="tab-6" style="display: none;">
 		<div class="eac-settings-tabs">
 			<div class="eac-elements__table-common wc">
@@ -216,7 +217,7 @@ ob_start();
 
 			</div> <!-- Table common -->
 		</div> <!-- Settings TAB -->
-	</div> <!-- TAB 5-->
+	</div> <!-- TAB 6 -->
 
 	<div class="eac-saving-box">
 		<div id="eac-wc-integration-to-save"><?php esc_html_e( 'Vous devez enregistrer les réglages', 'eac-components' ); ?></div>

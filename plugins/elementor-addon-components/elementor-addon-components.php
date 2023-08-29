@@ -4,11 +4,11 @@
  * Description: Ajouter des composants et des fonctionnalités avancées pour la version gratuite d'Elementor
  * Plugin URI: https://elementor-addon-components.com/
  * Author: Team EAC
- * Version: 2.1.0
- * Elementor tested up to: 3.12.2
+ * Version: 2.1.2
+ * Elementor tested up to: 3.14.1
  * WC requires at least: 6.9.0
- * WC tested up to: 7.1.0
- * ACF tested up to: 6.0.7
+ * WC tested up to: 7.8.0
+ * ACF tested up to: 6.1.6
  * Author URI: https://elementor-addon-components.com/
  * Text Domain: eac-components
  * Domain Path: /languages
@@ -26,7 +26,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 define( 'EAC_DOMAIN', 'eac-components' );
 define( 'EAC_PLUGIN_NAME', 'Elementor Addon Components' );
-define( 'EAC_ADDONS_VERSION', '2.1.0' );
+define( 'EAC_ADDONS_VERSION', '2.1.2' );
 
 define( 'EAC_CUSTOM_FILE', __FILE__ );
 define( 'EAC_ADDONS_URL', plugins_url( '/', __FILE__ ) );
@@ -47,7 +47,7 @@ define( 'EAC_EHF_PATH', EAC_ADDONS_PATH . 'templates-lib/' );
 define( 'EAC_EHF_WIDGETS_PATH', EAC_ADDONS_PATH . 'templates-lib/widgets/' );
 define( 'EAC_EHF_WIDGETS_NAMESPACE', 'EACCustomWidgets\\TemplatesLib\\Widgets\\' );
 
-define( 'EAC_SCRIPT_DEBUG', false );           // true = .js ou false = .min.js
+define( 'EAC_SCRIPT_DEBUG', false );            // true = .js ou false = .min.js
 define( 'EAC_STYLE_DEBUG', false );            // true = .css ou false = .min.css
 define( 'EAC_GET_POST_ARGS_IN', false );       // arguments $settings pour WP_Query de la page en entrée
 define( 'EAC_GET_POST_ARGS_OUT', false );      // arguments formatés pour WP_Query en sortie

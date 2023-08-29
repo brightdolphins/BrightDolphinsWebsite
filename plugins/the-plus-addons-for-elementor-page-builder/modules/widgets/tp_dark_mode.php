@@ -5,23 +5,19 @@ Description: Dark Mode.
 Author: Theplus
 Author URI: https://posimyth.com
 */
+
 namespace TheplusAddons\Widgets;
 
 use Elementor\Widget_Base;
 use Elementor\Controls_Manager;
 use Elementor\Utils;
-use Elementor\Core\Schemes\Color;
 use Elementor\Group_Control_Background;
 use Elementor\Group_Control_Border;
 use Elementor\Group_Control_Typography;
-use Elementor\Core\Schemes\Typography;
 use Elementor\Group_Control_Box_Shadow;
 use Elementor\Core\Settings\Manager as SettingsManager;
-use Elementor\Core\Kits\Documents\Tabs\Global_Colors;
 
-if (!defined('ABSPATH'))
-    exit; // Exit if accessed directly
-
+if (!defined('ABSPATH')) exit; // Exit if accessed directly
 
 class L_ThePlus_Dark_Mode extends Widget_Base {
 		

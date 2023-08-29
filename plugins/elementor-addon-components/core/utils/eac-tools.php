@@ -6,6 +6,7 @@
  *
  * @since 1.0.0
  * @since 2.1.0 Création des méthodes de gestion des réseaux sociaux
+ * @since 2.1.2 Fix: vérifie si la fonction 'wc_get_product' existe
  */
 
 namespace EACCustomWidgets\Core\Utils;
@@ -14,6 +15,8 @@ namespace EACCustomWidgets\Core\Utils;
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+use EACCustomWidgets\Core\Eac_Config_Elements;
 
 class Eac_Tools_Util {
 
@@ -65,7 +68,7 @@ class Eac_Tools_Util {
 		'link_category',
 		'post_format',
 		'elementor_library_type',
-		//'elementor_library_category',
+		// 'elementor_library_category',
 		'elementor_font_type',
 		'yst_prominent_words',
 		'product_type',
@@ -275,7 +278,7 @@ class Eac_Tools_Util {
 			'name' => 'Email',
 			'icon' => '<i class="fa fa-envelope" aria-hidden="true"></i>',
 		),
-		'url'   => array(
+		'url'       => array(
 			'name' => 'Website',
 			'icon' => '<i class="fa fa-globe" aria-hidden="true"></i>',
 		),
@@ -497,13 +500,16 @@ class Eac_Tools_Util {
 	}
 
 	/**
+	 * 'wp_check_filetype' retourne null si ce n'est pas un type mime de fichier activé (JSON)
+	 * 
+	 * @var $relative_path Le chemin d'accès aux fichiers de configuration JSON
+	 * @var $mimes Le type mime des fichiers recherchés
 	 * @return la liste des fichiers d'un répertoire sous forme [url] => filename
-	 *
-	 * @since 1.9.5
 	 */
 	public static function get_directory_files_list( $relative_path = 'includes/config', $mimes = 'application/json' ) {
 		$files_list = array( 'none' => esc_html__( 'Aucun', 'eac-components' ) );
-		$path       = EAC_ADDONS_PATH . $relative_path;
+
+		$path = EAC_ADDONS_PATH . $relative_path;
 		if ( $dir = opendir( $path ) ) {
 			while ( $file = readdir( $dir ) ) {
 				if ( '.' !== $file && '..' !== $file ) {
@@ -961,8 +967,11 @@ class Eac_Tools_Util {
 		$the_excerpt   = null;
 		$the_post_type = $the_post->post_type;
 
-		/* Intégration du type produit */
-		if ( 'product' === $the_post_type ) {
+		/**
+		 * Intégration du type produit
+		 * @since 2.1.2 Fix test si la fonction existe
+		 */
+		if ( 'product' === $the_post_type && function_exists( 'wc_get_product' ) ) {
 			$product     = wc_get_product( $post_id );
 			$the_excerpt = $product->get_description() ? $product->get_description() : $product->get_short_description();
 		} elseif ( $the_post ) {
@@ -980,17 +989,6 @@ class Eac_Tools_Util {
 
 		/** 1.9.8  */
 		return wp_trim_words( $the_excerpt, $excerpt_length, '[...]' );
-
-		/**
-		$words = explode(' ', $the_excerpt, $excerpt_length + 1);
-		if (count($words) > $excerpt_length) {
-			array_pop($words);
-			$the_excerpt = implode(' ', $words);
-			$the_excerpt .= '[...]';     // Aucun espace avant
-		}
-
-		return $the_excerpt;
-		*/
 	}
 
 	/**

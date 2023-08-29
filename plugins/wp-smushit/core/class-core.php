@@ -261,7 +261,6 @@ class Core extends Stats {
 
 		$upgrade_url = add_query_arg(
 			array(
-				'coupon'       => 'SMUSH30OFF',
 				'utm_source'   => 'smush',
 				'utm_medium'   => 'plugin',
 				'utm_campaign' => 'smush_bulksmush_inline_filesizelimit',
@@ -352,6 +351,8 @@ class Core extends Stats {
 				'token'            => $product_analytics->get_token(),
 				'unique_id'        => $product_analytics->get_unique_id(),
 				'super_properties' => $product_analytics->get_super_properties(),
+				'debug'            => defined( 'WP_SMUSH_MIXPANEL_DEBUG' ) && WP_SMUSH_MIXPANEL_DEBUG
+										&& defined( 'WP_SMUSH_VERSION' ) && strpos( WP_SMUSH_VERSION, 'beta' ),
 			)
 		);
 

@@ -5,22 +5,21 @@ Description: Post Meta
 Author: Theplus
 Author URI: https://posimyth.com
 */
+
 namespace TheplusAddons\Widgets;
 
 use Elementor\Widget_Base;
 use Elementor\Controls_Manager;
 use Elementor\Utils;
-use Elementor\Core\Schemes\Color;
 use Elementor\Group_Control_Typography;
 use Elementor\Group_Control_Border;
-use Elementor\Core\Schemes\Typography;
 use Elementor\Group_Control_Background;
 use Elementor\Group_Control_Box_Shadow;
+use Elementor\Core\Kits\Documents\Tabs\Global_Typography;
 
 use TheplusAddons\L_Theplus_Element_Load;
-if (!defined('ABSPATH'))
-    exit; // Exit if accessed directly
 
+if (!defined('ABSPATH')) exit; // Exit if accessed directly
 
 class L_ThePlus_Post_Meta extends Widget_Base {
 		
@@ -208,7 +207,9 @@ class L_ThePlus_Post_Meta extends Widget_Base {
 			[
 				'name' => 'metaTypo',
 				'label' => esc_html__( 'Label Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_1,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_PRIMARY
+				],
 				'selector' => '{{WRAPPER}} .tp-post-meta-info .tp-meta-label',
 			]
 		);
@@ -228,7 +229,9 @@ class L_ThePlus_Post_Meta extends Widget_Base {
 			[
 				'name' => 'metavalueTypo',
 				'label' => esc_html__( 'Value Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_1,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_PRIMARY
+				],
 				'selector' => '{{WRAPPER}} .tp-post-meta-info .tp-meta-value',
 			]
 		);
@@ -593,7 +596,9 @@ class L_ThePlus_Post_Meta extends Widget_Base {
 			[
 				'name' => 'tab_category_Typo',
 				'label' => esc_html__( 'Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_1,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_PRIMARY
+				],
 				'selector' => '{{WRAPPER}} .tp-meta-category a',
 			]
 		);

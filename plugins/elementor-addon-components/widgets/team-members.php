@@ -9,6 +9,7 @@
  *
  * @since 1.9.1
  * @since 2.1.0 Refonte de la méthode 'get_social_medias'
+ * @since 2.1.1 Lazyload attribut
  */
 
 namespace EACCustomWidgets\Widgets;
@@ -47,6 +48,14 @@ class Team_Members_Widget extends Widget_Base {
 
 		wp_register_style( 'eac-team-members', EAC_Plugin::instance()->get_style_url( 'assets/css/team-members' ), array( 'eac' ), '1.9.1' );
 	}
+
+	/**
+	 * La taille de l'image par défaut
+	 *
+	 * @var IMAGE_SIZE
+	 *
+	 */
+	const IMAGE_SIZE = '640';
 
 	/**
 	 * Le nom de la clé du composant dans le fichier de configuration
@@ -681,6 +690,7 @@ class Team_Members_Widget extends Widget_Base {
 				array(
 					'name'    => 'tm_image_size',
 					'default' => 'medium',
+					'exclude' => array( 'custom' ),
 				)
 			);
 
@@ -1132,14 +1142,12 @@ class Team_Members_Widget extends Widget_Base {
 		$id = $this->get_id();
 
 		// Formate le nom avec son tag
-		$name_tag   = $settings['tm_settings_name_tag'];
-		$open_name  = '<' . $name_tag . ' class="team-members_name-content">';
-		$close_name = '</' . $name_tag . '>';
+		$open_name  = '<' . $settings['tm_settings_name_tag'] . ' ';
+		$close_name = '</' . $settings['tm_settings_name_tag'] . '>';
 
 		// Formate le job avec son tag
-		$title_tag   = $settings['tm_settings_title_tag'];
-		$open_title  = '<' . $title_tag . ' class="team-members_title-content">';
-		$close_title = '</' . $title_tag . '>';
+		$open_title  = '<' . $settings['tm_settings_title_tag'] . ' ';
+		$close_title = '</' . $settings['tm_settings_title_tag'] . '>';
 
 		// La classe du titre/texte
 		$this->add_render_attribute( 'content_wrapper', 'class', 'team-member_content' );
@@ -1148,54 +1156,68 @@ class Team_Members_Widget extends Widget_Base {
 		ob_start();
 		foreach ( $settings['tm_member_list'] as $index => $item ) {
 			$member_name_setting_key = $this->get_repeater_setting_key( 'tm_member_name', 'tm_member_list', $index );
-			$this->add_render_attribute( $member_name_setting_key, 'class', 'team-member_name' );
-			$this->add_inline_editing_attributes( $member_name_setting_key, 'advanced' );
+			$this->add_inline_editing_attributes( $member_name_setting_key, 'none' );
+			$this->add_render_attribute( $member_name_setting_key, 'class', 'team-members_name-content' );
 
 			$member_title_setting_key = $this->get_repeater_setting_key( 'tm_member_title', 'tm_member_list', $index );
-			$this->add_render_attribute( $member_title_setting_key, 'class', 'team-member_title' );
-			$this->add_inline_editing_attributes( $member_title_setting_key, 'advanced' );
+			$this->add_inline_editing_attributes( $member_title_setting_key, 'none' );
+			$this->add_render_attribute( $member_title_setting_key, 'class', 'team-members_title-content' );
 
 			$member_bio_setting_key = $this->get_repeater_setting_key( 'tm_member_biography', 'tm_member_list', $index );
-			$this->add_inline_editing_attributes( $member_bio_setting_key, 'basic' );
+			$this->add_inline_editing_attributes( $member_bio_setting_key, 'none' );
 
-			$image_data  = '';
+			$image  = array();
 			$image_url   = '';
 			$image_alt   = '';
 			$image_title = '';
-			$name_tag    = '';
-			$title_tag   = '';
+			$name_with_tag    = '';
+			$title_with_tag   = '';
 
 			// Il y a une image
 			if ( ! empty( $item['tm_member_image']['url'] ) ) {
 				// Le nom
 				if ( ! empty( $item['tm_member_name'] ) ) {
-					$name_tag = $open_name . sanitize_text_field( $item['tm_member_name'] ) . $close_name;
+					$name_with_tag = $open_name . $this->get_render_attribute_string( $member_name_setting_key ) . '>' . sanitize_text_field( $item['tm_member_name'] ) . $close_name;
 				}
 
 				// Le job
 				if ( ! empty( $item['tm_member_title'] ) ) {
-					$title_tag = $open_title . sanitize_text_field( $item['tm_member_title'] ) . $close_title;
+					$title_with_tag = $open_title . $this->get_render_attribute_string( $member_title_setting_key ) . '>' . sanitize_text_field( $item['tm_member_title'] ) . $close_title;
 				}
 
 				/**
 				 * L'image vient de la librarie des médias
 				 *
 				 * @since 2.0.0 Suppression du paramètre 'ver' de l'image
-				 * @since 2.0.2 ajout de l'attribut 'loading' à l'image
+				 * @since 2.1.1 Ajout des attributs width et height pour le lazyload
 				 */
 				if ( ! empty( $item['tm_member_image']['id'] ) ) {
-					$image_data  = Group_Control_Image_Size::get_attachment_image_src( $item['tm_member_image']['id'], 'tm_image_size', $settings );
-					$image_url   = $image_data;
+					$image  = wp_get_attachment_image_src( $item['tm_member_image']['id'], $settings['tm_image_size_size'] );
+					if ( ! $image ) {
+						$image    = array();
+						$image[0] = plugins_url() . '/elementor/assets/images/placeholder.png';
+						$image[1] = self::IMAGE_SIZE;
+						$image[2] = self::IMAGE_SIZE;
+					}
+					$image_url   = $image[0];
+					$width       = $image[1];
+					$height      = $image[2];
 					$image_alt   = Control_Media::get_image_alt( $item['tm_member_image'] );
 					$image_title = Control_Media::get_image_title( $item['tm_member_image'] );
 				} else { // Image avec Url externe sans paramètre version
-					$image_url = $item['tm_member_image']['url'];
+					$image  = array();
+					$image_url   = $item['tm_member_image']['url'];
+					$width       = self::IMAGE_SIZE;
+					$height      = self::IMAGE_SIZE;
+					$image_alt   = 'Team member external image';
+					$image_title = 'Team member external image';
 				}
 
 				$this->add_render_attribute( 'tm_image', 'src', esc_url( $image_url ) );
+				$this->add_render_attribute( 'tm_image', 'width', esc_attr( $width ) );
+				$this->add_render_attribute( 'tm_image', 'height', esc_attr( $height ) );
 				$this->add_render_attribute( 'tm_image', 'alt', esc_html( $image_alt ) );
 				$this->add_render_attribute( 'tm_image', 'title', esc_html( $image_title ) );
-				$this->add_render_attribute( 'tm_image', 'loading', 'lazy' );
 
 				if ( $settings['tm_image_animation'] ) {
 					$this->add_render_attribute( 'tm_image', 'class', 'eac-image-loaded elementor-animation-' . $settings['tm_image_animation'] );
@@ -1205,19 +1227,19 @@ class Team_Members_Widget extends Widget_Base {
 
 				?>
 				<div <?php echo wp_kses_post( $this->get_render_attribute_string( 'content_wrapper' ) ); ?>>
-					<div class="team-member_image">
+					<div class="team-member_image" role="img" aria-label="<?php echo esc_attr( $image_title ); ?>">
 						<img <?php echo wp_kses_post( $this->get_render_attribute_string( 'tm_image' ) ); ?> />
 					</div>
 					<div class="team-member_wrapper-info">
 						<div class="team-member_info-content">
-							<?php if ( ! empty( $name_tag ) ) : ?>
-								<div <?php echo wp_kses_post( $this->get_render_attribute_string( $member_name_setting_key ) ); ?>>
-									<?php echo $name_tag; // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							<?php if ( ! empty( $name_with_tag ) ) : ?>
+								<div class="team-member_name">
+									<?php echo $name_with_tag; // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 								</div>
 							<?php endif; ?>
-							<?php if ( ! empty( $title_tag ) ) : ?>
-								<div <?php echo wp_kses_post( $this->get_render_attribute_string( $member_title_setting_key ) ); ?>>
-									<?php echo $title_tag; // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							<?php if ( ! empty( $title_with_tag ) ) : ?>
+								<div class="team-member_title">
+									<?php echo $title_with_tag; // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 								</div>
 							<?php endif; ?>
 							<?php if ( ! empty( $item['tm_member_biography'] ) ) : ?>
@@ -1234,10 +1256,10 @@ class Team_Members_Widget extends Widget_Base {
 			}
 			$this->set_render_attribute( 'tm_image', 'class', null );
 			$this->set_render_attribute( 'tm_image', 'src', null );
+			$this->set_render_attribute( 'tm_image', 'width', null );
+			$this->set_render_attribute( 'tm_image', 'height', null );
 			$this->set_render_attribute( 'tm_image', 'alt', null );
 			$this->set_render_attribute( 'tm_image', 'title', null );
-			$this->set_render_attribute( 'tm_image', 'loading', null );
-			$this->set_render_attribute( 'wrapper_info', 'class', null );
 		}
 		$output = ob_get_contents();
 		ob_end_clean();
@@ -1258,23 +1280,26 @@ class Team_Members_Widget extends Widget_Base {
 		$social_medias = Eac_Tools_Util::get_all_social_medias_icon();
 
 		ob_start();
-		echo '<div class="dynamic-tags_social-container">';
 		foreach ( $social_medias as $site => $icon ) {
 			if ( empty( $repeater_item['tm_member_name'] ) || empty( $repeater_item[ 'tm_member_social_' . $site ] ) || '#' === $repeater_item[ 'tm_member_social_' . $site ] ) {
 				continue; }
 
 			if ( 'email' === $site ) {
-				echo '<a href="' . esc_url( 'mailto:' . antispambot( sanitize_email( $repeater_item[ 'tm_member_social_' . $site ] ) ) ) . '" rel="nofollow">';
+				echo '<a href="' . esc_url( 'mailto:' . antispambot( sanitize_email( $repeater_item[ 'tm_member_social_' . $site ] ) ) ) . '" rel="nofollow" aria-label="' . esc_attr( ucfirst( $site ) ) . '">';
 			} else {
-				echo '<a href="' . esc_url( $repeater_item[ 'tm_member_social_' . $site ] ) . '" target="_blank" rel="nofollow noopener noreferrer">';
+				echo '<a href="' . esc_url( $repeater_item[ 'tm_member_social_' . $site ] ) . '" target="_blank" rel="nofollow noopener noreferrer" aria-label="' . esc_attr( ucfirst( $site ) ) . '">';
 			}
-			echo '<span class="dynamic-tags_social-icon ' . esc_attr( $site ) . '" title="' . esc_attr( ucfirst( $site ) ) . '" aria-label="' . esc_attr( ucfirst( $site ) ) . '">';
+			echo '<span class="dynamic-tags_social-icon ' . esc_attr( $site ) . '" title="' . esc_attr( ucfirst( $site ) ) . '">';
 			echo $icon; // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 			echo '</span></a>';
 		}
-		echo '</div>';
 		$output = ob_get_clean();
-		echo wp_kses_post( $output );
+
+		if ( ! empty( $output ) ) {
+			echo '<div class="dynamic-tags_social-container">';
+			echo wp_kses_post( $output );
+			echo '</div>';
+		}
 	}
 
 	protected function content_template() {}

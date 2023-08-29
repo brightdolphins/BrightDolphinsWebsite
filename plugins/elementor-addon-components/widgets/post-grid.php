@@ -8,13 +8,7 @@
  * dans différents modes, masonry ou grille et avec différents filtres
  *
  * @since 1.0.0
- * @since 1.8.7 Support des custom breakpoints
- *              Suppression de la méthode 'init_settings'
- * @since 1.9.0 Intégration des scripts et des styles dans le constructeur de la class
- * @since 1.9.7 Ajout du traitement du mode 'slider'
- * @since 1.9.8 Le slider et les styles sont chargés à partir d'un trait
- * @since 2.0.0 Amélioration le chargement des images
- * @since 2.0.2 Ajout de l'attribut 'loading' à l'avatar
+ * @since 2.1.1 Lazyload attribut
  */
 
 namespace EACCustomWidgets\Widgets;
@@ -48,29 +42,32 @@ class Articles_Liste_Widget extends Widget_Base {
 
 	/**
 	 * Constructeur de la class Articles_Liste_Widget
-	 *
-	 * Enregistre les scripts et les styles
-	 *
-	 * @since 1.9.0
-	 * @since 1.9.7 Ajout des styles/scripts du mode slider
 	 */
 	public function __construct( $data = array(), $args = null ) {
 		parent::__construct( $data, $args );
 
 		wp_register_script( 'swiper', 'https://cdnjs.cloudflare.com/ajax/libs/Swiper/8.3.2/swiper-bundle.min.js', array( 'jquery' ), '8.3.2', true );
 		wp_register_script( 'isotope', EAC_ADDONS_URL . 'assets/js/isotope/isotope.pkgd.min.js', array( 'jquery' ), '3.0.6', true );
-		/*wp_register_script( 'eac-fit-rows', EAC_Plugin::instance()->get_script_url( 'assets/js/isotope/fit-rows' ), array( 'isotope' ), '2.1.0', true );*/
+		//wp_register_script( 'eac-fit-rows', EAC_Plugin::instance()->get_script_url( 'assets/js/isotope/fit-rows' ), array( 'isotope' ), '2.1.1', true );
 		wp_register_script( 'eac-imagesloaded', EAC_ADDONS_URL . 'assets/js/isotope/imagesloaded.pkgd.min.js', array( 'jquery' ), '4.1.4', true );
 		wp_register_script( 'eac-infinite-scroll', EAC_ADDONS_URL . 'assets/js/isotope/infinite-scroll.pkgd.min.js', array( 'jquery' ), '3.0.5', true );
-		wp_register_script( 'eac-post-grid', EAC_Plugin::instance()->get_script_url( 'assets/js/elementor/eac-post-grid' ), array( 'jquery', 'elementor-frontend', 'isotope', 'eac-infinite-scroll', 'swiper', 'eac-imagesloaded' ), '1.9.0', true );
+		wp_register_script( 'eac-post-grid', EAC_Plugin::instance()->get_script_url( 'assets/js/elementor/eac-post-grid' ), array( 'jquery', 'elementor-frontend', 'isotope', 'eac-infinite-scroll', 'swiper', 'eac-imagesloaded' ), EAC_ADDONS_VERSION, true );
 
 		wp_register_style( 'swiper-bundle', 'https://cdnjs.cloudflare.com/ajax/libs/Swiper/8.3.2/swiper-bundle.min.css', array(), '8.3.2' );
-		wp_register_style( 'eac-swiper', EAC_Plugin::instance()->get_style_url( 'assets/css/swiper' ), array( 'eac', 'swiper-bundle' ), '1.9.7' );
-		wp_register_style( 'eac-post-grid', EAC_Plugin::instance()->get_style_url( 'assets/css/post-grid' ), array( 'eac', 'eac-swiper' ), EAC_ADDONS_VERSION );
+		wp_enqueue_style( 'eac-swiper', EAC_Plugin::instance()->get_style_url( 'assets/css/swiper' ), array(), '1.0.0' );
+		wp_enqueue_style( 'eac-post-grid', EAC_Plugin::instance()->get_style_url( 'assets/css/post-grid' ), array( 'eac-swiper' ), '1.0.0' );
 
 		// @since 1.7.1 Supprime les callbacks du filtre de la liste 'orderby'
 		remove_all_filters( 'eac/tools/post_orderby' );
 	}
+
+	/**
+	 * La taille de l'image par défaut
+	 *
+	 * @var IMAGE_SIZE
+	 *
+	 */
+	const IMAGE_SIZE = '640';
 
 	/**
 	 * Le nom de la clé du composant dans le fichier de configuration
@@ -146,7 +143,7 @@ class Articles_Liste_Widget extends Widget_Base {
 	 * @return CSS list.
 	 */
 	public function get_style_depends() {
-		return array( 'swiper-bundle', 'eac-swiper', 'eac-post-grid' );
+		return array( 'swiper-bundle' );
 	}
 
 	/**
@@ -1919,7 +1916,7 @@ class Articles_Liste_Widget extends Widget_Base {
 		$this->add_render_attribute( 'content_wrapper', 'class', 'al-post__content-wrapper' );
 
 		// Bouton 'Load more'
-		$button_text = '<button class="al-more-button">' . esc_html__( "Plus d'articles", 'eac-components' ) . ' <span class="al-more-button-paged">' . $the_query->query_vars['paged'] . '</span>/' . $the_query->max_num_pages . '</button>';
+		$button_text = '<button class="al-more-button" type="button">' . esc_html__( "Plus d'articles", 'eac-components' ) . ' <span class="al-more-button-paged">' . $the_query->query_vars['paged'] . '</span>/' . $the_query->max_num_pages . '</button>';
 
 		/** @since 1.7.2 Affiche les arguments de la requête */
 		if ( 'yes' === $settings['al_display_content_args'] && \Elementor\Plugin::$instance->editor->is_edit_mode() ) {
@@ -1932,19 +1929,17 @@ class Articles_Liste_Widget extends Widget_Base {
 
 		ob_start();
 		if ( $the_query->have_posts() ) {
-			/**
-			 * Création et affichage des filtres
-			 *
-			 * @since 1.9.7
-			 */
+			/** Création et affichage des filtres avant le widget */
 			if ( $has_filters ) {
-				if ( $has_users && ! $has_keys ) { // Champ user renseigné et pas de clé. Affiche les auteurs formatés
-					echo Eac_Helpers_Util::get_user_filters( $user_filters ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				} elseif ( $has_keys ) { // Filtre sélectionné et champ métadonnée renseigné. Affiche les metadonnées formatées
-					echo Eac_Helpers_Util::get_meta_query_filters( $post_args ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				} elseif ( ! empty( $taxonomy_filters ) ) { // Filtre sélectionné et champs catégories et étiquettes renseignés. Affiche les catégories/étiquettes formatées
-					echo Eac_Helpers_Util::get_taxo_tag_filters( $taxonomy_filters, $term_slug_filters ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				// phpcs:disable WordPress.Security.EscapeOutput
+				if ( $has_users && ! $has_keys ) {
+					echo Eac_Helpers_Util::get_user_filters( $user_filters );
+				} elseif ( $has_keys ) {
+					echo Eac_Helpers_Util::get_meta_query_filters( $post_args );
+				} elseif ( ! empty( $taxonomy_filters ) ) {
+					echo Eac_Helpers_Util::get_taxo_tag_filters( $taxonomy_filters, $term_slug_filters );
 				}
+				// phpcs:enable WordPress.Security.EscapeOutput
 			}
 			?>
 			<div <?php echo wp_kses_post( $this->get_render_attribute_string( 'posts_wrapper' ) ); ?>>
@@ -2017,6 +2012,7 @@ class Articles_Liste_Widget extends Widget_Base {
 					 * @since 1.7.0 Ajout de l'ID Elementor du widget et de la liste des slugs dans la class pour gérer les filtres et le pagging.
 					 * Voir eac-post-grid.js:selectedItems
 					 * Surtout ne pas utiliser la fonction 'post_class'
+					 * @since 2.1.1 Ajout des attributs width et height pour le lazyload
 					 */
 					if ( ! $has_swiper ) {
 						$article_class = $unique_id . ' al-post__wrapper ' . implode( ' ', $terms_slug );
@@ -2032,13 +2028,15 @@ class Articles_Liste_Widget extends Widget_Base {
 								<!-- L'image -->
 								<?php if ( $has_image && has_post_thumbnail() ) : ?>
 									<div class="al-post__image-wrapper">
-										<div class="al-post__image">
+										<div class="al-post__image" role="img" aria-label="<?php echo esc_attr( the_title() ); ?>">
 
 											<?php
 											$image = wp_get_attachment_image_src( get_post_thumbnail_id( get_the_ID() ), $settings['al_image_dimension'] );
 											if ( ! $image ) {
 												$image    = array();
 												$image[0] = plugins_url() . '/elementor/assets/images/placeholder.png';
+												$image[1] = self::IMAGE_SIZE;
+												$image[2] = self::IMAGE_SIZE;
 											}
 											?>
 
@@ -2052,7 +2050,7 @@ class Articles_Liste_Widget extends Widget_Base {
 											<a class="swiper-no-swiping" href="<?php esc_url( the_permalink() ); ?>" target="_blank" rel="noopener noreferrer">
 											<?php endif; ?>
 
-												<img class="al-post__image-loaded" src="<?php echo esc_url( $image[0] ); ?>" alt="<?php echo esc_html( get_the_title() ); ?>" />
+												<img class="al-post__image-loaded" src="<?php echo esc_url( $image[0] ); ?>" alt="<?php echo esc_html( get_the_title() ); ?>" width="<?php echo esc_attr( $image[1] ); ?>" height="<?php echo esc_attr( $image[2] ); ?>" loading="eager" />
 
 											<?php if ( ( ! $has_swiper && $has_image_lightbox ) || $has_image_link ) : ?>
 											</a>
@@ -2061,14 +2059,16 @@ class Articles_Liste_Widget extends Widget_Base {
 									</div>
 								<?php endif; ?>
 
+								<?php if ( $has_titre || $has_resum || $has_readmore ) : ?>
 								<div class="al-post__text-wrapper">
+								<?php endif; ?>
 									<!-- Le titre -->
 									<?php if ( $has_titre ) : ?>
 										<!-- Affiche les IDs -->
 										<?php if ( $has_id ) : ?>
-											<?php echo $open_title; ?><a class="swiper-no-swiping" href="<?php esc_url( the_permalink() ); ?>" title="<?php esc_html( the_title() ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_attr( get_the_ID() ) . ' : ' . esc_html( get_the_title() ); ?></a><?php echo $close_title; ?>
+											<?php echo $open_title; ?><a class="swiper-no-swiping" href="<?php esc_url( the_permalink() ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_attr( get_the_ID() ) . ' : ' . esc_html( get_the_title() ); ?></a><?php echo $close_title; ?>
 										<?php else : ?>
-											<?php echo $open_title; ?><a class="swiper-no-swiping" href="<?php esc_url( the_permalink() ); ?>" title="<?php esc_html( the_title() ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( get_the_title() ); ?></a><?php echo $close_title; ?>
+											<?php echo $open_title; ?><a class="swiper-no-swiping" href="<?php esc_url( the_permalink() ); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html( get_the_title() ); ?></a><?php echo $close_title; ?>
 										<?php endif; ?>
 									<?php endif; ?>
 
@@ -2102,7 +2102,9 @@ class Articles_Liste_Widget extends Widget_Base {
 											</span>
 										</div>
 									<?php endif; ?>
+								<?php if ( $has_titre || $has_resum || $has_readmore ) : ?>
 								</div>
+								<?php endif; ?>
 							</div>
 
 							<?php if ( $has_avatar || $has_term || $has_auteur || $has_date || $has_comment ) : ?>
@@ -2189,38 +2191,44 @@ class Articles_Liste_Widget extends Widget_Base {
 	 * @updated   1.7.0 Ajout de l'unique ID
 	 */
 	protected function get_settings_json( $unique_id, $dataid, $pagingid, $dmp ) {
-		$module_settings = $this->get_settings_for_display();
+		$settings = $this->get_settings_for_display();
 
-		$effect = $module_settings['slider_effect'];
+		$effect = $settings['slider_effect'];
 		if ( in_array( $effect, array( 'fade', 'creative' ), true ) ) {
 			$nb_images = 1;
-		} elseif ( empty( $module_settings['slider_images_number'] ) || absint( $module_settings['slider_images_number'] ) === 0 ) {
+		} elseif ( isset( $settings['slider_images_centered'] ) && 'yes' === $settings['slider_images_centered'] ) {
+			$nb_images = 2;
+		} elseif ( empty( $settings['slider_images_number'] ) ) {
+			$nb_images = 3;
+		} elseif ( 0 === absint( $settings['slider_images_number'] ) ) {
 			$nb_images = 'auto';
 			$effect    = 'slide';
 		} else {
-			$nb_images = absint( $module_settings['slider_images_number'] );
+			$nb_images = absint( $settings['slider_images_number'] );
 		}
-		$has_swiper = 'slider' === $module_settings['al_layout_type'] ? true : false;
+
+		$has_swiper = 'slider' === $settings['al_layout_type'] ? true : false;
 
 		$settings = array(
 			'data_id'                  => $dataid,
 			'data_pagination_id'       => $pagingid,
-			'data_layout'              => $module_settings['al_layout_type'],
+			'data_layout'              => $settings['al_layout_type'],
 			'data_article'             => $unique_id,
-			'data_filtre'              => ! $has_swiper && 'yes' === $module_settings['al_content_filter_display'] ? true : false,
-			'data_fancybox'            => 'yes' === $module_settings['al_image_lightbox'] ? true : false,
+			'data_filtre'              => ! $has_swiper && 'yes' === $settings['al_content_filter_display'] ? true : false,
+			'data_fancybox'            => 'yes' === $settings['al_image_lightbox'] ? true : false,
 			'data_max_pages'           => $dmp,
 			'data_sw_id'               => 'eac_post_grid_' . $unique_id,
 			'data_sw_swiper'           => $has_swiper,
-			'data_sw_autoplay'         => 'yes' === $module_settings['slider_autoplay'] ? true : false,
-			'data_sw_loop'             => 'yes' === $module_settings['slider_loop'] ? true : false,
-			'data_sw_delay'            => absint( $module_settings['slider_delay'] ),
+			'data_sw_autoplay'         => 'yes' === $settings['slider_autoplay'] ? true : false,
+			'data_sw_loop'             => 'yes' === $settings['slider_loop'] ? true : false,
+			'data_sw_delay'            => absint( $settings['slider_delay'] ),
 			'data_sw_imgs'             => $nb_images,
+			'data_sw_centered'         => 'yes' === $settings['slider_images_centered'] ? true : false,
 			'data_sw_dir'              => 'horizontal',
-			'data_sw_rtl'              => 'right' === $module_settings['slider_rtl'] ? true : false,
+			'data_sw_rtl'              => 'right' === $settings['slider_rtl'] ? true : false,
 			'data_sw_effect'           => $effect,
 			'data_sw_free'             => true,
-			'data_sw_pagination_click' => 'yes' === $module_settings['slider_pagination'] && 'yes' === $module_settings['slider_pagination_click'] ? true : false,
+			'data_sw_pagination_click' => 'yes' === $settings['slider_pagination'] && 'yes' === $settings['slider_pagination_click'] ? true : false,
 		);
 
 		return wp_json_encode( $settings );

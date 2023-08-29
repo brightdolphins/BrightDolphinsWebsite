@@ -4,9 +4,10 @@
  * Name: Site logo
  * Slug: eac-addon-site-logo
  *
- * Description: Création et affichage du slogan du site
+ * Description: Création et affichage du logo du site
  *
  * @since 2.1.0
+ * @since 2.1.1 Ajout de l'attribut lazy load aux img
  */
 
 namespace EACCustomWidgets\TemplatesLib\Widgets;
@@ -337,9 +338,9 @@ class Site_Logo_Widget extends Widget_Base {
 			$logo = wp_get_attachment_image_src( $logo_id, $logo_size, true );
 			if ( $logo ) {
 				if ( 'image/svg' === substr( get_post_mime_type( $logo_id ), 0, 9 ) ) {
-					echo '<img class="site-logo_img" src="' . esc_url( $logo[0] ) . '" alt="' . esc_attr( $image_alt ) . '" width="' . absint( $logo[1] ) . 'px" height="auto">';
+					echo '<img class="site-logo_img" src="' . esc_url( $logo[0] ) . '" alt="' . esc_attr( $image_alt ) . '" width="' . absint( $logo[1] ) . 'px" height="auto" loading="lazy">';
 				} else {
-					echo '<img class="site-logo_img" src="' . esc_url( $logo[0] ) . '" alt="' . esc_attr( $image_alt ) . '">';
+					echo '<img class="site-logo_img" src="' . esc_url( $logo[0] ) . '" alt="' . esc_attr( $image_alt ) . '" loading="lazy">';
 				}
 			}
 			/** URL externe */
@@ -347,7 +348,7 @@ class Site_Logo_Widget extends Widget_Base {
 			$url    = $settings['site_logo_choose_image']['url'];
 			$width  = 'custom' === $settings['sl_image_size_size'] && ! empty( $settings['sl_image_size_custom_dimension']['width'] ) ? absint( $settings['sl_image_size_custom_dimension']['width'] ) . 'px' : '150px';
 			$height = 'custom' === $settings['sl_image_size_size'] && ! empty( $settings['sl_image_size_custom_dimension']['height'] ) ? absint( $settings['sl_image_size_custom_dimension']['height'] ) . 'px' : 'auto';
-			echo '<img class="site-logo_img" src="' . esc_url( $url ) . '" alt="' . esc_attr( get_bloginfo( 'name' ) ) . '" style="width:' . esc_attr( $width ) . '; height:' . esc_attr( $height ) . ';">';
+			echo '<img class="site-logo_img" src="' . esc_url( $url ) . '" alt="' . esc_attr( get_bloginfo( 'name' ) ) . '" style="width:' . esc_attr( $width ) . '; height:' . esc_attr( $height ) . ';" loading="lazy">';
 		}
 		if ( $site_url ) {
 			echo '</a>';

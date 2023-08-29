@@ -47,7 +47,7 @@ class Html_Sitemap_Widget extends Widget_Base {
 	public function __construct( $data = array(), $args = null ) {
 		parent::__construct( $data, $args );
 
-		wp_register_style( 'eac-html-sitemap', EAC_Plugin::instance()->get_style_url( 'assets/css/html-sitemap' ), array( 'eac' ), EAC_ADDONS_VERSION );
+		wp_register_style( 'eac-html-sitemap', EAC_Plugin::instance()->get_style_url( 'assets/css/html-sitemap' ), array( 'eac' ), '1.7.1' );
 
 		// Filtre la liste 'orderby' utilisée dans les articles et la taxonomie
 		add_filter(
@@ -117,17 +117,6 @@ class Html_Sitemap_Widget extends Widget_Base {
 	 */
 	public function get_categories() {
 		return Eac_Config_Elements::get_widget_categories( $this->slug );
-	}
-
-	/**
-	 * Load dependent libraries
-	 *
-	 * @access public
-	 *
-	 * @return libraries list.
-	 */
-	public function get_script_depends() {
-		return array( '' );
 	}
 
 	/**
@@ -1393,13 +1382,14 @@ class Html_Sitemap_Widget extends Widget_Base {
 	 */
 	protected function eac_get_html_sitemap_posts() {
 		$settings = $this->get_settings_for_display();
-		$this->add_render_attribute( 'sitemap_wrapper_post', 'class', 'sitemap-posts' );
-
-		$this->add_inline_editing_attributes( 'stm_post_titre', 'advanced' );
-		$this->add_render_attribute( 'stm_post_titre', 'class', 'sitemap-posts-title' );
+		$this->add_inline_editing_attributes( 'stm_post_titre', 'none' );
 		?>
-		<div <?php echo wp_kses_post( $this->get_render_attribute_string( 'sitemap_wrapper_post' ) ); ?>>
-			<div <?php echo $this->get_render_attribute_string( 'stm_post_titre' ); ?>><h2><?php echo sanitize_text_field( $settings['stm_post_titre'] ); ?></h2></div>
+		<div class="sitemap-posts">
+			<div class="sitemap-posts-title">
+				<h2 <?php echo wp_kses_post( $this->get_render_attribute_string( 'stm_post_titre' ) ); ?>>
+					<?php echo sanitize_text_field( $settings['stm_post_titre'] ); ?>
+				</h2>
+			</div>
 			<div class="sitemap-posts-list">
 				<?php
 				global $post;

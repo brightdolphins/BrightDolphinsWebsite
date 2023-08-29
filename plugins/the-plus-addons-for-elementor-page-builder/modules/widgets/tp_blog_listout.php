@@ -5,22 +5,20 @@ Description: Different style of Blog Post listing layouts.
 Author: Theplus
 Author URI: https://posimyth.com
 */
+
 namespace TheplusAddons\Widgets;
 
 use Elementor\Widget_Base;
 use Elementor\Controls_Manager;
 use Elementor\Utils;
-use Elementor\Core\Schemes\Color;
 use Elementor\Group_Control_Typography;
 use Elementor\Group_Control_Border;
-use Elementor\Core\Schemes\Typography;
 use Elementor\Group_Control_Background;
 use Elementor\Group_Control_Box_Shadow;
 use Elementor\Group_Control_Image_Size;
+use Elementor\Core\Kits\Documents\Tabs\Global_Typography;
 
-if (!defined('ABSPATH'))
-    exit; // Exit if accessed directly
-
+if (!defined('ABSPATH')) exit; // Exit if accessed directly
 
 class L_ThePlus_Blog_ListOut extends Widget_Base {
 	
@@ -547,7 +545,9 @@ class L_ThePlus_Blog_ListOut extends Widget_Base {
 			[
 				'name' => 'meta_tag_typography',
 				'label' => esc_html__( 'Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_1,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_PRIMARY
+				],
 				'selector' => '{{WRAPPER}} .blog-list .post-inner-loop .post-meta-info span',
 			]
 		);
@@ -628,7 +628,9 @@ class L_ThePlus_Blog_ListOut extends Widget_Base {
 			[
 				'name' => 'title_typography',
 				'label' => esc_html__( 'Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_1,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_PRIMARY
+				],
 				'selector' => '{{WRAPPER}} .blog-list .post-inner-loop .post-title,{{WRAPPER}} .blog-list .post-inner-loop .post-title a',
 			]
 		);
@@ -679,7 +681,7 @@ class L_ThePlus_Blog_ListOut extends Widget_Base {
                 'label' => esc_html__('Excerpt/Content', 'tpebl'),
                 'tab' => Controls_Manager::TAB_STYLE,
 				'condition'   => [
-					'display_excerpt'    => 'yes',
+					'display_excerpt' => 'yes',
 				],
             ]
         );
@@ -688,7 +690,9 @@ class L_ThePlus_Blog_ListOut extends Widget_Base {
 			[
 				'name' => 'excerpt_typography',
 				'label' => esc_html__( 'Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_1,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_PRIMARY
+				],
 				'selector' => '{{WRAPPER}} .blog-list .post-inner-loop .entry-content,{{WRAPPER}} .blog-list .post-inner-loop .entry-content p',
 			]
 		);

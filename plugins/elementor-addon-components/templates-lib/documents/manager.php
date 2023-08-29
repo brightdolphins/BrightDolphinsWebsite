@@ -492,6 +492,8 @@ final class Manager {
 	public function enqueue_scripts() {
 		wp_enqueue_style( 'eac-header-footer', EAC_Plugin::instance()->get_style_url( 'templates-lib/assets/css/header-footer' ), array(), '2.1.0' );
 
+		//Plugin::instance()->frontend->enqueue_styles();
+
 		$header_template_id = $this->has_assigned_template( SiteHeader::TYPE );
 		$footer_template_id = $this->has_assigned_template( SiteFooter::TYPE );
 
@@ -516,11 +518,29 @@ final class Manager {
 		}
 
 		if ( Eac_Config_Elements::is_widget_active( 'mega-menu' ) ) {
+			wp_register_script( 'eac-mega-menu', EAC_Plugin::instance()->get_script_url( 'templates-lib/assets/js/mega-menu' ), array( 'jquery', 'elementor-frontend' ), '2.1.0', true );
+
+			if ( class_exists( 'woocommerce' ) ) {
+				$args = array(
+					'ajax_url'    => admin_url( 'admin-ajax.php' ),
+					'ajax_action' => 'update_mini_cart_counter',
+					'ajax_nonce'  => wp_create_nonce( 'eac_update_minicart_counter' ),
+				);
+				wp_localize_script( 'eac-mega-menu', 'eacUpdateCounter', $args );
+			}
 			wp_enqueue_style( 'eac-mega-menu', EAC_Plugin::instance()->get_style_url( 'templates-lib/assets/css/mega-menu' ), array(), '2.1.0' );
 		}
 
 		if ( Eac_Config_Elements::is_widget_active( 'site-search' ) ) {
 			wp_enqueue_style( 'eac-site-search', EAC_Plugin::instance()->get_style_url( 'templates-lib/assets/css/site-search' ), array(), '2.1.0' );
+		}
+
+		if ( Eac_Config_Elements::is_widget_active( 'breadcrumbs' ) ) {
+			wp_enqueue_style( 'eac-breadcrumbs', EAC_Plugin::instance()->get_style_url( 'templates-lib/assets/css/breadcrumbs' ), array(), '2.1.1' );
+		}
+
+		if ( Eac_Config_Elements::is_widget_active( 'reader-progress' ) ) {
+			wp_enqueue_style( 'eac-reader-progress', EAC_Plugin::instance()->get_style_url( 'templates-lib/assets/css/reader-progress' ), array(), '2.1.1' );
 		}
 	}
 

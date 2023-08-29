@@ -35,19 +35,43 @@ function l_theplus_validate_html_tag( $check_tag ) {
 /*panel start*/
 function theplus_free_import_data_content(){
 	echo '<div class="tp-pro-note-title"><p>Collection of 18+ Full page Templates, All PlusWidget Pages, All PlusListing Pages, All PlusExtras Pages, and 300+ Special UI Blocks with our pro version.</p></div>
-		<div style="text-align:center;">
-			<img style="width:75%;" src="'.L_THEPLUS_URL .'assets/images/panel/plus-design.png" alt="'.esc_attr__('Plus Design','tpebl').'" class="panel-plus-design" />								
-		</div>
-	<div class="tp-pro-note-link"><a href="https://theplusaddons.com/plus-design/" target="_blank" rel="noopener noreferrer">Check Plus Design</a></div>';
+		<div style="text-align:center;"><img style="display: flex;justify-content: center;width:75%;" src="'.L_THEPLUS_URL .'assets/images/panel/plus-design.png" alt="'.esc_attr__('Plus Design','tpebl').'" class="panel-plus-design" /></div>
+		<div class="tp-pro-note-link"><a href="https://theplusaddons.com/plus-design/" target="_blank" rel="noopener noreferrer">Check Plus Design</a></div>';
 }
 add_action('theplus_free_pro_import_data', 'theplus_free_import_data_content');
 
 function theplus_free_purchase_code_content(){
-	echo '<div class="tp-pro-note-title"><p style="margin-bottom:40px;">Upgrade to Pro version to get lots more Widgets, Features, PlusDesign and Lot more.</p></div>
-		<div style="text-align:center;">
-			<img style="width:55%;" src="'.L_THEPLUS_URL .'assets/images/panel/activate.png" alt="'.esc_attr__('Activate','tpebl').'" class="panel-plus-activate" />
-		</div>
-		<div class="tp-pro-note-link"><a href="https://theplusaddons.com/free-vs-pro-compare/" target="_blank" rel="noopener noreferrer">Compare Free vs Pro</a></div>';
+	echo '<div class="tp-pro-note-title"><p style="margin-bottom:40px;font-weight: bolder;">Activate Licence to get access of our Pro Widgets, Features and Design Templates.</p></div>
+		<div style="text-align:center;"><img style="width:auto;height:300px;" src="'.L_THEPLUS_URL .'assets/images/panel/activate.png" alt="'.esc_attr__('Activate','tpebl').'" class="panel-plus-activate" /></div>
+		<div style="display: flex;flex-direction: column;align-items: center;"> 
+			<div class="tp-pro-note-step">
+				<span>STEP I : </span>
+				<span>
+					<a href="https://theplusaddons.com/pricing/" target="_blank" rel="noopener noreferrer"> 
+						Buy Pro Plugin from our Website 
+						<svg width="9" height="13" viewBox="0 0 9 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.5 1.5L7.5 7L1.5 12" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+					</a>
+				</span>
+			</div>
+			<div class="tp-pro-note-step">
+				<span>STEP II : </span>
+				<span>
+					<a href="https://store.posimyth.com/dashboard/" target="_blank" rel="noopener noreferrer"> 
+						Download Pro Plugin from Dashboard. 
+						<svg width="9" height="13" viewBox="0 0 9 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.5 1.5L7.5 7L1.5 12" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+					</a>
+				</span>
+			</div>
+			<div class="tp-pro-note-step">
+				<span>STEP III : </span>
+				<span>
+					<a href="https://theplusaddons.com/docs/how-to-activate-the-plus-addons-for-elementor/" target="_blank" rel="noopener noreferrer"> 
+						Insert key and Activate Licence.
+						<svg width="9" height="13" viewBox="0 0 9 13" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1.5 1.5L7.5 7L1.5 12" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+					</a> 
+				</span>
+			</div>
+		</div>';
 }
 add_action('theplus_free_pro_purchase_code', 'theplus_free_purchase_code_content');
 
@@ -495,9 +519,13 @@ function l_registered_widgets(){
 			'dependency' => [
 				'css' => [					
 					L_THEPLUS_PATH . DIRECTORY_SEPARATOR .'assets/css/main/countdown/plus-countdown.css',
+					L_THEPLUS_PATH . DIRECTORY_SEPARATOR .'assets/css/extra/countdown/flipdown.min.css',
+					
 				],
 				'js' => [
 					L_THEPLUS_PATH . DIRECTORY_SEPARATOR .'assets/js/extra/jquery.downCount.js',
+					L_THEPLUS_PATH . DIRECTORY_SEPARATOR .'assets/js/extra/countdown/flipdown.min.js',
+					L_THEPLUS_PATH . DIRECTORY_SEPARATOR .'assets/js/extra/countdown/progressbar.min.js',
 					L_THEPLUS_PATH . DIRECTORY_SEPARATOR .'assets/js/main/countdown/plus-countdown.min.js',
 				],
 			],

@@ -74,7 +74,7 @@ class Eac_Load_Elements {
 			$path = Eac_Config_Elements::get_widget_path( 'header-footer' );
 			if ( $path ) {
 				// Charge les actions AJAX 'wp_ajax_xxxxxx' pour mettre à jour le badge du mini-cart
-				require_once EAC_ADDONS_PATH . 'templates-lib/widgets/mega-menu-actions.php';
+				require_once EAC_ADDONS_PATH . 'templates-lib/widgets/classes/class-menu-actions.php';
 				require_once $path;
 			}
 		}

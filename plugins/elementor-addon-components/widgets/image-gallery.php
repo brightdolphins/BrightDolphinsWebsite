@@ -8,8 +8,7 @@
  * grille, mosaïque et justifiées
  *
  * @since 1.0.0
- * @since 2.0.0 Amélioration le chargement des images
- * @since 2.0.2 Ajout des attributs d'édition en ligne
+ * @since 2.1.1 Lazyload attribut
  */
 
 namespace EACCustomWidgets\Widgets;
@@ -45,9 +44,6 @@ class Image_Galerie_Widget extends Widget_Base {
 	 * Constructeur de la class Image_Galerie_Widget
 	 *
 	 * Enregistre les scripts et les styles
-	 *
-	 * @since 1.9.0
-	 * @since 1.9.7 Ajout des styles/scripts du mode slider
 	 */
 	public function __construct( $data = array(), $args = null ) {
 		parent::__construct( $data, $args );
@@ -56,12 +52,20 @@ class Image_Galerie_Widget extends Widget_Base {
 		wp_register_script( 'isotope', EAC_ADDONS_URL . 'assets/js/isotope/isotope.pkgd.min.js', array( 'jquery' ), '3.0.6', true );
 		wp_register_script( 'eac-imagesloaded', EAC_ADDONS_URL . 'assets/js/isotope/imagesloaded.pkgd.min.js', array( 'jquery' ), '4.1.4', true );
 		wp_register_script( 'eac-collageplus', EAC_ADDONS_URL . 'assets/js/isotope/jquery.collagePlus.min.js', array( 'jquery' ), '0.3.3', true );
-		wp_register_script( 'eac-image-gallery', EAC_Plugin::instance()->get_script_url( 'assets/js/elementor/eac-image-gallery' ), array( 'jquery', 'elementor-frontend', 'isotope', 'eac-collageplus', 'swiper', 'eac-imagesloaded' ), '1.0.0', true );
+		wp_register_script( 'eac-image-gallery', EAC_Plugin::instance()->get_script_url( 'assets/js/elementor/eac-image-gallery' ), array( 'jquery', 'elementor-frontend', 'isotope', 'eac-collageplus', 'swiper', 'eac-imagesloaded' ), EAC_ADDONS_VERSION, true );
 
 		wp_register_style( 'swiper-bundle', 'https://cdnjs.cloudflare.com/ajax/libs/Swiper/8.3.2/swiper-bundle.min.css', array(), '8.3.2' );
-		wp_register_style( 'eac-swiper', EAC_Plugin::instance()->get_style_url( 'assets/css/swiper' ), array( 'eac', 'swiper-bundle' ), '1.9.7' );
-		wp_register_style( 'eac-image-gallery', EAC_Plugin::instance()->get_style_url( 'assets/css/image-gallery' ), array( 'eac', 'eac-swiper' ), EAC_ADDONS_VERSION );
+		wp_enqueue_style( 'eac-swiper', EAC_Plugin::instance()->get_style_url( 'assets/css/swiper' ), array(), '1.0.0' );
+		wp_enqueue_style( 'eac-image-gallery', EAC_Plugin::instance()->get_style_url( 'assets/css/image-gallery' ), array( 'eac-swiper' ), '1.0.0' );
 	}
+
+	/**
+	 * La taille de l'image par défaut
+	 *
+	 * @var IMAGE_SIZE
+	 *
+	 */
+	const IMAGE_SIZE = '640';
 
 	/**
 	 * Le nom de la clé du composant dans le fichier de configuration
@@ -136,7 +140,7 @@ class Image_Galerie_Widget extends Widget_Base {
 	 * @return CSS list.
 	 */
 	public function get_style_depends() {
-		return array( 'swiper-bundle', 'eac-swiper', 'eac-image-gallery' );
+		return array( 'swiper-bundle' );
 	}
 
 	/**
@@ -1633,9 +1637,18 @@ class Image_Galerie_Widget extends Widget_Base {
 		/** Boucle sur tous les items */
 		foreach ( $settings['ig_image_list'] as $index => $item ) {
 
+			/** Le titre, la description et label du bouton 'read more' sont éditables en ligne */
+			$image_list_titre_key = $this->get_repeater_setting_key( 'ig_item_title', 'ig_image_list', $index );
 			$image_list_desc_key = $this->get_repeater_setting_key( 'ig_item_desc', 'ig_image_list', $index );
+			$image_list_button_key = $this->get_repeater_setting_key( 'ig_item_title_button', 'ig_image_list', $index );
+
+			$this->add_inline_editing_attributes( $image_list_titre_key, 'none' );
+			$this->add_inline_editing_attributes( $image_list_desc_key, 'none' );
+			$this->add_inline_editing_attributes( $image_list_button_key, 'none' );
+
+			$this->add_render_attribute( $image_list_titre_key, 'class', 'image-galerie__titre' );
 			$this->add_render_attribute( $image_list_desc_key, 'class', 'image-galerie__description' );
-			$this->add_inline_editing_attributes( $image_list_desc_key );
+			$this->add_render_attribute( $image_list_button_key, 'class', 'image-galerie__button-link swiper-no-swiping' );
 
 			/** Il y a une image */
 			if ( ! empty( $item['ig_item_image']['url'] ) ) {
@@ -1690,7 +1703,7 @@ class Image_Galerie_Widget extends Widget_Base {
 				$item_title = sanitize_text_field( $item['ig_item_title'] );
 
 				/** Le titre */
-				$title_with_tag = '<' . $title_tag . ' class="image-galerie__titre">' . $item_title . '</' . $title_tag . '>';
+				$title_with_tag = '<' . $title_tag . ' ' . $this->get_render_attribute_string( $image_list_titre_key ) . '>' . $item_title . '</' . $title_tag . '>';
 
 				/** Formate le titre avec ou sans icone */
 				if ( ! $link_url ) {
@@ -1702,18 +1715,10 @@ class Image_Galerie_Widget extends Widget_Base {
 				/**
 				 * @since 1.6.5 Affecte le titre à l'attribut ALT des images externes si le control 'ig_item_alt' n'est pas valorisé
 				 */
-				$image_alt = isset( $item['ig_item_alt'] ) && ! empty( $item['ig_item_alt'] ) ? sanitize_text_field( $item['ig_item_alt'] ) : $item_title;
+				$image_alt = isset( $item['ig_item_alt'] ) && ! empty( $item['ig_item_alt'] ) ? sanitize_text_field( $item['ig_item_alt'] ) : esc_html( $item_title );
 
 				/**
-				 *
-				 * @since 1.4.1 Ajout du paramètre 'ver' à l'image avec un identifiant unique
-				 * pour forcer le chargement de l'image du serveur et non du cache pour les MEDIAS
-				 *
-				 * @since 1.6.0 Gestion des images externes
-				 * La balise dynamique 'External image' ne renvoie pas l'ID de l'image
-				 *
-				 * @since 1.9.8 Affiche l'image par défaut d'Elementor s'il n'y a pas d'image
-				 * @since 2.0.0 Suppression du paramètre 'ver' de l'image
+				 * @since 2.1.1 Ajout des attributs width et height pour le lazyload
 				 */
 				// Récupère les propriétés de l'image
 				if ( ! empty( $item['ig_item_image']['id'] ) ) {
@@ -1721,11 +1726,17 @@ class Image_Galerie_Widget extends Widget_Base {
 					if ( ! $image_data ) {
 						$image_data    = array();
 						$image_data[0] = plugins_url() . '/elementor/assets/images/placeholder.png';
+						$image_data[1] = self::IMAGE_SIZE;
+						$image_data[2] = self::IMAGE_SIZE;
 					}
-					$image_url = esc_url( $image_data[0] );
+					$image_url = $image_data[0];
 					$image_alt = Control_Media::get_image_alt( $item['ig_item_image'] );
 				} else { // Image avec Url externe
-					$image_url = esc_url( $item['ig_item_image']['url'] );
+					$image_data = array();
+					$image_data[0] = esc_url( $item['ig_item_image']['url'] );
+					$image_data[1] = self::IMAGE_SIZE;
+					$image_data[2] = self::IMAGE_SIZE;
+					$image_url     = $item['ig_item_image']['url'];
 				}
 
 				/**
@@ -1735,23 +1746,25 @@ class Image_Galerie_Widget extends Widget_Base {
 				if ( ! $has_swiper && $has_image_lightbox && 'overlay-out' === $overlay ) {
 					$image = sprintf(
 						'<a href="%s" data-elementor-open-lightbox="no" data-fancybox="%s" data-caption="%s">
-						<img class="image-galerie__image-instance" src="%s" alt="%s" /></a>',
-						$image_url,
-						$unique_id,
-						$item_title,
-						$image_url,
-						$image_alt
+						<img class="image-galerie__image-instance" src="%s" alt="%s" width="%d" height="%d" loading="eager" /></a>',
+						esc_url( $image_url ),
+						esc_attr( $unique_id ),
+						esc_html( $item_title ),
+						esc_url( $image_url ),
+						esc_html( $image_alt ),
+						esc_attr( $image_data[1] ),
+						esc_attr( $image_data[2] )
 					);
 				} elseif ( $has_image_link && $link_url && 'overlay-out' === $overlay ) {
-					$image = sprintf( '<a %s><img class="image-galerie__image-instance" src="%s" alt="%s" /></a>', $this->get_render_attribute_string( 'ig-link-to' ), $image_url, $image_alt );
+					$image = sprintf( '<a %s><img class="image-galerie__image-instance" src="%s" alt="%s" width="%d" height="%d" loading="eager" /></a>', $this->get_render_attribute_string( 'ig-link-to' ), esc_url( $image_url ), esc_html( $image_alt ), esc_attr( $image_data[1] ), esc_attr( $image_data[2] ) );
 				} else {
-					$image = sprintf( '<img class="image-galerie__image-instance" src="%s" alt="%s" />', $image_url, $image_alt );
+					$image = sprintf( '<img class="image-galerie__image-instance" src="%s" alt="%s" width="%d" height="%d" loading="eager" />', esc_url( $image_url ), esc_html( $image_alt ), esc_attr( $image_data[1] ), esc_attr( $image_data[2] ) );
 				}
 
 				// On construit le DOM
 				$html .= '<div ' . $this->get_render_attribute_string( 'galerie__item' ) . '>';
 				$html .= '<div ' . $this->get_render_attribute_string( 'galerie__inner' ) . '>';
-				$html .= '<div class="image-galerie__image">';
+				$html .= '<div class="image-galerie__image" role="img" aria-label="' . esc_attr( $item_title ) . '">';
 				$html .= $image;
 				$html .= '</div>';
 
@@ -1773,13 +1786,13 @@ class Image_Galerie_Widget extends Widget_Base {
 						/** Un lien on affiche le bouton */
 						if ( $link_url && ! $has_image_link ) {
 							$html .= '<a ' . $this->get_render_attribute_string( 'ig-link-to' ) . '>';
-							$html .= '<button class="image-galerie__button-link swiper-no-swiping" type="button">' . $button_label . '</button>';
+							$html .= '<button type="button" ' . $this->get_render_attribute_string( $image_list_button_key ) . '>' . $button_label . '</button>';
 							$html .= '</a>';
 						}
 
 							/** La visionneuse est activée et l'overlay est sur l'image */
 						if ( $has_image_lightbox && 'overlay-in' === $overlay ) {
-							$html .= '<button class="image-galerie__button-lightbox swiper-no-swiping" data-src="' . $image_url . '" data-caption="' . $image_alt . '" type="button"><i class="far fa-image" aria-hidden="true"></i></button>';
+							$html .= '<button class="image-galerie__button-lightbox swiper-no-swiping" data-src="' . $image_url . '" data-caption="' . $image_alt . '" type="button" alt="' . $image_alt . '"><i class="far fa-image" aria-hidden="true"></i></button>';
 						}
 						$html .= '</div>';  // button-wrapper
 					}
@@ -1822,48 +1835,53 @@ class Image_Galerie_Widget extends Widget_Base {
 	 * @since 1.9.7 Ajout des paramètres pour le slider 'data_sw_*'
 	 */
 	protected function get_settings_json( $id ) {
-		$module_settings = $this->get_settings_for_display();
-		$layout_mode     = in_array( $module_settings['ig_layout_type'], array( 'masonry', 'fitRows', 'justify', 'slider' ), true ) ? $module_settings['ig_layout_type'] : 'fitRows';
-		$grid_height     = ! empty( $module_settings['ig_justify_height']['size'] ) ? $module_settings['ig_justify_height']['size'] : 300; // justify Desktop
+		$settings = $this->get_settings_for_display();
+		$layout_mode     = in_array( $settings['ig_layout_type'], array( 'masonry', 'fitRows', 'justify', 'slider' ), true ) ? $settings['ig_layout_type'] : 'fitRows';
+		$grid_height     = ! empty( $settings['ig_justify_height']['size'] ) ? $settings['ig_justify_height']['size'] : 300; // justify Desktop
 
-		if ( in_array( $module_settings['ig_layout_type'], array( 'justify' ), true ) ) {
+		if ( in_array( $settings['ig_layout_type'], array( 'justify' ), true ) ) {
 			$overlay = 'overlay-in';
-		} elseif ( ! isset( $module_settings['ig_overlay_inout'] ) ) {
+		} elseif ( ! isset( $settings['ig_overlay_inout'] ) ) {
 			$overlay = '';
 		} else {
-			$overlay = $module_settings['ig_overlay_inout'];
+			$overlay = $settings['ig_overlay_inout'];
 		}
 
-		$effect = $module_settings['slider_effect'];
+		$effect = $settings['slider_effect'];
 		if ( in_array( $effect, array( 'fade', 'creative' ), true ) ) {
 			$nb_images = 1;
-		} elseif ( empty( $module_settings['slider_images_number'] ) || 0 === $module_settings['slider_images_number'] ) {
+		} elseif ( isset( $settings['slider_images_centered'] ) && 'yes' === $settings['slider_images_centered'] ) {
+			$nb_images = 2;
+		} elseif ( empty( $settings['slider_images_number'] ) ) {
+			$nb_images = 3;
+		} elseif ( 0 === absint( $settings['slider_images_number'] ) ) {
 			$nb_images = 'auto';
 			$effect    = 'slide';
 		} else {
-			$nb_images = absint( $module_settings['slider_images_number'] );
+			$nb_images = absint( $settings['slider_images_number'] );
 		}
 
 		$settings = array(
 			'data_id'                  => $id,
 			'data_layout'              => $layout_mode,
 			'gridHeight'               => $grid_height,
-			'gridHeightT'              => ! empty( $module_settings['ig_justify_height_tablet']['size'] ) ? $module_settings['ig_justify_height_tablet']['size'] : $grid_height,
-			'gridHeightM'              => ! empty( $module_settings['ig_justify_height_mobile']['size'] ) ? $module_settings['ig_justify_height_mobile']['size'] : $grid_height,
+			'gridHeightT'              => ! empty( $settings['ig_justify_height_tablet']['size'] ) ? $settings['ig_justify_height_tablet']['size'] : $grid_height,
+			'gridHeightM'              => ! empty( $settings['ig_justify_height_mobile']['size'] ) ? $settings['ig_justify_height_mobile']['size'] : $grid_height,
 			'data_overlay'             => $overlay,
-			'data_fancybox'            => 'yes' === $module_settings['ig_image_lightbox'] ? true : false,
-			'data_metro'               => 'yes' === $module_settings['ig_layout_type_metro'] ? true : false,
-			'data_filtre'              => 'yes' === $module_settings['ig_content_filter_display'] ? true : false,
-			'data_sw_swiper'           => 'slider' === $module_settings['ig_layout_type'] ? true : false,
-			'data_sw_autoplay'         => 'yes' === $module_settings['slider_autoplay'] ? true : false,
-			'data_sw_loop'             => 'yes' === $module_settings['slider_loop'] ? true : false,
-			'data_sw_delay'            => absint( $module_settings['slider_delay'] ),
+			'data_fancybox'            => 'yes' === $settings['ig_image_lightbox'] ? true : false,
+			'data_metro'               => 'yes' === $settings['ig_layout_type_metro'] ? true : false,
+			'data_filtre'              => 'yes' === $settings['ig_content_filter_display'] ? true : false,
+			'data_sw_swiper'           => 'slider' === $settings['ig_layout_type'] ? true : false,
+			'data_sw_autoplay'         => 'yes' === $settings['slider_autoplay'] ? true : false,
+			'data_sw_loop'             => 'yes' === $settings['slider_loop'] ? true : false,
+			'data_sw_delay'            => absint( $settings['slider_delay'] ),
 			'data_sw_imgs'             => $nb_images,
+			'data_sw_centered'         => 'yes' === $settings['slider_images_centered'] ? true : false,
 			'data_sw_dir'              => 'horizontal',
-			'data_sw_rtl'              => 'right' === $module_settings['slider_rtl'] ? true : false,
+			'data_sw_rtl'              => 'right' === $settings['slider_rtl'] ? true : false,
 			'data_sw_effect'           => $effect,
 			'data_sw_free'             => true,
-			'data_sw_pagination_click' => 'yes' === $module_settings['slider_pagination'] && 'yes' === $module_settings['slider_pagination_click'] ? true : false,
+			'data_sw_pagination_click' => 'yes' === $settings['slider_pagination'] && 'yes' === $settings['slider_pagination_click'] ? true : false,
 		);
 
 		return wp_json_encode( $settings );
@@ -1906,15 +1924,15 @@ class Image_Galerie_Widget extends Widget_Base {
 				ksort( $filters_name, SORT_FLAG_CASE | SORT_NATURAL );
 
 				$html_filtres .= "<div id='ig-filters__wrapper' class='ig-filters__wrapper'>";
-				$html_filtres .= "<div class='ig-filters__item ig-active'><a href='#' data-filter='*'>" . esc_html__( 'Tous', 'eac-components' ) . '</a></div>';
+				$html_filtres .= "<div class='ig-filters__item ig-active'><a href='#' data-filter='*' role='button'>" . esc_html__( 'Tous', 'eac-components' ) . '</a></div>';
 				foreach ( $filters_name as $filter_name ) {
-					$html_filtres .= "<div class='ig-filters__item'><a href='#' data-filter='." . sanitize_title( $filter_name ) . "'>" . ucfirst( $filter_name ) . '</a></div>';
+					$html_filtres .= "<div class='ig-filters__item'><a href='#' data-filter='." . sanitize_title( $filter_name ) . "' role='button'>" . ucfirst( $filter_name ) . '</a></div>';
 				}
 				$html_filtres .= '</div>';
 
 				// Filtre dans une liste pour les media query
 				$html_filtres     .= "<div id='ig-filters__wrapper-select' class='ig-filters__wrapper-select'>";
-				$html_filtres     .= "<select class='ig-filter__select'>";
+				$html_filtres     .= "<select class='ig-filters__select' aria-label='Filter labels'>";
 					$html_filtres .= "<option value='*' selected>" . esc_html__( 'Tous', 'eac-components' ) . '</option>';
 				foreach ( $filters_name as $filter_name ) {
 					$html_filtres .= "<option value='." . sanitize_title( $filter_name ) . "'>" . ucfirst( $filter_name ) . '</option>';

@@ -5,6 +5,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use EACCustomWidgets\Core\Eac_Config_Elements;
+
 /**
 add_action('elementor/editor/wp_head', function() {
 	if (\Elementor\Plugin::$instance->editor->is_edit_mode()) {
@@ -128,7 +130,6 @@ function eac_img_shortcode( $params = array() ) {
 
 	if ( empty( $source ) ) {
 		return $html_default; }
-	// if (! empty($source) && ! preg_match("/\.(gif|png|jpg|jpeg|bmp)$/i", $source)) { return $html_default; }
 
 	if ( 'yes' === $embed_link ) {
 		// print_r($linked); // Embed le lien
@@ -204,12 +205,17 @@ function eac_elementor_add_tmpl( $params = array() ) {
  *
  * @since 1.6.0
  * @since 2.1.0 Ajout de la colonne 'Show on'
+ * @since 2.1.0 Ajout de la colonne 'Cache'
  */
 function eac_add_colonnes_elementor( $columns ) {
 	$hft_column = array();
+	$option_cache = get_option( Eac_Config_Elements::get_mega_nav_menu_cache_name() );
 
 	if ( ! empty( get_query_var( 'elementor_library_type' ) ) && ( 'siteheader' === get_query_var( 'elementor_library_type' ) || 'sitefooter' === get_query_var( 'elementor_library_type' ) ) ) {
-		$hft_column['eac_header_footer'] = esc_html__( 'Afficher avec', 'eac-components' );
+		$hft_column['eac_hfb_show'] = esc_html__( 'Afficher avec', 'eac-components' );
+		if ( $option_cache && 'yes' === $option_cache ) {
+			$hft_column['eac_hfb_cache'] = esc_html( 'Cache' );
+		}
 	} else {
 		$hft_column['eac_shortcode'] = esc_html__( 'Code court', 'eac-components' );
 	}
@@ -223,16 +229,34 @@ function eac_add_colonnes_elementor( $columns ) {
  *
  * @since 1.6.0
  * @since 1.9.1 Check post_status
- * @since 2.1.0 Ajout de la valorisation de la colonne 'Show on'
+ * @since 2.1.0 Valorisation de la colonne 'Show on'
+ * @since 2.1.1 Valorisation de la colonne 'Cache' si le menu est effectivement dans le cache (options)
  */
 function eac_data_colonnes_elementor( $column_name, $post_id ) {
+	global $wpdb;
 	$the_post = get_post( $post_id );
 
 	if ( 'publish' === $the_post->post_status && 'eac_shortcode' === $column_name ) {
 		echo '<input type="text" class="widefat" onfocus="this.select()" value=\'[eac_elementor_tmpl id="' . esc_attr( $post_id ) . '"]\' readonly>';
-	}
+	} elseif ( 'publish' === $the_post->post_status && 'eac_hfb_cache' === $column_name ) {
+		$option_name = 'eac_options_nav_menu-' . $post_id . '-';
+		$option      = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT option_name
+				FROM {$wpdb->prefix}options
+				WHERE option_name LIKE %s",
+				$wpdb->esc_like( $option_name ) . '%'
+			)
+		);
 
-	if ( 'publish' === $the_post->post_status && 'eac_header_footer' === $column_name ) {
+		//error_log(json_encode(\Elementor\Plugin::$instance->documents->get( $post_id )->get_elements_data()));
+
+		if ( $option && ! empty( $option ) ) {
+			echo esc_html__( 'Oui', 'eac-components' );
+		} else {
+			echo esc_html__( 'Non', 'eac-components' );
+		}
+	} elseif ( 'publish' === $the_post->post_status && 'eac_hfb_show' === $column_name ) {
 		$meta = get_post_meta( $post_id, '_elementor_page_settings', true );
 
 		if ( isset( $meta['show_on'] ) ) {

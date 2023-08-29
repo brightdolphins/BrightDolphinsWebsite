@@ -92,11 +92,11 @@ class Eac_Author_Social_Network extends Tag {
 
 			if ( '' !== $value ) {
 				if ( 'email' === $key ) {
-					echo '<a href="' . esc_url( 'mailto:' . antispambot( sanitize_email( $value ) ) ) . '" rel="nofollow">';
+					echo '<a href="' . esc_url( 'mailto:' . antispambot( sanitize_email( $value ) ) ) . '" rel="nofollow" aria-label="' . esc_attr( ucfirst( $key ) ) . '">';
 				} else {
-					echo '<a href="' . esc_url( $value ) . '" rel="nofollow">';
+					echo '<a href="' . esc_url( $value ) . '" rel="nofollow" aria-label="' . esc_attr( ucfirst( $key ) ) . '">';
 				}
-				echo '<span class="dynamic-tags_social-icon ' . esc_attr( $key ) . '" title="' . esc_attr( ucfirst( $key ) ) . '" aria-label="' . esc_attr( ucfirst( $key ) ) . '">';
+				echo '<span class="dynamic-tags_social-icon ' . esc_attr( $key ) . '" title="' . esc_attr( ucfirst( $key ) ) . '">';
 				echo Eac_Tools_Util::get_social_media_icon( $key );  // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 				echo '</span></a>';
 			}

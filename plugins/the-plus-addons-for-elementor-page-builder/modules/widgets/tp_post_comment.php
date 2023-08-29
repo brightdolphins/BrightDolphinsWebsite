@@ -5,22 +5,21 @@ Description: Post Comment
 Author: Theplus
 Author URI: https://posimyth.com
 */
+
 namespace TheplusAddons\Widgets;
 
 use Elementor\Widget_Base;
 use Elementor\Controls_Manager;
 use Elementor\Utils;
-use Elementor\Core\Schemes\Color;
 use Elementor\Group_Control_Typography;
 use Elementor\Group_Control_Border;
-use Elementor\Core\Schemes\Typography;
 use Elementor\Group_Control_Background;
 use Elementor\Group_Control_Box_Shadow;
+use Elementor\Core\Kits\Documents\Tabs\Global_Typography;
 
 use TheplusAddons\L_Theplus_Element_Load;
-if (!defined('ABSPATH'))
-    exit; // Exit if accessed directly
 
+if (!defined('ABSPATH')) exit; // Exit if accessed directly
 
 class L_ThePlus_Post_Comment extends Widget_Base {
 		
@@ -99,7 +98,9 @@ class L_ThePlus_Post_Comment extends Widget_Base {
 			[
 				'name' => 'headingTypo',
 				'label' => esc_html__( 'Text', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_1,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_PRIMARY
+				],
 				'selector' => '{{WRAPPER}} .tp-post-comment .comment-list .comment-section-title,.tp-post-comment #respond.comment-respond h3#reply-title',
 			]
 		);
@@ -216,7 +217,9 @@ class L_ThePlus_Post_Comment extends Widget_Base {
 			[
 				'name' => 'userTypo',
 				'label' => esc_html__( 'Username Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_1,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_PRIMARY
+				],
 				'selector' => '{{WRAPPER}} .tp-post-comment .comment-author.vcard .fn .url',				
 			]
 		);
@@ -265,7 +268,9 @@ class L_ThePlus_Post_Comment extends Widget_Base {
 			[
 				'name' => 'metaTypo',
 				'label' => esc_html__( 'Meta Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_1,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_PRIMARY
+				],
 				'selector' => '{{WRAPPER}} .tp-post-comment .comment-meta .comment-metadata a',
 				
 			]
@@ -315,7 +320,9 @@ class L_ThePlus_Post_Comment extends Widget_Base {
 			[
 				'name' => 'replyTypo',
 				'label' => esc_html__( 'Reply Message Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_1,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_PRIMARY
+				],
 				'selector' => '{{WRAPPER}} .tp-post-comment .comment-list .comment-content,{{WRAPPER}} .tp-post-comment .comment-list .comment-content p',
 			]
 		);
@@ -462,7 +469,9 @@ class L_ThePlus_Post_Comment extends Widget_Base {
 			[
 				'name' => 'repbtnTypo',
 				'label' => esc_html__( 'Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_1,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_PRIMARY
+				],
 				'selector' => '{{WRAPPER}} .tp-post-comment .comment-list .reply a',
 			]
 		);
@@ -587,7 +596,9 @@ class L_ThePlus_Post_Comment extends Widget_Base {
 			[
 				'name' => 'repCanbtnTypo',
 				'label' => esc_html__( 'Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_1,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_PRIMARY
+				],
 				'selector' => '{{WRAPPER}} .tp-post-comment #respond.comment-respond #cancel-comment-reply-link',
 			]
 		);
@@ -655,7 +666,9 @@ class L_ThePlus_Post_Comment extends Widget_Base {
 			[
 				'name' => 'fieldLabelTypo',
 				'label' => esc_html__( 'Label Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_1,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_PRIMARY
+				],
 				'selector' => '{{WRAPPER}} .tp-post-comment #respond #commentform label',
 				'separator' => 'after',	
 			]
@@ -667,10 +680,7 @@ class L_ThePlus_Post_Comment extends Widget_Base {
 				'type' => Controls_Manager::DIMENSIONS,
 				'size_units' => [ 'px', 'em', '%' ],				
 				'selectors' => [
-					'{{WRAPPER}} .tp-post-comment #commentform #author,
-				{{WRAPPER}} .tp-post-comment #commentform #email,
-				{{WRAPPER}} .tp-post-comment #commentform #url,
-				{{WRAPPER}} .tp-post-comment form.comment-form textarea#comment' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+					'{{WRAPPER}} .tp-post-comment #commentform #author,{{WRAPPER}} .tp-post-comment #commentform #email,{{WRAPPER}} .tp-post-comment #commentform #url,{{WRAPPER}} .tp-post-comment form.comment-form textarea#comment' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
 				],
 				'separator' => 'after',	
 			]
@@ -680,11 +690,10 @@ class L_ThePlus_Post_Comment extends Widget_Base {
 			[
 				'name' => 'fieldTypo',
 				'label' => esc_html__( 'Fields Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_1,
-				'selector' => '{{WRAPPER}} .tp-post-comment #commentform #author,
-				{{WRAPPER}} .tp-post-comment #commentform #email,
-				{{WRAPPER}} .tp-post-comment #commentform #url,
-				{{WRAPPER}} .tp-post-comment form.comment-form textarea#comment',
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_PRIMARY
+				],
+				'selector' => '{{WRAPPER}} .tp-post-comment #commentform #author,{{WRAPPER}} .tp-post-comment #commentform #email,{{WRAPPER}} .tp-post-comment #commentform #url,{{WRAPPER}} .tp-post-comment form.comment-form textarea#comment',
 			]
 		);		
 		$this->start_controls_tabs( 'tabs_cmnt_field_style' );
@@ -701,10 +710,7 @@ class L_ThePlus_Post_Comment extends Widget_Base {
 				'type' => Controls_Manager::COLOR,
 				'default' => '',
 				'selectors' => [
-					'{{WRAPPER}} .tp-post-comment #commentform #author,
-				{{WRAPPER}} .tp-post-comment #commentform #email,
-				{{WRAPPER}} .tp-post-comment #commentform #url,
-				{{WRAPPER}} .tp-post-comment form.comment-form textarea#comment' => 'color: {{VALUE}}',
+					'{{WRAPPER}} .tp-post-comment #commentform #author,{{WRAPPER}} .tp-post-comment #commentform #email,{{WRAPPER}} .tp-post-comment #commentform #url,{{WRAPPER}} .tp-post-comment form.comment-form textarea#comment' => 'color: {{VALUE}}',
 				],
 				
 			]
@@ -991,7 +997,9 @@ class L_ThePlus_Post_Comment extends Widget_Base {
 			[
 				'name' => 'btnTypo',
 				'label' => esc_html__( 'Button Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_1,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_PRIMARY
+				],
 				'selector' => '{{WRAPPER}} .tp-post-comment #commentform #submit',
 			]
 		);

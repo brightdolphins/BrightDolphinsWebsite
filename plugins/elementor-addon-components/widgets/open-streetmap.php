@@ -16,7 +16,8 @@
  *              Intégration de l'import de données d'un fichier geoJSON
  * @since 2.0.2 Test du retour de la fonction json_decode erroné
  * @since 2.1.0 Ajout du mode plein écran
- * Fix remplacement 'file_get_contents' par 'wp_remote_get'
+ *              Fix remplacement 'file_get_contents' par 'wp_remote_get'
+ * @since 2.1.1 Fonctionnalité upload des fichiers JSON est active
  */
 
 namespace EACCustomWidgets\Widgets;
@@ -175,8 +176,6 @@ class Open_Streetmap_Widget extends Widget_Base {
 	 * Constructeur de la class Open_Streetmap_Widget
 	 *
 	 * Enregistre les scripts et les styles
-	 *
-	 * @since 1.9.0
 	 */
 	public function __construct( $data = array(), $args = null ) {
 		parent::__construct( $data, $args );
@@ -189,12 +188,12 @@ class Open_Streetmap_Widget extends Widget_Base {
 
 		wp_register_script( 'leaflet', 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js', array(), '1.7.1', true );
 		wp_register_script( 'marker-cluster', 'https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.0/leaflet.markercluster.js', array( 'leaflet' ), '1.5.0', true );
-		wp_register_script( 'fullscreen', EAC_Plugin::instance()->get_script_url( 'assets/js/elementor/eac-openstreetmap-fullscreen' ), array( 'leaflet' ), EAC_ADDONS_VERSION, true );
-		wp_register_script( 'eac-openstreetmap', EAC_Plugin::instance()->get_script_url( 'assets/js/elementor/eac-openstreetmap' ), array( 'jquery', 'elementor-frontend', 'leaflet', 'marker-cluster', 'fullscreen' ), EAC_ADDONS_VERSION, true );
+		wp_register_script( 'fullscreen', EAC_Plugin::instance()->get_script_url( 'assets/js/elementor/eac-openstreetmap-fullscreen' ), array( 'leaflet' ), '2.1.0', true );
+		wp_register_script( 'eac-openstreetmap', EAC_Plugin::instance()->get_script_url( 'assets/js/elementor/eac-openstreetmap' ), array( 'jquery', 'elementor-frontend', 'leaflet', 'marker-cluster', 'fullscreen' ), '1.8.8', true );
 
 		wp_register_style( 'marker-cluster', 'https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.0/MarkerCluster.min.css', array(), '1.5.0' );
 		wp_register_style( 'marker-cluster-default', 'https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.0/MarkerCluster.Default.min.css', array(), '1.5.0' );
-		wp_register_style( 'eac-leaflet', EAC_Plugin::instance()->get_style_url( 'assets/css/open-streetmap' ), array( 'eac', 'marker-cluster', 'marker-cluster-default' ), EAC_ADDONS_VERSION );
+		wp_register_style( 'eac-leaflet', EAC_Plugin::instance()->get_style_url( 'assets/css/open-streetmap' ), array( 'eac', 'marker-cluster', 'marker-cluster-default' ), '1.8.8' );
 	}
 
 	/**
@@ -597,7 +596,6 @@ class Open_Streetmap_Widget extends Widget_Base {
 				'osm_markers_import_type',
 				array(
 					'label'       => esc_html__( 'Type de lien', 'eac-components' ),
-					'description' => esc_html__( "Local = le fichier est dans le répertoire '/includes/config/osm/markers'.", 'eac-components' ),
 					'type'        => Controls_Manager::SELECT,
 					'default'     => 'none',
 					'options'     => array(
@@ -610,19 +608,39 @@ class Open_Streetmap_Widget extends Widget_Base {
 			);
 
 			$this->add_control(
-				'osm_markers_import_url',
+				'osm_markers_import_file_info',
 				array(
-					'label'       => esc_html__( 'URL', 'eac-components' ),
-					'description' => esc_html__( "Coller le chemin absolu du fichier 'geoJSON'", 'eac-components' ),
-					'type'        => Controls_Manager::URL,
-					'placeholder' => 'http://your-link.com/file-geojson.json',
+					'type'            => Controls_Manager::RAW_HTML,
+					'content_classes' => 'elementor-panel-alert elementor-panel-alert-info',
+					'raw'             => esc_html__( "Local = le fichier est dans le répertoire '/includes/config/osm/markers'.", 'eac-components' ),
 					'condition'   => array(
 						'osm_markers_import_list' => 'yes',
-						'osm_markers_import_type' => 'url',
+						'osm_markers_import_type' => 'file',
 					),
 				)
 			);
 
+			/** @since 2.1.1 */
+			if ( Eac_Config_Elements::is_feature_active( 'unfiltered-medias' ) ) {
+				$this->add_control(
+					'osm_markers_import_url',
+					array(
+						'label'       => esc_html__( 'URL', 'eac-components' ),
+						'description' => esc_html__( "Coller le chemin absolu du fichier 'geoJSON'", 'eac-components' ),
+						'type'        => Controls_Manager::URL,
+						'placeholder' => 'http://your-link.com/file-geojson.json',
+						'condition'   => array(
+							'osm_markers_import_list' => 'yes',
+							'osm_markers_import_type' => 'url',
+						),
+					)
+				);
+			}
+
+			/**
+			 * La fonction 'get_directory_files_list' de l'objet 'Eac_Tools_Util' utilise une fonction WP
+			 * Cette fonction vérifie les droits sur le mime type 'json' activé ou non
+			 */
 			$this->add_control(
 				'osm_markers_import_file',
 				array(
@@ -639,6 +657,22 @@ class Open_Streetmap_Widget extends Widget_Base {
 				)
 			);
 
+			/** @since 2.1.1 */
+			if ( ! Eac_Config_Elements::is_feature_active( 'unfiltered-medias' ) ) {
+				$this->add_control(
+					'osm_markers_import_url_info',
+					array(
+						'type'            => Controls_Manager::RAW_HTML,
+						'content_classes' => 'elementor-panel-alert elementor-panel-alert-warning',
+						'raw'             => esc_html__( 'Activer la fonctionnalité "Télécharger les fichiers non filtrés" pour lire un flux JSON', 'eac-components' ),
+						'condition'   => array(
+							'osm_markers_import_list' => 'yes',
+							'osm_markers_import_type!' => 'none',
+						),
+					)
+				);
+			}
+
 			$this->add_control(
 				'osm_markers_import_keywords',
 				array(
@@ -648,7 +682,10 @@ class Open_Streetmap_Widget extends Widget_Base {
 					'type'        => Controls_Manager::TEXTAREA,
 					'dynamic'     => array( 'active' => true ),
 					'label_block' => true,
-					'condition'   => array( 'osm_markers_import_list' => 'yes' ),
+					'condition'   => array(
+						'osm_markers_import_list'  => 'yes',
+						'osm_markers_import_type!' => 'none',
+					),
 				)
 			);
 
@@ -660,7 +697,10 @@ class Open_Streetmap_Widget extends Widget_Base {
 					'options'     => $this->base_icons,
 					'default'     => 'default.png',
 					'label_block' => true,
-					'condition'   => array( 'osm_markers_import_list' => 'yes' ),
+					'condition'   => array(
+						'osm_markers_import_list'  => 'yes',
+						'osm_markers_import_type!' => 'none',
+					),
 				)
 			);
 
@@ -1061,7 +1101,7 @@ class Open_Streetmap_Widget extends Widget_Base {
 	protected function render() {
 		?>
 		<div class="eac-open-streetmap">
-			<input type="hidden" id="osm_nonce" name="osm_nonce" value="<?php echo wp_create_nonce( 'eac_file_osm_nonce_' . $this->get_id() ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>" />
+			<input type="hidden" id="osm_nonce" name="osm_nonce" value="<?php echo esc_attr( wp_create_nonce( 'eac_file_osm_nonce_' . $this->get_id() ) ); ?>" />
 			<?php $this->render_map(); ?>
 		</div>
 		<?php
@@ -1196,17 +1236,27 @@ class Open_Streetmap_Widget extends Widget_Base {
 	 */
 	protected function get_settings_json() {
 		$module_settings = $this->get_settings_for_display();
-		$locate          = false; // 'yes' === $module_settings['osm_settings_client_geolocate'] ? true : false;
-		$zoomauto        = 'yes' === $module_settings['osm_settings_zoom_auto'] ? true : false;
-		$layer           = isset( $this->base_layers[ $module_settings['osm_settings_layers'] ] ) ? $this->base_layers[ $module_settings['osm_settings_layers'] ] : $this->layer_default;
-		$has_import      = 'yes' === $module_settings['osm_markers_import_list'] ? true : false;
-		$file_import     = '';
-		if ( $has_import && 'url' === $module_settings['osm_markers_import_type'] && ! empty( $module_settings['osm_markers_import_url']['url'] ) ) {
+
+		/** @since 2.1.1 */
+		$is_json_actif     = Eac_Config_Elements::is_feature_active( 'unfiltered-medias' );
+		$locate            = false; // 'yes' === $module_settings['osm_settings_client_geolocate'] ? true : false;
+		$zoomauto          = 'yes' === $module_settings['osm_settings_zoom_auto'] ? true : false;
+		$layer             = isset( $this->base_layers[ $module_settings['osm_settings_layers'] ] ) ? $this->base_layers[ $module_settings['osm_settings_layers'] ] : $this->layer_default;
+		$has_import        = 'yes' === $module_settings['osm_markers_import_list'] ? true : false;
+		$has_import_url    = $has_import && $is_json_actif && 'url' === $module_settings['osm_markers_import_type'];
+		$has_import_file   = $has_import && 'file' === $module_settings['osm_markers_import_type'] && 'none' !== $module_settings['osm_markers_import_file'];
+		$file_import       = '';
+		$import_icon_sizes = $this->sizes_icons_default;
+
+		if ( $has_import_url && ! empty( $module_settings['osm_markers_import_url']['url'] ) ) {
 			$file_import = esc_url( $module_settings['osm_markers_import_url']['url'] );
-		} elseif ( $has_import && 'file' === $module_settings['osm_markers_import_type'] && ! empty( $module_settings['osm_markers_import_file'] ) && 'none' !== $module_settings['osm_markers_import_file'] ) {
-			$file_import = $module_settings['osm_markers_import_file'];
+		} elseif ( $has_import_file && ! empty( $module_settings['osm_markers_import_file'] ) ) {
+			$file_import = esc_url( $module_settings['osm_markers_import_file'] );
 		}
-		$import_icon_sizes = ! empty( $this->base_icons_sizes ) && isset( $this->base_icons_sizes[ $module_settings['osm_markers_import_marker'] ] ) ? $this->base_icons_sizes[ $module_settings['osm_markers_import_marker'] ] : $this->sizes_icons_default;
+
+		if ( $has_import && ! empty( $this->base_icons_sizes ) && isset( $this->base_icons_sizes[ $module_settings['osm_markers_import_marker'] ] ) ) {
+			$import_icon_sizes = $this->base_icons_sizes[ $module_settings['osm_markers_import_marker'] ];
+		}
 
 		$settings = array(
 			'data_id'            => $this->get_id(),
@@ -1223,7 +1273,7 @@ class Open_Streetmap_Widget extends Widget_Base {
 			'data_clickpopup'    => 'yes' === $module_settings['osm_content_click_popup'] ? true : false,
 			'data_import'        => $has_import,
 			'data_import_url'    => $file_import,
-			'data_import_icon'   => $module_settings['osm_markers_import_marker'],
+			'data_import_icon'   => isset( $module_settings['osm_markers_import_marker'] ) ? $module_settings['osm_markers_import_marker'] : 'default.png',
 			'data_import_sizes'  => $import_icon_sizes,
 			'data_keywords'      => ! empty( $module_settings['osm_markers_import_keywords'] ) ? preg_replace( "/\r|\n/", ',', $module_settings['osm_markers_import_keywords'] ) : '',
 			'data_collapse_menu' => true, // 'yes' === $module_settings['osm_content_tiles_control'] ? true : false,
@@ -1252,7 +1302,7 @@ class Open_Streetmap_Widget extends Widget_Base {
 				'headers' => array( 'Accept' => 'application/json' ),
 			)
 		);
-
+		//error_log(json_encode(wp_remote_retrieve_response_code($json)));
 		if ( ! is_wp_error( $json ) && 200 === wp_remote_retrieve_response_code( $json ) && ! empty( wp_remote_retrieve_body( $json ) ) ) {
 			$body   = wp_remote_retrieve_body( $json );
 			$layers = json_decode( $body, true );

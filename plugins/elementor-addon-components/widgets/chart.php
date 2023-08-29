@@ -7,8 +7,7 @@
  * Description: Chart_Widget
  *
  * @since 1.5.4
- * @since 1.6.4 Selection de la palette de couleurs globales (Saved Color)
- * @since 1.9.0 Intégration des scripts et des styles dans le constructeur de la class
+ * @since 2.1.2 Fix: use strict comparison for 'file_get_contents'
  */
 
 namespace EACCustomWidgets\Widgets;
@@ -836,7 +835,9 @@ class Chart_Widget extends Widget_Base {
 		if ( 'yes' === $settings['chart_file_import'] ) {
 			$url = filter_var( $settings['chart_file_url']['url'], FILTER_SANITIZE_URL );
 
-			if ( ! $json_source = file_get_contents( $url ) ) {
+			/** @since 2.1.2 */
+			$json_source = @file_get_contents( $url );
+			if ( false === $json_source ) {
 				$error = error_get_last()['message'];
 				echo wp_kses_post( $error );
 				return;
@@ -858,7 +859,7 @@ class Chart_Widget extends Widget_Base {
 			if ( ! $json_data ) {
 				$error = 'JSON::' . json_last_error() . '::' . json_last_error_msg() . '::' . $url;
 				echo $error . '<br />';
-				print_r( $json_source );
+				//print_r( $json_source );
 				return;
 			}
 		}

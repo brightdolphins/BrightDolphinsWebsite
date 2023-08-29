@@ -543,7 +543,7 @@ class Eac_Woo_Filters {
 	public function update_mini_cart_count( $fragments ) {
 		$has_cart = is_a( WC()->cart, 'WC_Cart' );
 		if ( $has_cart && ( ! is_null( WC()->cart ) && ! is_cart() && ! is_checkout() ) ) {
-			$count_items = WC()->cart->cart_contents_count;
+			$count_items = WC()->cart->get_cart_contents_count();
 			ob_start();
 			?>
 			<span class='badge-cart__quantity'><?php echo esc_attr( $count_items ); ?></span>

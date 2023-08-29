@@ -10,7 +10,6 @@
  * Le contenu peut être ajouter automatiquement dans le type d'article sélectionné.
  *
  * @since 1.9.1
- * @since 1.9.2 Check si ID du post = ID du template
  * @since 2.1.0 Affecte la global $authordata
  *              Sanitize le tableau d'options
  */
@@ -113,17 +112,6 @@ class Author_Infobox_Widget extends Widget_Base {
 	 */
 	public function get_categories() {
 		return Eac_Config_Elements::get_widget_categories( $this->slug );
-	}
-
-	/**
-	 * Load dependent libraries
-	 *
-	 * @access public
-	 *
-	 * @return libraries list.
-	 */
-	public function get_script_depends() {
-		return array();
 	}
 
 	/**

@@ -5,23 +5,23 @@ Description: Message Box
 Author: Theplus
 Author URI: https://posimyth.com
 */
+
 namespace TheplusAddons\Widgets;
 
 use Elementor\Widget_Base;
 use Elementor\Controls_Manager;
 use Elementor\Utils;
-use Elementor\Core\Schemes\Color;
 use Elementor\Group_Control_Typography;
 use Elementor\Group_Control_Text_Shadow;
-use Elementor\Core\Schemes\Typography;
 use Elementor\Group_Control_Background;
 use Elementor\Group_Control_Image_Size;
 use Elementor\Group_Control_Border;
 use Elementor\Group_Control_Box_Shadow;
+use Elementor\Core\Kits\Documents\Tabs\Global_Typography;
 
 use TheplusAddons\Theplus_Element_Load;
-if (!defined('ABSPATH'))
-    exit; // Exit if accessed directly
+
+if (!defined('ABSPATH')) exit; // Exit if accessed directly
 
 class L_ThePlus_MessageBox extends Widget_Base {
 		
@@ -177,7 +177,9 @@ class L_ThePlus_MessageBox extends Widget_Base {
 			[
 				'name' => 'titleTypo',
 				'label' => esc_html__( 'Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_1,
+				'global' => [
+					'default' => \Elementor\Core\Kits\Documents\Tabs\Global_Typography::TYPOGRAPHY_PRIMARY
+				],
 				'selector' => '{{WRAPPER}} .msg-title',
 				'condition' => [
 					'Title!' => '',
@@ -302,7 +304,9 @@ class L_ThePlus_MessageBox extends Widget_Base {
 			[
 				'name' => 'descTypo',
 				'label' => esc_html__( 'Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_1,
+				'global' => [
+					'default' => \Elementor\Core\Kits\Documents\Tabs\Global_Typography::TYPOGRAPHY_PRIMARY
+				],
 				'selector' => '{{WRAPPER}} .msg-desc',
 				'condition' => [
 					'Description' => 'yes',

@@ -37,7 +37,7 @@
   margin-bottom: 10px;
 }
 
-.ig-filters__wrapper-select .ig-filter__select {
+.ig-filters__wrapper-select .ig-filters__select {
   padding: 0 5px;
   background-color: var(--eac-bg-input);
   border-color: var(--eac-color-primary);
@@ -80,7 +80,7 @@
 
   /* Cache les filtres standards pour les mobiles */
   .ig-filters__wrapper {
-    display: none;
+    display: none !important;
   }
 
   /* Affiche les filtres select/option pour les mobiles */

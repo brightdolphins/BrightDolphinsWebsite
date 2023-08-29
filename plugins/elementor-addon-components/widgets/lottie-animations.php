@@ -7,6 +7,7 @@
  * Description: Implémente les animations Lottie
  *
  * @since 1.9.3
+ * @since 2.1.1 L'option de format des médias de type JSON est activée
  */
 
 namespace EACCustomWidgets\Widgets;
@@ -194,24 +195,37 @@ class Lottie_Animations_Widget extends Widget_Base {
 				)
 			);
 
-			$this->add_control(
-				'lottie_settings_media_url',
-				array(
-					'label'         => esc_html__( 'URL', 'eac-components' ),
-					'type'          => Controls_Manager::URL,
-					'description'   => __( "Obtenez l'URL de l'animation <a href='https://lottiefiles.com/' target='_blank' rel='nofollow noopener noreferrer'>ici</a>", 'eac-components' ),
-					'placeholder'   => 'https://lottiefiles.com/anim.json/',
-					'show_external' => true,
-					'default'       => array(
-						'is_external' => true,
-						'nofollow'    => true,
-					),
-					'dynamic'       => array(
-						'active' => true,
-					),
-					'condition'     => array( 'lottie_settings_source' => 'url' ),
-				)
-			);
+			/** @since 2.1.1 Le filtre des médias est actif */
+			if ( Eac_Config_Elements::is_feature_active( 'unfiltered-medias' ) ) {
+				$this->add_control(
+					'lottie_settings_media_url',
+					array(
+						'label'         => esc_html__( 'URL', 'eac-components' ),
+						'type'          => Controls_Manager::URL,
+						'description'   => __( "Obtenez l'URL de l'animation <a href='https://lottiefiles.com/' target='_blank' rel='nofollow noopener noreferrer'>ici</a>", 'eac-components' ),
+						'placeholder'   => 'https://lottiefiles.com/anim.json/',
+						'show_external' => true,
+						'default'       => array(
+							'is_external' => true,
+							'nofollow'    => true,
+						),
+						'dynamic'       => array(
+							'active' => true,
+						),
+						'condition'     => array( 'lottie_settings_source' => 'url' ),
+					)
+				);
+			} else {
+				$this->add_control(
+					'lottie_settings_media_url_info',
+					array(
+						'type'            => Controls_Manager::RAW_HTML,
+						'content_classes' => 'elementor-panel-alert elementor-panel-alert-warning',
+						'raw'             => esc_html__( 'Activer la fonctionnalité "Télécharger les fichiers non filtrés" pour lire un flux JSON', 'eac-components' ),
+						'condition'       => array( 'lottie_settings_source' => 'url' ),
+					)
+				);
+			}
 
 			$this->add_responsive_control(
 				'lottie_settings_animation_size',
@@ -570,7 +584,15 @@ class Lottie_Animations_Widget extends Widget_Base {
 	protected function render_lottie() {
 		$settings = $this->get_settings_for_display();
 		$has_link = false;
-		$url      = 'file' === $settings['lottie_settings_source'] ? $settings['lottie_settings_media_file'] : esc_url( $settings['lottie_settings_media_url']['url'] );
+		$url = '';
+
+		if ( 'file' === $settings['lottie_settings_source'] ) {
+			$url = esc_url( $settings['lottie_settings_media_file'] );
+		} elseif ( Eac_Config_Elements::is_feature_active( 'unfiltered-medias' ) && 'url' === $settings['lottie_settings_source'] ) {
+			$url = esc_url( $settings['lottie_settings_media_url']['url'] );
+		} else {
+			return;
+		}
 
 		$this->add_render_attribute(
 			'lottie_anime',

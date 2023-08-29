@@ -67,12 +67,6 @@ class L_Theplus_Elementor_Plugin_Options
 		}		
 		
 		
-		//Elementor widget
-		add_action( 'elementor/widgets/register', array( $this, 'tp_ele_unregister_widgets' ), 15 );
-		if(current_user_can("manage_options")){
-			add_action( 'admin_post_tp_ele_widgets_opts_save', array( $this,'ele_widgets_opts_save_action') );
-		}
-		
 		add_action('wp_ajax_tp_admin_rateus_notice',	array($this,'tp_rateus_notice_dismiss'));
 		add_action('wp_ajax_tp_admin_rateus_notice_never',	array($this,'tp_rateus_notice_dismiss_ever'));
 		
@@ -80,287 +74,39 @@ class L_Theplus_Elementor_Plugin_Options
 		
     }
     
-	/**
-     * Version 5.0
-     * @Elementor Widget Categories
-     */
-	public function ele_get_categories() {
-		return array(
-			'basic',
-			'general',
-			'woocommerce-elements',
-			'wordpress',			
-			'pro-elements',
-			'theme-elements',
-		);
-	}	
-	
 	public function tp_ele_pro_default_wid_save(){
 		$option_name='ele_default_plus_options';
 		$value='1';
 		$deprecated = null;
 		$autoload = 'no';
-		if ( is_admin() && get_option( $option_name ) !== false ) {
-		} else if( is_admin() ){
-			$default_load=get_option( 'theplus_elementor_widget' );
-			if ( $default_load !== false && $default_load!='' ) {
-				add_option( $option_name,$value, $deprecated, $autoload );
-			}else{
-				$widgets_list = $this->tp_ele_get_registered_widgets();
-				$ele_wid_options=get_option( 'theplus_elementor_widget' );
-				$ele_wid_options['elementor_check_elements']= array_keys($widgets_list);
-				add_option( 'theplus_elementor_widget',$ele_wid_options, $deprecated, $autoload );
-				add_option( $option_name,$value, $deprecated, $autoload );
-			}
-		}
 
-		/*@sinnce 3.12.0*/
-		if ( defined( 'ELEMENTOR_VERSION' ) &&  version_compare( ELEMENTOR_VERSION, '3.12.0', '>=' ) ) {
-			$option_name_ele350reset ='ele312_default_plus_options';
-			if ( is_admin() && get_option( $option_name_ele350reset ) !== false ) {
-			} else if( is_admin() ){
-				$widgets_list = $this->tp_ele_get_registered_widgets();
-				$ele_wid_options=[];
-				$ele_wid_options['elementor_check_elements']= array_keys($widgets_list);				
-				update_option( 'theplus_elementor_widget',$ele_wid_options, $deprecated, $autoload );
-				update_option( $option_name_ele350reset,$value, $deprecated, $autoload );
-			}
-		}
+		$GetKey = [ 
+			'theplus_elementor_widget', 
+			'ele312_default_plus_options', 
+			'ele314_default_plus_options', 
+			'ele380loop_default_plus_options',
+			'elepro_default_plus_options',
+			'eleprowc_default_plus_options',
+			'eleprocf7_default_plus_options',
+			'eleproff_default_plus_options',
+			'elepromc_default_plus_options',
+			'elepropm_default_plus_options',
+			'yithwoocompare_default_plus_options',
+			'ele380beta4_default_plus_options',
+			'ele380main_default_plus_options',
+		];
 
-		/*@sinnce 5.2.10*/
-		if ( defined( 'ELEMENTOR_VERSION' ) &&  version_compare( ELEMENTOR_VERSION, '3.14.0', '>=' ) ) {
-			$option_name_ele350reset = 'ele314_default_plus_options';
-			if ( is_admin() && get_option( $option_name_ele350reset ) !== false ) {
-			} else if( is_admin() ){
-				$widgets_list = $this->tp_ele_get_registered_widgets();
-				$ele_wid_options=[];
-				$ele_wid_options['elementor_check_elements']= array_keys($widgets_list);				
-				update_option( 'theplus_elementor_widget',$ele_wid_options, $deprecated, $autoload );
-				update_option( $option_name_ele350reset,$value, $deprecated, $autoload );
-			}
-		}
+		foreach ($GetKey as $key => $self) {
+			if( !empty($self) ){
+				$existing_option = get_option($self);
 
-		if(defined( 'ELEMENTOR_PRO_VERSION' ) && Utils::has_pro()){
-
-			/*New Added*/
-			$experiments_manager_loop = Plugin::$instance->experiments;
-			if($experiments_manager_loop->is_feature_active( 'loop' )){
-				$option_name_ele380loopreset ='ele380loop_default_plus_options';
-				if ( is_admin() && get_option( $option_name_ele380loopreset ) !== false ) {
-				} else if( is_admin() ){
-					$widgets_list = $this->tp_ele_get_registered_widgets();
-					$ele_wid_options=[];
-					$ele_wid_options['elementor_check_elements']= array_keys($widgets_list);				
-					update_option( 'theplus_elementor_widget',$ele_wid_options, $deprecated, $autoload );
-					update_option( $option_name_ele380loopreset,$value, $deprecated, $autoload );
-				}	
-			}
-
-
-			$option_name_pro ='elepro_default_plus_options';
-			if ( is_admin() && get_option( $option_name_pro ) !== false ) {
-			} else if( is_admin() ){
-				$widgets_list = $this->tp_ele_get_registered_widgets();
-				$ele_wid_options=[];
-				$ele_wid_options['elementor_check_elements']= array_keys($widgets_list);				
-				update_option( 'theplus_elementor_widget',$ele_wid_options, $deprecated, $autoload );
-				update_option( $option_name_pro,$value, $deprecated, $autoload );
-			}
-			
-			if(function_exists( 'WC' )){
-				$option_name_pro_wc ='eleprowc_default_plus_options';
-				if ( is_admin() && get_option( $option_name_pro_wc ) !== false ) {
-				} else if( is_admin() ){
-					$widgets_list = $this->tp_ele_get_registered_widgets();
-					$ele_wid_options=[];
-					$ele_wid_options['elementor_check_elements']= array_keys($widgets_list);				
-					update_option( 'theplus_elementor_widget',$ele_wid_options, $deprecated, $autoload );
-					update_option( $option_name_pro_wc,$value, $deprecated, $autoload );
-				}
-			}			
-			
-			if(defined( 'WPCF7_VERSION' )){
-				$option_name_pro_cf7 ='eleprocf7_default_plus_options';
-				if ( is_admin() && get_option( $option_name_pro_cf7 ) !== false ) {
-				} else if( is_admin() ){
-					$widgets_list = $this->tp_ele_get_registered_widgets();
-					$ele_wid_options=[];
-					$ele_wid_options['elementor_check_elements']= array_keys($widgets_list);				
-					update_option( 'theplus_elementor_widget',$ele_wid_options, $deprecated, $autoload );
-					update_option( $option_name_pro_cf7,$value, $deprecated, $autoload );
-				}
-			}
-			
-			if(defined( 'FLUENTFORM_VERSION' )){
-				$option_name_pro_ff ='eleproff_default_plus_options';
-				if ( is_admin() && get_option( $option_name_pro_ff ) !== false ) {
-				} else if( is_admin() ){
-					$widgets_list = $this->tp_ele_get_registered_widgets();
-					$ele_wid_options=[];
-					$ele_wid_options['elementor_check_elements']= array_keys($widgets_list);				
-					update_option( 'theplus_elementor_widget',$ele_wid_options, $deprecated, $autoload );
-					update_option( $option_name_pro_ff,$value, $deprecated, $autoload );
-				}
-			}			
-			
-			if(defined( 'MC4WP_VERSION' )){
-				$option_name_pro_mc ='elepromc_default_plus_options';
-				if ( is_admin() && get_option( $option_name_pro_mc ) !== false ) {
-				} else if( is_admin() ){
-					$widgets_list = $this->tp_ele_get_registered_widgets();
-					$ele_wid_options=[];
-					$ele_wid_options['elementor_check_elements']= array_keys($widgets_list);				
-					update_option( 'theplus_elementor_widget',$ele_wid_options, $deprecated, $autoload );
-					update_option( $option_name_pro_mc,$value, $deprecated, $autoload );
-				}
-			}
-			
-			if(class_exists( 'Popup_Maker' )){
-				$option_name_pro_pm ='elepropm_default_plus_options';
-				if ( is_admin() && get_option( $option_name_pro_pm ) !== false ) {
-				} else if( is_admin() ){
-					$widgets_list = $this->tp_ele_get_registered_widgets();
-					$ele_wid_options=[];
-					$ele_wid_options['elementor_check_elements']= array_keys($widgets_list);				
-					update_option( 'theplus_elementor_widget',$ele_wid_options, $deprecated, $autoload );
-					update_option( $option_name_pro_pm,$value, $deprecated, $autoload );
-				}
-			}
-			
-			/*YITH*/
-			
-			//YITH WooCommerce Compare Widget
-			if(defined( 'YITH_WOOCOMPARE_VERSION' )){
-				$option_name_pro_yith_woo_com ='yithwoocompare_default_plus_options';
-				if ( is_admin() && get_option( $option_name_pro_yith_woo_com ) !== false ) {
-				} else if( is_admin() ){
-					$widgets_list = $this->tp_ele_get_registered_widgets();
-					$ele_wid_options=[];
-					$ele_wid_options['elementor_check_elements']= array_keys($widgets_list);				
-					update_option( 'theplus_elementor_widget',$ele_wid_options, $deprecated, $autoload );
-					update_option( $option_name_pro_yith_woo_com,$value, $deprecated, $autoload );
-				}
-			}
-			/*YITH*/
-
-			/*@sinnce 5.1.13*/
-			//elementor loop builder
-			if ( version_compare( ELEMENTOR_PRO_VERSION, '3.8.0-beta4', '==' ) ) {
-				$experiments_manager = Plugin::$instance->experiments;
-				if($experiments_manager->is_feature_active( 'loop' )){
-					$option_name_ele380b4reset ='ele380beta4_default_plus_options';
-					if ( is_admin() && get_option( $option_name_ele380b4reset ) !== false ) {
-					} else if( is_admin() ){
-						$widgets_list = $this->tp_ele_get_registered_widgets();
-						$ele_wid_options=[];
-						$ele_wid_options['elementor_check_elements']= array_keys($widgets_list);				
-						update_option( 'theplus_elementor_widget',$ele_wid_options, $deprecated, $autoload );
-						update_option( $option_name_ele380b4reset,$value, $deprecated, $autoload );
-					}	
-				}
-			}
-			if ( version_compare( ELEMENTOR_PRO_VERSION, '3.8.0', '>=' ) ) {
-				$option_name_ele380mainreset ='ele380main_default_plus_options';
-				if ( is_admin() && get_option( $option_name_ele380mainreset ) !== false ) {
-				} else if( is_admin() ){
-					$widgets_list = $this->tp_ele_get_registered_widgets();
-					$ele_wid_options=[];
-					$ele_wid_options['elementor_check_elements']= array_keys($widgets_list);				
-					update_option( 'theplus_elementor_widget',$ele_wid_options, $deprecated, $autoload );
-					update_option( $option_name_ele380mainreset,$value, $deprecated, $autoload );
+				if ($existing_option !== false) {
+					delete_option($self);
 				}
 			}
 		}
 	}
-	
-	/**
-     * Version 5.0
-     * @Elementor Get Widget
-     */
-	public function tp_ele_get_registered_widgets() {
-		if ( ! empty( $this->widgets ) ) {
-			return $this->widgets;
-		}
-		
-		$types = Elementor\Plugin::instance()->widgets_manager->get_widget_types();
-		
-		$ele_cat = $this->ele_get_categories();
-		
-		$widgets = array();
 
-		foreach ( $types as $type ) {
-			$ele_widget_cat = $type->get_categories();
-		
-			if ( empty($ele_widget_cat[0]) || !in_array( $ele_widget_cat[0], $ele_cat, true ) ) {
-				continue;
-			}			
-
-			$widgets[ $type->get_name() ] = $type->get_title();
-		}
-		
-		if ( isset( $widgets['common'] ) ) {
-			unset( $widgets['common'] );
-		}
-		
-		asort( $widgets );
-		$this->widgets = $widgets;
-		
-		return $widgets;
-	}
-
-	public function ele_widgets_opts_save_action() {
-		$action_page = 'theplus_elementor_widget';
-		if(isset($_POST["ele-submit-key"]) && !empty($_POST["ele-submit-key"]) && $_POST["ele-submit-key"]=='Save'){
-			
-			if ( ! isset( $_POST['nonce_ele_options'] ) || ! wp_verify_nonce( $_POST['nonce_ele_options'], 'nonce_ele_options_action' ) ) {
-			   wp_safe_redirect(admin_url('admin.php?page='.$action_page));
-			} else {
-			
-				if ( FALSE === get_option($action_page) ){
-					$default_value = array('elementor_check_elements' => '');
-					add_option($action_page,$default_value);
-					wp_safe_redirect(admin_url('admin.php?page=theplus_elementor_widget'));
-				}
-				else{
-					$update_value=[];
-					if(isset($_POST['elementor_check_elements']) && !empty($_POST['elementor_check_elements'])){
-						$update_value['elementor_check_elements'] = $_POST['elementor_check_elements'];						
-					}else if(empty($_POST['elementor_check_elements'])){
-						$update_value['elementor_check_elements'] = '';					
-					}
-					
-					update_option( $action_page, $update_value );
-					wp_safe_redirect(admin_url('admin.php?page='.$action_page));
-					
-				}
-			}
-			
-		}else{
-			wp_safe_redirect(admin_url('admin.php?page='.$action_page));
-		}
-	}
-	
-	/**
-     * Version 5.0
-     * @Elementor Unregister Widget
-     */
-	public function tp_ele_unregister_widgets() {
-		$elementor = Elementor\Plugin::instance();
-		if ( ! $elementor->editor->is_edit_mode() ) {
-			return;
-		}
-
-		$selected_widgets = get_option( 'theplus_elementor_widget' );
-		$elewid = array_keys($this->tp_ele_get_registered_widgets());
-				
-		if(!empty($selected_widgets) && isset($selected_widgets['elementor_check_elements'])){			
-		$get_unreg = array_diff($elewid,$selected_widgets['elementor_check_elements']);
-			foreach ( $get_unreg as $key => $widget ) {
-				$elementor->widgets_manager->unregister( $widget );
-			}
-		}
-	}
-	
     /**
      * Initiate our hooks
      * @since 1.0.0
@@ -371,16 +117,9 @@ class L_Theplus_Elementor_Plugin_Options
 		wp_enqueue_style('thickbox.css', '/'.WPINC.'/js/thickbox/thickbox.css', null, '1.0');
 	}
 
-    public function hooks()
-    {
-        add_action('admin_init', array(
-            $this,
-            'init'
-        ));
-        add_action('admin_menu', array(
-            $this,
-            'add_options_page'
-        ));
+    public function hooks(){
+        add_action('admin_init', array( $this, 'init' ) );
+        add_action('admin_menu', array( $this, 'add_options_page' ) );
     }    
 		
 	// Admin dismiss notice foreever
@@ -2133,30 +1872,30 @@ class L_Theplus_Elementor_Plugin_Options
 							echo '</div>';
 
 													
-	$elewid = $this->tp_ele_get_registered_widgets();
-	echo '<form class="cmb-form" action="'.esc_url( admin_url('admin-post.php') ).'" method="post" id="elementor_widgets_options" enctype="multipart/form-data" encoding="multipart/form-data">';
-		wp_nonce_field( 'nonce_ele_options_action', 'nonce_ele_options' );
-		$ele_wid_options=get_option( 'theplus_elementor_widget' );
-		$ele_wid_get = $ele_wid_options['elementor_check_elements'];
+	// $elewid = $this->tp_ele_get_registered_widgets();
+	// echo '<form class="cmb-form" action="'.esc_url( admin_url('admin-post.php') ).'" method="post" id="elementor_widgets_options" enctype="multipart/form-data" encoding="multipart/form-data">';
+	// 	wp_nonce_field( 'nonce_ele_options_action', 'nonce_ele_options' );
+	// 	$ele_wid_options=get_option( 'theplus_elementor_widget' );
+	// 	$ele_wid_get = $ele_wid_options['elementor_check_elements'];
 		
-		foreach ($elewid as $key => $val) {	
-			$checked = '';
-			if(!empty($ele_wid_get) && in_array($key, $ele_wid_get)){
-				$checked = 'checked="checked"';
-			}			
+		// foreach ($elewid as $key => $val) {	
+		// 	$checked = '';
+		// 	if(!empty($ele_wid_get) && in_array($key, $ele_wid_get)){
+		// 		$checked = 'checked="checked"';
+		// 	}			
 			
-			echo '<div class="theplus-ele-panel-col theplus-ele-panel-col-25">';
-				echo '<div class="theplus-ele-panel-col-inner">';
-					echo '<span class="widget-name-wrap">'.esc_html($val).'</span>';
-					echo '<div class="widget-check-wrap">
-							<input type="checkbox" class="ele-widget-list-checkbox" name="elementor_check_elements[]" id="'.esc_attr($key).'" value="'.esc_attr($key).'" '.$checked.' > <label for="'.esc_attr($key).'"></label>
-						</div>';
-				echo '</div>';
-			echo '</div>';
-		}
-	echo '<input type="hidden" name="action" value="tp_ele_widgets_opts_save">';
-		echo '<input type="submit" name="ele-submit-key" value="Save" class="button-primary theplus-submit-widget">';
-	echo '</form>';
+		// 	echo '<div class="theplus-ele-panel-col theplus-ele-panel-col-25">';
+		// 		echo '<div class="theplus-ele-panel-col-inner">';
+		// 			echo '<span class="widget-name-wrap">'.esc_html($val).'</span>';
+		// 			echo '<div class="widget-check-wrap">
+		// 					<input type="checkbox" class="ele-widget-list-checkbox" name="elementor_check_elements[]" id="'.esc_attr($key).'" value="'.esc_attr($key).'" '.$checked.' > <label for="'.esc_attr($key).'"></label>
+		// 				</div>';
+		// 		echo '</div>';
+		// 	echo '</div>';
+		// }
+	// echo '<input type="hidden" name="action" value="tp_ele_widgets_opts_save">';
+	// 	echo '<input type="submit" name="ele-submit-key" value="Save" class="button-primary theplus-submit-widget">';
+	// echo '</form>';
 } 
 /*elementor widget end*/
 							

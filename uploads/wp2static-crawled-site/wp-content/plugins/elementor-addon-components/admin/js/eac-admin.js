@@ -382,4 +382,41 @@
 		$('#eac-dialog_grant-option').dialog('open');
 	});
 
+	/**
+	 * Initalise la boîte de dialogue unfiltered-medias
+	 *
+	 * @since 2.1.1
+	 */
+	$('#eac-dialog_grant-medias').dialog({
+		title: 'Grant Upload JSON',
+		dialogClass: 'wp-dialog',
+		autoOpen: false,
+		draggable: false,
+		width: '640px',
+		modal: true,
+		resizable: false,
+		closeOnEscape: true,
+		position: {
+			my: "center",
+			at: "center",
+			of: window
+		},
+		open: function () {
+			// close dialog by clicking the overlay behind it
+			$('.ui-widget-overlay').bind('click', function () {
+				$('#eac-dialog_grant-medias').dialog('close');
+			});
+		},
+		create: function () {
+			// style fix for WordPress admin
+			$('.ui-dialog-titlebar-close').addClass('ui-button');
+		},
+	});
+
+	// bind de l'icone '?' pour ouvrir la boîte de dialogue unfiltered-medias
+	$('a span.grant-medias-upload').click(function (e) {
+		e.preventDefault();
+		$('#eac-dialog_grant-medias').dialog('open');
+	});
+
 })(jQuery);

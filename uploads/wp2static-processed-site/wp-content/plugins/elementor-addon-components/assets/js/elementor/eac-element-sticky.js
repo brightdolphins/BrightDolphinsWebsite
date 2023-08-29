@@ -33,7 +33,7 @@
 				positionClass: '',
 				optionsObserve: {
 					root: null,
-					rootMargin: '0px',
+					rootMargin: '0px 0px 1000px 0px',
 					threshold: 1, // Seuil de visibilité de l'élément
 				},
 				intersectObserver: null,

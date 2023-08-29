@@ -10,6 +10,11 @@
  * @since 2.0.1 Gestion des options pour les filtres WooCommerce
  * @since 2.1.0 Ajout des éléments Entête et Pied de page et des composants associés
  *              Teste si le thème est un block thème
+ * @since 2.1.1 Ajout de l'option feature WordPress 'unfiltered-medias'
+ *              Ajout de l'option header footer 'breadcrumbs'
+ *              Ajout de l'option header footer "Fil d'ariane"
+ * @since 2.1.2 Fix Yoast breadcrumbs
+ *              Fix RankMath breadcrumbs
  */
 
 namespace EACCustomWidgets\Core;
@@ -59,7 +64,15 @@ class Eac_Config_Elements {
 	 * @var String $options_mega_nav_menu
 	 * @since 2.1.0
 	 */
-	private static $options_mega_nav_menu = 'eac_options_nav-menu_';
+	private static $options_mega_nav_menu = 'eac_options_nav_menu-';
+
+	/**
+	 * L'option de la BDD pour les menus mis en cache
+	 *
+	 * @var String $options_mega_nav_menu_cache
+	 * @since 2.1.1
+	 */
+	private static $options_mega_nav_menu_cache = 'eac_options_nav_menu_cache';
 
 	/**
 	 * La structure de l'option de la BDD des filtres WooCommerce
@@ -69,7 +82,7 @@ class Eac_Config_Elements {
 	 */
 	private static $woo_shop_args = array(
 		'product-page'   => array(
-			'shop'       => array(
+			'shop'             => array(
 				'url' => '',
 				'id'  => 0,
 			),
@@ -179,11 +192,11 @@ class Eac_Config_Elements {
 	 */
 	private function __construct() {
 		/** @since 2.1.0 */
-		/**if ( function_exists( 'wp_is_block_theme' ) && wp_is_block_theme() ) {
+		if ( function_exists( 'wp_is_block_theme' ) && wp_is_block_theme() ) {
 			update_option( self::$options_block_theme, 'true' );
 		} else {
 			update_option( self::$options_block_theme, 'false' );
-		}*/
+		}
 
 		// Charge les liste des widgets et des fonctionnalités
 		$this->set_widgets_list();
@@ -216,10 +229,10 @@ class Eac_Config_Elements {
 		self::$widgets_common_keys_active   = array_slice( self::$widgets_keys_active, $pos_widgets_common, ( $pos_widgets_ehf - $pos_widgets_common ) );
 		self::$widgets_ehf_keys_active      = array_slice( self::$widgets_keys_active, $pos_widgets_ehf );
 
-		//error_log("Widgets advanced".json_encode(self::$widgets_advanced_keys_active)."::".$pos_widgets_advanced);
-		//error_log("Widgets components".json_encode(self::$widgets_common_keys_active)."::".$pos_widgets_common);
-		//error_log("Widgets ehf".json_encode(self::$widgets_ehf_keys_active)."::".$pos_widgets_ehf);
-		//error_log("Widgets count".count(self::$widgets_keys_active)."::".$pos_widgets_advanced."::".$pos_widgets_common."::".$pos_widgets_ehf);
+		// error_log("Widgets advanced".json_encode(self::$widgets_advanced_keys_active)."::".$pos_widgets_advanced);
+		// error_log("Widgets components".json_encode(self::$widgets_common_keys_active)."::".$pos_widgets_common);
+		// error_log("Widgets ehf".json_encode(self::$widgets_ehf_keys_active)."::".$pos_widgets_ehf);
+		// error_log("Widgets count".count(self::$widgets_keys_active)."::".$pos_widgets_advanced."::".$pos_widgets_common."::".$pos_widgets_ehf);
 
 		// Enregistre l'option des fonctionnalités si elle n'existe pas
 		if ( ! get_option( self::$options_features_name, false ) ) {
@@ -353,6 +366,7 @@ class Eac_Config_Elements {
 	 * @param $element (String) le composant à checker
 	 * @return Bool les dépendances sont actives
 	 * @since 2.0.1
+	 * @since 2.1.1 Check si le breadcrumb est actif avec quelques plugin SEO
 	 */
 	public static function are_widget_dependencies_enabled( $element ) {
 		$active = true;
@@ -373,6 +387,25 @@ class Eac_Config_Elements {
 			if ( ! empty( self::$widgets_list[ $element ]['func_depends'] ) ) {
 				foreach ( self::$widgets_list[ $element ]['func_depends'] as $func ) {
 					if ( ! function_exists( $func ) ) {
+						return false;
+					}
+				}
+			}
+
+			/**
+			 * @since 2.1.1
+			 * @since 2.1.2 Teste si la fonction'yoast_breadcrumb' existe
+			 *              Teste de l'option Rank Math
+			 */
+			if ( ! empty( self::$widgets_list[ $element ]['elems_exclude'] ) ) {
+				foreach ( self::$widgets_list[ $element ]['elems_exclude'] as $elem ) {
+					if ( 'yoast' === $elem && function_exists( 'yoast_breadcrumb' ) && isset( get_option( 'wpseo_titles' )['breadcrumbs-enable'] ) && get_option( 'wpseo_titles' )['breadcrumbs-enable'] ) {
+						return false;
+					} elseif ( 'rankmath' === $elem && function_exists( 'rank_math_the_breadcrumbs' ) && isset( get_option( 'rank-math-options-general' )['breadcrumbs'] ) && 'on' === get_option( 'rank-math-options-general' )['breadcrumbs'] ) {
+						return false;
+					} elseif ( 'seopress' === $elem && function_exists( 'seopress_display_breadcrumbs' ) ) {
+						return false;
+					} elseif ( 'bcn' === $elem && function_exists( 'bcn_display' ) ) { // NavXT
 						return false;
 					}
 				}
@@ -638,7 +671,7 @@ class Eac_Config_Elements {
 				'help_url_class' => 'eac-admin-help',
 				'file_path'      => EAC_WIDGETS_PATH . 'html-sitemap.php',
 				'name_space'     => EAC_WIDGETS_NAMESPACE . 'Html_Sitemap_Widget',
-				'badge'          => 'eac-promotion-updated',
+				'badge'          => '',
 				'category'       => array( 'eac-advanced' ),
 			),
 			'image-galerie'     => array(
@@ -743,7 +776,7 @@ class Eac_Config_Elements {
 				'help_url_class' => 'eac-admin-help',
 				'file_path'      => EAC_WIDGETS_PATH . 'open-streetmap.php',
 				'name_space'     => EAC_WIDGETS_NAMESPACE . 'Open_Streetmap_Widget',
-				'badge'          => 'eac-promotion-updated',
+				'badge'          => '',
 				'category'       => array( 'eac-advanced' ),
 			),
 			'pdf-viewer'        => array(
@@ -788,7 +821,7 @@ class Eac_Config_Elements {
 				'help_url_class' => 'eac-admin-help',
 				'file_path'      => EAC_WIDGETS_PATH . 'rss-reader.php',
 				'name_space'     => EAC_WIDGETS_NAMESPACE . 'Lecteur_Rss_Widget',
-				'badge'          => 'eac-promotion-updated',
+				'badge'          => '',
 				'category'       => array( 'eac-advanced' ),
 			),
 			'syntax-highlight'  => array(
@@ -971,7 +1004,7 @@ class Eac_Config_Elements {
 				'badge'          => '',
 				'category'       => array( 'eac-elements' ),
 			),
-			'all-ehf'    => array(
+			'all-ehf'           => array(
 				'active'         => false,
 				'title'          => 'Active/Désactive tous les composants',
 				'keywords'       => array(),
@@ -986,10 +1019,10 @@ class Eac_Config_Elements {
 				'badge'          => '',
 				'category'       => '',
 			),
-			'header-footer'   => array(
+			'header-footer'     => array(
 				'active'         => false,
 				'title'          => esc_html__( 'Entête - Pied de page', 'eac-components' ),
-				'keywords'       => array(),
+				'keywords'       => array( 'header', 'footer', 'builder' ),
 				'icon'           => '',
 				'name'           => '',
 				'class_depends'  => array(),
@@ -998,10 +1031,26 @@ class Eac_Config_Elements {
 				'help_url_class' => 'eac-admin-help',
 				'file_path'      => EAC_EHF_PATH . 'documents/manager.php',
 				'name_space'     => '',
-				'badge'          => 'eac-promotion-new',
+				'badge'          => '',
 				'category'       => '',
 			),
-			'button-back'   => array(
+			'breadcrumbs'        => array(
+				'active'         => false,
+				'title'          => esc_html__( 'Fil d&#039;ariane', 'eac-components' ),
+				'keywords'       => array( 'breadcrumb' ),
+				'icon'           => 'eicon-product-breadcrumbs eac-icon-elements',
+				'name'           => 'eac-addon-breadcrumbs',
+				'class_depends'  => array(),
+				'elems_exclude'  => array( 'yoast', 'rankmath', 'seopress', 'bcn' ),
+				'func_depends'   => array(),
+				'help_url'       => 'https://elementor-addon-components.com/add-widgets-with-header-footer-builder/#add-a-breadcrumb-in-the-header',
+				'help_url_class' => 'eac-admin-help',
+				'file_path'      => EAC_EHF_WIDGETS_PATH . 'breadcrumb.php',
+				'name_space'     => EAC_EHF_WIDGETS_NAMESPACE . 'Breadcrumb_Widget',
+				'badge'          => '',
+				'category'       => array( 'eac-ehf' ),
+			),
+			'button-back'       => array(
 				'active'         => false,
 				'title'          => esc_html__( 'Bouton retour en haut', 'eac-components' ),
 				'keywords'       => array( 'button', 'top' ),
@@ -1013,10 +1062,10 @@ class Eac_Config_Elements {
 				'help_url_class' => 'eac-admin-help',
 				'file_path'      => EAC_EHF_WIDGETS_PATH . 'button-back.php',
 				'name_space'     => EAC_EHF_WIDGETS_NAMESPACE . 'Button_Back_Widget',
-				'badge'          => 'eac-promotion-new',
+				'badge'          => '',
 				'category'       => array( 'eac-ehf' ),
 			),
-			'site-copyright'   => array(
+			'site-copyright'    => array(
 				'active'         => false,
 				'title'          => esc_html__( 'Copyright', 'eac-components' ),
 				'keywords'       => array( 'copyright', 'site' ),
@@ -1028,10 +1077,10 @@ class Eac_Config_Elements {
 				'help_url_class' => 'eac-admin-help',
 				'file_path'      => EAC_EHF_WIDGETS_PATH . 'site-copyright.php',
 				'name_space'     => EAC_EHF_WIDGETS_NAMESPACE . 'Site_Copyright_Widget',
-				'badge'          => 'eac-promotion-new',
+				'badge'          => '',
 				'category'       => array( 'eac-ehf' ),
 			),
-			'page-title'   => array(
+			'page-title'        => array(
 				'active'         => false,
 				'title'          => esc_html__( 'Titre de la page', 'eac-components' ),
 				'keywords'       => array( 'title', 'page' ),
@@ -1043,10 +1092,25 @@ class Eac_Config_Elements {
 				'help_url_class' => 'eac-admin-help',
 				'file_path'      => EAC_EHF_WIDGETS_PATH . 'page-title.php',
 				'name_space'     => EAC_EHF_WIDGETS_NAMESPACE . 'Page_Title_Widget',
-				'badge'          => 'eac-promotion-new',
+				'badge'          => '',
 				'category'       => array( 'eac-ehf' ),
 			),
-			'site-search'   => array(
+			'reader-progress'    => array(
+				'active'         => false,
+				'title'          => esc_html__( 'Barre de progression de lecture', 'eac-components' ),
+				'keywords'       => array( 'progress' ),
+				'icon'           => 'eicon-progress-tracker eac-icon-elements',
+				'name'           => 'eac-addon-reader-progress',
+				'class_depends'  => array(),
+				'func_depends'   => array(),
+				'help_url'       => 'https://elementor-addon-components.com/add-widgets-with-header-footer-builder/#add-a-reading-progress-bar-in-the-header',
+				'help_url_class' => 'eac-admin-help',
+				'file_path'      => EAC_EHF_WIDGETS_PATH . 'reader-progress-bar.php',
+				'name_space'     => EAC_EHF_WIDGETS_NAMESPACE . 'Reader_Progress_Bar_Widget',
+				'badge'          => '',
+				'category'       => array( 'eac-ehf' ),
+			),
+			'site-search'       => array(
 				'active'         => false,
 				'title'          => esc_html__( 'Rechercher', 'eac-components' ),
 				'keywords'       => array( 'search', 'form' ),
@@ -1058,10 +1122,10 @@ class Eac_Config_Elements {
 				'help_url_class' => 'eac-admin-help',
 				'file_path'      => EAC_EHF_WIDGETS_PATH . 'site-search.php',
 				'name_space'     => EAC_EHF_WIDGETS_NAMESPACE . 'Site_Search_Widget',
-				'badge'          => 'eac-promotion-new',
+				'badge'          => '',
 				'category'       => array( 'eac-ehf' ),
 			),
-			'mega-menu'   => array(
+			'mega-menu'         => array(
 				'active'         => false,
 				'title'          => esc_html__( 'Simple menu', 'eac-components' ),
 				'keywords'       => array( 'navigation', 'nav', 'menu', 'mega' ),
@@ -1073,10 +1137,10 @@ class Eac_Config_Elements {
 				'help_url_class' => 'eac-admin-help',
 				'file_path'      => EAC_EHF_WIDGETS_PATH . 'mega-menu.php',
 				'name_space'     => EAC_EHF_WIDGETS_NAMESPACE . 'Mega_Menu_Widget',
-				'badge'          => 'eac-promotion-new',
+				'badge'          => '',
 				'category'       => array( 'eac-ehf' ),
 			),
-			'site-logo'   => array(
+			'site-logo'         => array(
 				'active'         => false,
 				'title'          => esc_html__( 'Logo du site', 'eac-components' ),
 				'keywords'       => array( 'logo', 'site' ),
@@ -1088,10 +1152,10 @@ class Eac_Config_Elements {
 				'help_url_class' => 'eac-admin-help',
 				'file_path'      => EAC_EHF_WIDGETS_PATH . 'site-logo.php',
 				'name_space'     => EAC_EHF_WIDGETS_NAMESPACE . 'Site_Logo_Widget',
-				'badge'          => 'eac-promotion-new',
+				'badge'          => '',
 				'category'       => array( 'eac-ehf' ),
 			),
-			'site-tagline'   => array(
+			'site-tagline'      => array(
 				'active'         => false,
 				'title'          => esc_html__( 'Slogan du site', 'eac-components' ),
 				'keywords'       => array( 'tagline', 'site' ),
@@ -1103,10 +1167,10 @@ class Eac_Config_Elements {
 				'help_url_class' => 'eac-admin-help',
 				'file_path'      => EAC_EHF_WIDGETS_PATH . 'site-tagline.php',
 				'name_space'     => EAC_EHF_WIDGETS_NAMESPACE . 'Site_Tagline_Widget',
-				'badge'          => 'eac-promotion-new',
+				'badge'          => '',
 				'category'       => array( 'eac-ehf' ),
 			),
-			'site-title'   => array(
+			'site-title'        => array(
 				'active'         => false,
 				'title'          => esc_html__( 'Titre du site', 'eac-components' ),
 				'keywords'       => array( 'title', 'site' ),
@@ -1118,10 +1182,10 @@ class Eac_Config_Elements {
 				'help_url_class' => 'eac-admin-help',
 				'file_path'      => EAC_EHF_WIDGETS_PATH . 'site-title.php',
 				'name_space'     => EAC_EHF_WIDGETS_NAMESPACE . 'Site_Title_Widget',
-				'badge'          => 'eac-promotion-new',
+				'badge'          => '',
 				'category'       => array( 'eac-ehf' ),
 			),
-			'social-media'   => array(
+			'social-media'      => array(
 				'active'         => false,
 				'title'          => esc_html__( 'Réseaux sociaux', 'eac-components' ),
 				'keywords'       => array( 'social', 'media' ),
@@ -1133,7 +1197,7 @@ class Eac_Config_Elements {
 				'help_url_class' => 'eac-admin-help',
 				'file_path'      => EAC_EHF_WIDGETS_PATH . 'social-media.php',
 				'name_space'     => EAC_EHF_WIDGETS_NAMESPACE . 'Social_Media_Widget',
-				'badge'          => 'eac-promotion-new',
+				'badge'          => '',
 				'category'       => array( 'eac-ehf' ),
 			),
 		);
@@ -1477,7 +1541,7 @@ class Eac_Config_Elements {
 				'name_space'     => '',
 				'badge'          => '',
 			),
-			'kenburns-slideshow'     => array(
+			'kenburns-slideshow'    => array(
 				'active'         => false,
 				'title'          => esc_html__( 'Effet Ken Burns', 'eac-components' ),
 				'class_depends'  => array(),
@@ -1519,7 +1583,7 @@ class Eac_Config_Elements {
 				'help_url_class' => 'eac-admin-help',
 				'file_path'      => EAC_ELEMENTOR_INCLUDES . 'injection/eac-injection-sticky.php',
 				'name_space'     => '',
-				'badge'          => 'eac-promotion-updated',
+				'badge'          => '',
 			),
 			'woo-dynamic-tag'       => array(
 				'active'         => false,
@@ -1565,6 +1629,17 @@ class Eac_Config_Elements {
 				'name_space'     => '',
 				'badge'          => '',
 			),
+			'unfiltered-medias'     => array(
+				'active'         => false,
+				'title'          => esc_html__( 'Téléverser les fichiers non filtrés', 'eac-components' ),
+				'class_depends'  => array(),
+				'func_depends'   => array(),
+				'help_url'       => '#',
+				'help_url_class' => 'eac-admin-help grant-medias-upload',
+				'file_path'      => '',
+				'name_space'     => '',
+				'badge'          => '',
+			),
 		);
 	}
 
@@ -1572,8 +1647,6 @@ class Eac_Config_Elements {
 
 	/**
 	 * get_manage_options_name
-	 *
-	 * @since 1.9.7
 	 *
 	 * @return le nom de la capacité 'eac_manage_options'
 	 */
@@ -1588,6 +1661,17 @@ class Eac_Config_Elements {
 	 */
 	public static function get_mega_nav_menu_option_name() {
 		return self::$options_mega_nav_menu;
+	}
+
+	/**
+	 * get_mega_nav_menu_cache_name
+	 *
+	 * @since 2.1.1
+	 *
+	 * @return String L'option des menus mis en cache
+	 */
+	public static function get_mega_nav_menu_cache_name() {
+		return self::$options_mega_nav_menu_cache;
 	}
 
 	/**
@@ -1608,7 +1692,9 @@ class Eac_Config_Elements {
 		return self::$woo_shop_args;
 	}
 
-	/** @since 2.1.0 Test du type de thème FSE ou non */
+	/**
+	 * Test du type de thème FSE ou non
+	 */
 	public static function is_a_block_theme() {
 		return 'true' === get_option( self::$options_block_theme ) ? true : false;
 	}

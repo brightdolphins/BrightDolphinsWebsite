@@ -5,24 +5,22 @@ Description: Page Scroll
 Author: Theplus
 Author URI: https://posimyth.com
 */
+
 namespace TheplusAddons\Widgets;
 
 use Elementor\Widget_Base;
 use Elementor\Controls_Manager;
 use Elementor\Repeater;
 use Elementor\Group_Control_Typography;
-use Elementor\Core\Schemes\Color;
 use Elementor\Group_Control_Text_Shadow;
 use Elementor\Group_Control_Box_Shadow;
 use Elementor\Group_Control_Border;
 use Elementor\Group_Control_Background;
-use Elementor\Core\Schemes\Typography;
+use Elementor\Core\Kits\Documents\Tabs\Global_Typography;
 
 use TheplusAddons\L_Theplus_Element_Load;
 
-if (!defined('ABSPATH'))
-    exit; // Exit if accessed directly
-
+if (!defined('ABSPATH')) exit; // Exit if accessed directly
 
 class L_ThePlus_Page_Scroll extends Widget_Base {
 		
@@ -806,7 +804,9 @@ class L_ThePlus_Page_Scroll extends Widget_Base {
 			[
 				'name' => 'dots_text_typo_n',
 				'label' => esc_html__( 'Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_1,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_PRIMARY
+				],
 				'selector' => '#fp-nav ul li .fp-tooltip,#pp-nav ul li .pp-tooltip,#multiscroll-nav ul li .multiscroll-tooltip',
 				
 			]

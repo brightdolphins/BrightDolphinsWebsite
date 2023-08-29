@@ -51,7 +51,7 @@
 	margin-bottom: 10px;
 }
 
-.al-filters__wrapper-select .al-filter__select {
+.al-filters__wrapper-select .al-filters__select {
 	padding: 0 5px;
 	background-color: var(--eac-bg-input);
 	border-color: var(--eac-color-primary);
@@ -93,14 +93,14 @@
 .al-post__inner-wrapper {
 	position: relative;
 	overflow: hidden;
-	margin: 0 5px 5px 0;
-	padding: 5px;
+	/*margin: 0 5px 5px 0;*/
+	/*padding: 5px;*/
 	background-color: #FFF;
 }
 
 /** Formate le titre */
 .al-post__inner-wrapper .al-post__content-title {
-	margin: 10px auto;
+	margin: 5px auto 10px;
 	font-size: .8em;
 	font-weight: 600;
 	line-height: 1.4em;
@@ -118,7 +118,11 @@
 	flex-wrap: nowrap;
 	-webkit-flex-direction: column;
 	flex-direction: column;
-	margin-bottom: 5px;
+	/*margin-bottom: 5px;*/
+}
+
+.al-post__text-wrapper {
+	padding: 5px;
 }
 
 /** Le wrapper du résumé */
@@ -135,7 +139,7 @@
 .al-post__image-wrapper {
 	position: relative;
 	/* pour l'overlay */
-	margin-bottom: 5px;
+	/*margin-bottom: 5px;*/
 	line-height: 0;
 	overflow: hidden;
 	text-align: center;
@@ -241,12 +245,12 @@
 
 	/* Cache les filtres standards pour les mobiles */
 	.al-filters__wrapper {
-		display: none;
+		display: none !important;
 	}
 
 	/* Affiche les filtres select/option pour les mobiles */
 	.al-filters__wrapper-select {
-		display: block;
+		display: block !important;
 	}
 }
 
@@ -261,7 +265,7 @@
 	flex-direction: row;
 	align-items: center;
 	justify-content: flex-start;
-	padding: 5px 0 0;
+	padding: 0 5px 5px;
 }
 
 /** Gère le contenu Avatar */
@@ -393,6 +397,7 @@
 	border: 1px solid #EFEFEF;
 	-webkit-box-shadow: 1px 1px 5px #999;
 	box-shadow: 1px 1px 5px #999;
+	padding: 5px;
 }
 
 .al-post__wrapper-style-2 .al-post__inner-wrapper {

@@ -3,6 +3,8 @@
  *
  * @param $element. Le contenu de la section/container
  * @since 2.1.0
+ * @since 2.1.2 Nouvel element handler
+ * Elementor 3.1.0 https://developers.elementor.com/a-new-method-for-attaching-a-js-handler-to-an-element/
  */
 class widgetMegaMenu extends elementorModules.frontend.handlers.Base {
 	getDefaultSettings() {
@@ -22,8 +24,9 @@ class widgetMegaMenu extends elementorModules.frontend.handlers.Base {
 				icon_up: '.mega-menu_nav-menu .mega-menu_icon-up:not(.responsive)',
 				icon_up_resp: '.mega-menu_nav-menu .mega-menu_icon-up.responsive',
 				icon_right: '.mega-menu_nav-menu .mega-menu_icon-right',
-				breakpoint: '.mega-menu_nav-wrapper',
-				sticky: '.mega-menu_nav-wrapper',
+				mini_cart: '#menu-item-mini-cart',
+				bodyCheckout: 'woocommerce-checkout',
+				bodyCart: 'woocommerce-cart',
 			},
 		};
 	}
@@ -45,8 +48,11 @@ class widgetMegaMenu extends elementorModules.frontend.handlers.Base {
 			$icon_up: this.$element.find(selectors.icon_up),
 			$icon_up_resp: this.$element.find(selectors.icon_up_resp),
 			$icon_right: this.$element.find(selectors.icon_right),
-			breakpoint: this.$element.find(selectors.breakpoint).data('breakpoint'),
-			isSticky: this.$element.find(selectors.sticky).data('enable-fixed'),
+			$mini_cart: this.$element.find(selectors.mini_cart),
+			hasBodyClassCheckout: jQuery('body').hasClass(selectors.bodyCheckout),
+			hasBodyClassCart: jQuery('body').hasClass(selectors.bodyCart),
+			breakpoint: this.$element.find(selectors.target_nav).data('breakpoint'),
+			isSticky: this.$element.find(selectors.target_nav).data('enable-fixed'),
 			mediaQuery: null,
 			optionsObserve: {
 				root: null,
@@ -55,29 +61,49 @@ class widgetMegaMenu extends elementorModules.frontend.handlers.Base {
 			},
 			fixedClass: 'menu-fixed',
 			isEditMode: elementorFrontend.isEditMode(),
+			isPreviewMode: false,
+			hasMiniCart: this.$element.find(selectors.target_nav).data('mini-cart'),
+			hasMenuCache: this.$element.find(selectors.target_nav).data('menu-cache'),
 			adminBar: document.getElementById('wpadminbar'),
 		};
 
-		components.$targetInstance.css('display', 'block');
 		components.mediaQuery = window.matchMedia(components.breakpoint);
+
+		const queryString = window.location.search;
+		const urlParams = new URLSearchParams(queryString);
+		components.isPreviewMode = urlParams.has('preview') ? true : false;
 
 		return components;
 	}
 
+	/**
+	 * Créer la liste des événements et leurs callbacks
+	 */
 	bindEvents() {
-		this.elements.mediaQuery.addEventListener('change', this.onMediaQueryChange.bind(this));
-
-		jQuery(document.body).on('removed_from_cart', this.onRemovedFromCart.bind(this));
-
-		// L'API IntersectionObserver existe (mac <= 11.1.2)
-		if (window.IntersectionObserver && 'yes' === this.elements.isSticky && !this.elements.isEditMode) {
-			const intersectObserver = new IntersectionObserver(this.observeElementInViewport.bind(this), this.elements.optionsObserve);
-			intersectObserver.observe(this.elements.$parentElement[0]);
+		if (!this.elements.isEditMode && !this.elements.isPreviewMode && this.elements.hasMenuCache) {
+			this.setMenuClass();
 		}
 
 		if (this.elements.mediaQuery.matches) {
 			this.elements.$target_nav.addClass('breakpoint');
 			this.widgetToggleOn();
+		}
+		this.elements.mediaQuery.addEventListener('change', this.onMediaQueryChange.bind(this));
+
+		if (this.elements.hasMiniCart) {
+			/** Supprime le mini cart lorsque la page panier est affichée */
+			if ((this.elements.hasBodyClassCart || this.elements.hasBodyClassCheckout) && this.elements.$mini_cart.length) {
+				this.elements.$mini_cart.remove();
+			} else {
+				jQuery(document.body).on('removed_from_cart', this.onRemovedFromCart.bind(this));
+				jQuery(document.body).trigger('removed_from_cart');
+			}
+		}
+
+		// L'API IntersectionObserver existe (mac <= 11.1.2)
+		if (window.IntersectionObserver && 'yes' === this.elements.isSticky && !this.elements.isEditMode) {
+			const intersectObserver = new IntersectionObserver(this.observeElementInViewport.bind(this), this.elements.optionsObserve);
+			intersectObserver.observe(this.elements.$parentElement[0]);
 		}
 	}
 
@@ -117,10 +143,7 @@ class widgetMegaMenu extends elementorModules.frontend.handlers.Base {
 	 * Cette méthode est appelée lors du changement d'état du device
 	 */
 	widgetToggleOff() {
-		this.elements.$button_toggle_open.off('click');
-		this.elements.$button_toggle_close.off('click');
-		this.elements.$target_top_link.off('click');
-		this.elements.$target_sub_link.off('click');
+		this.unbindButtonsToggleEvents();
 
 		this.elements.$button_toggle_open.css('display', 'none');
 		this.elements.$button_toggle_open.attr('aria-expanded', 'false');
@@ -148,6 +171,42 @@ class widgetMegaMenu extends elementorModules.frontend.handlers.Base {
 		this.elements.$button_toggle_close.on('click', this.onButtonToggleClose.bind(this));
 		this.elements.$target_top_link.on('click', this.onTargetTopLink.bind(this));
 		this.elements.$target_sub_link.on('click', this.onTargetSubLink.bind(this));
+	}
+
+	/**
+	 * Suppression des événements sur les éléments concernés par le menu responsive
+	 */
+	unbindButtonsToggleEvents() {
+		this.elements.$button_toggle_open.off('click');
+		this.elements.$button_toggle_close.off('click');
+		this.elements.$target_top_link.off('click');
+		this.elements.$target_sub_link.off('click');
+	}
+
+	/**
+	 * Ajouter les classes aux éléments du menu mis dans le cache
+	 */
+	setMenuClass() {
+		this.elements.$targetInstance.find('.current-menu-ancestor, .current-menu-parent, .current_page_item, .current-menu-item').removeClass('current-menu-ancestor current-menu-parent current_page_item current-menu-item');
+		this.elements.$targetInstance.find('a[aria-current="page"]').removeAttr('aria-current');
+
+		const currentLocation = window.location.href.split(/\?|\#/g)[0];
+
+		this.elements.$target_nav.find('li a').each(function () {
+			if (currentLocation === jQuery(this).attr('href')) {
+				var $nodeParent = jQuery(this).parents().closest('li').not('li#menu-item-mini-cart');
+				jQuery(this).attr('aria-current', 'page');
+				if ($nodeParent.length) {
+					jQuery.fn.reverse = [].reverse;
+					$nodeParent.reverse().each(function (index) {
+						//console.log(index+"::"+jQuery(this).attr('id'));
+						if (index === 0) { jQuery(this).addClass('current-menu-item'); }
+						else if (index === 1) { jQuery(this).addClass('current-menu-parent'); }
+						else { jQuery(this).addClass('current-menu-ancestor'); }
+					});
+				}
+			}
+		});
 	}
 
 	/**
@@ -280,9 +339,13 @@ class widgetMegaMenu extends elementorModules.frontend.handlers.Base {
 /**
  * Description: La class est créer lorsque le composant 'eac-addon-mega-menu' est chargé dans la page
  *
- * @param $element (ex: scope)
+ * @param $element (ex: $scope)
  * @since 2.1.0
+ * @since 2.1.2 Nouvel element handler
  */
+/*jQuery(window).on('elementor/frontend/init', () => {
+	elementorFrontend.elementsHandler.attachHandler('eac-addon-mega-menu', widgetMegaMenu);
+});*/
 
 jQuery(window).on('elementor/frontend/init', () => {
 	const EacAddonsMegaMenu = ($element) => {

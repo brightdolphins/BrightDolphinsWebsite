@@ -24,8 +24,6 @@ if ( defined( 'ELEMENTOR_PRO_VERSION' ) ) {
 use EACCustomWidgets\EAC_Plugin;
 use Elementor\Controls_Manager;
 use Elementor\Element_Base;
-use Elementor\Group_Control_Typography;
-use Elementor\Core\Kits\Documents\Tabs\Global_Typography;
 use Elementor\Plugin;
 
 class Eac_Injection_Widget_Sticky {
@@ -79,7 +77,7 @@ class Eac_Injection_Widget_Sticky {
 	 * Mets le script dans le file
 	 */
 	public function eac_enqueue_scripts() {
-		wp_enqueue_script( 'eac-element-sticky', EAC_Plugin::instance()->get_script_url( 'assets/js/elementor/eac-element-sticky' ), array( 'jquery', 'elementor-frontend' ), EAC_ADDONS_VERSION, true );
+		wp_enqueue_script( 'eac-element-sticky', EAC_Plugin::instance()->get_script_url( 'assets/js/elementor/eac-element-sticky' ), array( 'jquery', 'elementor-frontend' ), '1.8.1', true );
 	}
 
 	/**

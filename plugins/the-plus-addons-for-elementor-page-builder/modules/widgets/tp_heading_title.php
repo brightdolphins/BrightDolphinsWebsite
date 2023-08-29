@@ -5,21 +5,17 @@ Description: Creative Heading Options.
 Author: Theplus
 Author URI: https://posimyth.com
 */
+
 namespace TheplusAddons\Widgets;
 
 use Elementor\Widget_Base;
 use Elementor\Controls_Manager;
 use Elementor\Utils;
-use Elementor\Core\Schemes\Color;
 use Elementor\Group_Control_Typography;
 use Elementor\Group_Control_Border;
-use Elementor\Core\Schemes\Typography;
 use Elementor\Group_Control_Text_Shadow;
 
-
-if (!defined('ABSPATH'))
-    exit; // Exit if accessed directly
-
+if (!defined('ABSPATH')) exit; // Exit if accessed directly
 
 class L_Theplus_Ele_Heading_Title extends Widget_Base {
 		
@@ -672,7 +668,7 @@ class L_Theplus_Ele_Heading_Title extends Widget_Base {
 					'layout!' => ['carousel']
 				],
 				'selectors' => [
-					'{{WRAPPER}} .heading_style .heading-sub-title, .heading_style .heading-title' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+					'{{WRAPPER}} .heading_style .heading-title' => 'padding: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
 				],
 				'condition' => [
 					'heading_style' => [ 'style_1', 'style_2' ],

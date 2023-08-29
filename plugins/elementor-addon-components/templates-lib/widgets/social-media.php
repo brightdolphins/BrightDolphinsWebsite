@@ -594,11 +594,11 @@ class Social_Media_Widget extends Widget_Base {
 				continue; }
 
 			if ( 'email' === $site ) {
-				echo '<a href="' . esc_url( 'mailto:' . antispambot( sanitize_email( $settings[ 'social_media_' . $site ] ) ) ) . '" rel="nofollow">';
+				echo '<a href="' . esc_url( 'mailto:' . antispambot( sanitize_email( $settings[ 'social_media_' . $site ] ) ) ) . '" rel="nofollow" aria-label="' . esc_attr( ucfirst( $site ) ) . '">';
 			} else {
-				echo '<a href="' . esc_url( $settings[ 'social_media_' . $site ] ) . '" target="_blank" rel="nofollow noopener noreferrer">';
+				echo '<a href="' . esc_url( $settings[ 'social_media_' . $site ] ) . '" target="_blank" rel="nofollow noopener noreferrer" aria-label="' . esc_attr( ucfirst( $site ) ) . '">';
 			}
-			echo '<span class="dynamic-tags_social-icon ' . esc_attr( $site ) . '" title="' . esc_attr( ucfirst( $site ) ) . '" aria-label="' . esc_attr( ucfirst( $site ) ) . '">';
+			echo '<span class="dynamic-tags_social-icon ' . esc_attr( $site ) . '" title="' . esc_attr( ucfirst( $site ) ) . '">';
 			echo $icon; // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 			echo '</span></a>';
 		}

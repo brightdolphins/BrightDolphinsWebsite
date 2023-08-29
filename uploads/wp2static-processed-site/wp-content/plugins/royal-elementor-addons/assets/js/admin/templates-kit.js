@@ -9,7 +9,7 @@ jQuery(document).ready(function( $ ) {
 		init: function() {
 
 			// Overlay Click
-			$('.wpr-templates-kit-grid').find('.image-overlay').on('click', function(){
+			$(document).on('click', '.wpr-templates-kit-grid .image-overlay', function(){
 				WprTemplatesKit.showImportPage( $(this).closest('.grid-item') );
 				WprTemplatesKit.renderImportPage( $(this).closest('.grid-item') );
 			});
@@ -30,6 +30,15 @@ jQuery(document).ready(function( $ ) {
 				if ( confirmImport ) {
 					WprTemplatesKit.importTemplatesKit( $(this).attr('data-kit-id') );
 					$('.wpr-import-kit-popup-wrap').fadeIn();
+
+					// Old Version Check
+					let wooBuilder = $('.grid-item[data-kit-id="'+ $(this).attr('data-kit-id') +'"]').find('.wpr-woo-builder-label').length,
+						updateNotice = $('.wpr-wp-update-notice').length;
+						
+					if ( wooBuilder > 0 && updateNotice > 0 ) {
+						$('.wpr-wp-update-notice').show();
+						$('.progress-wrap').hide();
+					}
 				}
 			});
 
@@ -40,7 +49,8 @@ jQuery(document).ready(function( $ ) {
 			});
 
 			// Search Templates Kit
-			var searchTimeout = null;  
+			var searchTimeout = null,
+				maingGridHtml = $('.wpr-templates-kit-grid').html();
 			$('.wpr-templates-kit-search').find('input').keyup(function(e) {
 				if ( e.which === 13 ) {
 					return false;
@@ -54,7 +64,7 @@ jQuery(document).ready(function( $ ) {
 
 				searchTimeout = setTimeout(function() {
 					searchTimeout = null;
-					WprTemplatesKit.searchTemplatesKit( val );
+					WprTemplatesKit.searchTemplatesKit( val, maingGridHtml );
 
 					// Final Adjustments
 					$.ajax({
@@ -418,7 +428,7 @@ jQuery(document).ready(function( $ ) {
 			$('.wpr-templates-kit-single').find('.preview-demo').attr('href', $('.wpr-templates-kit-single').find('.preview-demo').attr('href') +'/'+ id );
 		},
 
-		searchTemplatesKit: function( tag ) {
+		searchTemplatesKit: function( tag, html ) {
 			var price = $('.wpr-templates-kit-price-filter').children().first().attr( 'data-price' ),
 				priceAttr = 'mixed' === price ? '' : '[data-price*="'+ price +'"]';
 
@@ -426,6 +436,7 @@ jQuery(document).ready(function( $ ) {
 				$('.main-grid .grid-item').hide();
 				$('.main-grid .grid-item[data-tags*="'+ tag +'"]'+ priceAttr).show();
 			} else {
+				$('.main-grid').html( html );
 				$('.main-grid .grid-item'+ priceAttr).show();
 			}
 
@@ -436,6 +447,17 @@ jQuery(document).ready(function( $ ) {
 				$('.wpr-templates-kit-not-found').hide();
 				$('.wpr-templates-kit-page-title').show();
 			}
+
+			// Reorder Search accoring to Title match
+			$('.main-grid .grid-item:visible').each(function(i){
+				if ( '' !== tag ) {
+					let title = $(this).attr('data-title');
+
+					if ( -1 === title.indexOf(tag) ) {
+						$('.main-grid').append( $(this).remove() );
+					}
+				}
+			});
 		},
 
 		fiterFreeProTemplates: function( price ) {

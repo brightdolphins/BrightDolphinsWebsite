@@ -48,7 +48,7 @@
     cursor:pointer;
 }
 .tp-messagebox .msg-icon-content i {
-    color: #ffffff;    
+    color: #000000;    
     font-size: 25px;
     text-align: center;
     display: flex;

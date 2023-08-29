@@ -8,12 +8,6 @@
  * ouverte par un bouton ou un texte
  *
  * @since 1.8.5
- * @since 1.8.7 Application des breakpoints
- * @since 1.9.0 Intégration des scripts et des styles dans le constructeur de la class
- *              Cache le ontrol 'oc_align_button' lorsque le bouton est collant
- * @since 1.9.1 Impossible de sauvegarder le document comme modèle
- * @since 1.9.6 Les containers déclencheur et la div canvas ont le même ID
- *              Dimension du container ajout de l'unité '%'
  * @since 2.1.0 L'icone du bouton ne s'affiche pas
  */
 
@@ -1139,7 +1133,7 @@ class Off_Canvas_Widget extends Widget_Base {
 	protected function render_offcanvas() {
 		$settings = $this->get_settings_for_display();
 
-		$trigger        = $settings['oc_trigger_type']; // Button, Text
+		$trigger        = $settings['oc_trigger_type'];
 		$has_overlay    = $settings['oc_content_overlay'];
 		$content        = $settings['oc_content_type'];
 		$short_code     = $settings['oc_content_shortcode'];

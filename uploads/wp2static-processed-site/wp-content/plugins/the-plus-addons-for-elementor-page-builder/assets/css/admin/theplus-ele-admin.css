@@ -2162,6 +2162,44 @@ a.theplus-panel-btn-outline-2 {
 }
 /*pro head and button in 4 tab end*/
 
+/*pro activated step*/
+.tp-pro-note-step{
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.tp-pro-note-step span:nth-child(1){
+    font-weight: bold;
+}
+
+.tp-pro-note-step span:nth-child(2){
+    margin-left: 5px;
+}
+
+.tp-pro-note-step span:nth-child(2) a{
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: black;
+}
+
+.tp-pro-note-step span:nth-child(2):hover a,
+.tp-pro-note-step span:nth-child(2):hover svg path{
+    color: #8072FC;
+    stroke: #8072FC;
+}
+
+.tp-pro-note-step span:nth-child(2) svg{
+    transition: transform 0.3s ease;
+    margin-left: 5px;
+}
+
+.tp-pro-note-step span:nth-child(2):hover a svg{
+    transform: translate(50%, 0%)
+}
+/** pro activated step */
+
 /*mobile responsive start*/
 @media (min-width: 600px) and (max-width: 767px){ 
 .theplus-panel-col-25 {
@@ -2263,7 +2301,7 @@ a.theplus-panel-btn-outline-2 {
     margin: 0;
 }
 .theplus-settings-form-wrapper.form-theplus_performance{
-	 width: 80%;
+    width: 80%;
 }
 }
 /*mobile responsive end*/
@@ -2497,7 +2535,7 @@ label.theplus-filter-widget-search {
     padding-top: 0 !important;
     display: inline-flex !important;
     width: auto !important;
-    justify-content: space-between !important;
+    justify-content: center !important;
 }
 
 .theplus-settings-form-wrapper.form-theplus_performance form#theplus_performance,
@@ -2516,61 +2554,6 @@ label.theplus-filter-widget-search {
     margin: 0 !important;
     width: 43.5% !important;
     align-items: center;
-}
-.theplus-settings-form-wrapper.form-theplus_performance .tp-perf-ele-wid label.tp-perf-ele-wid-label {
-    width: auto;
-    padding: 0;
-    text-align: left;
-    float: none;
-    font-size: 20px;
-    line-height: 30px;
-    color: #313131;
-    white-space: nowrap;
-    font-weight: 500;
-    transition: all .3s linear;
-}
-
-.theplus-settings-form-wrapper.form-theplus_performance .tp-perf-ele-wid .tp-perf-ele-wid-desc {
-    color: #888;
-    margin: 0;
-    font-size: 15px;
-    text-align: center;
-    line-height: 26px;
-    font-weight: 400;
-    letter-spacing: 0.2px;
-    padding: 0;
-    font-style: normal;
-    margin: 0 auto;
-    max-width: 85%;
-    margin-top: 15px;
-}
-
-.theplus-settings-form-wrapper.form-theplus_performance .tp-perf-ele-wid a.tp-perf-ele-wid-button {
-    text-decoration: blink !important;
-    outline: none !important;
-    background: #8072FC;
-    color: #fff;
-    padding: 15px 25px;
-    margin-top: 25px;
-    font-size: 15px;
-    letter-spacing: .5px;
-    text-transform: uppercase;
-    font-weight: 600;
-    border-radius: 4px;
-    box-shadow: 0px 10px 20px rgb(128 114 252 / 10%);
-    position: relative;
-    display: inline-block;
-}
-.theplus-settings-form-wrapper.form-theplus_performance .tp-perf-ele-wid .tp-perf-ele-wid-notice {
-    font-size: 13px;
-    line-height: 22px;
-    max-width: 80%;
-    margin: 0 auto;
-    margin-top: 25px;
-    display: block;
-    color: #888;
-    font-weight: 400;
-    text-align: center;
 }
 .theplus-settings-form-wrapper.form-theplus_elementor_widget .plus-ele-widget-list{
 	padding: 0 8px;

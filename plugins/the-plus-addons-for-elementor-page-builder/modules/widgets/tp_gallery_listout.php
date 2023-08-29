@@ -5,22 +5,20 @@ Description: Different style of gallery listing layouts.
 Author: Theplus
 Author URI: https://posimyth.com
 */
+
 namespace TheplusAddons\Widgets;
 
 use Elementor\Widget_Base;
 use Elementor\Controls_Manager;
 use Elementor\Utils;
-use Elementor\Core\Schemes\Color;
 use Elementor\Group_Control_Typography;
 use Elementor\Group_Control_Border;
-use Elementor\Core\Schemes\Typography;
 use Elementor\Group_Control_Background;
 use Elementor\Group_Control_Box_Shadow;
 use Elementor\Group_Control_Css_Filter;
+use Elementor\Core\Kits\Documents\Tabs\Global_Typography;
 
-if (!defined('ABSPATH'))
-    exit; // Exit if accessed directly
-
+if (!defined('ABSPATH')) exit; // Exit if accessed directly
 
 class L_ThePlus_Gallery_ListOut extends Widget_Base {
 	
@@ -552,7 +550,9 @@ class L_ThePlus_Gallery_ListOut extends Widget_Base {
 			[
 				'name' => 'title_typography',
 				'label' => esc_html__( 'Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_1,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_PRIMARY
+				],
 				'selector' => '{{WRAPPER}} .gallery-list .post-inner-loop .post-title,{{WRAPPER}} .gallery-list .post-inner-loop .post-title a',
 			]
 		);
@@ -612,7 +612,9 @@ class L_ThePlus_Gallery_ListOut extends Widget_Base {
 			[
 				'name' => 'excerpt_typography',
 				'label' => esc_html__( 'Typography', 'tpebl' ),
-				'scheme' => Typography::TYPOGRAPHY_3,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_TEXT
+				],
 				'selector' => '{{WRAPPER}} .gallery-list .post-inner-loop .entry-content',
 			]
 		);
@@ -761,6 +763,18 @@ class L_ThePlus_Gallery_ListOut extends Widget_Base {
 				'name' => 'css_filters',
 				'selector' => '{{WRAPPER}} .gallery-list .gallery-list-content .gallery-image img,{{WRAPPER}} .gallery-list .gallery-list-content  .gallery-bg-image-metro',
 				'separator' => 'before',
+			]
+		);
+		$this->add_control('image_border_radius',
+			[
+				'label'      => esc_html__( 'Border Radius', 'theplus' ),
+				'type'       => Controls_Manager::DIMENSIONS,
+				'size_units' => [ 'px', '%' ],
+				'selectors'  => [
+					'{{WRAPPER}} .gallery-list .post-inner-loop .gallery-list-content .gallery-bg-image-metro,
+					 {{WRAPPER}} .gallery-list-content .attachment-tp-image-grid.size-tp-image-grid ,
+					 {{WRAPPER}} .gallery-list-content .attachment-full.size-full' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+				],
 			]
 		);
 		$this->end_controls_tab();

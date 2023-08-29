@@ -16,7 +16,13 @@
   display: none;
 }
 
-/** Style des boutons déclencheurs  */
+/** Style du texte déclencheur */
+.fv-viewer__wrapper-text {
+  position: relative;
+  width: fit-content;
+}
+
+/** Style des boutons déclencheurs */
 .fv-viewer__wrapper-btn {
   display: block;
   color: #FFFFFF;

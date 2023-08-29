@@ -5,19 +5,20 @@ Description: Content of text text block.
 Author: Theplus
 Author URI: https://posimyth.com
 */
+
 namespace TheplusAddons\Widgets;
 
 use Elementor\Widget_Base;
 use Elementor\Controls_Manager;
 use Elementor\Utils;
-use Elementor\Core\Schemes\Color;
 use Elementor\Group_Control_Typography;
 use Elementor\Group_Control_Border;
-use Elementor\Core\Schemes\Typography;
+
+use Elementor\Core\Kits\Documents\Tabs\Global_Typography;
 
 use TheplusAddons\L_Theplus_Element_Load;
-if (!defined('ABSPATH'))
-    exit; // Exit if accessed directly
+
+if (!defined('ABSPATH')) exit; // Exit if accessed directly
 
 class L_ThePlus_Adv_Text_Block extends Widget_Base {
 
@@ -169,7 +170,9 @@ class L_ThePlus_Adv_Text_Block extends Widget_Base {
             [
                 'name' => 'content_typography',
                 'label' => esc_html__('Typography', 'tpebl'),
-				'scheme'   => Typography::TYPOGRAPHY_3,
+				'global' => [
+					'default' => Global_Typography::TYPOGRAPHY_TEXT
+				],
                 'selector' => '{{WRAPPER}} .pt_plus_adv_text_block .text-content-block,{{WRAPPER}} .pt_plus_adv_text_block .text-content-block p',
             ]
         );

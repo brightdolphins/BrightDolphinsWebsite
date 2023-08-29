@@ -112,14 +112,16 @@
 						
 						/** @since 1.3.1 Ajout du support de l'audio, de la vidéo et du PDF */
 						if(item.img && settings.data_img) {
-							var img = '';
+							var img       = '';
 							var videoattr = '';
+							var titreImg  = $.trim(item.title.replace(/"/g, " "));
+
 							if(item.img.match(/\.mp3|\.m4a/)) { // Flux mp3
 								img =	'<div class="rss-galerie__item-image">' +
-											'<audio controls preload="none" src="' + item.img + '" type="audio/mp3"></audio>' +
+											'<audio aria-label="' + titreImg + '" controls preload="none" src="' + item.img + '" type="audio/mp3"></audio>' +
 										'</div>';
 							} else if(item.img.match(/\.mp4|\.m4v/)) { // Flux mp4
-								videoattr = is_ios ? '<video controls preload="metadata" type="video/mp4">' : '<video controls preload="none" type="video/mp4">';
+								videoattr = is_ios ? '<video aria-label="' + titreImg + '" controls preload="metadata" type="video/mp4">' : '<video controls preload="none" type="video/mp4">';
 								img =	'<div class="rss-galerie__item-image">' +
 											 videoattr +
 												'<source src="' + item.img + '">' +
@@ -127,15 +129,15 @@
 											'</video>' +
 										'</div>';
 							} else if(item.img.match(/\.pdf/)) { // Fichier PDF
-								img = '<div class="rss-galerie__item-image"><a href="' + item.imgLink + 
-									'" data-elementor-open-lightbox="no" data-fancybox="rss-gallery" data-caption="' + item.title.replace(/"/g, "'") + '"><i class="fa fa-file-pdf-o" aria-hidden="true"></i></a></div>';
+								img = '<div class="rss-galerie__item-image" aria-label="' + titreImg + '"><a href="' + item.imgLink + 
+									'" data-elementor-open-lightbox="no" data-fancybox="rss-gallery" data-caption="' + titreImg + '"><i class="fa fa-file-pdf-o" aria-hidden="true"></i></a></div>';
 							} else if(settings.data_lightbox) { // Fancybox activée. Suppression des " par des ' dans le titre
-								img = '<div class="rss-galerie__item-image"><a href="' + item.imgLink + 
-									'" data-elementor-open-lightbox="no" data-fancybox="rss-gallery" data-caption="' + item.title.replace(/"/g, "'") + '"><img class="eac-image-loaded" src="' + item.img + '"></a></div>';
+								img = '<div class="rss-galerie__item-image" role="img" aria-label="' + titreImg + '"><a href="' + item.imgLink + 
+									'" data-elementor-open-lightbox="no" data-fancybox="rss-gallery" data-caption="' + titreImg + '"><img class="eac-image-loaded" src="' + item.img + '"></a></div>';
 							} else if(settings.data_image_link) { // @since 1.8.2 Lien de l'article sur l'image
-								img = '<div class="rss-galerie__item-image"><a href="' + item.lien + '" target="_blank" rel="nofollow noopener noreferrer"><img class="eac-image-loaded" src="' + item.img + '"></a></div>';
+								img = '<div class="rss-galerie__item-image" role="img" aria-label="' + titreImg + '"><a href="' + item.lien + '" target="_blank" rel="nofollow noopener noreferrer"><img class="eac-image-loaded" src="' + item.img + '"></a></div>';
 							} else {
-								img = '<div class="rss-galerie__item-image"><img class="eac-image-loaded" src="' + item.img + '"></div>';
+								img = '<div class="rss-galerie__item-image" role="img" aria-label="' + titreImg + '"><img class="eac-image-loaded" src="' + item.img + '"></div>';
 							}
 						$wrapperContent.append(img);
 						}

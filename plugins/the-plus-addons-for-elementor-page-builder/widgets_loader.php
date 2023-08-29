@@ -176,10 +176,10 @@ final class L_Theplus_Element_Load {
 				$tp_widgets_list = $theplus_options['check_elements'];
 			}
 		}else if($page == "elementorwidgetpage"){
-			$theplus_options=get_option( 'theplus_elementor_widget' );
-			if(!empty($theplus_options) && isset($theplus_options['elementor_check_elements'])){
-				$tp_widgets_list = $theplus_options['elementor_check_elements'];
-			}
+			// $theplus_options=get_option( 'theplus_elementor_widget' );
+			// if(!empty($theplus_options) && isset($theplus_options['elementor_check_elements'])){
+			// 	$tp_widgets_list = $theplus_options['elementor_check_elements'];
+			// }
 		}
 		
 		if ( empty( $post_ids ) ) {
@@ -230,7 +230,7 @@ final class L_Theplus_Element_Load {
 			}
 			
 			$to_return = [];
-			
+
 			\Elementor\Plugin::$instance->db->iterate_data( $meta_data, function( $element ) use ($tp_widgets_list, &$to_return) {
 				$page = !empty($_GET['page']) ? wp_unslash($_GET['page']) : '';
 				if($page == "tpewidpage"){
@@ -238,9 +238,9 @@ final class L_Theplus_Element_Load {
 						$to_return[] = str_replace('-','_',$element['widgetType']);
 					}
 				}else if($page == "elementorwidgetpage"){
-					if ( !empty( $element['widgetType'] ) && array_key_exists($element['widgetType'], array_flip($tp_widgets_list) ) ) {				
-						$to_return[] = $element['widgetType'];
-					}
+					// if ( !empty( $element['widgetType'] ) && array_key_exists($element['widgetType'], array_flip($tp_widgets_list) ) ) {				
+					// 	$to_return[] = $element['widgetType'];
+					// }
 				}
 				
 			} );
@@ -275,17 +275,17 @@ final class L_Theplus_Element_Load {
 					$message = "We have scanned your site and disabled ".$val3." unused The Plus Addons widgets.";
 				}
 			}else if($page == "elementorwidgetpage"){
-				$theplus_options=get_option( 'theplus_elementor_widget' );			
-				if(!empty($theplus_options) && isset($theplus_options['elementor_check_elements'])){
-					$tp_widgets_list = $theplus_options['elementor_check_elements'];
-					$val1 = count($tp_widgets_list);
-					$val2 = count($_GET['SacanedDataPass']);
-					$val3 = $val1 - $val2;
+				// $theplus_options=get_option( 'theplus_elementor_widget' );			
+				// if(!empty($theplus_options) && isset($theplus_options['elementor_check_elements'])){
+				// 	$tp_widgets_list = $theplus_options['elementor_check_elements'];
+				// 	$val1 = count($tp_widgets_list);
+				// 	$val2 = count($_GET['SacanedDataPass']);
+				// 	$val3 = $val1 - $val2;
 					
-					$theplus_options['elementor_check_elements'] = array_keys($_GET['SacanedDataPass']);
-					update_option( 'theplus_elementor_widget',$theplus_options, null, 'no' );
-					$message = "We have scanned your site and disabled ".$val3." unused The Plus Addons widgets.";
-				}
+				// 	$theplus_options['elementor_check_elements'] = array_keys($_GET['SacanedDataPass']);
+				// 	update_option( 'theplus_elementor_widget',$theplus_options, null, 'no' );
+				// 	$message = "We have scanned your site and disabled ".$val3." unused The Plus Addons widgets.";
+				// }
 			}			
 		}
 		wp_send_json_success( $message );
@@ -442,9 +442,6 @@ final class L_Theplus_Element_Load {
 		if ( current_user_can( 'install_plugins' ) ) {
 			/**Install ThePlus Blocks Notice*/
 			add_action( 'admin_notices', array( $this, 'theplus_blocks_notice_install_plugin' ) );
-			/**Install ThePlus Blocks Notice*/
-			add_action( 'enqueue_block_editor_assets', array( $this, 'theplus_blocks_popup_enqueue_scripts' ) );
-			add_action( 'wp_ajax_theplus_blocks_install_plugin', array( $this, 'theplus_blocks_install_plugin' ) );
 			/**TPAG Close Popup and Notice*/
 			add_action( 'wp_ajax_theplus_blocks_dismiss_notice', array( $this, 'theplus_blocks_dismiss_notice' ) );
 		}
@@ -460,7 +457,6 @@ final class L_Theplus_Element_Load {
 			/**Plugin by links*/
 			add_filter( 'plugin_row_meta', array( $this, 'tp_extra_links_plugin_row_meta' ), 10, 2 );
 		}
-		
 	}
 
 	/**
@@ -522,146 +518,6 @@ final class L_Theplus_Element_Load {
 	}
 
 	/**
-	 * Plugin Active Show Block Editor Button 
-	 *
-	 * @since 5.2.6
-	 */
-	public function theplus_blocks_popup_enqueue_scripts() {
-		$file_path = $this->TPAG_Slug;
-		$installed_plugins = get_plugins();
-
-		$popup_dismissed = get_user_meta( get_current_user_id(), 'theplus_tpag_blocks_dismissed_popup', true );
-		if ( !empty($popup_dismissed) ) {
-			return; 
-		}
-
-		$popup_dismissed = get_option('theplus_tpag_blocks_dismissed_popup');
-		if ( !empty($popup_dismissed) ) {
-			return; 
-		}
-
-		if ( is_plugin_active( $file_path ) || isset( $installed_plugins[ $file_path ] ) ) {
-			return;
-		}
-
-		add_action( 'admin_footer', array( $this, 'theplus_blocks_promo_admin_js_template' ) );
-
-		wp_enqueue_style( 'theplus-gb-blocks-css', L_THEPLUS_ASSETS_URL . 'css/admin/theplus-gb-blocks-promo.css', array(), L_THEPLUS_VERSION, false );
-		wp_enqueue_script( 'theplus-gb-blocks-js', L_THEPLUS_ASSETS_URL . 'js/admin/theplus-gb-blocks-promo.js', array('jquery') , L_THEPLUS_VERSION, true );
-	}
-
-	/**
-	 * Plugin Active Add Editor Popup HTML Gutenberg Side
-	 *
-	 * @since 5.2.6
-	 */
-	public function theplus_blocks_promo_admin_js_template() {
-		$tpag_logo  = L_THEPLUS_URL . 'assets/images/tpag/tpag.svg';
-		$tpag_mainimg = L_THEPLUS_URL . 'assets/images/tpag/tpag-1.png';
-		$tpag_close = L_THEPLUS_URL . 'assets/images/tpag/close.svg';
-		$tpag_ExternalLink = L_THEPLUS_URL . 'assets/images/tpag/external-link.svg';
-		$security = wp_create_nonce( 'theplus-addons-tpag-blocks' );
-
-		?>
-        <script id="tp-tpag-template-button" type="text/html">
-			<div id="tp-tpag-main-btn-popup">
-				<button type="button" id="tp-tpag-button-popup">
-					<img width="20" src="<?php echo esc_url( $tpag_logo ); ?>" alt="tp-close">
-					<span><?php esc_html_e( '40+ Blocks', 'tpebl' ); ?></span>
-				</button>
-				<span class="tp-tpag-btn-popup-close">
-					<img class="tp-tpag-btn-dont-show" width="20" data-type="close-btn-popup" data-security="<?php echo esc_attr( $security ); ?>" src="<?php echo esc_url( $tpag_close ); ?>" alt="tp-close">
-				</span>
-			<div>
-        </script>
-
-		<script id="tp-tpag-template-popup" type="text/html">
-            <div class="tp-gb-popup-tpag">
-                <div class="tp-gb-header-tpag">
-                    <img src="<?php echo esc_url( $tpag_close ); ?>" class="tp-tpag-dismiss" alt="tp-close">
-                    <div class="tp-tpag-tooltip"><?php esc_html_e( 'Popup Close', 'tpebl' ); ?></div>
-                </div>
-                <div class="tp-gb-tpag-popup-content">
-                    <div class="tp-gb-tpag-content">
-                        <div class="tp-tpag-content-image">
-                            <img src="<?php echo esc_url( $tpag_mainimg ); ?>" alt="tp-tpgb-main-image">
-                        </div>
-                        <div class="tp-tpag-content-details">
-                            <h3><?php esc_html_e( "Download The Plus Blocks for Gutenberg for 80+ WordPress Blocks (40 Free Blocks)", 'tpebl' ); ?> </h3>
-                            <p><?php esc_html_e( "Imagine having the same powers as The Plus Addons for Elementor but for gutenberg! Well, it's a reality with our new Gutenberg block plugin.", 'tpebl' ); ?></p>
-                            <p class="tp-tpag-demo-live"><a href="<?php echo esc_url($this->TPAG_DocUrl); ?>" target="_blank" rel="noopener noreferrer" ><?php esc_html_e( "Check Live demos", 'tpebl' ); ?><img src="<?php echo esc_url( $tpag_ExternalLink ); ?>" class="tp-tpag-docicon" alt="tp-doclink"></a></p>
-                            <button class="tp-install-tpag" data-security="<?php echo esc_attr( $security ); ?>"><?php echo esc_html_e( "Install The Plus Blocks for Gutenberg", 'tpebl' ); ?></button>
-							<a class="tp-tpag-dont-show" data-security="<?php echo esc_attr( $security ); ?>" data-type="close-popup"><?php esc_html_e( "Don't show again", 'tpebl' ); ?></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </script>
-
-		<?php
-	}
-
-	/**
-	 * Install TPAG Version Editor Gutenberg Side
-	 *
-	 * @since 5.2.6
-	 */
-	public function theplus_blocks_install_plugin(){
-
-		if( !isset($_POST['security']) || empty($_POST['security']) || ! wp_verify_nonce( $_POST['security'], 'theplus-addons-tpag-blocks' ) ) {	
-			die ('Security checked!');
-		}
-
-		if ( !current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( __( 'You are not allowed to do this action', 'tpebl' ) );
-		}
-
-		include_once ABSPATH . 'wp-admin/includes/file.php';
-        include_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
-        include_once ABSPATH . 'wp-admin/includes/class-automatic-upgrader-skin.php';
-
-		$response = wp_remote_post('http://api.wordpress.org/plugins/info/1.0/',
-            [
-                'body' => [
-                    'action' => 'plugin_information',
-                    'request' => serialize((object) [
-                        'slug' => 'the-plus-addons-for-block-editor',
-                        'fields' => [
-                            'version' => false,
-                        ],
-                    ]),
-                ],
-            ]
-        );
-
-		$TpagPlugin = unserialize(wp_remote_retrieve_body($response));
-		if ( is_wp_error($TpagPlugin) ) {
-            return $TpagPlugin;
-        }
-
-		$upgrad = new \Plugin_Upgrader(new \Automatic_Upgrader_Skin());
-
-        /**Install Plugin*/
-        $TpagInstall = $upgrad->install($TpagPlugin->download_link);
-		if (is_wp_error($TpagInstall)) {
-            return $TpagInstall;
-        }
-
-		/**Activate Plugin*/
-		if ($TpagInstall == true) {
-            $TpagActive = activate_plugin( $upgrad->plugin_info(), '', false, true );
-
-            if ( is_wp_error($TpagActive) ) {
-                return $TpagActive;
-            }
-
-            return $TpagActive == null;
-        }
-		
-        wp_send_json_success( __('TPAG Plugin installed successfully', 'tpebl') );
-    }
-
-	/**
 	 * It's is use for Save key in database
 	 * TAPG Notice and TAG Popup Dismisse 
 	 * 
@@ -683,7 +539,7 @@ final class L_Theplus_Element_Load {
 		if( $GetType == "tpag_notice" ){
 			update_user_meta( get_current_user_id(), 'theplus_tpag_blocks_dismissed_notice', true );
 		}else if( $GetType == "tpag_popup" ){
-			add_option('theplus_tpag_blocks_dismissed_popup', true);
+			// add_option('theplus_tpag_blocks_dismissed_popup', true);
 		}
 
 		wp_send_json_success();

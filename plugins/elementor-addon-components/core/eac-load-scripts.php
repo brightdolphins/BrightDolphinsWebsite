@@ -77,7 +77,7 @@ class Eac_Load_Scripts {
 	 */
 	public function enqueue_scripts_styles() {
 		// Les styles globaux
-		wp_enqueue_style( 'eac', EAC_Plugin::instance()->get_style_url( 'assets/css/eac-components' ), false, EAC_ADDONS_VERSION );
+		wp_enqueue_style( 'eac', EAC_Plugin::instance()->get_style_url( 'assets/css/eac-components' ), false, '1.0.0' );
 
 		// Les styles de la Fancybox
 		wp_enqueue_style( 'eac-image-fancybox', EAC_Plugin::instance()->get_style_url( 'assets/css/jquery.fancybox' ), array( 'eac' ), '3.5.7' );

@@ -13,6 +13,7 @@ use Elementor\Core\Schemes\Typography;
 use Elementor\Core\Schemes\Color;
 use Elementor\Repeater;
 use Elementor\Group_Control_Image_Size;
+use Exception;
 use WprAddons\Classes\Utilities;
 
 if ( ! defined( 'ABSPATH' ) ) exit; // Exit if accessed directly
@@ -51,6 +52,8 @@ class Wpr_Instagram_Feed extends Widget_Base {
     	if ( empty(get_option('wpr_wl_plugin_links')) )
     		return 'https://wordpress.org/support/plugin/royal-elementor-addons/';
     }
+
+	public $reauthorization_needed;
 	
 	public function add_controls_group_limit() {
 		$this->add_control(
@@ -197,7 +200,8 @@ class Wpr_Instagram_Feed extends Widget_Base {
 					'luminosity' => esc_html__( 'luminosity', 'wpr-addons' ),
 				],
 				'selectors' => [
-					'{{WRAPPER}} {{CURRENT_ITEM}} .wpr-insta-feed-media-hover-bg' => 'mix-blend-mode: {{VALUE}}',
+					// '{{WRAPPER}} {{CURRENT_ITEM}} .wpr-insta-feed-media-hover-bg' => 'mix-blend-mode: {{VALUE}}',
+					'{{WRAPPER}} .wpr-insta-feed-media-hover-bg' => 'mix-blend-mode: {{VALUE}}',
 				],
 				'separator' => 'after',
 			]
@@ -581,7 +585,7 @@ class Wpr_Instagram_Feed extends Widget_Base {
 		$this->start_controls_section(
 			'section_insta_api',
 			[
-				'label' => esc_html__( 'Integration', 'wpr-addons' ),
+				'label' => 'Intergration <a href="#" onclick="window.open(\'https://www.youtube.com/watch?v=mRwHa-J-fxg\',\'_blank\').focus()">Video Tutorial <span class="dashicons dashicons-video-alt3"></span></a>',
 				'tab' => Controls_Manager::TAB_CONTENT,
 			]
 		);
@@ -4943,9 +4947,13 @@ class Wpr_Instagram_Feed extends Widget_Base {
 		$response = wp_remote_get($url);
 		if(!isset($body)) {
 			$body = json_decode($response['body']);
-			set_transient('wpr_instagram_access_token'. $this->get_ID(), $body->access_token, $body->expires_in);
-			set_transient('wpr_instagram_access_token_expires_in'. $this->get_ID(), $body->expires_in, $body->expires_in);
-			set_transient('wpr_instagram_access_token_generation_date'. $this->get_ID(), date('Y-m-d'), $body->expires_in);
+			if ($body->error) {
+				$this->reauthorization_needed = true;
+			} else {
+				set_transient('wpr_instagram_access_token'. $this->get_ID(), $body->access_token, $body->expires_in);
+				set_transient('wpr_instagram_access_token_expires_in'. $this->get_ID(), $body->expires_in, $body->expires_in);
+				set_transient('wpr_instagram_access_token_generation_date'. $this->get_ID(), date('Y-m-d'), $body->expires_in);
+			}
 		}
 	}
 
@@ -5480,13 +5488,12 @@ class Wpr_Instagram_Feed extends Widget_Base {
 	
 			$token_generation_date = strtotime(get_transient('wpr_instagram_access_token_generation_date'. $this->get_ID()));
 		} else {
-			
 			$access_token = $settings['instagram_access_token'];
-
+			
 			if ( !get_transient('wpr_instagram_access_token_expires_in'. $this->get_ID()) ) {
 				set_transient('wpr_instagram_access_token_expires_in'. $this->get_ID(), $settings['instagram_access_token_expires_in']);
 			}
-
+			
 			$token_expires_in = get_transient('wpr_instagram_access_token_expires_in'. $this->get_ID());
 			
 			if (!get_transient('wpr_instagram_access_token_generation_date'. $this->get_ID())) {
@@ -5511,6 +5518,13 @@ class Wpr_Instagram_Feed extends Widget_Base {
 		if ( '' === $access_token ) {
 			if ( current_user_can('administrator') ) {
 				echo '<p class="wpr-token-missing">'. esc_html__('Please click on the Authorize Instagram button to get instagram access token and expiry date!', 'wpr-addons') .'</p>';
+			}
+			return;
+		}
+
+		if ( $this->reauthorization_needed ) {
+			if ( current_user_can('administrator') ) {
+				echo '<p class="wpr-token-missing">'. esc_html__('Please reauthorize instagram', 'wpr-addons') .'</p>';
 			}
 			return;
 		}

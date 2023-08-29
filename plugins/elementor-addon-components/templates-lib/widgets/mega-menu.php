@@ -7,6 +7,9 @@
  * Description: Création d'un menu de navigation basé sur les menus existants
  *
  * @since 2.1.0
+ * @since 2.1.1 Sauvegarde du menu dans une option pour accélérer le chargement
+ *              Changement du nom du fichier 'menu-walker.php' en 'class-menu-walker.php'
+ *              Fix: le libellé du namespace 'Templates' en 'TemplatesLib' pour la class 'EAC_Menu_Walker'
  */
 
 namespace EACCustomWidgets\TemplatesLib\Widgets;
@@ -16,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use EACCustomWidgets\EAC_Plugin;
-use EACCustomWidgets\Templates\Widgets\EAC_Menu_Walker;
+use EACCustomWidgets\TemplatesLib\Widgets\Classes\EAC_Menu_Walker;
 use EACCustomWidgets\Core\Utils\Eac_Tools_Util;
 use EACCustomWidgets\Core\Eac_Config_Elements;
 
@@ -37,55 +40,6 @@ class Mega_Menu_Widget extends Widget_Base {
 	 * @var $selected_args_menu
 	 */
 	private $selected_args_menu = '';
-
-	/**
-	 * Constructeur de la class
-	 */
-	public function __construct( $data = array(), $args = null ) {
-		parent::__construct( $data, $args );
-
-		require_once __DIR__ . '/menu-walker.php';
-
-		/** Les styles du widget sont chargés dans le frontend 'templates-lib/documents/manager.php */
-		wp_register_script( 'eac-mega-menu', EAC_Plugin::instance()->get_script_url( 'templates-lib/assets/js/mega-menu' ), array( 'jquery', 'elementor-frontend' ), '2.1.0', true );
-
-		if ( class_exists( 'woocommerce' ) ) {
-			$args = array(
-				'ajax_url'    => admin_url( 'admin-ajax.php' ),
-				'ajax_action' => 'update_mini_cart_counter',
-				'ajax_nonce'  => wp_create_nonce( 'eac_update_minicart_counter' ),
-			);
-			wp_localize_script( 'eac-mega-menu', 'eacUpdateCounter', $args );
-		}
-
-		/**
-		global $wp_filter;
-		$hooks = 'nav_menu_item_title';
-		if ( ! isset( $wp_filter[ $hooks ] ) ) {
-			return;
-		}
-
-		if ( isset( $wp_filter[ $hooks ]->callbacks ) ) {
-			foreach ( $wp_filter[$hooks]->callbacks as $priority => $callbacks ) {
-				error_log(json_encode($callbacks));
-				foreach ( $callbacks as $callback ) {
-					if ( isset( $callback['function'] ) && ! is_array( $callback['function'] ) && is_string( $callback['function'] ) ) {
-						//$ref = new \ReflectionMethod( 'class_name', $callback['function'] );
-						error_log($callback['function']."::".$priority."::".$callback['accepted_args']);
-					}
-				}
-			}
-		}
-		*/
-		// add_filter( 'wp_nav_menu', array( $this, 'set_option_nav_menu' ), 10, 2 );
-
-		/** Le filtre 'wp_nav_menu_items' est court-circuité par 'pre_wp_nav_menu' */
-		/**
-		if ( ! Plugin::$instance->editor->is_edit_mode() && ! Plugin::$instance->preview->is_preview_mode() ) {
-			add_filter( 'pre_wp_nav_menu', array( $this, 'get_option_nav_menu' ), 10, 2 );
-		}
-		*/
-	}
 
 	/**
 	 * La liste des breakpoints et de leurs valeurs
@@ -112,6 +66,44 @@ class Mega_Menu_Widget extends Widget_Base {
 		'(max-width:768px)'  => 'Max 768px',
 		'(max-width:640px)'  => 'Max 640px',
 	);
+
+	/**
+	 * L'ID réel du menu
+	 *
+	 * @var $main_id
+	 *
+	 * @access private
+	 */
+	private $main_id;
+
+	/**
+	 * Constructeur de la class
+	 */
+	public function __construct( $data = array(), $args = null ) {
+		parent::__construct( $data, $args );
+
+		/**
+		global $wp_filter;
+		$hook_name = 'nav_menu_item_title';
+		if ( isset( $wp_filter[ $hook_name ] ) ) {
+			foreach ( $wp_filter[ $hook_name ] as $priority => $callbacks ) {
+				foreach ( $callbacks as $unique_id => $callback ) {
+					if ( isset( $callback['function'] ) && is_array( $callback['function'] ) ) {
+						//unset( $wp_filter[ $hook_name ]->callbacks[ $priority ][ $unique_id ] );
+						//remove_filter( $hook_name, $callback['function'][1], $priority );
+						//error_log(get_class( $callback['function'][0] )."::".$callback['function'][1]."::".$priority."::".$callback['accepted_args']."::".$unique_id);
+					} elseif ( isset( $callback['function'] ) && ! is_array( $callback['function'] ) && is_string( $callback['function'] ) ) {
+						//unset( $wp_filter[ $hook_name ]->callbacks[ $priority ] );
+						//remove_filter( $hook_name, $callback['function'], $priority );
+						//error_log($callback['function']."::".$priority."::".$callback['accepted_args']);
+					}
+				}
+			}
+		}
+		*/
+
+		$this->includes();
+	}
 
 	/**
 	 * Le nom de la clé du composant dans le fichier de configuration
@@ -219,8 +211,8 @@ class Mega_Menu_Widget extends Widget_Base {
 			$responsive_value = Plugin::$instance->breakpoints->get_breakpoints( $key )->get_value();
 			$this->responsive_breakpoints[ '(max-width:' . absint( $responsive_value ) . 'px)' ] = 'Max ' . absint( $responsive_value ) . 'px';
 		}
-		$this->responsive_breakpoints['(max-width:240px)'] = esc_html__( 'Jamais', 'eac-components');
-		$this->responsive_breakpoints['(max-width:4600px)'] = esc_html__( 'Toujours', 'eac-components');
+		$this->responsive_breakpoints['(max-width:240px)']  = esc_html__( 'Jamais', 'eac-components' );
+		$this->responsive_breakpoints['(max-width:4600px)'] = esc_html__( 'Toujours', 'eac-components' );
 
 		$this->start_controls_section(
 			'mn_settings',
@@ -416,6 +408,36 @@ class Mega_Menu_Widget extends Widget_Base {
 				)
 			);
 		}
+
+		/*$this->add_control(
+			'mn_content_menu_cache',
+			array(
+				'label'     => esc_html__( 'Mettre le menu de navigation en cache', 'eac-components' ),
+				'type'      => Controls_Manager::CHOOSE,
+				'options'   => array(
+					'yes' => array(
+						'title' => esc_html__( 'Oui', 'eac-components' ),
+						'icon'  => 'fa fa-check',
+					),
+					'no'  => array(
+						'title' => esc_html__( 'Non', 'eac-components' ),
+						'icon'  => 'fa fa-ban',
+					),
+				),
+				'default'   => 'no',
+				'toggle'    => false,
+				'separator' => 'before',
+			)
+		);
+
+		$this->add_control(
+			'mn_content_menu_cache_info',
+			array(
+				'type'            => Controls_Manager::RAW_HTML,
+				'content_classes' => 'elementor-panel-alert elementor-panel-alert-info',
+				'raw'             => esc_html__( "Le menu sera mis en cache pour accélérer l'affichage, sinon le cache sera vidé. Actif sur le frontend.", 'eac-components' ),
+			)
+		);*/
 
 		$this->end_controls_section();
 
@@ -741,7 +763,7 @@ class Mega_Menu_Widget extends Widget_Base {
 				array(
 					'label'     => esc_html__( 'Couleur', 'eac-components' ),
 					'type'      => Controls_Manager::COLOR,
-					'global'    => array( 'default' => Global_Colors::COLOR_PRIMARY ),
+					'global'    => array( 'default' => Global_Colors::COLOR_TEXT ),
 					'default'   => '#FFFFFF',
 					'selectors' => array(
 						'{{WRAPPER}} .mega-menu_nav-menu > li > a > .mega-menu_item-title,
@@ -840,7 +862,7 @@ class Mega_Menu_Widget extends Widget_Base {
 				array(
 					'label'     => esc_html__( 'Couleur', 'eac-components' ),
 					'type'      => Controls_Manager::COLOR,
-					'global'    => array( 'default' => Global_Colors::COLOR_PRIMARY ),
+					'global'    => array( 'default' => Global_Colors::COLOR_TEXT ),
 					'default'   => '#FFFFFF',
 					'selectors' => array(
 						'{{WRAPPER}} .mega-menu_sub-menu .mega-menu_item-title,
@@ -918,7 +940,7 @@ class Mega_Menu_Widget extends Widget_Base {
 					'default'   => '#FFFFFF',
 					'selectors' => array(
 						'{{WRAPPER}} .mega-menu_nav-toggle .mega-menu_menu-icon i,
-							{{WRAPPER}} .mega-menu_nav-toggle .toggle-menu' => 'color: {{VALUE}};',
+						{{WRAPPER}} .mega-menu_nav-toggle .toggle-menu' => 'color: {{VALUE}};',
 					),
 				)
 			);
@@ -929,7 +951,7 @@ class Mega_Menu_Widget extends Widget_Base {
 					'name'     => 'mn_buttons_typography',
 					'label'    => esc_html__( 'Typographie des boutons', 'eac-components' ),
 					'global'   => array( 'default' => Global_Typography::TYPOGRAPHY_PRIMARY ),
-					'selector' => '{{WRAPPER}} .mega-menu_nav-toggle .mega-menu_menu-icon i',
+					'selector' => '{{WRAPPER}} .mega-menu_nav-toggle .mega-menu_menu-icon i, {{WRAPPER}} .mega-menu_nav-toggle .toggle-menu',
 				)
 			);
 
@@ -949,7 +971,7 @@ class Mega_Menu_Widget extends Widget_Base {
 				array(
 					'label'     => esc_html__( 'Couleur', 'eac-components' ),
 					'type'      => Controls_Manager::COLOR,
-					'global'    => array( 'default' => Global_Colors::COLOR_PRIMARY ),
+					'global'    => array( 'default' => Global_Colors::COLOR_TEXT ),
 					'default'   => '#000',
 					'selectors' => array(
 						'{{WRAPPER}} #menu-item-mini-cart .woocommerce-mini-cart__buttons .button' => 'color: {{VALUE}};',
@@ -1035,9 +1057,14 @@ class Mega_Menu_Widget extends Widget_Base {
 	protected function render_megamenu() {
 		$settings = $this->get_settings_for_display();
 
+		$this->main_id = get_the_ID();
+		if ( \Elementor\Plugin::$instance->documents->get_current() !== null ) {
+			$this->main_id = \Elementor\Plugin::$instance->documents->get_current()->get_main_id();
+		}
+
 		$current_menu_name = $settings['mn_content_menu'];
 
-		$current_menu_obj  = wp_get_nav_menu_object( $current_menu_name );
+		$current_menu_obj = wp_get_nav_menu_object( $current_menu_name );
 		if ( ! $current_menu_obj ) {
 			return;
 		}
@@ -1046,7 +1073,7 @@ class Mega_Menu_Widget extends Widget_Base {
 		$current_location_name = array_search( $current_menu_id, get_nav_menu_locations(), true );
 
 		$container_class = 'mega-menu_nav-wrapper';
-		$menu_class      = 'mega-menu_nav-menu mega-menu_main-menu';
+		$menu_class      = 'mega-menu_nav-menu';
 		$menu_icons      = array();
 		$menu_icons      = $this->get_menu_icons( $settings );
 
@@ -1055,7 +1082,7 @@ class Mega_Menu_Widget extends Widget_Base {
 			'container_class' => "menu-{$current_menu_obj->slug}-container inside-navigation inside-container",
 			'menu'            => $current_menu_id,
 			'menu_class'      => $menu_class,
-			'menu_id'         => $current_menu_obj->slug . '-' . $this->get_id(),
+			'menu_id'         => $current_menu_obj->slug . '-' . $this->main_id,
 			'echo'            => false,
 			'fallback_cb'     => '__return_empty_string',
 			'walker'          => new EAC_Menu_Walker( $settings['mn_content_orientation'], false ),
@@ -1065,7 +1092,12 @@ class Mega_Menu_Widget extends Widget_Base {
 		$this->selected_args_menu = $current_menu_id;
 
 		$sticky       = Plugin::$instance->editor->is_edit_mode() ? 'no' : $settings['mn_content_add_menu_sticky'];
-		$mega_menu_id = 'mega-menu-' . $this->get_id();
+		$mega_menu_id = 'mega-menu-' . $this->main_id;
+		$toggle_open  = 'toggle-open-' . $this->main_id;
+		$toggle_close = 'toggle-close-' . $this->main_id;
+
+		/** Les hooks WooCommerce */
+		$woo_shop_args = get_option( Eac_Config_Elements::get_woo_hooks_option_name() );
 
 		$this->add_render_attribute( 'nav-menu', 'id', $mega_menu_id );
 		$this->add_render_attribute( 'nav-menu', 'class', $container_class );
@@ -1074,9 +1106,8 @@ class Mega_Menu_Widget extends Widget_Base {
 		$this->add_render_attribute( 'nav-menu', 'itemscope', 'itemscope' );
 		$this->add_render_attribute( 'nav-menu', 'data-breakpoint', $settings['mn_settings_responsive_breakpoint'] );
 		$this->add_render_attribute( 'nav-menu', 'data-enable-fixed', $sticky );
-
-		/** Les hooks WooCommerce */
-		$woo_shop_args = get_option( Eac_Config_Elements::get_woo_hooks_option_name() );
+		$this->add_render_attribute( 'nav-menu', 'data-mini-cart', $woo_shop_args && class_exists( 'WooCommerce' ) && 'yes' === $settings['mn_content_add_menu_cart'] );
+		$this->add_render_attribute( 'nav-menu', 'data-menu-cache', false ); //! empty( $settings['mn_content_menu_cache'] ) && 'yes' === $settings['mn_content_menu_cache'] ? true : false );
 
 		/** Ajout du filtre avant de créer le menu */
 		if ( $woo_shop_args && class_exists( 'WooCommerce' ) && 'yes' === $settings['mn_content_add_menu_cart'] ) {
@@ -1088,20 +1119,28 @@ class Mega_Menu_Widget extends Widget_Base {
 
 		/** Update de l'option WooCommerce hooks dans la BDD */
 		update_option( Eac_Config_Elements::get_woo_hooks_option_name(), $woo_shop_args );
+		?>
+		<style>
+			@media <?php echo esc_attr( $settings['mn_settings_responsive_breakpoint'] ); ?> {
+			#<?php echo esc_attr( $mega_menu_id ); ?>.mega-menu_nav-wrapper { display: none; }
+			#<?php echo esc_attr( $toggle_open ); ?>.mega-menu_nav-toggle.elementor-clickable.mega-menu_flyout-open { display: block; }
+		}
 
+		</style>
+		<?php
 		// phpcs:disable WordPress.Security.EscapeOutput
 		ob_start();
 		?>
-		<div class='mega-menu_nav-toggle elementor-clickable mega-menu_flyout-open' tabindex="0" aria-expanded="false" aria-controls="<?php echo esc_attr( $mega_menu_id ); ?>">
+		<button id='<?php echo esc_attr( $toggle_open ); ?>' class='mega-menu_nav-toggle elementor-clickable mega-menu_flyout-open' type='button' tabindex='0' aria-expanded='false' aria-controls='<?php echo esc_attr( $mega_menu_id ); ?>'>
 			<div class='mega-menu_menu-icon'>
 				<?php echo isset( $menu_icons[0] ) ? $menu_icons[0] . '<span class="toggle-menu">Menu</span>' : ''; ?>
 			</div>
-		</div>
-		<div class="mega-menu_nav-toggle elementor-clickable mega-menu_flyout-close" tabindex="0" aria-expanded="false" aria-controls="<?php echo esc_attr( $mega_menu_id ); ?>">
+		</button>
+		<button id='<?php echo esc_attr( $toggle_close ); ?>' class='mega-menu_nav-toggle elementor-clickable mega-menu_flyout-close' type='button' tabindex='0' aria-expanded='false' aria-controls='<?php echo esc_attr( $mega_menu_id ); ?>'>
 			<div class='mega-menu_menu-icon'>
 				<?php echo isset( $menu_icons[1] ) ? $menu_icons[1] . '<span class="toggle-menu">' . esc_html__( 'Fermer', 'eac-components' ) . '</span>' : ''; ?>
 			</div>
-		</div>
+		</button>
 		<?php
 		echo '<nav ' . wp_kses_post( $this->get_render_attribute_string( 'nav-menu' ) ) . '>';
 			echo wp_nav_menu( $args );
@@ -1132,7 +1171,6 @@ class Mega_Menu_Widget extends Widget_Base {
 				$icon,
 				array(
 					'aria-hidden' => 'true',
-					'tabindex'    => '0',
 				)
 			);
 			$menu_icon = ob_get_clean();
@@ -1147,6 +1185,7 @@ class Mega_Menu_Widget extends Widget_Base {
 	 * Woocommerce Mini cart in widget
 	 */
 	private function get_the_widget( $widget ) {
+		// error_log(json_encode(get_dynamic_block_names()));
 		ob_start();
 		the_widget( $widget );
 		return ob_get_clean();
@@ -1166,29 +1205,23 @@ class Mega_Menu_Widget extends Widget_Base {
 
 			$old_items = $items;
 			ob_start();
-			$count_items = WC()->cart->cart_contents_count;
-			if ( 0 === $count_items ) {
-				?>
-				<li id='menu-item-mini-cart' class='mega-menu_top-item'>
-			<?php } else { ?>
-				<li id='menu-item-mini-cart' class='menu-item menu-item-type-cart menu-item-has-children mega-menu_top-item'>
+			$count_items = WC()->cart->get_cart_contents_count();
+			?>
+			<li id='menu-item-mini-cart' class='menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children mega-menu_top-item'>
 				<?php
-			}
-			if ( 'yes' === $settings['mn_content_mini_cart_badge'] ) {
-				?>
+				if ( 'yes' === $settings['mn_content_mini_cart_badge'] ) {
+					?>
 					<span class='badge-cart__quantity'><?php echo esc_attr( $count_items ); ?></span>
 				<?php } ?>
-					<span class="mega-menu_top-link">
-						<a href='#'>
-							<div class='eac-shopping-cart'><?php echo isset( $menu_icon ) ? $menu_icon : ''; ?></div>
-						</a>
-					</span>
-					<?php if ( $count_items > 0 ) { ?>
-						<ul class='mini-cart-product mega-menu_sub-menu'>
-							<?php echo wp_kses_post( $this->get_the_widget( 'WC_Widget_Cart' ) ); ?>
-						</ul>
-					<?php } ?>
-				</li>
+				<span class="mega-menu_top-link">
+					<a href='#'>
+						<div class='eac-shopping-cart'><?php echo isset( $menu_icon ) ? $menu_icon : ''; ?></div>
+					</a>
+				</span>
+				<ul class='mini-cart-product mega-menu_sub-menu'>
+					<?php echo wp_kses_post( $this->get_the_widget( 'WC_Widget_Cart' ) ); ?>
+				</ul>
+			</li>
 			<?php
 			$new_item = ob_get_clean();
 			$items    = $old_items . $new_item;
@@ -1198,31 +1231,92 @@ class Mega_Menu_Widget extends Widget_Base {
 	}
 
 	/**
-	 * set_option_nav_menu
+	 * set_nav_menu_cache
 	 *
 	 * Enregistre le menu dans les options de la BDD
+	 * Pas en mode edition puisque l'item mini-cart peut ne pas être affiché
+	 *
+	 * @since 2.1.1
 	 */
-	public function set_option_nav_menu( $nav_menu, $args ) {
+	public function set_nav_menu_cache( $nav_menu, $args ) {
+		global $wpdb;
+
+		if ( empty( $this->selected_args_menu ) ) {
+			return $nav_menu;
+		}
+
 		if ( ! empty( $args->menu ) && $args->menu === $this->selected_args_menu ) {
-			$option_name = Eac_Config_Elements::get_mega_nav_menu_option_name() . $args->menu;
-			update_option( $option_name, $nav_menu );
+			$settings = $this->get_settings_for_display();
+			if ( ! empty( $settings['mn_content_menu_cache'] ) && 'yes' === $settings['mn_content_menu_cache'] ) {
+				$option_name = Eac_Config_Elements::get_mega_nav_menu_option_name() . $this->main_id . '-' . $args->menu;
+				update_option( $option_name, $nav_menu, 'no' );
+			} else {
+				$option_name = Eac_Config_Elements::get_mega_nav_menu_option_name() . $this->main_id . '-';
+				$wpdb->query(
+					$wpdb->prepare(
+						"DELETE FROM {$wpdb->prefix}options
+						WHERE option_name LIKE %s",
+						$wpdb->esc_like( $option_name ) . '%'
+					)
+				);
+			}
 		}
 		return $nav_menu;
 	}
 
 	/**
-	 * get_option_nav_menu
+	 * get_nav_menu_cache
 	 *
 	 * Charge le menu des options de la BDD
+	 * Pas en mode édition et preview
+	 *
+	 * @since 2.1.1
 	 */
-	public function get_option_nav_menu( $nav_menu, $args ) {
+	public function get_nav_menu_cache( $nav_menu, $args ) {
+		if ( Plugin::$instance->editor->is_edit_mode() || Plugin::$instance->preview->is_preview_mode() || is_preview() || is_admin() || empty( $this->selected_args_menu ) ) {
+			return $nav_menu;
+		}
+
 		if ( ! empty( $args->menu ) && $args->menu === $this->selected_args_menu ) {
-			$option_name = Eac_Config_Elements::get_mega_nav_menu_option_name() . $args->menu;
-			if ( get_option( $option_name ) ) {
+			$settings     = $this->get_settings_for_display();
+			$option_cache = Eac_Config_Elements::get_mega_nav_menu_cache_name();
+			$option_name  = Eac_Config_Elements::get_mega_nav_menu_option_name() . $this->main_id . '-' . $args->menu;
+
+			if ( ! empty( $settings['mn_content_menu_cache'] ) && 'yes' === $settings['mn_content_menu_cache'] && get_option( $option_name ) ) {
+				update_option( $option_cache, 'yes', 'no' );
 				$nav_menu = get_option( $option_name );
+			} else {
+				update_option( $option_cache, 'no', 'no' );
 			}
 		}
 		return $nav_menu;
+	}
+
+	/**
+	 * includes
+	 *
+	 * les actions 'wp_update_nav_menu' et 'wp_delete_nav_menu' sont dans le fichier 'eac-nav-menu.php'
+	 * Le filtre 'wp_nav_menu' et la fonction 'wp_nav_menu' sont court-circuités par 'pre_wp_nav_menu'
+	 *
+	 * Ajout des filtres pour la sauvegarde/restitution du menu dans une option pour un chargement plus rapide
+	 * Force le chargement du cart s'il est null. Le cart est uniquement initialisé sur le frontend
+	 *
+	 * @since 2.1.1
+	 */
+	public function includes() {
+		require_once __DIR__ . '/classes/class-menu-walker.php';
+
+		if ( defined( 'WC_ABSPATH' ) ) {
+			if ( is_null( WC()->cart ) ) {
+				include_once WC_ABSPATH . 'includes/wc-cart-functions.php';
+				include_once WC_ABSPATH . 'includes/class-wc-cart.php';
+				wc_load_cart();
+			}
+		}
+
+		//add_filter( 'wp_nav_menu', array( $this, 'set_nav_menu_cache' ), 10, 2 );
+
+		//add_filter( 'pre_wp_nav_menu', array( $this, 'get_nav_menu_cache' ), 10, 2 );
 	}
 
 	protected function content_template() {}

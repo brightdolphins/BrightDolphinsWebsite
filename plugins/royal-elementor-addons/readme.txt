@@ -1,9 +1,9 @@
 === Royal Elementor Addons and Templates ===
-Contributors: WP Royal, rubeushagrid13, cyberpinky, elementoraddonswpr, ggedenidze1982
+Contributors: WP Royal, rubeushagrid13, cyberpinky, elementoraddonswpr, ggedenidze1982, wprduke
 Tags: elementor, elementor templates, elementor addons, widgets for elementor, elementor widgets, elementor mega menu, elementor woocommerce builder, theme builder, header footer builder, elementor post grid, elementor product grid, addons for elementor
-Stable tag: 1.3.71
+Stable tag: 1.3.75
 Requires at least: 5.0
-Tested up to: 6.2.2
+Tested up to: 6.3
 Requires PHP: 5.6
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
@@ -113,7 +113,8 @@ Comes with **80+ Elementor addons, 60+ Elementor Templates KIT (Growing Each Wee
 **Extensions and Other Features**
 
 - [**Elementor Theme Builder & Woocommerce Builder**](https://royal-elementor-addons.com/?ref=rea-wpo-pp-details-tab#headerfooterbuilder) - Header Footer Builder, Post & Product Archive builder, Single Post & Product builder, Single Page, Search, category, tags, 404, author, data page template builder.
-- [**Mega Menu Builder**](https://royal-elementor-addons.com/elementor-mega-menu-widget/?ref=rea-wpo-pp-details-tab#popupbuilder?ref=rea-wpo-pp-details-tab#popupbuilder) - Build any type of WordPress mega menu with Menu Badges and Icons, use any elementor widgets in Mega menu content, supports Ajax loading of mega menu items for maximum page loading speed. Off-Canvas Mobile and Desktop Menus support. 
+- [**Mega Menu Builder**](https://royal-elementor-addons.com/elementor-mega-menu-widget/?ref=rea-wpo-pp-details-tab#popupbuilder?ref=rea-wpo-pp-details-tab#popupbuilder) - Build any type of WordPress mega menu with Menu Badges and Icons, use any elementor widgets in Mega menu content, supports Ajax loading of mega menu items for maximum page loading speed. Off-Canvas Mobile and Desktop Menus support.
+- [**Advanced Sticky Menu**](https://prnt.sc/pCVM2ayA_vVV) check examples (scroll to see menu effects): [Demo 1](https://demosites.royal-elementor-addons.com/fashion-v2/?ref=rea-wpo-pp-details-tab), [Demo 2](https://demosites.royal-elementor-addons.com/digital-marketing-agency-v2/?ref=rea-wpo-pp-details-tab), [Demo 3](https://demosites.royal-elementor-addons.com/personal-blog-v1/?ref=rea-wpo-pp-details-tab), [Demo 4](https://demosites.royal-elementor-addons.com/digital-marketing-agency-v1/?ref=rea-wpo-pp-details-tab), [Demo 5.](https://demosites.royal-elementor-addons.com/construction-v3/?ref=rea-wpo-pp-details-tab)
 - [**Popup Builder**](https://royal-elementor-addons.com/?ref=rea-wpo-pp-details-tab#popupbuilder) - (Offer Sales Banners, Subscriptions Banners, GDPR Cookie Consent & Compliance Notice, Cookie Notice, Age Verification), 20+ Premade Popup Templates included in popup library
 - [**Parallax Scrolling**](https://royal-elementor-addons.com/elementor-parallax-background/?ref=rea-wpo-pp-details-tab) - Parallax effect extension
 - [**Parallax Multi-Layer Effect**](https://royal-elementor-addons.com/elementor-parallax-background/?ref=rea-wpo-pp-details-tab#multiparallax) -  extension
@@ -187,7 +188,11 @@ and other custom branding related settings)
 - [**Business Consulting**](https://demosites.royal-elementor-addons.com/business-consulting-v1/?ref=rea-wpo-pp-details-tab)
 - [**Car Repair**](https://demosites.royal-elementor-addons.com/car-repair-v1/?ref=rea-wpo-pp-details-tab)
 - [**Business Landing Page**](https://demosites.royal-elementor-addons.com/landing-page-business-v1/?ref=rea-wpo-pp-details-tab)
+- [**Mobile App Landing Page**](https://demosites.royal-elementor-addons.com/landing-page-mobileapp-v1/?ref=rea-wpo-pp-details-tab)
 - [**Digital Product Landing Page**](https://demosites.royal-elementor-addons.com/landing-page-digital-product-v1/?ref=rea-wpo-pp-details-tab)
+- [**Saas Landing Page**](https://demosites.royal-elementor-addons.com/landing-page-saas-v1/?ref=rea-wpo-pp-details-tab)
+- [**Startup Landing Page**](https://demosites.royal-elementor-addons.com/landing-page-startup-v1/?ref=rea-wpo-pp-details-tab)
+- [**Ebook Landing Page**](https://demosites.royal-elementor-addons.com/landing-page-ebook-v1/?ref=rea-wpo-pp-details-tab)
 - [**Home Care**](https://demosites.royal-elementor-addons.com/home-care-v1/?ref=rea-wpo-pp-details-tab)
 - [**Fintech**](https://demosites.royal-elementor-addons.com/fintech-v1/?ref=rea-wpo-pp-details-tab)
 - [**Portfolio v2**](https://demosites.royal-elementor-addons.com/portfolio-v2/?ref=rea-wpo-pp-details-tab)
@@ -416,6 +421,19 @@ memory_limit 256M or more
 post_max_size 64M
 
 == Changelog ==
+= Royal Elementor Addons v1.3.75 - 2023-08-19 =
+* FIXED: Minor Bugs.
+
+= Royal Elementor Addons v1.3.74 - 2023-08-18 =
+* FIXED: Minor Bugs.
+
+= Royal Elementor Addons v1.3.73 - 2023-08-10 =
+* ADDED: [Advanced Sticky Menu Options](https://prnt.sc/pCVM2ayA_vVV) to create stunning and eye-catching menu effects, check examples (scroll to see menu effects): [Demo 1](https://demosites.royal-elementor-addons.com/fashion-v2/?ref=rea-wpo-pp-details-tab), [Demo 2](https://demosites.royal-elementor-addons.com/digital-marketing-agency-v2/?ref=rea-wpo-pp-details-tab), [Demo 3](https://demosites.royal-elementor-addons.com/personal-blog-v1/?ref=rea-wpo-pp-details-tab), [Demo 4](https://demosites.royal-elementor-addons.com/digital-marketing-agency-v1/?ref=rea-wpo-pp-details-tab), [Demo 5.](https://demosites.royal-elementor-addons.com/construction-v3/?ref=rea-wpo-pp-details-tab)
+* ADDED: New [Woocommerce options](https://prnt.sc/TYc4NIi_qjMF).
+* ADDED: WPML translation support for Widgets, Template Translation Support is coming soon.
+* TESTED: New WP version 6.3.
+* FIXED: Minor Bugs.
+
 = Royal Elementor Addons v1.3.71 - 2023-07-11 =
 * ADDED: Business Landing Page - Elementor Templates Kit - [**Landing Page Business**](https://demosites.royal-elementor-addons.com/landing-page-business-v1/?ref=rea-wpo-pp-details-tab).
 * ADDED: Digital Product Landing Page - Elementor Templates Kit - [**Landing Page Digital Product**](https://demosites.royal-elementor-addons.com/landing-page-digital-product-v1/?ref=rea-wpo-pp-details-tab).

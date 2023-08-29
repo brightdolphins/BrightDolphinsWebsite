@@ -10,18 +10,16 @@ namespace TheplusAddons\Widgets;
 use Elementor\Widget_Base;
 use Elementor\Controls_Manager;
 use Elementor\Utils;
-use Elementor\Core\Schemes\Color;
 use Elementor\Group_Control_Typography;
 use Elementor\Group_Control_Border;
 use Elementor\Group_Control_Background;
 use Elementor\Group_Control_Box_Shadow;
-use Elementor\Core\Schemes\Typography;
 use Elementor\Group_Control_Image_Size;
+use Elementor\Core\Kits\Documents\Tabs\Global_Colors;
 
 use TheplusAddons\L_Theplus_Element_Load;
-if (!defined('ABSPATH'))
-    exit; // Exit if accessed directly
 
+if (!defined('ABSPATH')) exit; // Exit if accessed directly
 
 class L_ThePlus_Progress_Bar extends Widget_Base {
 		
@@ -508,14 +506,12 @@ class L_ThePlus_Progress_Bar extends Widget_Base {
 				'selector' => '{{WRAPPER}} .progress_bar .prog-title.prog-icon .progress_bar-title,{{WRAPPER}} .pt-plus-pie_chart .progress_bar-title',
 			]
 		);
-		$this->add_control(
-			'title_color',
+		$this->add_control('title_color',
 			[
 				'label' => esc_html__( 'Title Color', 'tpebl' ),
 				'type' => \Elementor\Controls_Manager::COLOR,
-				'scheme' => [
-					'type' => Color::get_type(),
-					'value' => Color::COLOR_1,
+				'global' => [
+					'default' => Global_Colors::COLOR_PRIMARY
 				],
 				'selectors' => [
 					'{{WRAPPER}} span.progress_bar-title,
@@ -590,14 +586,12 @@ class L_ThePlus_Progress_Bar extends Widget_Base {
 				'selector' => '{{WRAPPER}} .progress_bar .counter-number .theserivce-milestone-number',
 			]
 		);
-		$this->add_control(
-			'number_color',
+		$this->add_control('number_color',
 			[
 				'label' => esc_html__( 'Number Color', 'tpebl' ),
 				'type' => \Elementor\Controls_Manager::COLOR,
-				'scheme' => [
-					'type' => Color::get_type(),
-					'value' => Color::COLOR_1,
+				'global' => [
+					'default' => Global_Colors::COLOR_PRIMARY
 				],
 				'selectors' => [
 					'{{WRAPPER}} .progress_bar .counter-number .theserivce-milestone-number' => 'color: {{VALUE}}',

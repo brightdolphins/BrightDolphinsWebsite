@@ -7,6 +7,7 @@
  *
  * @since 1.9.3
  * @since 2.0.0 Charge la lib jQuery
+ * @since 2.1.1 La fonctionnalité des médias activés est testée
  */
 
 namespace EACCustomWidgets\Includes\Elementor\Injection;
@@ -22,6 +23,8 @@ if ( defined( 'ELEMENTOR_PRO_VERSION' ) ) {
 }
 
 use EACCustomWidgets\EAC_Plugin;
+use EACCustomWidgets\Core\Eac_Config_Elements;
+
 use Elementor\Controls_Manager;
 use Elementor\Element_Base;
 
@@ -152,27 +155,39 @@ class Eac_Injection_Widget_Lottie {
 					)
 				);
 
-				$element->add_control(
-					'eac_element_lottie_media_url',
-					array(
-						'label'         => esc_html__( 'URL', 'eac-components' ),
-						'type'          => Controls_Manager::URL,
-						'description'   => __( "Obtenez l'URL de l'animation <a href='https://lottiefiles.com/' target='_blank' rel='nofollow noopener noreferrer'>ici</a>", 'eac-components' ),
-						'placeholder'   => 'https://lottiefiles.com/anim.json/',
-						'show_external' => true,
-						'default'       => array(
-							'is_external' => true,
-							'nofollow'    => true,
-						),
-						'dynamic'       => array(
-							'active' => true,
-						),
-						'condition'     => array(
-							'eac_element_lottie'        => 'yes',
-							'eac_element_lottie_source' => 'url',
-						),
-					)
-				);
+				if ( Eac_Config_Elements::is_feature_active( 'unfiltered-medias' ) ) {
+					$element->add_control(
+						'eac_element_lottie_media_url',
+						array(
+							'label'         => esc_html__( 'URL', 'eac-components' ),
+							'type'          => Controls_Manager::URL,
+							'description'   => __( "Obtenez l'URL de l'animation <a href='https://lottiefiles.com/' target='_blank' rel='nofollow noopener noreferrer'>ici</a>", 'eac-components' ),
+							'placeholder'   => 'https://lottiefiles.com/anim.json/',
+							'show_external' => true,
+							'default'       => array(
+								'is_external' => true,
+								'nofollow'    => true,
+							),
+							'dynamic'       => array(
+								'active' => true,
+							),
+							'condition'     => array(
+								'eac_element_lottie'        => 'yes',
+								'eac_element_lottie_source' => 'url',
+							),
+						)
+					);
+				} else {
+					$element->add_control(
+						'eac_element_lottie_media_url_info',
+						array(
+							'type'            => Controls_Manager::RAW_HTML,
+							'content_classes' => 'elementor-panel-alert elementor-panel-alert-warning',
+							'raw'             => esc_html__( 'Activer la fonctionnalité "Télécharger les fichiers non filtrés" pour lire un flux JSON', 'eac-components' ),
+							'condition'       => array( 'eac_element_lottie_source' => 'url' ),
+						)
+					);
+				}
 
 				$element->add_control(
 					'eac_element_lottie_viewport',
@@ -247,9 +262,18 @@ class Eac_Injection_Widget_Lottie {
 			return;
 		}
 
-		// Le control existe et il est renseigné
+		/**
+		 * Le control existe et il est renseigné
+		 * @since 2.1.1 La fonctionnalité des médias est active
+		 */
 		if ( isset( $settings['eac_element_lottie'] ) && 'yes' === $settings['eac_element_lottie'] ) {
-			$url      = 'file' === $settings['eac_element_lottie_source'] ? $settings['eac_element_lottie_media_file'] : $settings['eac_element_lottie_media_url']['url'];
+			$url = '';
+
+			if ( 'file' === $settings['eac_element_lottie_source'] ) {
+				$url = esc_url( $settings['eac_element_lottie_media_file'] );
+			} elseif ( Eac_Config_Elements::is_feature_active( 'unfiltered-medias' ) && 'url' === $settings['eac_element_lottie_source'] ) {
+				$url = esc_url( $settings['eac_element_lottie_media_url']['url'] );
+			}
 			$viewp    = 'yes' === $settings['eac_element_lottie_viewport'] ? 'viewport' : 'none';
 			$autoplay = 'yes' === $settings['eac_element_lottie_viewport'] ? 'false' : 'true';
 

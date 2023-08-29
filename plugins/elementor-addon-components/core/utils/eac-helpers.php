@@ -6,13 +6,6 @@
  * notamment les widgets 'Post grid' et 'Product grid'
  *
  * @since 1.0.0
- * @since 1.7.3 Recherche les meta_value avec la méthode 'get_post_custom_values'
- *              Check si les meta_value sont serialisées
- *              Cast les types de valeur 'NUMERIC' et 'DECIMAL'
- * @since 1.7.5 Les champs ACF 'text' peuvent contenir une virgule.
- *              Changement du caractère de séparation pipe '|' ou lieu de ','
- * @since 1.9.8 Traitement des produits Woocommerce
- *              Traite le parent des sous-catégories
  */
 
 namespace EACCustomWidgets\Core\Utils;
@@ -353,7 +346,6 @@ class Eac_Helpers_Util {
 	 * @param { $which_user} String: Une liste de noms avec la virgule comme séparateur
 	 *
 	 * @return les filtres des auteurs des articles formatés en HTML
-	 * @since 1.6.0
 	 */
 	public static function get_user_filters( $which_user ) {
 		$html        = '';
@@ -361,18 +353,18 @@ class Eac_Helpers_Util {
 
 		/** Affichage standard des filtres */
 		$html     .= "<div id='al-filters__wrapper' class='al-filters__wrapper'>";
-			$html .= "<div class='al-filters__item al-active'><a href='#' data-filter='*'>" . esc_html__( 'Tous', 'eac-components' ) . '</a></div>';
+			$html .= "<div class='al-filters__item al-active'><a href='#' data-filter='*' role='button'>" . esc_html__( 'Tous', 'eac-components' ) . '</a></div>';
 		foreach ( $which_users as $id_user ) {
 			$disp_user = get_user_by( 'id', trim( $id_user ) );
 			if ( false !== $disp_user ) {
-				$html .= "<div class='al-filters__item'><a href='#' data-filter='." . sanitize_title( $disp_user->display_name ) . "'>" . ucfirst( $disp_user->display_name ) . '</a></div>';
+				$html .= "<div class='al-filters__item'><a href='#' data-filter='." . sanitize_title( $disp_user->display_name ) . "' role='button'>" . ucfirst( $disp_user->display_name ) . '</a></div>';
 			}
 		}
 		$html .= '</div>';
 
 		/** Filtres sous forme de liste */
 		$html         .= "<div id='al-filters__wrapper-select' class='al-filters__wrapper-select'>";
-			$html     .= "<select class='al-filter__select'>";
+			$html     .= "<select class='al-filters__select' aria-label='User filter'>";
 				$html .= "<option value='*' selected>" . esc_html__( 'Tous', 'eac-components' ) . '</option>';
 		foreach ( $which_users as $id_user ) {
 			$disp_user = get_user_by( 'id', trim( $id_user ) );
@@ -394,10 +386,6 @@ class Eac_Helpers_Util {
 	 * @param { $args} Array: Arguments de la requête WP_Query
 	 *
 	 * @return les filtres des champs personnalisés formatés en HTML
-	 *
-	 * @since 1.6.0
-	 * @since 1.7.0 Lance une requête get_posts() avec les arguments passés en paramètre
-	 * pour lire tous les articles et retourner l'ensemble des filtres meta même s'il y a une pagination
 	 */
 	public static function get_meta_query_filters( $args ) {
 		$html      = '';
@@ -448,15 +436,15 @@ class Eac_Helpers_Util {
 
 			// Affichage standard des filtres
 			$html     .= "<div id='al-filters__wrapper' class='al-filters__wrapper'>";
-				$html .= "<div class='al-filters__item al-active'><a href='#' data-filter='*'>" . esc_html__( 'Tous', 'eac-components' ) . '</a></div>';
+				$html .= "<div class='al-filters__item al-active'><a href='#' data-filter='*' role='button'>" . esc_html__( 'Tous', 'eac-components' ) . '</a></div>';
 			foreach ( $term_data as $data ) {
-				$html .= "<div class='al-filters__item'><a href='#' data-filter='." . sanitize_title( $data ) . "'>" . ucfirst( $data ) . '</a></div>';
+				$html .= "<div class='al-filters__item'><a href='#' data-filter='." . sanitize_title( $data ) . "' role='button'>" . ucfirst( $data ) . '</a></div>';
 			}
 			$html .= '</div>';
 
 			// Filtres sous forme de liste
 			$html         .= "<div id='al-filters__wrapper-select' class='al-filters__wrapper-select'>";
-				$html     .= "<select class='al-filter__select'>";
+				$html     .= "<select class='al-filters__select' aria-label='Meta data filter'>";
 					$html .= "<option value='*' selected>" . esc_html__( 'Tous', 'eac-components' ) . '</option>';
 			foreach ( $term_data as $data ) {
 				$html .= "<option value='." . sanitize_title( $data ) . "'>" . ucfirst( $data ) . '</option>';
@@ -478,9 +466,6 @@ class Eac_Helpers_Util {
 	 * @param { $terms_filters}      Array: Un tableau de slug des étiquettes
 	 *
 	 * @return les filtres des catégories formatées en HTML
-	 * @since 1.6.0
-	 * @since 1.7.0 Simplification du code
-	 * @since 1.9.8 Récupère les catégories de plus haut niveau
 	 */
 	public static function get_taxo_tag_filters( $taxonomies_filters, $terms_filters, $cat_parent = false ) {
 		$html         = '';
@@ -530,15 +515,15 @@ class Eac_Helpers_Util {
 
 		/** Affichage standard des filtres */
 		$html     .= "<div id='al-filters__wrapper' class='al-filters__wrapper'>";
-			$html .= "<div class='al-filters__item al-active'><a href='#' data-filter='*'>" . esc_html__( 'Tous', 'eac-components' ) . '</a></div>';
+			$html .= "<div class='al-filters__item al-active'><a href='#' data-filter='*' role='button'>" . esc_html__( 'Tous', 'eac-components' ) . '</a></div>';
 		foreach ( $unique_terms as $display_term ) {
-			$html .= "<div class='al-filters__item'><a href='#' data-filter='." . explode( ':', $display_term )[0] . "'>" . ucfirst( explode( ':', $display_term )[1] ) . '</a></div>';
+			$html .= "<div class='al-filters__item'><a href='#' data-filter='." . explode( ':', $display_term )[0] . "' role='button'>" . ucfirst( explode( ':', $display_term )[1] ) . '</a></div>';
 		}
 		$html .= '</div>';
 
 		// Filtres sous forme de liste
 		$html         .= "<div id='al-filters__wrapper-select' class='al-filters__wrapper-select'>";
-			$html     .= "<select class='al-filter__select'>";
+			$html     .= "<select class='al-filters__select' aria-label='Taxonomy filter'>";
 				$html .= "<option value='*' selected>" . esc_html__( 'Tous', 'eac-components' ) . '</option>';
 		foreach ( $unique_terms as $display_term ) {
 			$html .= "<option value='." . explode( ':', $display_term )[0] . "'>" . ucfirst( explode( ':', $display_term )[1] ) . '</option>';

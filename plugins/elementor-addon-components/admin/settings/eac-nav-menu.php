@@ -8,6 +8,7 @@
  *
  * @since 1.9.6
  * @since 2.1.0 Ajout du nonce pour ouvrir la popup nav menu
+ * @since 2.1.1 Hooks pour la sauvagarde, la destruction d'un menu et le changement du permalink. Voir 'mega-menu.php'
  */
 
 namespace EACCustomWidgets\Admin\Settings;
@@ -66,20 +67,72 @@ class Eac_Load_Nav_Menu {
 		// Retour AJAX spécifie la méthode de sauvegarde des champs du template du menu de l'item courant
 		add_action( 'wp_ajax_save_menu_settings', array( $this, 'save_menu_settings' ) );
 
-		/** @since 2.1.0 */
-		/*if ( Eac_Config_Elements::is_widget_active( 'mega-menu' ) ) {
+		/** @since 2.1.1 */
+		$option_cache = get_option( Eac_Config_Elements::get_mega_nav_menu_cache_name() );
+
+		if ( Eac_Config_Elements::is_widget_active( 'mega-menu' ) && $option_cache && 'yes' === $option_cache ) {
 			add_action( 'wp_update_nav_menu', array( $this, 'delete_registered_nav_menu' ) );
 			add_action( 'wp_delete_nav_menu', array( $this, 'delete_registered_nav_menu' ) );
-		}*/
+			add_action( 'permalink_structure_changed', array( $this, 'delete_registered_nav_menu' ) );
+			add_action( 'edited_term', array( $this, 'what_the_term' ), 10, 3 );
+			add_action( 'delete_term', array( $this, 'what_the_term' ), 10, 3 );
+			/** Permalink base */
+			add_filter( 'category_rewrite_rules', array( $this, 'rewrite_term_base' ) );
+			add_filter( 'post_tag_rewrite_rules', array( $this, 'rewrite_term_base' ) );
+			add_filter( 'product_cat_rewrite_rules', array( $this, 'rewrite_term_base' ) );
+			add_filter( 'product_tag_rewrite_rules', array( $this, 'rewrite_term_base' ) );
+			//add_action( 'woocommerce_attribute_updated', array( $this, 'what_the_term' ), 10, 3 );
+			//add_action( 'woocommerce_attribute_deleted', array( $this, 'what_the_term' ), 10, 3 );
+		}
+	}
+
+	/**
+	 * rewrite_term_base
+	 * Changement de la structure du permalink de base pour category, tag, category produit et tag produit
+	 *
+	 * @since 2.1.1
+	 */
+	public function rewrite_term_base( $rules ) {
+		$this->remove_nav_menu_options();
+		return $rules;
+	}
+
+	/**
+	 * what_the_term
+	 * Texte le type de taxonomie avant de supprimer les options des menus de navigation
+	 *
+	 * @since 2.1.1
+	 */
+	public function what_the_term( $term_id, $tt_id, $taxonomy ) {
+		//error_log($taxonomy."::".$term_id."::".json_encode($tt_id));
+
+		//if ( in_array( $taxonomy, array( 'category', 'post_tag', 'product_cat', 'product_tag' ), true ) || ( is_array( $tt_id ) && isset( $tt_id['attribute_label'] ) ) ) {
+		if ( in_array( $taxonomy, array( 'category', 'post_tag', 'product_cat', 'product_tag' ), true ) ) {
+			$this->remove_nav_menu_options();
+		}
 	}
 
 	/**
 	 * delete_registered_nav_menu
-	 * Supprime toutes les options des menus de navigation sans distinction créées dans 'mega_menu.php'
+	 * Tampon avant de supprimer les options des menus de navigation
 	 *
-	 * @since 2.1.0
+	 * @since 2.1.1
 	 */
 	public function delete_registered_nav_menu() {
+		$this->remove_nav_menu_options();
+
+		//remove_action( 'wp_update_nav_menu', array( $this, 'delete_registered_nav_menu' ) );
+		//remove_action( 'wp_delete_nav_menu', array( $this, 'delete_registered_nav_menu' ) );
+		//remove_action( 'permalink_structure_changed', array( $this, 'delete_registered_nav_menu' ) );
+	}
+
+	/**
+	 * remove_nav_menu_options
+	 * Supprime toutes les options des menus de navigation sans distinction créées dans 'mega_menu.php'
+	 *
+	 * @since 2.1.1
+	 */
+	public function remove_nav_menu_options() {
 		global $wpdb;
 		$wpdb->query(
 			$wpdb->prepare(
@@ -113,7 +166,7 @@ class Eac_Load_Nav_Menu {
 		// }
 
 		// Les styles de la fonctionnalité
-		wp_enqueue_style( 'eac-nav-menu', EAC_Plugin::instance()->get_style_url( 'assets/css/nav-menu' ), array(), EAC_ADDONS_VERSION );
+		wp_enqueue_style( 'eac-nav-menu', EAC_Plugin::instance()->get_style_url( 'assets/css/nav-menu' ), array(), '1.9.6' );
 	}
 
 	/**
@@ -161,7 +214,7 @@ class Eac_Load_Nav_Menu {
 
 		// Ajout JS/CSS de gestion des événements de la Fancybox
 		wp_enqueue_script( 'eac-admin-nav-menu', EAC_Plugin::instance()->get_script_url( 'admin/js/eac-admin_nav-menu' ), array( 'jquery', 'wp-color-picker' ), '1.9.6', true );
-		wp_enqueue_style( 'eac-admin-nav-menu', EAC_Plugin::instance()->get_style_url( 'admin/css/eac-admin_nav-menu' ), false, EAC_ADDONS_VERSION );
+		wp_enqueue_style( 'eac-admin-nav-menu', EAC_Plugin::instance()->get_style_url( 'admin/css/eac-admin_nav-menu' ), false, '1.9.6' );
 
 		/** 2.1.0 Ajout du nonce dans l'URL 'ajax_content' pour ouvrir la popup menu */
 		$url_nonce = wp_create_nonce( $this->menu_url_nonce );

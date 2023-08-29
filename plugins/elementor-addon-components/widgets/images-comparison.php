@@ -365,7 +365,7 @@ class Images_Comparison_Widget extends Widget_Base {
 		$this->add_render_attribute( 'data_diff', 'data-diff', esc_attr( $id ) );
 		$this->add_render_attribute( 'data_diff', 'data-settings', $this->get_settings_json( $id ) );
 		?>
-		<div class="eac-images-comparison">
+		<div class="eac-images-comparison" role="img" aria-label="Image comparison">
 			<div <?php echo wp_kses_post( $this->get_render_attribute_string( 'data_diff' ) ); ?>>
 				<?php $this->render_galerie(); ?>
 			</div>

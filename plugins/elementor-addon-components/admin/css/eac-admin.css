@@ -6,7 +6,8 @@
 }
 
 #eac-dialog_acf-json p,
-#eac-dialog_grant-option p {
+#eac-dialog_grant-option p,
+#eac-dialog_grant-medias p {
 	font-size: 15px;
 }
 

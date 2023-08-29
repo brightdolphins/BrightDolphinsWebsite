@@ -5,6 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 use EACCustomWidgets\Core\Eac_Config_Elements;
 ?>
 <form action="" method="POST" id="eac-form-settings" name="eac-form-settings">
+	<!-- Onglet 'Advanced' -->
 	<div id="tab-1" style="display: none;">
 		<div class="eac-settings-tabs">
 			<div class="eac-elements__table-common">
@@ -59,8 +60,9 @@ use EACCustomWidgets\Core\Eac_Config_Elements;
 				?>
 			</div> <!-- Table common -->
 		</div> <!-- Settings TAB -->
-	</div> <!-- TAB 1-->
+	</div> <!-- TAB 1 -->
 
+	<!-- Onglet 'Basic' -->
 	<div id="tab-2" style="display: none;">
 		<div class="eac-settings-tabs">
 			<div class="eac-elements__table-common">
@@ -115,8 +117,9 @@ use EACCustomWidgets\Core\Eac_Config_Elements;
 				?>
 			</div> <!-- Table common -->
 		</div> <!-- Settings TAB -->
-	</div> <!-- TAB 2-->
+	</div> <!-- TAB 2 -->
 
+	<!-- Onglet 'Header & Footer ' -->
 	<div id="tab-3" style="display: none;">
 		<div class="eac-settings-tabs">
 			<div class="eac-elements__table-common">
@@ -171,7 +174,7 @@ use EACCustomWidgets\Core\Eac_Config_Elements;
 			?>
 			</div> <!-- Table common -->
 		</div> <!-- Settings TAB -->
-	</div> <!-- TAB 3-->
+	</div> <!-- TAB 3 -->
 
 	<div class="eac-saving-box">
 		<div id="eac-elements-to-save"><?php esc_html_e( 'Vous devez enregistrer les réglages', 'eac-components' ); ?></div>

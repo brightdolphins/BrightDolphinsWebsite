@@ -16,7 +16,7 @@ function SelectBox({selectedTemplate, onUpdate}) {
 
 const SelectedSelectBox = withSelect((select) => {
   return {
-    selectedTemplate: select('core/editor').getEditedPostAttribute('meta')['elemental_theme_builder_template_siteheader']
+    selectedTemplate: select('core/editor').getEditedPostAttribute('meta')['eac_theme_builder_template_siteheader']
   }
 })(SelectBox);
 
@@ -25,7 +25,7 @@ const DispatchedSelectBox = withDispatch((dispatch) => {
       onUpdate: function(templateSlug) {
         dispatch('core/editor').editPost({
           meta: {
-            'elemental_theme_builder_template_siteheader': templateSlug || ''
+            'eac_theme_builder_template_siteheader': templateSlug || ''
           }
         });
       }

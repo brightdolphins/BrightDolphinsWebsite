@@ -5,21 +5,18 @@ Description: unique design of pricing table.
 Author: Theplus
 Author URI: https://posimyth.com
 */
+
 namespace TheplusAddons\Widgets;
 
 use Elementor\Widget_Base;
 use Elementor\Controls_Manager;
 use Elementor\Utils;
-use Elementor\Core\Schemes\Color;
 use Elementor\Group_Control_Typography;
 use Elementor\Group_Control_Border;
-use Elementor\Core\Schemes\Typography;
 use Elementor\Group_Control_Background;
 use Elementor\Group_Control_Box_Shadow;
 
-if (!defined('ABSPATH'))
-    exit; // Exit if accessed directly
-
+if (!defined('ABSPATH')) exit; // Exit if accessed directly
 
 class L_ThePlus_Pricing_Table extends Widget_Base {
 		
@@ -2146,7 +2143,75 @@ class L_ThePlus_Pricing_Table extends Widget_Base {
 			]
 		);
 		$this->end_controls_tab();
-
+		$this->start_controls_tab(
+			'tab_button_box_hover',
+			[
+				'label' => esc_html__( 'Box Hover', 'theplus' ),
+			]
+		);
+		$this->add_control(
+			'btn_text_box_hover_color',
+			[
+				'label' => esc_html__( 'Text Hover Color', 'theplus' ),
+				'type' => Controls_Manager::COLOR,
+				'selectors' => [
+					'{{WRAPPER}} .plus-pricing-table:hover .button-link-wrap' => 'color: {{VALUE}};',
+				],
+			]
+		);
+		$this->add_group_control(
+			Group_Control_Background::get_type(),
+			[
+				'name'      => 'box_hover_btn_bg',
+				'types'     => [ 'classic', 'gradient' ],
+				'selector'  => '{{WRAPPER}} .plus-pricing-table:hover .pt_plus_button.button-style-8 .button-link-wrap',
+				'separator' => 'after',
+				'condition' => [
+					'button_style!' => ['style-7','style-9'],
+				],
+			]
+		);
+		$this->add_control(
+			'btn_border_box_hover_color',
+			[
+				'label'     => esc_html__( 'Hover Border Color', 'theplus' ),
+				'type'      => Controls_Manager::COLOR,
+				'default'   => '#313131',
+				'selectors' => [
+					'{{WRAPPER}} .plus-pricing-table:hover .pt_plus_button.button-style-8 .button-link-wrap' => 'border-color: {{VALUE}};',
+				],
+				'condition' => [
+					'button_style' => ['style-8'],
+					'button_border_style!' => 'none'
+				],
+				'separator' => 'after',
+			]
+		);
+		$this->add_responsive_control(
+			'box_hover_btn_radius',
+			[
+				'label'      => esc_html__( 'Hover Border Radius', 'theplus' ),
+				'type'       => Controls_Manager::DIMENSIONS,
+				'size_units' => [ 'px', '%' ],
+				'selectors'  => [
+					'{{WRAPPER}} .plus-pricing-table:hover .pt_plus_button.button-style-8 .button-link-wrap' => 'border-radius: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
+				],
+				'condition' => [
+					'button_style' => ['style-8'],
+				],
+			]
+		);
+		$this->add_group_control(
+			Group_Control_Box_Shadow::get_type(),
+			[
+				'name'     => 'box_hover_btn_shadow',
+				'selector' => '{{WRAPPER}} .plus-pricing-table:hover .pt_plus_button.button-style-8 .button-link-wrap',
+				'condition' => [
+					'button_style' => ['style-8'],
+				],
+			]
+		);
+		$this->end_controls_tab();
 		$this->start_controls_tab(
 			'tab_button_hover',
 			[
@@ -2711,19 +2776,24 @@ class L_ThePlus_Pricing_Table extends Widget_Base {
 			$icons_content='<div class="pricing-icon">'.$imgSrc.'</div>';
 		}
 		
-		$icon_style=$settings["icon_style"];
-			if($icon_style == 'square'){
-				$service_icon_style = 'icon-squre';
-			} 
-			if($icon_style == 'rounded'){
-				$service_icon_style = 'icon-rounded';
-			}
+		$icon_style = $settings["icon_style"];
+
+		$service_icon_style = '';
+		if( $icon_style == 'square' ){
+			$service_icon_style = 'icon-squre';
+		} 
+		
+		if( $icon_style == 'rounded' ){
+			$service_icon_style = 'icon-rounded';
+		}
+
 		if($image_icon == 'icon'){
 			if($settings["icon_font_style"]=='font_awesome'){
 				$icons = $settings["icon_fontawesome"];
 			}else{
 				$icons = '';
 			}
+			
 			$icon_bg = tp_bg_lazyLoad($settings['icon_background_image'],$settings['icon_hover_background_image']);
 			if(!empty($icons)){
 				$icons_content = '<div class="pricing-icon '.esc_attr($service_icon_style).' '.$icon_bg.'"><i class=" '.esc_attr($icons).' "></i></div>';

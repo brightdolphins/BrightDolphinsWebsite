@@ -8,17 +8,8 @@
  * d'un articles. Les articles sont affichées sous forme de grille.
  *
  * @since 1.8.2
- * @since 1.8.5 Fix: ACF field 'Select multiple values' === 'no' pour le champ 'post_object'
- *              Force le changement du type de données en array
- * @since 1.8.7 Support des custom breakpoints
- * @since 1.9.0 Intégration des scripts et des styles dans le constructeur de la class
- * @since 1.9.5 Fix: vsprintf passé des strings en arguments à la place d'un array()
- * @since 1.9.7 Ajout du traitement du mode 'slider'
- * @since 1.9.8 Ajout du bouton 'En savoir plus'
- * @since 2.0.2 Intègre les pages d'options dans la liste du champ relationnel
- *              Suppression de la méthode 'get_acf_fields_options'
- *              Ajout du contrôle d'alignement vertical
- *              Ajout de l'attribut ALT aux images
+ * @since 2.1.1 Lazyload attribut
+ * @since 2.1.2 Style du titre ne s'affiche pas quand l'option image par défaut est désactivée
  */
 
 namespace EACCustomWidgets\Widgets;
@@ -60,11 +51,11 @@ class Acf_Relationship_Widget extends Widget_Base {
 		parent::__construct( $data, $args );
 
 		wp_register_script( 'swiper', 'https://cdnjs.cloudflare.com/ajax/libs/Swiper/8.3.2/swiper-bundle.min.js', array( 'jquery' ), '8.3.2', true );
-		wp_register_script( 'eac-acf-relation', EAC_Plugin::instance()->get_script_url( 'assets/js/elementor/acf-relationship' ), array( 'jquery', 'elementor-frontend', 'swiper' ), '1.9.7', true );
+		wp_register_script( 'eac-acf-relation', EAC_Plugin::instance()->get_script_url( 'assets/js/elementor/acf-relationship' ), array( 'jquery', 'elementor-frontend', 'swiper' ), '1.8.2', true );
 
 		wp_register_style( 'swiper-bundle', 'https://cdnjs.cloudflare.com/ajax/libs/Swiper/8.3.2/swiper-bundle.min.css', array(), '8.3.2' );
-		wp_register_style( 'eac-swiper', EAC_Plugin::instance()->get_style_url( 'assets/css/swiper' ), array( 'eac', 'swiper-bundle' ), '1.8.2' );
-		wp_register_style( 'eac-acf-relation', EAC_Plugin::instance()->get_style_url( 'assets/css/acf-relationship' ), array( 'eac', 'eac-swiper' ), '1.8.2' );
+		wp_enqueue_style( 'eac-swiper', EAC_Plugin::instance()->get_style_url( 'assets/css/swiper' ), array(), '1.8.2' );
+		wp_enqueue_style( 'eac-acf-relation', EAC_Plugin::instance()->get_style_url( 'assets/css/acf-relationship' ), array( 'eac-swiper' ), '1.8.2' );
 	}
 
 	/**
@@ -140,7 +131,7 @@ class Acf_Relationship_Widget extends Widget_Base {
 	 * @return CSS list.
 	 */
 	public function get_style_depends() {
-		return array( 'swiper-bundle', 'eac-swiper', 'eac-acf-relation' );
+		return array( 'swiper-bundle' );
 	}
 
 	/**
@@ -782,14 +773,16 @@ class Acf_Relationship_Widget extends Widget_Base {
 				)
 			);
 
-			/** Titre */
+			/**
+			 * Titre
+			 * @since 2.1.2
+			 */
 			$this->add_control(
 				'acf_relation_title_style',
 				array(
 					'label'     => esc_html__( 'Titre', 'eac-components' ),
 					'type'      => Controls_Manager::HEADING,
 					'separator' => 'before',
-					'condition' => array( 'acf_relation_content_image' => 'yes' ),
 				)
 			);
 
@@ -803,7 +796,6 @@ class Acf_Relationship_Widget extends Widget_Base {
 						'value' => Color::COLOR_4,
 					),
 					'selectors' => array( '{{WRAPPER}} .acf-relation_title .acf-relation_title-content' => 'color: {{VALUE}};' ),
-					'condition' => array( 'acf_relation_content_image' => 'yes' ),
 				)
 			);
 
@@ -814,7 +806,6 @@ class Acf_Relationship_Widget extends Widget_Base {
 					'label'     => esc_html__( 'Typographie', 'eac-components' ),
 					'scheme'    => Typography::TYPOGRAPHY_4,
 					'selector'  => '{{WRAPPER}} .acf-relation_title .acf-relation_title-content',
-					'condition' => array( 'acf_relation_content_image' => 'yes' ),
 				)
 			);
 
@@ -1218,18 +1209,22 @@ class Acf_Relationship_Widget extends Widget_Base {
 			<article id="<?php echo esc_attr( $item['id'] ); ?>" class="<?php echo esc_attr( $item['class'] ); ?>">
 			<div class="acf-relation_inner-wrapper">
 			<?php
-			/** Affichage de l'image */
+			/**
+			 * Affichage de l'image
+			 * @since 2.1.1 Ajout des attributs width et height pour le lazyload
+			 */
 			if ( $has_image && ! empty( $item['img'] ) && is_array( $item['img'] ) ) {
 				$image     = $item['img'][0];
+				$width     = $item['img'][1];
+				$height    = $item['img'][2];
 				$image_alt = ! empty( $item['img_alt'] ) ? $item['img_alt'] : $item['post_title'];
 				if ( $image ) {
 					/** Le lien sur l'image */
-					if ( $has_link ) {
-						?>
-						<div class="acf-relation_img"><a href="<?php echo esc_url( $item['link'] ); ?>"><img src="<?php echo esc_url( $image ); ?>" alt="<?php echo esc_attr( $image_alt ); ?>" /></a></div>
+					if ( $has_link ) { ?>
+						<div class="acf-relation_img" role="img" aria-label="<?php echo esc_attr( $item['post_title'] ); ?>"><a href="<?php echo esc_url( $item['link'] ); ?>"><img src="<?php echo esc_url( $image ); ?>" alt="<?php echo esc_attr( $image_alt ); ?>" width="<?php echo esc_attr( $width ); ?>" height="<?php echo esc_attr( $height ); ?>" /></a></div>
 					<?php } else { ?>
-						<div class="acf-relation_img"><img src="<?php echo esc_url( $image ); ?>" alt="<?php echo esc_attr( $image_alt ); ?>" /></div>
-						<?php
+						<div class="acf-relation_img" role="img" aria-label="<?php echo esc_attr( $item['post_title'] ); ?>"><img src="<?php echo esc_url( $image ); ?>" alt="<?php echo esc_attr( $image_alt ); ?>" width="<?php echo esc_attr( $width ); ?>" height="<?php echo esc_attr( $height ); ?>" /></div>
+					<?php
 					}
 				}
 			}
@@ -1331,11 +1326,15 @@ class Acf_Relationship_Widget extends Widget_Base {
 		$effect = $settings['slider_effect'];
 		if ( in_array( $effect, array( 'fade', 'creative' ), true ) ) {
 			$nb_images = 1;
-		} elseif ( empty( $settings['slider_images_number'] ) || 0 === $settings['slider_images_number'] ) {
+		} elseif ( isset( $settings['slider_images_centered'] ) && 'yes' === $settings['slider_images_centered'] ) {
+			$nb_images = 2;
+		} elseif ( empty( $settings['slider_images_number'] ) ) {
+			$nb_images = 3;
+		} elseif ( 0 === absint( $settings['slider_images_number'] ) ) {
 			$nb_images = 'auto';
 			$effect    = 'slide';
 		} else {
-			$nb_images = absint( sanitize_text_field( $settings['slider_images_number'] ) );
+			$nb_images = absint( $settings['slider_images_number'] );
 		}
 
 		$settings = array(
@@ -1345,6 +1344,7 @@ class Acf_Relationship_Widget extends Widget_Base {
 			'data_sw_loop'             => 'yes' === $settings['slider_loop'] ? true : false,
 			'data_sw_delay'            => absint( $settings['slider_delay'] ),
 			'data_sw_imgs'             => $nb_images,
+			'data_sw_centered'         => 'yes' === $settings['slider_images_centered'] ? true : false,
 			'data_sw_dir'              => 'horizontal',
 			'data_sw_rtl'              => 'right' === $settings['slider_rtl'] ? true : false,
 			'data_sw_effect'           => $effect,

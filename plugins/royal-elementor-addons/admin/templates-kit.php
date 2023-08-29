@@ -103,7 +103,7 @@ function wpr_addons_templates_kit_page() {
             foreach ($sorted_kits as $kit_id => $data) {
                 $is_expert = isset($data['expert']) && 'expert' === $data['expert'] ? 'true' : 'false';
 
-                echo '<div class="grid-item" data-kit-id="'. esc_attr($kit_id) .'" data-tags="'. esc_attr($data['tags']) .'" data-plugins="'. esc_attr($data['plugins']) .'" data-pages="'. esc_attr($data['pages']) .'" data-price="'. esc_attr($data['price']) .'" data-expert="'. esc_attr($is_expert) .'">';
+                echo '<div class="grid-item" data-kit-id="'. esc_attr($kit_id) .'" data-title="'. esc_attr(strtolower($data['name'])) .'" data-tags="'. esc_attr($data['tags']) .'" data-plugins="'. esc_attr($data['plugins']) .'" data-pages="'. esc_attr($data['pages']) .'" data-price="'. esc_attr($data['price']) .'" data-expert="'. esc_attr($is_expert) .'">';
                     echo '' !== $data['label'] ? '<span class="label label-'. esc_attr($data['label']) .'">'. esc_html($data['label']) .'</span>' : '';
                     echo '<div class="image-wrap">';
                         echo '<img src="'. esc_url('https://royal-elementor-addons.com/library/templates-kit/'. $kit_id .'/home.jpg') .'">';
@@ -161,6 +161,14 @@ function wpr_addons_templates_kit_page() {
             <div class="content">
                 <p><?php esc_html_e('The import process can take a few seconds depending on the size of the kit you are importing and speed of the connection.', 'wpr-addons'); ?></p>
                 <p><?php esc_html_e('Please do NOT close this browser window until import is completed.', 'wpr-addons'); ?></p>
+
+                <?php // if wp version is lower than 6.1
+
+                if ( version_compare( get_bloginfo('version'), '6.1', '<' ) ) {
+                    echo '<p style="display:none;color: #f44;font-weight:bold;" class="wpr-wp-update-notice">'. esc_html__('Demo Content could NOT be imported, WordPress version is too old! Please update WordPress to the Latest version.', 'wpr-addons') .'</p>';
+                }
+
+                ?>
 
                 <div class="progress-wrap">
                     <div class="progress-bar"></div>

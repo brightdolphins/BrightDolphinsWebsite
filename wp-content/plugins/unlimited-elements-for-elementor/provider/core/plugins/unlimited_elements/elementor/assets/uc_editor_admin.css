@@ -1,5 +1,10 @@
 @CHARSET "ISO-8859-1";
 
+
+.elementor-panel .uc-notip:after{
+	display:none !important;
+}
+
 .elementor-panel .uc-button-edit-html{
 	margin-top:5px;
 }

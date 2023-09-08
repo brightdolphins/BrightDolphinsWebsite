@@ -13,7 +13,7 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
  *
  */
 	class HelperUC extends UniteHelperBaseUC{
-		
+
 		private static $db;
 		public static $operations;
 		private static $arrFontPanelData;
@@ -27,189 +27,189 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 		private static $arrDebug;
 		private static $hasOutput = false;
 		public static $arrWidgetScripts = array();
-		
+
 		public static function a____GENERAL____(){}
-		
+
 		/**
 		 * heck if debug by url
 		 */
 		public static function isDebug(){
-			
+
 			$debug = UniteFunctionsUC::getGetVar("ucdebug","",UniteFunctionsUC::SANITIZE_KEY);
-			
+
 			if(empty($debug))
 				return(false);
-				
+
 			$debug = UniteFunctionsUC::strToBool($debug);
-			
+
 			return($debug);
 		}
-		
-		
+
+
 		/**
 		 * validate plugin startup functionality
 		 * Enter description here ...
 		 */
 		public static function validatePluginStartup(){
-			
+
 			if(function_exists("simplexml_load_file") == false)
 				UniteFunctionsUC::throwError("Your php missing SimpleXML Extension. The plugin can't work without this extension because it has many xml files to load. Please enable this extension in php.ini");
-			
+
 		}
-		
+
 		/**
 		 * get the database
 		 */
 		public static function getDB(){
-			
+
 			if(empty(self::$db))
 				self::$db = new UniteCreatorDB();
-			
+
 			return(self::$db);
 		}
-		
+
 		/**
 		 * set local text object for text output
 		 */
 		public static function setLocalText($arrText){
-			
+
 			self::$arrLocalText = array_merge(self::$arrLocalText, $arrText);
-			
+
 		}
-		
+
 		/**
 		 * include all plugins
 		 */
 		public static function includeAllPlugins(){
-			
+
 			$objUCPlugins = new UniteCreatorPlugins();
 			$objUCPlugins->initPlugins();
 		}
-		
-		
+
+
 		/**
 		 * run provider function
 		 */
 		public static function runProviderFunc($func){
-			
+
 			$args = func_get_args();
 			array_shift($args);
-			
+
 			$exists = method_exists("UniteProviderFunctionsUC",$func);
-			
+
 			if(!$exists)
 				return(false);
-			
+
 			call_user_func_array(array("UniteProviderFunctionsUC",$func), $args);
-			
+
 		}
-		
-		
+
+
 		/**
 		 * get font panel fields
 		 */
 		public static function getFontPanelData(){
-			
+
 			if(!empty(self::$arrFontPanelData))
 				return(self::$arrFontPanelData);
-			
+
 			require GlobalsUC::$pathSettings."font_panel_data.php";
-						
+
 			self::$arrFontPanelData = $arrData;
-			
+
 			return(self::$arrFontPanelData);
 		}
-		
-		
+
+
 		/**
 		 * get text by key
 		 */
 		public static function getText($textKey){
-			
+
 			$searchKey = strtolower($textKey);
-			
+
 			//search local text first
 			if(array_key_exists($searchKey, self::$arrLocalText))
 				return(self::$arrLocalText[$textKey]);
-			
+
 			if(array_key_exists($searchKey, GlobalsUC::$arrServerSideText))
 				return(GlobalsUC::$arrServerSideText[$textKey]);
-			
+
 			if(array_key_exists($searchKey, GlobalsUC::$arrClientSideText))
 				return(GlobalsUC::$arrClientSideText[$textKey]);
-			
+
 			return($textKey);
 		}
-		
+
 		/**
 		 * put text by key
 		 */
 		public static function putText($textKey){
-			
+
 			echo self::getText($textKey);
 		}
-		
-		
+
+
 		/**
 		 * get settings object by name from settings folder
 		 */
 		public static function getSettingsObject($settingsName, $path=null){
-			
+
 			$pathSettings = self::getPathSettings($settingsName, $path);
-			
+
 			$objSettings = new UniteCreatorSettings();
 			$objSettings->loadXMLFile($pathSettings);
-			
+
 			return($objSettings);
 		}
-		
-		
+
+
 		/**
 		 * get current admin view
 		 */
 		public static function getAdminView(){
-			
+
 			if(UniteProviderFunctionsUC::isAdmin() == false)
 				return(null);
-			
+
 			$view = UniteCreatorAdmin::getView();
-			
+
 			return($view);
 		}
-	
-		
+
+
 		/**
-		 * 
+		 *
 		 * get size related css from size css array
 		 */
 		public static function getCssMobileSize($arrSizeCss, $cssPrefix = ""){
-			
+
 			$css = "";
 			foreach($arrSizeCss as $size=>$cssSize){
 				if(empty($cssSize))
 					continue;
-				
+
 				$cssSize = UniteFunctionsUC::addTabsToText($cssSize,"    ");
 				$cssSize = HelperHtmlUC::wrapCssMobile($cssSize, $size);
-				
+
 				if(!empty($css))
 					$css .= "\n\n";
-					
+
 				$css .= $cssSize;
 			}
-			
+
 			if(!empty($cssPrefix) && !empty($css))
 				$css = $cssPrefix."\n\n".$css;
-			
+
 			return($css);
 		}
-		
-		
+
+
 		/**
 		 * check if it's special addon type like shape or shape devider
 		 */
 		public static function isSpecialAddonType($type){
-			 
+
 			switch($type){
 				case GlobalsUC::ADDON_TYPE_SHAPE_DEVIDER:
 				case GlobalsUC::ADDON_TYPE_SHAPES:
@@ -217,159 +217,159 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 					return(true);
 				break;
 			}
-			
+
 			return(false);
 		}
-		
+
 		/**
 		 * tells if it's layout addon type or not
 		 */
 		public static function isLayoutAddonType($addonType){
-			
+
 			$objAddonType = UniteCreatorAddonType::getAddonTypeObject($addonType);
-			
+
 			$isLayout = $objAddonType->isLayout;
-			
+
 			return($isLayout);
 		}
-		
-		
+
+
 		/**
 		 * get product from request
 		 */
 		public static function getProductFromRequest(){
-			
+
 			$action = UniteFunctionsUC::getPostGetVariable("client_action", "", UniteFunctionsUC::SANITIZE_TEXT_FIELD);
 			if(empty($action))
 				return(null);
-			
+
 			$data = UniteFunctionsUC::getPostGetVariable("data", "", UniteFunctionsUC::SANITIZE_NOTHING);
 			$passData = UniteFunctionsUC::getVal($data, "manager_passdata");
-			
-			
+
+
 			if(empty($passData))
 				return(null);
-							
+
 			$product = UniteFunctionsUC::getVal($passData, "product");
-						
-			
+
+
 			return($product);
 		}
-		
+
 		/**
 		 * get php variables info
 		 */
 		public static function getPHPInfo(){
-			
+
 			if(function_exists("ini_get_all") == false)
 				return(array());
-			
+
 			$arrInfo = ini_get_all();
-			
+
 			if(empty($arrInfo))
 				return(array());
-			
+
 			$arrKeys = array("memory_limit", "max_execution_time", "post_max_size", "upload_max_filesize");
-			
+
 			$arrInfoComputed = array();
 			foreach($arrKeys as $key){
-				$arrValues = UniteFunctionsUC::getVal($arrInfo, $key);				
+				$arrValues = UniteFunctionsUC::getVal($arrInfo, $key);
 				$localValue = UniteFunctionsUC::getVal($arrValues, "local_value");
 				$arrInfoComputed[$key] = $localValue;
 			}
-			
+
 			return($arrInfoComputed);
 		}
-		
+
 		/**
-		 * return true - need to run. 
+		 * return true - need to run.
 		 * used for run code once functionality
 		 */
 		public static function isRunCodeOnce($key){
-			
+
 			$isAlreadyRun = UniteFunctionsUC::getVal(self::$arrRunOnceCache, $key);
-			
+
 			if($isAlreadyRun === true){
 				return(false);
 			}
-			
+
 			self::$arrRunOnceCache[$key] = true;
-			
+
 			return(true);
 		}
-		
+
 		/**
 		 * get records from sql query, don't allow to run other then select queries
 		 */
 		public static function getFromSql($query, $arg1 = null, $arg2 = null){
-			
+
 			$lower = strtolower($query);
 			if(strpos($lower, "select") !== 0)
 				UniteFunctionsUC::throwError("get from sql error - the query should start with the word 'select'");
-						
+
 			$query = sprintf($query, $arg1, $arg2);
-						
+
 			$db = self::getDB();
 			$response = $db->fetchSql($query);
-			
+
 			return($response);
 		}
-		
+
 		/**
 		 * check if there is permissions from query
 		 * and it's logged in or local
 		 */
 		public static function hasPermissionsFromQuery($getvar){
-			
+
 			$isEnabled = UniteFunctionsUC::getGetVar($getvar,"",UniteFunctionsUC::SANITIZE_TEXT_FIELD);
 			$isEnabled = UniteFunctionsUC::strToBool($isEnabled);
-			
+
 			if($isEnabled == false)
 				return(false);
-				
+
 			if(GlobalsUC::$isLocal == true)
 				return(true);
-				
+
 			if(UniteFunctionsWPUC::isCurrentUserHasPermissions() == true)
 				return(true);
-				
+
 			return(false);
 		}
-		
+
 		public static function a_______DEBUG________(){}
-		
-		
+
+
 		/**
 		 * add debug text
 		 */
 		public static function addDebug($title, $content = null){
-			
+
 			if(empty(self::$arrDebug))
 				self::$arrDebug = array();
-			
+
 			$name = HelperUC::convertTitleToHandle($title);
-			
+
 			$item = array();
 			$item["name"] = $name;
 			$item["title"] = $title;
 			$item["content"] = $content;
-			
+
 			self::$arrDebug[] = $item;
 		}
-		
+
 		/**
 		 * clear debug
 		 */
 		public static function clearDebug(){
-			
+
 			self::$arrDebug = array();
 		}
-		
+
 		/**
 		 * get debug data
 		 */
 		public static function getDebug(){
-			
+
 			return(self::$arrDebug);
 		}
 
@@ -377,25 +377,25 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 		 * show the debug
 		 */
 		public static function showDebug($type = null){
-			
+
 			dmp("Showing Debug");
-			
+
 			if(!empty($type))
 				dmp("$type mode");
-			
+
 			$arrDebug = HelperUC::getDebug();
-			
+
 			if(empty($arrDebug)){
 				dmp("no debug content found");
 				return(false);
 			}
-			
+
 			foreach($arrDebug as $item){
-				
+
 				$name = UniteFunctionsUC::getVal($item, "name");
-				
+
 				if($type == "query"){
-					
+
 					switch($name){
 						case "getpostlist_values":
 						case "getpostlist_param":
@@ -405,123 +405,123 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 						break;
 					}
 				}
-				
+
 				$title = UniteFunctionsUC::getVal($item, "title");
 				$content = UniteFunctionsUC::getVal($item, "content");
-				
+
 				$titleOutput = $title;
 				if(!empty($content))
 					$titleOutput = "<b>$title:</b>";
-				
+
 				dmp($titleOutput);
 				dmp($content);
-				
+
 			}
-			
-			
+
+
 		}
-		
-		
+
+
 		public static function a_______NOTICES________(){}
-		
-		
+
+
 		/**
 		 * add notice that will be showen on plugin pages
 		 */
 		public static function addAdminNotice($strNotice){
 			self::$arrAdminNotices[] = $strNotice;
 		}
-		
+
 		/**
 		 * add notice that will be showen on plugin pages
 		 */
 		public static function getAdminNotices(){
-			
+
 			$arrNotices = self::$arrAdminNotices;
-			
+
 			self::$arrAdminNotices = array();	 //clear
-			
+
 			return($arrNotices);
 		}
-		
-		
+
+
 		public static function a__________MEMORY__________(){}
-				
-		
+
+
 		/**
 		 * store memory log
 		 * state - start, end
 		 */
 		public static function logMemoryUsage($operation, $isUpdateOption = false){
-			
+
 			$usage = memory_get_usage();
-			
+
 			$diff = 0;
 			if(!empty(self::$arrLogMemory)){
 				$lastArrUsage = self::$arrLogMemory[count(self::$arrLogMemory)-1];
 				$lastUsage = $lastArrUsage["usage"];
 				$diff = $usage - $lastUsage;
 			}
-			
+
 			$arrLogItem = array("oper"=>$operation,"usage"=>$usage,"diff"=>$diff, "time"=>time());
-			
+
 			//log the page
 			if(empty(self::$arrLogMemory)){
 				$arrLogItem["current_page"] = GlobalsUC::$current_page_url;
 			}
-			
+
 			self::$arrLogMemory[] = $arrLogItem;
-			
+
 			if($isUpdateOption == true)
 				UniteProviderFunctionsUC::updateOption("unite_creator_memory_usage_log", self::$arrLogMemory);
-			
+
 		}
-		
-		
+
+
 		/**
 		 * get last memory usage
 		 */
 		public static function getLastMemoryUsage(){
-			
+
 			$arrLog = UniteProviderFunctionsUC::getOption("unite_creator_memory_usage_log");
-			
+
 			return($arrLog);
 		}
 
-		
+
 		public static function a_________STATE________(){}
-		
-		
+
+
 		/**
 		 * remember state
 		 */
 		public static function setState($name, $value){
-			
+
 			$optionName = "untecreator_state";
-							
+
 			$arrState = UniteProviderFunctionsUC::getOption($optionName);
 			if(empty($arrState) || is_array($arrState) == false)
 				$arrState = array();
-			
+
 			$arrState[$name] = $value;
 			UniteProviderFunctionsUC::updateOption($optionName, $arrState);
 		}
-		
-		
+
+
 		/**
 		 * get remembered state
 		 */
 		public static function getState($name){
-			
+
 			$optionName = "untecreator_state";
-			
+
 			$arrState = UniteProviderFunctionsUC::getOption($optionName);
 			$value = UniteFunctionsUC::getVal($arrState, $name, null);
-						
+
 			return($value);
 		}
-		
-		
+
+
 		/**
 		 * print general settings and exit all
 		 */
@@ -530,154 +530,154 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 			dmp($arrSettings);
 			exit();
 		}
-		
+
 		/**
 		 * get general setting value
 		 */
 		public static function getGeneralSetting($name){
-			
+
 			$arrSettings = self::$operations->getGeneralSettings();
 			//dmp($arrSettings);exit();
-			
+
 			if(array_key_exists($name,$arrSettings) == false)
 				UniteFunctionsUC::throwError("General setting: {$name} don't exists");
-			
+
 			$value = $arrSettings[$name];
-			
+
 			return($value);
 		}
-		
-		
+
+
 		public static function a________URL_AND_PATH_________(){}
-		
-		
+
+
 		/**
 		 * convert url to full url
 		 */
 		public static function URLtoFull($url, $urlBase = null){
-			
+
 			if(is_numeric($url))		//protection for image id
 				return($url);
-			
+
 			if(getType($urlBase) == "boolean")
 				UniteFunctionsUC::throwError("the url base should be null or string");
-			
+
 			if(is_array($url))
 				UniteFunctionsUC::throwError("url can't be array");
-			
+
 			$url = trim($url);
-			
+
 			if(empty($url))
 				return("");
-				
+
 			$urlLower = strtolower($url);
-			
+
 			if(strpos($urlLower, "http://") !== false || strpos($urlLower, "https://") !== false)
 				return($url);
-			
+
 			if(empty($urlBase))
 				$url = GlobalsUC::$url_base.$url;
 			else{
-				
+
 				$convertUrl = GlobalsUC::$url_base;
-				
+
 				//preserve old format:
 				$filepath = self::pathToAbsolute($url);
 				if(file_exists($filepath) == false)
 					$convertUrl = $urlBase;
-				
+
 				$url = $convertUrl.$url;
 			}
-			
+
 			$url = UniteFunctionsUC::cleanUrl($url);
-			 
+
 			return($url);
 		}
 
-		
+
 		/**
 		 * convert some url to relative
 		 */
 		public static function URLtoRelative($url, $isAssets = false){
-			
+
 			$replaceString = GlobalsUC::$url_base;
 			if($isAssets == true)
 				$replaceString = GlobalsUC::$url_assets;
-			
+
 			//in case of array take "url" from the array
 			if(is_array($url)){
-				
+
 				$strUrl = UniteFunctionsUC::getVal($url, "url");
 				if(empty($strUrl))
 					return($url);
-				
+
 				$url["url"] = str_replace($replaceString, "", $strUrl);
-				
+
 				return($url);
 			}
-			
+
 			$url = str_replace($replaceString, "", $url);
-		
+
 			return($url);
 		}
-		
-		
+
+
 		/**
 		 * change url to assets relative
 		 */
 		public static function URLtoAssetsRelative($url){
-			
+
 			$url = str_replace(GlobalsUC::$url_assets, "", $url);
-			
+
 			return($url);
 		}
 
-		
+
 		/**
 		 * convert url to path, if wrong path, return null
 		 */
 		public static function urlToPath($url){
-			
+
 			$urlRelative = self::URLtoRelative($url);
 			$path = GlobalsUC::$path_base.$urlRelative;
-			
+
 			if(file_exists($path) == false)
 				return(null);
-			
+
 			return($path);
 		}
-		
-		
+
+
 		/**
 		 * convert url array to relative
 		 */
 		public static function arrUrlsToRelative($arrUrls, $isAssets = false){
 			if(!is_array($arrUrls))
 				return($arrUrls);
-			
+
 			foreach($arrUrls as $key=>$url){
 				$arrUrls[$key] = self::URLtoRelative($url, $isAssets);
 			}
-			
+
 			return($arrUrls);
 		}
-		
-		
+
+
 		/**
 		 * convert url's array to full
 		 */
 		public static function arrUrlsToFull($arrUrls){
 			if(!is_array($arrUrls))
 				return($arrUrls);
-			
+
 			foreach($arrUrls as $key=>$url){
 				$arrUrls[$key] = self::URLtoFull($url);
 			}
-			
+
 			return($arrUrls);
 		}
 
-		
+
 		/**
 		 * strip base path part from the path
 		 */
@@ -1394,12 +1394,12 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 	 * @param $scriptFilename
 	 */
 	public static function addScriptAbsoluteUrl($urlScript, $handle, $inFooter = false){
-			
+
 		UniteProviderFunctionsUC::addScript($handle, $urlScript, $inFooter);
-		
+
 		if(GlobalsProviderUC::$isInsideEditor == true)
 			self::$arrWidgetScripts[$handle] = $urlScript;
-		
+
 	}
 
 	/**
@@ -1409,22 +1409,22 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 	 * @param $scriptFilename
 	 */
 	public static function addScriptAbsoluteUrl_widget($urlScript, $handle, $inFooter = false){
-					
+
 		if(GlobalsProviderUC::$isInsideEditor == true)
 			self::$arrWidgetScripts[$handle] = $urlScript;
 		else
 			UniteProviderFunctionsUC::addScript($handle, $urlScript, $inFooter);
-			
+
 	}
-	
-	
+
+
 	/**
 	 * add remote script
 	 */
 	public static function addRemoteControlsScript(){
 
 		UniteProviderFunctionsUC::addAdminJQueryInclude();
-		
+
 		$urlFiltersJS = GlobalsUC::$url_assets_libraries . "remote/ue-remote-controls.js";
 		HelperUC::addScriptAbsoluteUrl($urlFiltersJS, "ue_remote_controls");
 
@@ -1697,7 +1697,7 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 
 		$argPost = UniteFunctionsUC::getPostGetVariable("post", "", UniteFunctionsUC::SANITIZE_KEY);
 		$argAction = UniteFunctionsUC::getPostGetVariable("action", "", UniteFunctionsUC::SANITIZE_KEY);
-		
+
 		if($argAction == "elementor_render_widget" || $argAction == "elementor_ajax" || $argAction == "unlimitedelements_ajax_action")
 			return (true);
 
@@ -1706,9 +1706,9 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 
 		return (false);
 	}
-	
-	
-	
+
+
+
 	/**
 	 * start buffering widget output
 	 */

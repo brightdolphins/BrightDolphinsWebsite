@@ -207,10 +207,10 @@
 	background: #f7f7fa;
 }
 .ha-template-element-modal .modal__container ::-webkit-scrollbar-thumb {
-	background: #888a8;
+	background: rgba(136, 136, 136, .6588235294);
 }
 .ha-template-element-modal .modal__container ::-webkit-scrollbar-thumb:hover {
-	background: #5558f;
+	background: rgba(85, 85, 85, .5607843137);
 }
 .ha-template-element-modal .modal__header {
 	display: -webkit-box;

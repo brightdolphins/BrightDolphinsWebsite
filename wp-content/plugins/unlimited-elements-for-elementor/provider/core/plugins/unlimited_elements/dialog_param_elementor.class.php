@@ -18,6 +18,7 @@ class UniteCreatorDialogParamElementor extends UniteCreatorDialogParam{
 	 * add selector html to the params
 	 */
 	private function addHtmlSelector(){
+		
 		?>		
 		<div class="unite-inputs-sap"></div>
 		
@@ -391,8 +392,8 @@ class UniteCreatorDialogParamElementor extends UniteCreatorDialogParam{
 		$arrUnits["percent_px"] = __("%, PX","unlimited-elements-for-elementor");		
 		$arrUnits["px_percent"] = __("PX, %","unlimited-elements-for-elementor");
 		$arrUnits["px_percent_em"] = __("PX, %, EM","unlimited-elements-for-elementor");
-		$arrUnits["vh_px"] = __("VH, PX","unlimited-elements-for-elementor");
-		$arrUnits["px_vh"] = __("PX, VH","unlimited-elements-for-elementor");
+		$arrUnits["vh_px"] = __("VH, PX, REM","unlimited-elements-for-elementor");
+		$arrUnits["px_vh"] = __("PX, VH, REM","unlimited-elements-for-elementor");
 		$arrUnits["px_vh_percent"] = __("PX, VH, %","unlimited-elements-for-elementor");
 		$arrUnits["vw_px"] = __("VW, PX","unlimited-elements-for-elementor");
 		$arrUnits["px_vw"] = __("PX, VW","unlimited-elements-for-elementor");

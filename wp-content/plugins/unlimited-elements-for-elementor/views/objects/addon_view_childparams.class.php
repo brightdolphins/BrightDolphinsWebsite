@@ -460,6 +460,27 @@ class UniteCreatorAddonViewChildParams{
 ";
 		
 		$arrParams[] = $this->createChildParam_code($key, $text);
+
+		//----- get custom field ------
+		
+		$key = "get_custom_field()";
+		$text = "
+{# get post or term custom field. use when you have term or post id #}
+
+{% set postMetaValue = ucfunc(\"get_post_custom_field\",post_id,\"fieldname\") %}
+
+{% set termMetaValue = ucfunc(\"get_term_custom_field\",term_id,\"fieldname\") %}
+
+{# also you can debug the fields #}
+
+{{ucfunc(\"put_terms_meta_debug\",taxonomy)}}
+
+{{ucfunc(\"put_post_meta_debug\",taxonomy)}}
+
+
+";
+		
+		$arrParams[] = $this->createChildParam_code($key, $text);
 		
 
 		//----- hide id's in css ------
@@ -895,6 +916,7 @@ console.log(arrAttribute);
 		return($arrParams);
 	}
 
+	
 	/**
 	 * add put post meta function params
 	 */

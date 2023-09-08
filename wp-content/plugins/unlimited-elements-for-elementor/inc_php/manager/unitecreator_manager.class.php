@@ -689,6 +689,9 @@ class UniteCreatorManager{
 	 */
 	public static function putScriptsIncludes($type){
 		
+		//clear dropzone third party inclues
+		UniteFunctionsWPUC::findAndRemoveInclude("dropzone.min");
+		
 		
 		HelperUC::addScript("dropzone", "dropzone_js","js/dropzone");
 		HelperUC::addStyle("dropzone", "dropzone_css","js/dropzone");

@@ -8,7 +8,9 @@ function UniteCreatorElementorEditorAdmin(){
 	var g_objAddonParams, g_objAddonParamsItems, g_lastAddonName;
 	var g_numRepeaterItems = 0;
 	var g_windowFront, g_searchDataID, g_searchData, g_frontAPI; 
-	var g_temp = {};
+	var g_temp = {
+		startTime:0
+	};
 	
 	
 	/**
@@ -149,6 +151,11 @@ function UniteCreatorElementorEditorAdmin(){
 		selectPostTaxonomy.attr("multiple", true);
 		selectPostTaxonomy.css("height", "50px");
 		
+		//remove the tip
+		var objInputWrapper = selectPostTaxonomy.parents(".elementor-control-input-wrapper");
+		objInputWrapper.addClass("uc-notip");
+		
+		
 		var postType = selectPostType.val();
 		var selectedTax = selectPostTaxonomy.val();
 		
@@ -168,7 +175,8 @@ function UniteCreatorElementorEditorAdmin(){
 		//hide not relevant select options
 		var objOptions = selectPostTaxonomy.find("option");
 		var firstVisibleOption = null;
-		
+				
+		var numVisible = 0;
 		jQuery.each(objOptions, function(index, option){
 			
 			var objOption = jQuery(option);
@@ -179,12 +187,17 @@ function UniteCreatorElementorEditorAdmin(){
 			if(taxFound == true && firstVisibleOption == null)
 				firstVisibleOption = optionTax;
 			
-			if(taxFound == true)
+			if(taxFound == true){
 				objOption.show();
+				numVisible++;
+			}
 			else
 				objOption.hide();
 							
 		});
+		
+		if(numVisible > 4)
+			selectPostTaxonomy.css("height", "80px");
 		
 		//check and change current tax
 		
@@ -746,7 +759,7 @@ function UniteCreatorElementorEditorAdmin(){
 	function onSettingsPanelInit(){
 				
 		initSpecialSelects();
-						
+										
 		//init the post type selector if exists
 		postSelectOnLoad();
 		
@@ -1509,10 +1522,31 @@ function UniteCreatorElementorEditorAdmin(){
 	}
 
 	/**
+	 * check and remove panel loader, if enought time passed
+	 */
+	function checkRemoveLoader(){
+		
+		var hasLoadingClass = jQuery("body").hasClass("elementor-panel-loading");
+		
+		if(hasLoadingClass == false)
+			return(false);
+		
+		var timePass = Date.now() - g_temp.startTime;
+		
+		if(timePass > 10000)
+			jQuery("body").removeClass("elementor-panel-loading");
+		
+	}
+	
+
+	/**
 	 * on open widget
 	 * save last model
 	 */
 	function onElementorOpenWidget(event, model){
+		
+		//remove the loader if open widget
+		checkRemoveLoader();
 		
 		window.ucLastElementorModelID = model.id;
 		window.ucLastElementorModel = model.attributes;
@@ -1595,6 +1629,8 @@ function UniteCreatorElementorEditorAdmin(){
 		if(typeof g_ucHasBackgrounds !== "undefined" && g_ucHasBackgrounds === true)
 			initBackgrounds();
 		
+		g_temp.startTime = Date.now();
+		
 		elementor.hooks.addAction("panel/open_editor/widget", onElementorOpenWidget);
 		
 		if(elementor.channels){
@@ -1616,7 +1652,7 @@ function UniteCreatorElementorEditorAdmin(){
 	 * init the object
 	 */
 	this.init = function(){
-				
+		
 		g_objSettingsPanel = jQuery("#elementor-panel");
 		
 		//initPreviewThumbs();

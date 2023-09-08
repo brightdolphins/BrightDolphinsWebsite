@@ -5278,7 +5278,7 @@ class Wpr_Magazine_Grid extends Widget_Base {
 					ob_start();
 					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
 					$extra_icon = ob_get_clean();
-
+		
 					echo '<span class="wpr-grid-extra-icon-right">';
 						echo $extra_icon;
 					echo '</span>';
@@ -5320,7 +5320,7 @@ class Wpr_Magazine_Grid extends Widget_Base {
 					ob_start();
 					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
 					$extra_icon = ob_get_clean();
-
+	
 					echo '<span class="wpr-grid-extra-icon-right">';
 						echo $extra_icon;
 					echo '</span>';
@@ -5353,7 +5353,7 @@ class Wpr_Magazine_Grid extends Widget_Base {
 					ob_start();
 					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
 					$extra_icon = ob_get_clean();
-
+		
 					echo '<span class="wpr-grid-extra-icon-left">';
 						echo $extra_icon;
 					echo '</span>';
@@ -5368,7 +5368,7 @@ class Wpr_Magazine_Grid extends Widget_Base {
 				if ( 'after' === $settings['element_extra_icon_pos'] ) {
 					ob_start();
 					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
-					$extra_icon = ob_get_clean();
+					$extra_icon = ob_get_clean();		
 
 					echo '<span class="wpr-grid-extra-icon-right">';
 						echo $extra_icon;
@@ -5412,7 +5412,7 @@ class Wpr_Magazine_Grid extends Widget_Base {
 						ob_start();
 						\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
 						$extra_icon = ob_get_clean();
-	
+			
 						echo '<span class="wpr-grid-extra-icon-left">';
 							echo $extra_icon;
 						echo '</span>';
@@ -5424,11 +5424,11 @@ class Wpr_Magazine_Grid extends Widget_Base {
 					if ( 'after' === $settings['element_extra_icon_pos'] ) {
 						ob_start();
 						\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
-						$extra_icon = ob_get_clean();
-	
+						 ob_get_clean();
+			
 						echo '<span class="wpr-grid-extra-icon-right">';
 							echo $extra_icon;
-						echo '</span>';
+					 	echo '</span>';
 					}
 
 					echo '</a>';
@@ -5455,11 +5455,11 @@ class Wpr_Magazine_Grid extends Widget_Base {
 				if ( 'before' === $settings['element_extra_icon_pos'] ) {
 					ob_start();
 					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
-					$extra_icon = ob_get_clean();
-
+					ob_get_clean();
+		
 					echo '<span class="wpr-grid-extra-icon-left">';
 						echo $extra_icon;
-					echo '</span>';
+				 	echo '</span>';
 				}
 
 				// Read More Text
@@ -5470,10 +5470,11 @@ class Wpr_Magazine_Grid extends Widget_Base {
 					ob_start();
 					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
 					$extra_icon = ob_get_clean();
-
+					ob_get_clean();
+		
 					echo '<span class="wpr-grid-extra-icon-right">';
 						echo $extra_icon;
-					echo '</span>';
+				 	echo '</span>';
 				}
 
 				echo '</a>';
@@ -5528,10 +5529,11 @@ class Wpr_Magazine_Grid extends Widget_Base {
 					ob_start();
 					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
 					$extra_icon = ob_get_clean();
-
+					ob_get_clean();
+		
 					echo '<span class="wpr-grid-extra-icon-left">';
 						echo $extra_icon;
-					echo '</span>';
+				 	echo '</span>';
 				}
 
 				// Taxonomies
@@ -5547,11 +5549,11 @@ class Wpr_Magazine_Grid extends Widget_Base {
 				if ( 'after' === $settings['element_extra_icon_pos'] ) {
 					ob_start();
 					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
-					$extra_icon = ob_get_clean();
-
+					$extra_icon = ob_get_clean();					 ob_get_clean();
+		
 					echo '<span class="wpr-grid-extra-icon-right">';
 						echo $extra_icon;
-					echo '</span>';
+				 	echo '</span>';
 				}
 				// Text: After
 				if ( 'after' === $settings['element_extra_text_pos'] ) {

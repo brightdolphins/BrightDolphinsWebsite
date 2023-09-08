@@ -1,4 +1,96 @@
 
+version 1.5.83:
+
+-bug fix: don't show first item in filter when no terms available
+-change: updated calculators javascript code base
+
+
+version 1.5.82:
+
+-bug fix: fixed dynamic template with avoid duplicates
+-change: turned off the video icon for background attribute
+-bug fix: fixed gallery widget acf video item error
+-feature: added option for group filtering widgets
+-feature: solved the video play in gallery type from attachment video
+-bug fix: fixed some sort filter bugs with the default selected
+
+
+version 1.5.81:
+
+-bug fix: fixed some missing css in the dynamic loop widgets
+-bug fix: fixed some child filters related bug
+-bug fix: fixed order by price in current query
+-bug fix: fixed some php 8.16+ version notices 
+-feature: added option to print the term meta
+
+
+version 1.5.80:
+
+-feature: added option to get "all taxonomy terms" from a post 
+-feature: added html preperations for the woocommerce minicart
+-feature: added "this week" to the date selection query
+-feature: added "grouping" mode in the "related posts"
+-bug fix: the pagination now works on top of the grid
+-bug fix: fixed some init ajax filters multiple issues
+-bug fix: fixed the error with the assets path set
+
+
+version 1.5.79:
+
+-bug fix: changed name for area-label to aria-label
+-bug fix: in filters - refresh single filter if "all" selected and there are hidden items
+-bug fix: changed protection against inifnite loop to 200
+-bug fix: show child filters at start if there are selected items
+-bug fix: date time attribute processor - if no date given - don't take current time
+-bug fix: refresh child filter if main filter selected on init
+-bug fix: dynamic popup was not worked with multisource in some cases
+
+
+version 1.5.78:
+
+-bug fix: fixed show filters load more
+-bug fix: fixed multisource repeater empty
+
+
+version 1.5.77:
+
+-bug fix: fixed dropzone collision in widget editor view
+-bug fix: fixed sort filter price filtering
+-bug fix: fixed max number in addons db table. from "int" to "bigint"
+-bug fix: replaced some deprecated by elementor codes
+
+
+version 1.5.76:
+
+-bug fix: fixed some small bug with remote sync debug
+-bug fix: fixed the truncate in multisource
+-bug fix: fixed some small bugs related to remote controls
+-feature: added "rem" unit in slider attribute
+-bug fix: fixed dropzon third party conflict in manager
+
+
+version 1.5.75:
+
+-feature: added some suggestion text to add some memory in the troubleshooting section in case that needed
+-bug fix: the wrong author was displayed in loop post meta data
+-bug fix: do_shortcode to html items inside the grid and dynamic loop
+-update: Updated Freemius SDK to the latest version
+
+
+version 1.5.74:
+
+-bug fix: show search widgets at plugin install.
+-bug fix: menu picker depts in multisource
+-bug fix: set the author data to be retrievable in dynamic grid template
+-bug fix: show meta fields switcher didn't worked in multisource menu items
+
+
+version 1.5.73:
+
+- bug fix: added support for wordpress proxy in api calling
+- bug fix: fixed empty post in query result
+- bug fix: fixed "wrong template ID" elementor error in post accordion
+- feature: added options for revisions in widget editor
 
 
 version 1.5.72:

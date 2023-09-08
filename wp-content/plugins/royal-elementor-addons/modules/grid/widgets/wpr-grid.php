@@ -1033,7 +1033,7 @@ class Wpr_Grid extends Widget_Base {
 			'current_query_notice',
 			[
 				'type' => Controls_Manager::RAW_HTML,
-				'raw' => sprintf( __( 'To set <strong>Posts per Page</strong> for all Blog <strong>Archive Pages</strong>, navigate to <strong><a href="%s" target="_blank">Settings > Reading<a></strong>.', 'wpr-addons' ), admin_url( 'options-reading.php' ) ),
+				'raw' => sprintf( __( 'To set <strong>Posts per Page</strong> for all Blog <strong>Archive Pages</strong>, navigate to <strong><a href="%s" target="_blank">Settings > Reading</a></strong> and for <strong>CPT Archives</strong>,  navigate to <strong><a href="%s" target="_blank">Royal Addons > Settings > Custom Post Types</a></strong>.', 'wpr-addons' ), admin_url( 'options-reading.php' ), admin_url( 'admin.php?page=wpr-addons&tab=wpr_tab_settings#cpt-tab' ) ),
 				'content_classes' => 'elementor-panel-alert elementor-panel-alert-info',
 				'condition' => [
 					'query_source' => 'current',
@@ -8323,8 +8323,16 @@ class Wpr_Grid extends Widget_Base {
 			$tax_query = [];
 
 			$args = $wp_query->query_vars;
+
+			if ( is_post_type_archive() ) {
+				$posts_per_page = intval(get_option('wpr_cpt_ppp_'. $args['post_type']), 10);
+			} else {
+				$posts_per_page = intval(get_option('posts_per_page'));
+			}
+
 			$args['orderby'] = $query_order_by;
-			$args['offset'] = ( $paged - 1 ) * intval(get_option('posts_per_page')) + intval($settings[ 'query_offset' ]);
+
+			$args['offset'] = ( $paged - 1 ) * $posts_per_page + intval($settings[ 'query_offset' ]);
 			
 			if ( isset($_GET['category']) ) {
 				
@@ -8739,7 +8747,7 @@ class Wpr_Grid extends Widget_Base {
 						ob_start();
 						\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
 						$extra_icon = ob_get_clean();
-	
+		
 						echo '<span class="wpr-grid-extra-icon-left">';
 							echo $extra_icon;
 						echo '</span>';
@@ -8752,7 +8760,7 @@ class Wpr_Grid extends Widget_Base {
 						ob_start();
 						\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
 						$extra_icon = ob_get_clean();
-	
+			
 						echo '<span class="wpr-grid-extra-icon-right">';
 							echo $extra_icon;
 						echo '</span>';
@@ -8797,7 +8805,7 @@ class Wpr_Grid extends Widget_Base {
 					ob_start();
 					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
 					$extra_icon = ob_get_clean();
-
+		
 					echo '<span class="wpr-grid-extra-icon-right">';
 						echo $extra_icon;
 					echo '</span>';
@@ -8937,7 +8945,7 @@ class Wpr_Grid extends Widget_Base {
 					ob_start();
 					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
 					$extra_icon = ob_get_clean();
-
+		
 					echo '<span class="wpr-grid-extra-icon-left">';
 						echo $extra_icon;
 					echo '</span>';

@@ -474,9 +474,25 @@ class Plugin {
 		);
 	}
 
-
 	public function hide_theme_notice() {
 		wp_enqueue_style( 'hide-theme-notice', WPR_ADDONS_URL .'assets/css/admin/wporg-theme-notice.css', [] );
+
+		wp_enqueue_script(
+			'wpr-plugin-notice-js',
+			WPR_ADDONS_URL . 'assets/js/admin/plugin-update-notice.js',
+			[
+				'jquery'
+			]
+		);
+
+		wp_localize_script(
+			'wpr-plugin-notice-js',
+			'WprPluginNotice',
+			[
+				'ajaxurl' => admin_url( 'admin-ajax.php' ),
+				'nonce' => wp_create_nonce( 'wpr-plugin-notice-js' ),
+			]
+		);
 	}
 
 	public function enqueue_scripts() {
@@ -993,6 +1009,24 @@ class Plugin {
 
 		// Promote Premium Widgets
         add_filter('elementor/editor/localize_settings', [$this, 'promote_premium_widgets']);
+
+		add_filter( 'pre_get_posts', [$this, 'wpr_custom_posts_per_page'] );
+	}
+
+	public function wpr_custom_posts_per_page( $query ) {
+		if ( isset($query->query['post_type']) ) {
+			if (is_admin() ) {
+				if (\Elementor\Plugin::$instance->editor && !\Elementor\Plugin::$instance->editor->is_edit_mode()) {
+					return;
+				}
+			}
+			$query_post_type = $query->query['post_type'];
+			if ( is_string($query_post_type) && is_post_type_archive($query_post_type) && get_option('wpr_cpt_ppp_'. $query_post_type ) ) {
+				$query->set( 'posts_per_page', get_option('wpr_cpt_ppp_'. $query_post_type ) );
+			}
+		}
+	
+		return $query;
 	}
 
 	/**

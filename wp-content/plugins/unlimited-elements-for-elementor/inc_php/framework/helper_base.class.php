@@ -22,15 +22,19 @@ class UniteHelperBaseUC extends HtmlOutputBaseUC{
 		$response["message"] = $message;
 	
 		if(!empty($arrData)){
-	
+		
 			if(gettype($arrData) == "string")
 				$arrData = array("data"=>$arrData);
 	
 			$response = array_merge($response,$arrData);
 		}
-	
+						
 		$json = json_encode($response);
-	
+		
+		ob_end_clean();
+		
+		//header('Content-Type: application/json');
+		
 		echo UniteProviderFunctionsUC::escCombinedHtml($json);
 		exit();
 	}

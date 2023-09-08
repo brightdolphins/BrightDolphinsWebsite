@@ -61,7 +61,7 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 			$param["placeholder"] = UniteFunctionsUC::getVal($setting, "placeholder");
 			
 			$arrKeys = array("min","max","step","units","disabled","html",
-							 "settings_items","items_values","hide_label","title_field");
+							 "settings_items","items_values","hide_label","title_field","usefor");
 			
 			
 			foreach($arrKeys as $key){
@@ -683,6 +683,8 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 			break;
 			case "ucform_conditions":
 				
+				$condition = HelperProviderCoreUC_EL::paramToElementorCondition($param);
+				
 				$params = array();
 				$params["elementor_condition"] = $condition;
 				$params["origtype"] = UniteCreatorDialogParam::PARAM_REPEATER;
@@ -697,7 +699,9 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 				
 			break;
 			case "sort_filter_fields":
-
+				
+				$condition = HelperProviderCoreUC_EL::paramToElementorCondition($param);
+				
 				$params = array();
 				$params["elementor_condition"] = $condition;
 				$params["origtype"] = UniteCreatorDialogParam::PARAM_REPEATER;
@@ -719,7 +723,7 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 				
 			break;
 			default:
-				UniteFunctionsUC::throwError("Add special param error: wrong attribute type: $attributeType");
+				UniteFunctionsUC::throwError("Add special param error: wrong attribute type: $attributeType, please check that the plugin version is up to date");
 			break;
 		}
 				
@@ -976,6 +980,12 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 				$this->addContentSelector($name,$value,$title,$extra);
 			break;
 			case UniteCreatorDialogParam::PARAM_MENU:
+				
+				$useFor = UniteFunctionsUC::getVal($param, "usefor");
+				
+				if(!empty($useFor))
+					$extra["usefor"] = $useFor;
+								
 				$this->addMenuPicker($name,$value,$title,$extra);
 			break;
 			case UniteCreatorDialogParam::PARAM_TYPOGRAPHY:
@@ -1126,7 +1136,6 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 		if($enableCondition == false){
 			return(false);
 		}
-		
 		
 		$name = UniteFunctionsUC::getVal($param, "name");
 		
@@ -1301,7 +1310,47 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
     	return($arrOutput);    	
     }
 	
-	
+    /**
+     * add control by elementor condition
+     */
+    private function addControl_byElementorConditions($nameChild, $arrConditions){
+    	
+    	if(empty($arrConditions) == true)
+    		return(false);
+    	
+    	if(is_array($arrConditions) == false)
+    		UniteFunctionsUC::throwError("The elementor conditions should be array");
+    	
+    	foreach($arrConditions as $nameParent=>$value){
+    		
+    		$this->addControl($nameParent, $nameChild, "show", $value);
+    	}
+    	
+    	
+    }
+    
+    
+    /**
+     * add controls by elementor conditions
+     */
+	private function addControls_byElementorConditions(){
+		
+		if(empty($this->arrSettings))
+			return(false);
+					
+		foreach($this->arrSettings as $setting){
+			
+			$elementorCondition	 = UniteFunctionsUC::getVal($setting, "elementor_condition");
+			
+			if(empty($elementorCondition))
+				continue;
+			
+			$name = UniteFunctionsUC::getVal($setting, "name");
+			
+			$this->addControl_byElementorConditions($name, $elementorCondition);
+		}
+		
+	}
 	
 	/**
 	 * add settings by creator params - works for single widget only
@@ -1396,8 +1445,12 @@ class UniteCreatorSettingsWork extends UniteSettingsAdvancedUC{
 				$this->addByCreatorParam($postListParam);
 				
           }
+			
+          //add control by elementor conditions - from post list, terms list etc.
+          
+          $this->addControls_byElementorConditions();
 		
-		
+          
 	}
 	
 	

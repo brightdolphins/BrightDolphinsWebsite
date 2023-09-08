@@ -1,5 +1,7 @@
 "use strict";
 
+//version: 1.4
+
 function UnlimitedElementsForm(){
   
   var t = this;
@@ -29,14 +31,21 @@ function UnlimitedElementsForm(){
     
     objError.show();
     
+    var objErrorParent = objError.parents(".debug-wrapper");
+    
+    if(!objErrorParent.length)
     throw new Error(consoleErrorText);    
+    
+    objErrorParent.addClass("ue_error_true");
+    
+    throw new Error(consoleErrorText); 
     
   }
   
   /**
   * get formula names
   */
-  function getFormulaNames(expr, objError){
+  function getFormulaNames(expr, objError){ 
     
     var regex = /\[(.*?)\]/g;
     var matches = expr.match(regex);   
@@ -46,11 +55,37 @@ function UnlimitedElementsForm(){
     if(matches)      
     names = matches.map(match => match.substring(1, match.length - 1));     
     
+    if(names == undefined)
+    return(false);
+    
+    //check for space inside name
+    names.forEach(function(name, index){
+      
+      for (var i = 0; i < name.length; i++) {
+        
+        var currentChar = name[i];
+        
+        if(currentChar === " "){
+          
+          var errorText = 'Unlimited Elements Form Error: Name option must not contain spaces inside. Found in name: '+name;
+          var consoleErrorText = "Space character in name found";
+          
+          showCustomError(objError, errorText, consoleErrorText);
+          
+        }
+        
+      }
+      
+    });
+    
+    //remove spacing in case they were not removed before
+    expr = expr.replace(/\s+/g, "");
+    
     var unmatches = expr.replace(regex, "").split(/[\[\]]/);
     
     //exclude allowed symbols and check if array is empty, if not - then in formula some fields written without square parentacess
     unmatches = unmatches[0].replace(g_allowedSymbols, "").split(/[\[\]]/);
-
+    
     if(unmatches[0].length > 0){
       
       var errorText = 'Unlimited Elements Form Error: Input Name should be surrounded by square parentheses inside Formula';
@@ -70,6 +105,9 @@ function UnlimitedElementsForm(){
   function replaceNamesWithValues(expr, objError){
     
     var names = getFormulaNames(expr, objError);
+    
+    if(names == undefined || names == false)
+    return(expr);
     
     names.forEach(function(name, index){
       
@@ -93,11 +131,40 @@ function UnlimitedElementsForm(){
         
       }
       
+      //check if uppercase characters are in name
+      for (var i = 0; i < name.length; i++) {
+        
+        var currentChar = name[i];
+        
+        if (currentChar === currentChar.toUpperCase() && currentChar !== currentChar.toLowerCase()){
+          
+          var errorText = 'Unlimited Elements Form Error: Name option must not contain Uppercase characters. Found in name: '+name;
+          var consoleErrorText = "Uppercase in name found";
+          
+          showCustomError(objError, errorText, consoleErrorText);
+          
+        }
+        
+        if(currentChar === " "){
+          
+          var errorText = 'Unlimited Elements Form Error: Name option must not contain spaces inside. Found in name: '+name;
+          var consoleErrorText = "Space character in name found";
+          
+          showCustomError(objError, errorText, consoleErrorText);
+          
+        }
+        
+      }
+      
       var inputValue = objInpput.val();
       
       //add parentheses if valus is less then 0
       if(inputValue < 0)
-      inputValue = "("+inputValue+")"
+      inputValue = "("+inputValue+")";
+      
+      //if input is empty then count it as 0
+      if(inputValue.length == 0)
+      inputValue = 0;
       
       expr = expr.replace(name, inputValue);
       expr = expr.replace('[', '');
@@ -112,7 +179,7 @@ function UnlimitedElementsForm(){
   /*
   * validate the expression
   */
-  function validateExpression(expr){      
+  function validateExpression(expr){  
     
     //allow Math.something (math js operation), numbers, float numbers, math operators, dots, comas    
     var matches = expr.match(g_allowedSymbols);
@@ -133,7 +200,7 @@ function UnlimitedElementsForm(){
   */
   function getResult(expr, objError) {
     
-    //if space just erase it
+    //if space just erase it    
     expr = expr.replace(/\s+/g, "");
     
     //replace inputs name with its values
@@ -202,7 +269,7 @@ function UnlimitedElementsForm(){
     //if data formula is empty
     var dataFormula = objCalcInput.data("formula");
     
-    if(dataFormula == "")
+    if(dataFormula == "" || dataFormula == undefined)
     return(false);
     
     //get result with numbers instead of fields name
@@ -214,7 +281,10 @@ function UnlimitedElementsForm(){
     //set result to input
     objCalcInput.val(result);
     
-    //set readonly attr
+    //set readonly attr if needed
+    var dataRemoveReadonlyCalcMode = objCalcInput.data("remove-readonly-for-calc-mode");
+
+    if(dataRemoveReadonlyCalcMode == false)
     objCalcInput.attr('readonly', '');
     
   }
@@ -229,20 +299,87 @@ function UnlimitedElementsForm(){
   }
   
   /**
+  * assign parent calc number field input to each input inside formula
+  */
+  function assignParentNumberField(objParent, objError){
+    
+    var objFormula = objParent.find("[data-formula]");
+    var expr = objFormula.data("formula");
+    var parentIdAttribute = objParent.attr("id");
+    
+    var names = getFormulaNames(expr, objError);
+    
+    if(names == undefined || names == false)
+    return(false);
+    
+    names.forEach(function(name, index){
+      
+      var objInpput = jQuery(ueInputFieldSelector+'[name="'+name+'"]');
+      var dataParentFormulaInputArray = objInpput.data("parent-formula-input");
+      
+      //if attr not exist create it
+      if(dataParentFormulaInputArray === undefined)      
+      objInpput.attr("data-parent-formula-input", parentIdAttribute);   
+      
+      //if attr exist, add new parent id to it
+      if(dataParentFormulaInputArray !== undefined){
+        
+        dataParentFormulaInputArray = dataParentFormulaInputArray.split(",");
+        
+        dataParentFormulaInputArray.push(parentIdAttribute);
+        
+        objInpput.attr("data-parent-formula-input", dataParentFormulaInputArray); 
+        
+      }
+      
+    });
+    
+  }
+  
+  /**
+  * get parent input calc
+  */
+  function getParentCalcInput(objInput){
+    
+    var parentsArray = objInput.attr("data-parent-formula-input");
+    
+    var objParentsArray = [];
+        
+    //make sure attr is an array
+    if(parentsArray != undefined){
+      
+      parentsArray = parentsArray.split(",");
+      
+      parentsArray.forEach(function(id, index){
+        
+        var parentId = id;
+        var objParentCalcInput = jQuery("#"+parentId).find("[data-calc-mode='true']");
+        
+        objParentsArray.push(objParentCalcInput);
+        
+      });
+      
+      return(objParentsArray);
+      
+    }
+    
+  }
+  
+  /**
   * show main input
   */
-  function showField(objFieldWidget, classVisible){
+  function showField(objFieldWidget, classHidden){
     
-    objFieldWidget.addClass(classVisible);
+    objFieldWidget.removeClass(classHidden);
     
   }
   
   /**
   * hide main input
   */
-  function hideField(objFieldWidget, classVisible){
+  function hideField(objFieldWidget, classHidden){
     
-    objFieldWidget.removeClass(classVisible);
+    objFieldWidget.addClass(classHidden);
     
   }
   
@@ -339,7 +476,7 @@ function UnlimitedElementsForm(){
       
       var errorHtml = "<div class="+classError+">Unlimited Field Error: can't set condition. Condition Item Name equals Field Name: [ " + inputName + " ]. Please use different names.</div>";
       
-      objField.prepend(errorHtml);
+      jQuery(errorHtml).insertBefore(objField.parent());
       
     }
     
@@ -380,6 +517,9 @@ function UnlimitedElementsForm(){
       
       var names = getFormulaNames(formula, objError);
       
+      if(names == undefined || names == false)
+      return(false);
+      
       names.forEach(function(name, index){
         
         var objInpput = jQuery(ueInputFieldSelector+'[name="'+name+'"]');
@@ -406,7 +546,7 @@ function UnlimitedElementsForm(){
   t.setVisibility = function(conditionArray, widgetId){	  
     
     var objFieldWidget = jQuery("#"+widgetId);
-    var classVisible = "uc-visible";
+    var classHidden = "ucform-has-conditions";
     var classError = "ue-error";
     
     var conditions = conditionArray.visibility_conditions;
@@ -425,12 +565,12 @@ function UnlimitedElementsForm(){
       var conditionArray = conditions[i];
       var condition = conditionArray.condition;
       var fieldName = conditionArray.field_name;
-      var fieldValue = conditionArray.field_value;
+      var fieldValue = parseInt(conditionArray.field_value);
       var operator = conditionArray.operator;
       var id = conditionArray._id;
       
       var objField = jQuery(ueInputFieldSelector+'[name="'+fieldName+'"]');
-      var objFieldValue = objField.val();
+      var objFieldValue = parseInt(objField.val());
       
       //sets the condition: "==", ">", "<" ...
       var visibilityCondition = getConditions(visibilityCondition, condition, objFieldValue, fieldValue);
@@ -448,12 +588,14 @@ function UnlimitedElementsForm(){
       //show error if condition name equals input field name
       arrNames = getNames(arrNames, fieldName);
       
-      equalConditionInputNameError(objField, arrNames, classError);
+      var objInputField = objFieldWidget.find(ueInputFieldSelector);
+      
+      equalConditionInputNameError(objInputField, arrNames, classError);
       
     }
     
     if(eval(totalVisibilityCondition) == true)
-    showField(objFieldWidget, classVisible);
+    showField(objFieldWidget, classHidden);
     
     if(eval(totalVisibilityCondition) == false){
       
@@ -462,7 +604,7 @@ function UnlimitedElementsForm(){
       if(isInEditor == "yes")
       setVisibilityInEditor(objFieldWidget, classError);
       else
-      hideField(objFieldWidget, classVisible);
+      hideField(objFieldWidget, classHidden);
       
     }
     
@@ -489,35 +631,42 @@ function UnlimitedElementsForm(){
       var objCalcWidget = objCalcInput.parents(ueNumberSelector);		
       var objError = objCalcWidget.find(ueNumberErrorSelector);
       
+      //assign parent calc input number field widget for each ue field input that is inside formule of the number filed
+      assignParentNumberField(objCalcWidget, objError);
+      
       //set result in input
       setResult(objCalcInput, objError);    
       
-      //init events
-      var objAllInputFields = jQuery(ueInputFieldSelector);
-      
-      objAllInputFields.on('input', function(){
-        onInputChange(objCalcInput);
-      });
-      
       //set result on custom shange event
-      objAllInputFields.on('input_calc', function(){
-        setResult(objCalcInput, objError);
-      });
-      
-      //find option elements and trigger calc
-      var objAllOptionFields = jQuery(ueOptionFieldSelector);
-      
-      objAllOptionFields.on('change', function(){
-        onInputChange(objCalcInput);
-      });
-      
-      //set result on custom change event
-      objAllOptionFields.on('input_calc', function(){
-        setResult(objCalcInput, objError);
+      objCalcInput.on('input_calc', function(){
+        
+        var objInput = jQuery(this); //triggered input
+        
+        setResult(objInput, objError);
+        
       });
       
     });
     
+    //init events
+    var objAllInputFields = jQuery(ueInputFieldSelector);
+    
+    //on input change trigger only parent calc number field, not all of them
+    objAllInputFields.on('input', function(){
+      
+      var objInput = jQuery(this); //triggered input
+      var objParentCalkInputs = getParentCalcInput(objInput); //parent calc input with formula attr
+      
+      if(objParentCalkInputs == undefined)
+      return(true);
+          
+      objParentCalkInputs.forEach(function(parent, index){
+        
+        onInputChange(parent);          
+        
+      });
+      
+    });
     
   }
   
@@ -546,3 +695,4 @@ function UnlimitedElementsForm(){
 
 var g_ucUnlimitedForms = new UnlimitedElementsForm();
 
+g_ucUnlimitedForms.init();

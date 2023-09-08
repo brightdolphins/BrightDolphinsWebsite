@@ -156,6 +156,12 @@ function UERemoteGeneralAPI(){
 		if(num < 0)
 			num = 0;
 		
+		if(!num)
+			num = 0;
+		
+		if(typeof num == "undefined")
+			num = 0;
+		
 		return(num);
 	}
 	
@@ -225,7 +231,7 @@ function UERemoteGeneralAPI(){
 	this.doAction = function(action, arg1, arg2){
 		
 		validateInited();
-				
+		
 		if(g_isTypeEvents == true){
 			
 			var funcRunAction = getVal(g_options, "func_doAction");
@@ -267,7 +273,7 @@ function UERemoteGeneralAPI(){
 				
 				if(g_vars.enableDebug)
 					console.trace();
-					
+				
 				changeItem(arg1);
 				
 			break;
@@ -288,17 +294,26 @@ function UERemoteGeneralAPI(){
 		
 		var objItems = getObjItems();
 		
+		if(g_vars.enableDebug == true){
+			trace("generalAPI: listen class change: ");
+			trace(objItems);
+		}
+		
 		jQuery.each(objItems, function(index, item){
 			
 			var objItem = jQuery(item);
 			
 			var isSetObserver = objItem.data("uc_set_observer");
-			if(isSetObserver === true)
+			if(isSetObserver === true){
 				return(true);
-			
+			}
+						
 			var observer = new MutationObserver(function(records){
-							
+				
 				runWithTrashold(function(){
+					
+					if(g_vars.enableDebug == true)
+						trace("generalAPI: trigger item change");
 					
 					g_objParent.trigger("uc_change");
 					
@@ -377,16 +392,22 @@ function UERemoteGeneralAPI(){
 				
 	}
 	
+	
 	/**
 	 * init obzerver events
 	 */
 	function initEvents(){
 		
+		if(g_vars.enableDebug == true){
+			trace("generalAPI: init events");
+			trace(g_objParent);
+		}
+		
 		if(g_vars.listen_class_change == true)
 			initEvents_listenClassChange();
 		
 		if(g_vars.add_set_active_code == true){
-						
+			
 			initEvents_setActive();
 			
 		}
@@ -465,7 +486,7 @@ function UERemoteGeneralAPI(){
 		
 		var connectType = getVal(options, "connect_type");
 		if(connectType == "events")
-			g_isTypeEvents = true;
+			g_isTypeEvents = true;		//events allow to connect own functions
 		
 		g_options = options;
 		
@@ -495,7 +516,11 @@ function UERemoteGeneralAPI(){
 			else
 				initEvents();
 			
-			g_objParent.on("uc_ajax_refreshed", initEvents);
+			g_objParent.on("uc_ajax_refreshed", function(){
+				
+				setTimeout(initEvents,500)
+				
+			});
 			
 		}
 				
@@ -1613,7 +1638,11 @@ function UERemoteWidgets(){
 			g_vars.options_api = optionsFromData;
 		
 		if(g_vars.trace_debug == true){
-			trace(g_vars.options_api);
+			if(g_vars.options_api)
+				trace(g_vars.options_api);
+			else
+				g_vars.options_api = {};
+			
 			g_vars.options_api.trace_debug = true;
 		}
 		

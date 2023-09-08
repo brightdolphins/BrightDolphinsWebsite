@@ -8306,7 +8306,12 @@ class Wpr_Woo_Grid extends Widget_Base {
 			$settings[ 'query_offset' ] = 0;
 		}
 		
-		$offset = ( $paged - 1 ) * $settings['query_posts_per_page'] + $settings[ 'query_offset' ];
+		$query_posts_per_page = $settings['query_posts_per_page'];
+		if ( empty($query_posts_per_page) ) {
+			$query_posts_per_page = -1;
+		}
+		
+		$offset = ( $paged - 1 ) * $query_posts_per_page + $settings[ 'query_offset' ];
 
 		// Dynamic
 		$args = [
@@ -9094,9 +9099,7 @@ class Wpr_Woo_Grid extends Widget_Base {
 			\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
 			$extra_icon = ob_get_clean();
 
-			echo '<span class="wpr-grid-extra-icon-left">';
-				echo $extra_icon;
-			echo '</span>';
+			$button_HTML .= '<span class="wpr-grid-extra-icon-left">'. $extra_icon .'</span>';
 		}
 
 		// Button Text
@@ -9114,6 +9117,9 @@ class Wpr_Woo_Grid extends Widget_Base {
 		} elseif ( 'variable' === $product->get_type() ) {
 			$button_HTML .= $settings['element_addcart_variable_txt'];
 			array_push( $attributes, 'href="'. esc_url( get_permalink() ) .'"' );
+		} else if ( 'pw-gift-card' === $product->get_type() ) {
+			$button_HTML .= esc_html__('Select Amount', 'wpr-addons');
+			array_push( $attributes, 'href="'. esc_url( get_permalink() ) .'"' );
 		} else {
 			array_push( $attributes, 'href="'. esc_url( $product->get_product_url() ) .'"' );
 			$button_HTML .= get_post_meta( get_the_ID(), '_button_text', true ) ? get_post_meta( get_the_ID(), '_button_text', true ) : 'Buy Product';
@@ -9125,9 +9131,7 @@ class Wpr_Woo_Grid extends Widget_Base {
 			\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
 			$extra_icon = ob_get_clean();
 
-			echo '<span class="wpr-grid-extra-icon-right">';
-				echo $extra_icon;
-			echo '</span>';
+			$button_HTML .= '<span class="wpr-grid-extra-icon-right">'. $extra_icon .'</span>';
 		}
 
 		echo '<div class="'. esc_attr($class) .'">';

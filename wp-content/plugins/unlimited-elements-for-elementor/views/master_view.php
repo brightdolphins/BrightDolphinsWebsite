@@ -2,7 +2,7 @@
 /**
  * @package Unlimited Elements
  * @author unlimited-elements.com
- * @copyright (C) 2021 Unlimited Elements, All Rights Reserved. 
+ * @copyright (C) 2021 Unlimited Elements, All Rights Reserved.
  * @license GNU/GPLv3 http://www.gnu.org/licenses/gpl-3.0.html
  * */
 defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
@@ -12,19 +12,19 @@ if($view == "layout")
     $bottomLineClass = " unite-position-right";
 
  ob_start();
- 
+
  self::requireView($view);
- 
+
  $htmlView = ob_get_contents();
- 
+
  ob_end_clean();
-    
+
  $htmlClassAdd = "";
  if(!empty($view)){
  	$htmlClassAdd = " unite-view-{$view}";
  	$bottomLineClass .= " unite-view-{$view}";
  }
- 
+
 ?>
 
 <?php HelperHtmlUC::putGlobalsHtmlOutput(); ?>
@@ -36,11 +36,11 @@ if($view == "layout")
 <?php HelperHtmlUC::putInternalAdminNotices()?>
 
 
-<div id="viewWrapper" class="unite-view-wrapper unite-admin unite-inputs <?php echo $htmlClassAdd?>">
+<div id="viewWrapper" class="wrap unite-view-wrapper unite-admin unite-inputs <?php echo $htmlClassAdd?>">
 
 <?php
 	echo UniteProviderFunctionsUC::escCombinedHtml($htmlView);
-	
+
 	//include provider view if exists
 	$filenameProviderView = GlobalsUC::$pathProviderViews.$view.".php";
 	if(file_exists($filenameProviderView))
@@ -49,11 +49,11 @@ if($view == "layout")
 
 </div>
 
-<?php 
+<?php
 	$filepathProviderMasterView = GlobalsUC::$pathProviderViews."master_view.php";
 	if(file_exists($filepathProviderMasterView))
 		require_once $filepathProviderMasterView;
-		
+
 ?>
 
 <?php if(GlobalsUC::$blankWindowMode == false):?>
@@ -81,10 +81,10 @@ if($view == "layout")
 	<a id="uc_version_link" href="javascript:void(0)" class="unite-version-link">
 		<?php esc_html_e("view change log", "unlimited-elements-for-elementor")?>
 	</a>
-	
-	
+
+
 	<?php UniteProviderFunctionsUC::doAction(UniteCreatorFilters::ACTION_BOTTOM_PLUGIN_VERSION)?>
-	
+
 </div>
 
 <?php endif?>

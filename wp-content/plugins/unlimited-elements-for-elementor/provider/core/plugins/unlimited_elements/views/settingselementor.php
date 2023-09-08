@@ -45,12 +45,16 @@ class UniteCreatorViewElementorSettings extends UniteCreatorSettingsView{
 		//show the setting that was hidden in first place
 		if(GlobalsUC::$inDev == true)	//dynamic visibility
 			$objSettings->updateSettingProperty("enable_dynamic_visibility", "hidden", "false");
-		
+			
+		if(GlobalsUnlimitedElements::$enableForms == false){
+			
+			$objSettings->hideSap("forms");
+			$objSettings->hideSetting("enable_form_entries");
+			
+		}
+			
 		$isWpmlExists = UniteCreatorWpmlIntegrate::isWpmlExists();
 
-		if(GlobalsUC::$inDev == true)
-			$isWpmlExists = true;
-		
 		//enable wpml integration settings
 		if($isWpmlExists == true){
 			

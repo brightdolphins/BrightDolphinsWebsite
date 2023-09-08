@@ -20,6 +20,7 @@ class HelperProviderCoreUC_EL{
 	private static $arrPostContentCache = array();
 	private static $arrTemplatesCounter = array();
 	private static $isInfiniteLoopCode = false;
+	private static $arrAddedStyles = array();
 	
 	
 	/**
@@ -509,12 +510,64 @@ class HelperProviderCoreUC_EL{
 		
 		return(null);
 	}
+
+	/**
+	 * get addon settings from elementor content
+	 */
+	public static function getAddonValuesWithDataFromContent($arrContent, $elementID){
+		
+		$addon = self::getAddonWithDataFromContent($arrContent, $elementID);
+		
+		$arrValues = $addon->getProcessedMainParamsValues();
+		
+		return($arrValues);
+	}
+	
+	
+	/**
+	  * get widget elementor from content
+	 */
+	public static function getAddonWithDataFromContent($arrContent, $elementID){
+		
+		$arrElement = self::getArrElementFromContent($arrContent, $elementID);
+				
+		if(empty($arrElement)){
+			UniteFunctionsUC::throwError("Elementor Widget with id: $elementID not found");
+		}
+		
+		$type = UniteFunctionsUC::getVal($arrElement, "elType");
+		
+		if($type != "widget")
+			UniteFunctionsUC::throwError("The element is not a widget");
+		
+		$widgetType = UniteFunctionsUC::getVal($arrElement, "widgetType");
+		
+		if(strpos($widgetType, "ucaddon_") === false){
+			
+			if($widgetType == "global")
+				UniteFunctionsUC::throwError("The widget can't be global widget. Please change the grid to regular widget.");
+			
+			UniteFunctionsUC::throwError("Cannot output widget content for widget: $widgetType");
+		}
+
+		$arrSettingsValues = UniteFunctionsUC::getVal($arrElement, "settings");
+		
+		$widgetName = str_replace("ucaddon_", "", $widgetType);
+		
+		$addon = new UniteCreatorAddon();
+		$addon->initByAlias($widgetName, GlobalsUC::ADDON_TYPE_ELEMENTOR);
+		
+		$addon->setParamsValues($arrSettingsValues);
+		
+		return($addon);		
+	}
+		
 	
 	/**
 	 * put post content, or render with elementor
 	 */
 	public static function getPostContent($postID, $content=""){
-				
+		
 		if(empty($postID))
 			return(false);
 			
@@ -548,7 +601,7 @@ class HelperProviderCoreUC_EL{
 		//elementor content
 		
 		$content = self::getElementorTemplate($postID);
-
+		
 		self::$arrPostContentCache[$postID]	= $content;
 		
 		return($content);
@@ -601,6 +654,46 @@ class HelperProviderCoreUC_EL{
 		return($condition);
 	}
 	
+	/*
+	 * get elementor breakpoints
+	 */
+	public static function getBreakPoints($onlyCustom = true){
+		
+		$arrBreakpoints = Elementor\Plugin::$instance->breakpoints->get_breakpoints();
+		
+		if(empty($arrBreakpoints))
+			return(array());
+		
+		$output = array();
+			
+		foreach($arrBreakpoints as $objBreakpoint){
+			
+			//$arrBreakpoint = (array)$objBreakpoint;
+						
+			$name = $objBreakpoint->get_name();
+			
+			$isEnabled = $objBreakpoint->is_enabled();
+						
+			if($isEnabled == false)
+				continue;
+			
+			switch($name){
+				case "mobile":
+				case "tablet":
+					continue(2);
+				break;
+			}
+			
+			$value = $objBreakpoint->get_value();
+			
+			$output = array();
+			$output[$name] = $value;
+		}
+		
+		
+		return($output);
+	}
+	
 	private static function ______LISTING________(){}
 	
 	/**
@@ -631,6 +724,8 @@ class HelperProviderCoreUC_EL{
 	 */
 	public static function putElementorTemplate($templateID, $mode = null){
 		
+		$numTemplates = 250;
+		
 		$isWpmlExists = UniteCreatorWpmlIntegrate::isWpmlExists();
 				
 		//get right template
@@ -647,7 +742,7 @@ class HelperProviderCoreUC_EL{
 		
 		self::$arrTemplatesCounter[$templateID]++;
 		
-		if(self::$arrTemplatesCounter[$templateID] >= 50){
+		if(self::$arrTemplatesCounter[$templateID] >= $numTemplates){
 			
 			$text = __("Infinite Template Loop Found: $templateID","unlimited-elements-for-elementor");
 			
@@ -720,7 +815,7 @@ class HelperProviderCoreUC_EL{
 		//change the template ID according the language for wpml
 		
 		$isWpmlExists = UniteCreatorWpmlIntegrate::isWpmlExists();
-				
+			
 		//get right template
 		if($isWpmlExists == true){
 		
@@ -731,8 +826,7 @@ class HelperProviderCoreUC_EL{
 
 		
 		//--------------------
-			
-		
+				
 		global $wp_query;
 		
 		//empty the infinite loop protection
@@ -754,6 +848,10 @@ class HelperProviderCoreUC_EL{
 			
 		$GLOBALS['post'] = $post;
 		
+		//set author data
+		
+		UniteFunctionsWPUC::setGlobalAuthorData($post);
+		
 		//fix for jet engine
 		
 		$isJetExists = UniteCreatorPluginIntegrations::isJetEngineExists();
@@ -762,7 +860,7 @@ class HelperProviderCoreUC_EL{
 			do_action("the_post", $post, false);
 					
 		//set the flag on dynamic ajax
-		
+					
 		if(GlobalsProviderUC::$isUnderAjax == true){
 			GlobalsProviderUC::$isUnderAjaxDynamicTemplate = true;
 		}
@@ -772,9 +870,7 @@ class HelperProviderCoreUC_EL{
 		$isElementorProActive = HelperUC::isElementorProActive();
 		
 		$documentToChange = null;
-		
-		GlobalsProviderUC::$isUnderDynamicTemplateLoop = true;
-		
+				
 		if($isElementorProActive == true){
 			
 			$currentDocument = \ElementorPro\Plugin::elementor()->documents->get_current();
@@ -793,10 +889,54 @@ class HelperProviderCoreUC_EL{
 			"doc_to_change"=>$documentToChange
 		);
 		
+		//handle the additional css files
+		
+		if(GlobalsProviderUC::$isUnderAjax == true){
+			
+			$objStyles = wp_styles();
+			$arrHandles = $objStyles->queue;
+		}
+		
+		
 		if($listingType == "jet")
 			$htmlTemplate = self::getJetTemplateListingItem($templateID, $post);
 		else
 			$htmlTemplate = self::getElementorTemplate($templateID, $withCss);
+		
+		
+		//handle the additional css files
+		
+		if(GlobalsProviderUC::$isUnderAjax == true){
+			
+			$objStyles2 = wp_styles();
+			$arrHandles2 = $objStyles->queue;
+			
+			$arrDiff = array_diff($arrHandles2, $arrHandles);
+			
+			if(!empty($arrDiff))
+			foreach($arrDiff as $handleToAdd){
+				
+				if(isset(self::$arrAddedStyles[$handleToAdd]))
+					continue;
+				
+				self::$arrAddedStyles[$handleToAdd] = true;
+				
+				$objStyle = UniteFunctionsUC::getVal($objStyles2->registered, $handleToAdd);
+				
+				if(empty($objStyle))
+					continue;
+
+				$srcStyle = $objStyle->src;
+				$srcStyle = esc_url($srcStyle);
+				
+				$htmlStyle = "<link rel=\"stylesheet\" href=\"{$srcStyle}\">\n";
+				
+				$htmlTemplate = $htmlStyle.$htmlTemplate;
+			}
+			
+		}
+			
+		
 			
 		//add one more class
 		
@@ -804,6 +944,8 @@ class HelperProviderCoreUC_EL{
 		$dest = "{$source} uc-post-$postID";
 		
 		$htmlTemplate = str_replace($source, $dest, $htmlTemplate);
+		
+		$htmlTemplate = do_shortcode($htmlTemplate);
 		
 		echo $htmlTemplate;
 				

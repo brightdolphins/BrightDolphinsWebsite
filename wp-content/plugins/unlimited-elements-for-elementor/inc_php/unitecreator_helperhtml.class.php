@@ -231,12 +231,16 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 		/**
 		 * get error message html
 		 */
-		public static function getErrorMessageHtml($message, $trace = ""){
-		
+		public static function getErrorMessageHtml($message, $trace = "", $withCSS = false){
+					
 			$html = '<div class="unite-error-message">';
 			$html .= '<div style="unite-error-message-inner">';
 			$html .= $message;
-		
+			
+			if($withCSS == true){
+				$html .= "<style> .unite-error-message{color:red;}  </style>";
+			}
+			
 			if(!empty($trace)){
 				$html .= '<div class="unite-error-message-trace">';
 				$html .= "<pre>{$trace}</pre>";

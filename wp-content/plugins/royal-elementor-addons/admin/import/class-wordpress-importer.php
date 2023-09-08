@@ -1367,12 +1367,29 @@ class WP_Import extends WP_Importer {
 		register_post_type('wpr_portfolio', array(
 			'public' => true,
 			'has_archive' => true,
+			'show_in_nav_menus' => true,
 			'supports' => array('title', 'editor', 'thumbnail')
 		));
 	
 		// Register custom taxonomy
 		register_taxonomy('wpr_portfolio_cats', 'wpr_portfolio', array(
 			'public' => true,
+			'show_in_nav_menus' => true,
+			'hierarchical' => true
+		));
+
+		// Register custom post type
+		register_post_type('wpr_work', array(
+			'public' => true,
+			'has_archive' => true,
+			'show_in_nav_menus' => true,
+			'supports' => array('title', 'editor', 'thumbnail')
+		));
+	
+		// Register custom taxonomy
+		register_taxonomy('wpr_work_cats', 'wpr_work', array(
+			'public' => true,
+			'show_in_nav_menus' => true,
 			'hierarchical' => true
 		));
 	}

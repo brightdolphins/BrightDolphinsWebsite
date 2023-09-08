@@ -34,6 +34,10 @@ class UniteCreatorFiltersProcess{
 	private $contentWidgetsDebug = array();
 	private static $lastArgs = null;	
 	private static $isUnderAjaxSearch = false;
+	private static $showEchoDebug = false;
+	
+	private $hasSelectedByRequest = false;
+	private $hasSelectedTerm = false;
 	
 	
 	const TYPE_TABS = "tabs";
@@ -69,13 +73,13 @@ class UniteCreatorFiltersProcess{
 			$isForWooProducts = true;
 		
 		$arrWooTypes = array("sale_price","sales","rating");
-					
+		
 		$output = array();
 		
 		$isEnableMeta = UniteFunctionsUC::getVal($params, "enable_meta");
 		$isEnableMeta = UniteFunctionsUC::strToBool($isEnableMeta);
 		
-		//find if the meta enabled
+		//find if the meta enabled - old way
 		
 		if($isEnableMeta == true){
 			$metaName = UniteFunctionsUC::getVal($params, "meta_name");
@@ -86,19 +90,41 @@ class UniteCreatorFiltersProcess{
 				$isEnableMeta = false;
 		}
 		
-		
 		foreach($arrFields as $field){
 			
 			$title = UniteFunctionsUC::getVal($field, "title");
 			$type = UniteFunctionsUC::getVal($field, "type");
 			
 			//disable meta if not selected
-			if($type == "meta" && $isEnableMeta == false)
-				continue;
+			
+			$typeForOutput = null;
+			
+			if($type == "meta"){
+				
+				$fieldMetaName = UniteFunctionsUC::getVal($field, "meta_name");
+				$fieldMetaType = UniteFunctionsUC::getVal($field, "meta_type");
+								
+				if(empty($fieldMetaName) && $isEnableMeta == true){
+					$fieldMetaName = $metaName;
+				}
+				
+				if(empty($fieldMetaName))
+					continue;
+				
+				if(empty($fieldMetaType))
+					continue;
+
+				$fieldMetaName = trim($fieldMetaName);
+				
+				$typeForOutput = "meta__{$fieldMetaName}__{$fieldMetaType}";
+			}
 			
 			//filter woo types
 			if($isForWooProducts == false&& in_array($type, $arrWooTypes) == true)
 				continue;
+			
+			if(!empty($typeForOutput))
+				$type = $typeForOutput;
 			
 			$output[$type] = $title;
 		}
@@ -442,6 +468,70 @@ class UniteCreatorFiltersProcess{
 		return($arrOutput);
 	}
 	
+	/**
+	 * get orderby input filter
+	 */
+	private function getArrInputFilters_getOrderby($arrOutput, $request){
+		
+		$orderby = UniteFunctionsUC::getVal($request, "ucorderby");
+		$orderby = UniteProviderFunctionsUC::sanitizeVar($orderby, UniteFunctionsUC::SANITIZE_KEY);
+		
+		if(empty($orderby))
+			return($arrOutput);
+			
+		//check if valid
+		$arrOrderby = UniteFunctionsWPUC::getArrSortBy(true);
+			
+		if($orderby == "id")
+			$orderby = "ID";
+		
+		if(is_string($orderby) && isset($arrOrderby[$orderby]))
+			$arrOutput["orderby"] = $orderby;
+
+		//meta old name
+		if($orderby == "meta"){
+			
+			$orderbyMeta = UniteFunctionsUC::getVal($request, "ucorderby_meta");
+			$orderbyMeta = UniteProviderFunctionsUC::sanitizeVar($orderbyMeta, UniteFunctionsUC::SANITIZE_KEY);
+			
+			$orderbyMetaType = UniteFunctionsUC::getVal($request, "ucorderby_metatype");
+			$orderbyMetaType = UniteProviderFunctionsUC::sanitizeVar($orderbyMetaType, UniteFunctionsUC::SANITIZE_KEY);
+						
+			if(!empty($orderbyMeta)){
+				$arrOutput["orderby"] = $orderby;
+				$arrOutput["orderby_metaname"] = $orderbyMeta;
+			}
+			
+			if(!empty($orderbyMetaType))
+				$arrOutput["orderby_metatype"] = $orderbyMetaType;
+			
+		}
+
+		//meta new way
+		
+		if(strpos($orderby, "meta__") === false)
+			return($arrOutput);
+		
+		$arrMeta = explode("__", $orderby);
+
+		if(count($arrMeta) != 3)
+			return($arrOutput);
+		
+		$orderby = $arrMeta[0];
+		$metaName = $arrMeta[1];
+		$metaType = $arrMeta[2];
+		
+		if($orderby != "meta")
+			return($arrOutput);
+		
+		$arrOutput["orderby"] = $orderby;
+		$arrOutput["orderby_metaname"] = $metaName;
+		$arrOutput["orderby_metatype"] = $metaType;
+		
+		
+		return($arrOutput);
+	}
+	
 	
 	/**
 	 * get filters array from input
@@ -508,43 +598,9 @@ class UniteCreatorFiltersProcess{
 				$arrOutput["exclude"] = $exclude;
 		}
 		
-		
 		//orderby
 		
-		$orderby = UniteFunctionsUC::getVal($request, "ucorderby");
-		$orderby = UniteProviderFunctionsUC::sanitizeVar($orderby, UniteFunctionsUC::SANITIZE_KEY);
-		
-		if(!empty($orderby)){
-			
-			//check if valid
-			$arrOrderby = UniteFunctionsWPUC::getArrSortBy(true);
-			
-			if($orderby == "id")
-				$orderby = "ID";
-						
-			if(is_string($orderby) && isset($arrOrderby[$orderby]))
-				$arrOutput["orderby"] = $orderby;
-
-			if($orderby == "meta"){
-				
-				$orderbyMeta = UniteFunctionsUC::getVal($request, "ucorderby_meta");
-				$orderbyMeta = UniteProviderFunctionsUC::sanitizeVar($orderbyMeta, UniteFunctionsUC::SANITIZE_KEY);
-				
-				$orderbyMetaType = UniteFunctionsUC::getVal($request, "ucorderby_metatype");
-				$orderbyMetaType = UniteProviderFunctionsUC::sanitizeVar($orderbyMetaType, UniteFunctionsUC::SANITIZE_KEY);
-								
-				if(!empty($orderbyMeta)){
-					$arrOutput["orderby"] = $orderby;
-					$arrOutput["orderby_metaname"] = $orderbyMeta;
-				}
-				
-				if(!empty($orderbyMetaType))
-					$arrOutput["orderby_metatype"] = $orderbyMetaType;
-				
-			}
-			
-		}
-		
+		$arrOutput = $this->getArrInputFilters_getOrderby($arrOutput, $request);
 		
 		//orderdir
 		
@@ -552,6 +608,7 @@ class UniteCreatorFiltersProcess{
 		
 		if($orderDir == "asc" || $orderDir == "desc")
 			$arrOutput["orderdir"] = $orderDir;
+		
 		
 		self::$arrInputFiltersCache = $arrOutput;
 		
@@ -876,6 +933,17 @@ class UniteCreatorFiltersProcess{
 					$args["meta_key"] = $metaName;
 					
 				}
+								
+			}
+			
+			if($orderby == UniteFunctionsWPUC::SORTBY_PRICE){
+				$args["orderby"] = "meta_value_num";
+				$args["meta_key"] = "_price";
+			}
+			
+			if($orderby == UniteFunctionsWPUC::SORTBY_SALE_PRICE){
+				$args["orderby"] = "meta_value_num";
+				$args["meta_key"] = "_sale_price";
 			}
 			
 		}
@@ -914,8 +982,6 @@ class UniteCreatorFiltersProcess{
 			
 		}
 		
-		
-		
 		//supress all filters
 		if(self::$isUnderAjaxSearch == true){
 
@@ -935,7 +1001,7 @@ class UniteCreatorFiltersProcess{
 			dmp("filters:");
 			dmp($arrFilters);
 		}
-				
+		
 		return($args);
 	}
 
@@ -1069,7 +1135,7 @@ class UniteCreatorFiltersProcess{
 			
 			$arrSettingsValues = $this->modifySettingsValues($arrSettingsValues, $postListName);
 		}
-
+		
 		$addon->setParamsValues($arrSettingsValues);
 		
 		
@@ -1095,9 +1161,11 @@ class UniteCreatorFiltersProcess{
 	    
 		if(self::$showDebug == false){
 			$htmlDebug = ob_get_contents();
+			
 			ob_end_clean();
 	  	}
-		
+
+	  	
 		$output = array();
 		
 		//get only items
@@ -1123,8 +1191,6 @@ class UniteCreatorFiltersProcess{
 		
 		if(!empty($htmlDebug))
 			$output["html_debug"] = $htmlDebug;
-		
-		
 		
 		return($output);
 	}
@@ -1275,7 +1341,7 @@ class UniteCreatorFiltersProcess{
 	private function putWidgetGridFrontAjaxData(){
 		
 		//validate by response code
-		
+				
 		$responseCode = http_response_code();
 		
 		if($responseCode != 200){
@@ -1326,7 +1392,7 @@ class UniteCreatorFiltersProcess{
 			
 			if(self::$showDebug == true)
 				dmp("---- Test Not Empty Terms----");
-			
+						
 			$args = GlobalsProviderUC::$lastQueryArgs;
 			
 			if(self::$showDebug == true){
@@ -1424,6 +1490,11 @@ class UniteCreatorFiltersProcess{
 		$outputData["query_data"] = $arrQueryData;
 		$outputData["query_ids"] = $strQueryPostIDs;
 		
+		
+		if(self::$showEchoDebug == true){
+			dmp("showing the debug");
+			exit();
+		}
 		
 		HelperUC::ajaxResponseData($outputData);
 		
@@ -1648,12 +1719,21 @@ class UniteCreatorFiltersProcess{
 		
 		$filterBehavoiur = UniteFunctionsUC::getVal($dataPosts, $postListName."_ajax_seturl");
 		
-		
 		$strAttributes .= " data-ajax='true' ";
 		
 		if(!empty($filterBehavoiur))
 			$strAttributes .= " data-filterbehave='$filterBehavoiur' ";
-
+		
+		//add ajax group
+		
+		$filterGroup = UniteFunctionsUC::getVal($dataPosts, $postListName."_filtering_group");
+		
+		if(!empty($filterGroup)){
+			$filterGroup = esc_attr($filterGroup);
+			$strAttributes .= " data-filtergroup='$filterGroup' ";
+		}
+		
+			
 		//add last query
 		$arrQueryData = HelperUC::$operations->getLastQueryData();
 
@@ -1686,7 +1766,7 @@ class UniteCreatorFiltersProcess{
 		$postListName = UniteFunctionsUC::getVal($param, "name");
 		
 		$dataPosts = UniteFunctionsUC::getVal($data, $postListName);
-				
+		
 		$data = $this->addWidgetFilterableVarsFromData($data, $dataPosts, $postListName, $arrPostIDs);
 		
 		return($data);
@@ -1775,6 +1855,8 @@ class UniteCreatorFiltersProcess{
 	 * modify selected by request
 	 */
 	private function modifyOutputTerms_modifySelectedByRequest($arrTerms){
+
+		$this->hasSelectedByRequest = false;
 		
 		$selectedTerms = null;
 		$selectedTermIDs = null;
@@ -1826,13 +1908,16 @@ class UniteCreatorFiltersProcess{
 			
 			if($isSelected == false)
 				continue;
-							
+
+			
 			$arrSelected["term_".$index] = true;
 		}
 		
 		if(empty($arrSelected))
 			return($arrTerms);
-			
+		
+		$this->hasSelectedByRequest = true;
+		
 		//modify the selected
 		
 		foreach($arrTerms as $index => $term){
@@ -1862,8 +1947,10 @@ class UniteCreatorFiltersProcess{
 	 */
 	private function modifyOutputTerms_addFirstItem($arrTerms, $data, $filterType){
 		
+		//don't add first item if no terms, if no terms, no "all" as well
+		
 		if(empty($arrTerms))
-			$arrTerms = array();
+			return(array());
 		
 		$addFirst = UniteFunctionsUC::getVal($data, "add_first");
 		$addFirst = UniteFunctionsUC::strToBool($addFirst);
@@ -1871,6 +1958,7 @@ class UniteCreatorFiltersProcess{
 		if($addFirst == false)
 			return($arrTerms);
 		
+			
 		$text = UniteFunctionsUC::getVal($data, "first_item_text", __("All","unlimited-elements-for-elementor"));
 					
 		$firstTerm = array();
@@ -1893,7 +1981,7 @@ class UniteCreatorFiltersProcess{
 	
 	
 	/**
-	 * modify the selected 
+	 * modify the selected - first selected from options
 	 */
 	private function modifyOutputTerms_modifySelected($arrTerms, $data, $filterType){
 		
@@ -1930,7 +2018,7 @@ class UniteCreatorFiltersProcess{
 					
 		$firstNotHiddenIndex = null;
 		
-		$hasSelected = false;
+		$hasSelectedTerm = false;
 		
 		foreach($arrTerms as $index => $term){
 			
@@ -1977,7 +2065,7 @@ class UniteCreatorFiltersProcess{
 	
 	
 	/**
-	 * modify the terms for init after
+	 * modify the terms for init after 
 	 */
 	private function modifyOutputTerms_setNumPosts($arrTerms){
 			
@@ -1987,7 +2075,7 @@ class UniteCreatorFiltersProcess{
 		$arrParentNumPosts = array();
 		
 		$arrPostNums = GlobalsProviderUC::$arrTestTermIDs;
-			
+		
 		foreach($arrTerms as $key => $term){
 			
 			$termID = UniteFunctionsUC::getVal($term, "id");
@@ -2018,6 +2106,7 @@ class UniteCreatorFiltersProcess{
 			
 			if($isHidden == true){
 				$htmlAttributes = "hidden='hidden' style='display:none'";
+				$htmlAttributesNew = "hidden='hidden' ";	//no style
 				
 				$addClass = UniteFunctionsUC::getVal($term, "addclass");
 				$addClass .= " uc-item-hidden";
@@ -2027,6 +2116,7 @@ class UniteCreatorFiltersProcess{
 			
 			$term["hidden"] = $isHidden;
 			$term["html_attributes"] = $htmlAttributes;
+			$term["html_attributes2"] = $htmlAttributesNew;
 			
 			$arrTerms[$key] = $term;			
 		}
@@ -2115,8 +2205,14 @@ class UniteCreatorFiltersProcess{
 					
 				break;
 			}
-				
-						
+			
+			//set hasSelected - true, only if there are some selected slug
+			
+			$selectedSlug = UniteFunctionsUC::getVal($term, "slug");
+			
+			if(!empty($selectedSlug))
+				$this->hasSelectedTerm = true;
+			
 			$arrTerms[$index] = $term;
 			
 		}
@@ -2170,10 +2266,44 @@ class UniteCreatorFiltersProcess{
 		
 		if($isAllItem == true)
 			return(true);
-		
-		
+				
 		return(false);		
 	}
+	
+	/**
+	 * get data attributes
+	 */
+	private function modifyOutputTerms_getDataAttributes($arrTerms, $filterType){
+		
+		foreach($arrTerms as $index => $term){
+			
+			$termID = UniteFunctionsUC::getVal($term, "id");
+			
+			if(empty($termID))
+				continue;
+			
+			$title = UniteFunctionsUC::getVal($term, "name");
+			$slug = UniteFunctionsUC::getVal($term, "slug");
+			$taxonomy = UniteFunctionsUC::getVal($term, "taxonomy");
+			
+			$type = "term";
+			
+			$title = esc_attr($title);
+			$slug = esc_attr($slug);
+			$taxonomy = esc_attr($taxonomy);
+			
+			$key = "{$type}|{$taxonomy}|{$slug}";
+			
+			$htmlData = " data-id=\"$termID\" data-type=\"$type\" data-slug=\"$slug\" data-taxonomy=\"$taxonomy\" data-title=\"{$title}\" data-key=\"{$key}\" ";
+			
+			$term["html_data"] = $htmlData;
+			
+			$arrTerms[$index] = $term;
+		}
+		
+		return($arrTerms);
+	}
+	
 	
 	
 	/**
@@ -2204,7 +2334,7 @@ class UniteCreatorFiltersProcess{
 		
 		$limitGrayedItems = UniteFunctionsUC::getVal($data, "load_limit_grayed");
 		$limitGrayedItems = (int)$limitGrayedItems;
-				
+		
 		$filterRole = UniteFunctionsUC::getVal($data, "filter_role");
 		if($filterRole == "single")		
 			$filterRole = null;
@@ -2214,6 +2344,7 @@ class UniteCreatorFiltersProcess{
 		$addClass = " uc-grid-filter";
 		$addClassItem = "";
 		$isFirstLoad = true;		//not in ajax, or with init after (also first load)
+		
 		
 		$isInsideEditor = GlobalsProviderUC::$isInsideEditor;
 		
@@ -2233,12 +2364,7 @@ class UniteCreatorFiltersProcess{
 			
 			$isFirstLoad = true;
 		}
-		
-		//hide child filter at start
-		if(strpos($filterRole,"child") !== false && $isUnderAjax == false && $isInsideEditor == false){
-			$addClass .= " uc-filter-initing uc-initing-filter-hidden";
-		}
-				
+						
 		if($filterRole == self::ROLE_TERM_CHILD){
 			
 			$termID = UniteFunctionsUC::getVal($data, "child_termid");
@@ -2263,6 +2389,8 @@ class UniteCreatorFiltersProcess{
 		//modify terms
 		
 		$arrTerms = UniteFunctionsUC::getVal($data, "taxonomy");
+				
+		//modify the hidden as well
 		
 		$arrTerms = $this->modifyOutputTerms_setNumPosts($arrTerms, $isInitAfter, $isFirstLoad);
 		
@@ -2274,6 +2402,7 @@ class UniteCreatorFiltersProcess{
 		
 		$arrTerms = $this->modifyOutputTerms_modifySelectedByRequest($arrTerms);
 		
+		
 		$isFilterHidden = false;
 		
 		switch($filterType){
@@ -2282,7 +2411,7 @@ class UniteCreatorFiltersProcess{
 				
 				if($isInitAfter == true && !empty($limitGrayedItems) && $isUnderAjax == false)
 					$arrTerms = $this->modifyOutputTerms_tabs_modifyLimitGrayed($arrTerms, $limitGrayedItems);
-					
+				
 				$isFilterHidden = $this->modifyOutputTerms_isFilterHidden($data, $arrTerms, $isUnderAjax);
 				
 			break;
@@ -2294,7 +2423,23 @@ class UniteCreatorFiltersProcess{
 			break;
 		}
 		
+		
 		$arrTerms = $this->modifyOutputTerms_setSelectedClass($arrTerms, $filterType);
+		
+		$arrTerms = $this->modifyOutputTerms_getDataAttributes($arrTerms, $filterType);
+		
+		
+		//hide child filter at start 
+		
+		if(strpos($filterRole,"child") !== false && 
+		   $isUnderAjax == false && 
+		   $isInsideEditor == false){
+		  	
+			$addClass .= " uc-filter-initing uc-initing-filter-hidden";
+		}
+		
+		if($this->hasSelectedTerm == true)
+			$addClass .= " uc-has-selected";
 		
 		if($isFilterHidden)
 			$addClass .= " uc-filter-hidden";
@@ -2409,6 +2554,7 @@ class UniteCreatorFiltersProcess{
 			$hasPermissions = UniteFunctionsWPUC::isCurrentUserHasPermissions();
 			
 			if($hasPermissions == true){
+				self::$showEchoDebug = true;
 				self::$showDebug = true;
 				
 				dmp("SHOW DEBUG, logged in user");
@@ -2418,12 +2564,28 @@ class UniteCreatorFiltersProcess{
 		
 	}
 	
+	/**
+	 * check and set display errors by general option 
+s	 */
+	private function checkSetErrorsReporting(){
+		
+		$setDisplayErrors = HelperProviderCoreUC_EL::getGeneralSetting("enable_display_errors_ajax");
+		$setDisplayErrors = UniteFunctionsUC::strToBool($setDisplayErrors);
+		
+		if($setDisplayErrors == true){
+			
+			ini_set("display_errors", "on");
+			error_reporting(E_ALL);
+		}
+		
+	}
+	
 	
 	/**
 	 * test the request filter
 	 */
 	public function operateAjaxResponse(){
-		
+				
 		if(self::DEBUG_MAIN_QUERY == true){
 			$this->showMainQueryDebug();
 			exit();
@@ -2437,7 +2599,9 @@ class UniteCreatorFiltersProcess{
 		$this->runSomeCrossPluginProtections();
 		
 		$this->setShowDebug();
-			
+		
+		$this->checkSetErrorsReporting();
+		
 		try{
 			
 			switch($frontAjaxAction){
@@ -2452,6 +2616,20 @@ class UniteCreatorFiltersProcess{
 					$form = new UniteCreatorForm();
 					$form->submitFormFront();
 					
+				break;
+				case "removefromcart":
+					
+					$objWoo = UniteCreatorWooIntegrate::getInstance();
+					
+					$objWoo->removeFromCartFromData();
+										
+				break;
+				case "updatecartquantity":
+					
+					$objWoo = UniteCreatorWooIntegrate::getInstance();
+					
+					$objWoo->updateCartQuantityFromData();
+										
 				break;
 				default:
 					UniteFunctionsUC::throwError("wrong front ajax action: $frontAjaxAction");

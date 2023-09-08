@@ -289,49 +289,6 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 		}
 		
 		
-		//-----------------------------------------------------------------------------------------------
-		//get number of settings
-		public function getNumSettings(){
-			$counter = 0;
-			foreach($this->arrSettings as $setting){
-				switch($setting["type"]){
-					case self::TYPE_HR:
-					case self::TYPE_STATIC_TEXT:
-					break;
-					default:
-						$counter++;
-					break;
-				}
-			}
-			return($counter);
-		}
-		
-		
-		/**
-		 * get sap data
-		 */
-		public function getSap($sapKey){
-			
-			$arrSap = UniteFunctionsUC::getVal($this->arrSaps, $sapKey);
-			if(empty($arrSap))
-				UniteFunctionsUC::throwError("sap with key: $sapKey not found");
-			
-			return($arrSap);
-		}
-		
-		
-		/**
-		 * get sap by name
-		 */
-		protected function getSapKeyByName($name){
-			
-			foreach($this->arrSaps as $key=>$sap){
-				if($sap["name"] == $name)
-					return($key);
-			}
-			
-			return(null);
-		}
 
 		
 		/**
@@ -496,6 +453,68 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 			return($this->idPrefix);
 		}
 		
+		private function a_________SAPS_________(){}
+		
+		//-----------------------------------------------------------------------------------------------
+		//get number of settings
+		public function getNumSettings(){
+			$counter = 0;
+			foreach($this->arrSettings as $setting){
+				switch($setting["type"]){
+					case self::TYPE_HR:
+					case self::TYPE_STATIC_TEXT:
+					break;
+					default:
+						$counter++;
+					break;
+				}
+			}
+			return($counter);
+		}
+		
+		
+		/**
+		 * get sap data
+		 */
+		public function getSap($sapKey){
+			
+			$arrSap = UniteFunctionsUC::getVal($this->arrSaps, $sapKey);
+			if(empty($arrSap))
+				UniteFunctionsUC::throwError("sap with key: $sapKey not found");
+			
+			return($arrSap);
+		}
+		
+		
+		/**
+		 * get sap by name
+		 */
+		protected function getSapKeyByName($name){
+			
+			foreach($this->arrSaps as $key=>$sap){
+				if($sap["name"] == $name)
+					return($key);
+			}
+			
+			return(null);
+		}
+		
+		/**
+		 * hide sap from showing
+		 */
+		public function hideSap($name){
+			
+			foreach($this->arrSaps as $key=>$sap){
+				
+				$sapName = UniteFunctionsUC::getVal($sap, "name");
+				
+				if($sapName == $name){
+					$this->arrSaps[$key]["hidden"] = true;
+				}
+				
+			}
+			
+		}
 		
 		private function a_________ADD_________(){}
 		
@@ -935,7 +954,7 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 			//add sap key and sap keys
 			
 			$setting = $this->checkAndAddSap($setting);
-				
+			
 			$this->arrSettings[] = $setting;
 			
 			//add to settings index

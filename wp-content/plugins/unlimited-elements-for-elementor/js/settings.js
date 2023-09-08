@@ -11,6 +11,7 @@ function UniteSettingsUC(){
 	var g_objParent = null, g_objWrapper = null, g_objSapTabs = null;
 	var g_objProvider = new UniteProviderAdminUC();
 	
+	var G_DEBUG_INPUTS = false;
 	
 	var g_vars = {
 		NOT_UPDATE_OPTION: "unite_settings_no_update_value",
@@ -67,13 +68,22 @@ function UniteSettingsUC(){
 	 */
 	function iscValEQ(controlValue, value){
 		
+		var isEqual = false;
+		
 		if(typeof value != "string"){
 			
-			return jQuery.inArray( controlValue, value) != -1;
+			isEqual = jQuery.inArray( controlValue, value) != -1;
+			
 		}else{
-			return (value.toLowerCase() == controlValue);
+			
+			if(typeof controlValue == "object")
+				isEqual = jQuery.inArray(value, controlValue) != -1;
+			else
+				isEqual = (value.toLowerCase() == controlValue);
 		}
-
+		
+		
+		return(isEqual);
 	}
 	
 	
@@ -166,10 +176,16 @@ function UniteSettingsUC(){
 				selectorNot += ", .unite-settings-repeater *";
 			
 		}
-				
+		
 		var objInputs = g_objParent.find(selectors).not(selectorNot);
 		
-		
+		if(G_DEBUG_INPUTS == true){
+			
+			trace("debug inputs!");
+			trace(selectorNot);
+			trace(objInputs);
+			
+		}
 		
 		return(objInputs);
 	}
@@ -392,11 +408,6 @@ function UniteSettingsUC(){
 				value = dimentionsGetValues(objInput);
 			break;
 			case "select2":
-			break;
-			case "post_select":
-				
-				trace("get value post select");
-				
 			break;
 			case "gallery":
 				
@@ -656,6 +667,7 @@ function UniteSettingsUC(){
 				objInput.trigger("change");
 			break;
 			case "post":
+				
 				defaultValue = objInput.data(dataname);
 				
 				setPostPickerValue(objInput, defaultValue);
@@ -701,11 +713,6 @@ function UniteSettingsUC(){
 			break;
 			case "dimentions":
 				//no clear for now
-			break;
-			case "post_select":
-				
-				trace("clear post select");
-				
 			break;
 			case "gallery":
 				
@@ -872,11 +879,6 @@ function UniteSettingsUC(){
 				
 				objInput.select2("val",value);
 				objInput.trigger("change");
-				
-			break;
-			case "post_select":
-				
-				trace("set value post select");
 				
 			break;
 			case "gallery":
@@ -1194,8 +1196,8 @@ function UniteSettingsUC(){
 			
 		},400)
 		
-		objInput.select2().on('change', function(e){				
-				
+		objInput.select2({minimumInputLength: 1}).on('change', function(e){				
+				 
 			t.onSettingChange(null,objInput,true);
 
 			appendPlusIcon(objInput);
@@ -3052,63 +3054,18 @@ function UniteSettingsUC(){
 	}
 	
 	
-	function ______MAP_PICKER____(){}
-	
-	
-	/**
-	 * init google map picker
-	 */
-	function initMapPicker(objPickerWrapper){
-		
-		var dialogTitle = objPickerWrapper.data("dialogtitle");
-		
-		var objButton = objPickerWrapper.find(".unite-mappicker-button");
-		var objOverlay = objPickerWrapper.find(".unite-mappicker-chooser-overlay");
-		g_ucAdmin.validateDomElement(objButton, "choose map button");
-		
-		
-		objButton.on("click",function(){
-			
-			var dialogOptions = {};
-			dialogOptions["title"] = dialogTitle;
-			
-			var onMapUpdate = function(data, objDialog){
-				
-				var urlMapImage = data.url_static_map;
-				objPickerWrapper.find(".unite-mappicker-mapimage").attr("src", urlMapImage);
-				
-				objPickerWrapper.data("mapdata", data);
-				
-				t.onSettingChange(null, objPickerWrapper);
-				
-				setTimeout(function(){
-					objDialog.dialog("close");
-				}, 100);
-			};
-			
-			var urlParams = {};
-			var mapData = objPickerWrapper.data("mapdata");
-			window.uc_mappicker_data = mapData;
-			
-			g_ucAdmin.openIframeDialog("mappicker", urlParams, dialogOptions, onMapUpdate);
-						
-		});
-		
-		objOverlay.on("click",function(){
-			objButton.trigger("click");
-		});
-	}
-	
-	
 	function ______POST_PICKER____(){}
+	
 	
 	/**
 	 * init post picker 
 	 */
-	function initPostPicker(objWrapper){
+	function initPostPicker(objWrapper, data, selectedValue){
 		
 		//fix select focus inside jquery ui dialogs
 		g_ucAdmin.fixModalDialogSelect2();
+		
+    	objWrapper.removeData("post_picker_value");
 		
 		var objSelect = objWrapper.find(".unite-setting-post-picker");
 		
@@ -3116,18 +3073,22 @@ function UniteSettingsUC(){
 		var postTitle = objSelect.data("posttitle");
 		var placeholder = objSelect.data("placeholder");
 		
-		var data = [];
-		if(postID && postTitle){
-			
-			data.push({
-				id:postID,
-				text: postTitle
-			});
+		if(!data){
+			var data = [];
+		
+			if(postID && postTitle){
+				
+				data.push({
+					id:postID,
+					text: postTitle
+				});
+			}
 		}
 		
 		var urlAjax = g_ucAdmin.getUrlAjax("get_posts_list_forselect");
 		
 		objSelect.select2({
+			minimumInputLength:1,
 			data:data,
 			placeholder: placeholder,
 			allowClear: true,
@@ -3136,25 +3097,67 @@ function UniteSettingsUC(){
 				dataType:"json"
 			}
 		});
+
+		//on change - trigger change event, only first time
 		
-		
-		//on change - trigger change event
 		objSelect.on("change", function (e) { 
 			
 			t.onSettingChange(null, objWrapper, false);
 			
 		});
+			
+		
+		//set the value
+		if(selectedValue){
+			
+			objSelect.val(selectedValues);
+			objSelect.trigger('change');
+		}
 		
 	}
+	
 	
 	/**
 	 * set post picker value
 	 */
 	function setPostPickerValue(objWrapper, value){
-				
-		var objSelect = objWrapper.find(".unite-setting-post-picker");
-				
-		objSelect.val(value);
+		
+    	if(!value)
+    		var value = [];
+        
+    	objWrapper.data("post_picker_value", value);
+		
+        if(jQuery.isArray(value) == false)
+        	value = [value];
+
+        //clear the picker
+                
+        if (value.length === 0) {
+        	
+        	initPostPicker(objWrapper);
+        	
+            return(false);
+        }
+		
+        //get titles then init
+        
+        var urlAjax = g_ucAdmin.getUrlAjax("get_select2_post_titles");
+        
+        jQuery.get(urlAjax, {
+        	
+            'post_ids': value
+            
+        }).then(function (data) {
+        	
+            var response = JSON.parse(data);
+            var arrData = response.select2_data;
+            
+        	initPostPicker(objWrapper, arrData, value);
+            
+        });
+		
+        
+		
 	}
 	
 	
@@ -3163,13 +3166,19 @@ function UniteSettingsUC(){
 	 */
 	function getPostPickerValue(objWrapper){
 		
+    	var value = objWrapper.data("post_picker_value");
+		
+    	if(value)
+    		return(value);
+		
 		var objSelect = objWrapper.find(".unite-setting-post-picker");
-				
+		
 		var value = objSelect.select2("val");
 				
 		return(value);
 	}
 		
+	
 	function _______ANIMATIONS_____(){}
 	
 	/**
@@ -4018,7 +4027,7 @@ function UniteSettingsUC(){
 	 * isSingle == true - don't do recursion
 	 */
 	function getControlAction(parent, control){
-				
+		
 		var isEqual = iscValEQ(parent.value, control.value);
 		
 		var action = null;
@@ -4129,12 +4138,16 @@ function UniteSettingsUC(){
 	 */
 	function onControlSettingChange(event, input){
 		
+		var debugControls = false;
+		
 		if(!input)
 			input = this;
 		
-		var controlValue = input.value.toLowerCase();
-		var controlID = input.name;
+		var objInput = jQuery(input);
 		
+		var controlValue = getSettingInputValue(objInput);
+				
+		var controlID = input.name;
 		
 		if(!g_arrControls[controlID]) 
 			return(false);
@@ -4142,6 +4155,12 @@ function UniteSettingsUC(){
 		g_temp.cacheValues = null;
 		
 		var arrChildControls = g_arrControls[controlID];
+		
+		if(debugControls == true){
+			trace("controls change");
+			trace("parent value: " + controlValue)
+			trace(controlValue);
+		}
 		
 		var objParent = {
 				id: controlID,
@@ -4160,7 +4179,7 @@ function UniteSettingsUC(){
 				return(true);
 			
 			var value = objControl.value;
-			
+						
 			objControl.idChild = childName;
 			
 			//check multiple parents
@@ -4169,6 +4188,13 @@ function UniteSettingsUC(){
 				var action = getControlActionMultiple(objParent, objControl, arrParents);
 			else
 				var action = getControlAction(objParent, objControl);
+
+			if(debugControls == true){
+				if(debugControls == true){
+					trace("setting: "+childName +" | value: "+value+" | action: " + action);
+				}
+				
+			}
 			
 			
 			var inputTagName = "";
@@ -4754,11 +4780,6 @@ function UniteSettingsUC(){
 
 				initSelect2(objInput)
 								
-			break;
-			case "post_select":
-				
-				trace("init post select");
-				
 			break;
 			case "gallery":
 				

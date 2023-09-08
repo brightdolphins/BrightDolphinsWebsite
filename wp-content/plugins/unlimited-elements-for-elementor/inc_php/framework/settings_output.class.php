@@ -305,6 +305,7 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 			
 			$this->settings->setSettingsStateByControls();
 			$this->settings->setPairedSettings();
+			
 		}
 
 
@@ -1387,6 +1388,14 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 			
 			$name = UniteFunctionsUC::getVal($setting, "name");
 		
+			$isPostSelect = UniteFunctionsUC::getVal($setting, "post_select");
+			$isPostSelect = UniteFunctionsUC::strToBool($isPostSelect);
+			
+			if($isPostSelect == true){
+				$this->drawPostPickerInput($setting);
+				return(false);
+			}
+			
 			$isMultiple = false;
 			if($type == "multiselect")
 				$isMultiple = true;
@@ -1414,8 +1423,6 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 			if($isMultiple == true)
 				$setSelect2 = true;
 			
-			$isPostSelect = UniteFunctionsUC::getVal($setting, "post_select");
-			$isPostSelect = UniteFunctionsUC::strToBool($isPostSelect);
 			
 			if($isPostSelect == true){
 				$setSelect2 = true;

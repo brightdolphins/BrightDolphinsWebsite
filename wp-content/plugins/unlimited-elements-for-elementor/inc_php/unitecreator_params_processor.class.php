@@ -847,11 +847,11 @@ class UniteCreatorParamsProcessorWork{
 		if($addImageSizes == true){
 			$imageKey = $this->addImageAttributes_getImageKey("value_size", $name, $param, $data);
 		}
-				
+		
 		$url = UniteFunctionsUC::getVal($data, $imageKey);
 		$width = UniteFunctionsUC::getVal($data, $imageKey."_width");
 		$height = UniteFunctionsUC::getVal($data, $imageKey."_height");
-		
+						
 		$attributes = "";
 		
 		$attributes .= " src=\"{$url}\"";
@@ -884,6 +884,13 @@ class UniteCreatorParamsProcessorWork{
 				$data[$name."_width"] = $width;
 				$data[$name."_height"] = $height;
 			}			
+		}
+		
+		if($addImageSizes == true){
+			
+			$imageSize = UniteFunctionsUC::getVal($param, "value_size","full");
+			
+			$data[$name."_size"] = $imageSize;
 		}
 		
 					
@@ -992,6 +999,7 @@ class UniteCreatorParamsProcessorWork{
 			$data[$name] = $value;
 		}
 		
+				
 		
 		$sizeFilters = UniteFunctionsUC::getVal($param, "size_filters");
 		$isNoAttributes = UniteFunctionsUC::getVal($param, "no_attributes");
@@ -1671,14 +1679,29 @@ class UniteCreatorParamsProcessorWork{
 	 */
 	protected function getDateTimeData($data, $value, $name, $param, $processType){
 
+		$isDebug = false;
+		
 		//not given - return current date
 		
 		$formatFullDate = "d-M-Y, H:i";
 		
 		if(empty($value)){
-			$stamp = time();
-			$data[$name."_stamp"] = $stamp;
-			$data[$name] = date($formatFullDate, $stamp);
+			
+			//$stamp = time();
+			//$data[$name."_stamp"] = $stamp;
+			//$data[$name] = date($formatFullDate, $stamp);
+			
+			//if empty - return emtpy
+			
+			$data[$name."_stamp"] = "";
+			$data[$name] = "";
+			
+			if($isDebug == true){
+				dmp("get time1");
+				dmp($name);
+				dmp($stamp);
+				dmp($data);
+			}
 			
 			return($data);
 		}
@@ -1689,6 +1712,12 @@ class UniteCreatorParamsProcessorWork{
 			
 			$data[$name."_stamp"] = $value;
 			$data[$name] = date($formatFullDate, $stamp);
+			
+			if($isDebug == true){
+				dmp("get time2");
+				dmp($data);
+			}
+			
 			return($data);
 		}
 		
@@ -1697,6 +1726,12 @@ class UniteCreatorParamsProcessorWork{
 		$stamp = strtotime($value);
 		
 		$data[$name."_stamp"] = $stamp;
+		
+		if($isDebug == true){
+			dmp("get time3");
+			dmp($value);
+			dmp($stamp);
+		}
 		
 		return($data);
 	}
@@ -1758,9 +1793,9 @@ class UniteCreatorParamsProcessorWork{
 				}
 				
 				if($this->dynamicPopupEnabled == true)
-					$data["uc_dynamic_popup_class"] = "uc-dynamic-popup-grid";
+					$data["uc_dynamic_popup_class"] = " uc-dynamic-popup-grid";
 				
-				
+									
 				//use in post items
 				
 				$param["dynamic_popup_enabled"] = $isEnabled;
@@ -1875,6 +1910,23 @@ class UniteCreatorParamsProcessorWork{
 	}
 	
 	
+	/**
+	 * sort params. special attributes first, for dynamic popup processing for example
+	 */
+	public function sortParamsBeforeProcess($param1, $param2){
+		
+		$type1 = UniteFunctionsUC::getVal($param1, "type");
+		$type2 = UniteFunctionsUC::getVal($param2, "type");
+		
+		if($type1 == UniteCreatorDialogParam::PARAM_SPECIAL)
+			return(-1);
+		
+		if($type2 == UniteCreatorDialogParam::PARAM_SPECIAL)
+			return(1);
+		
+		return(0);
+	}
+	
 	
 	/**
 	 * get processed params
@@ -1885,9 +1937,13 @@ class UniteCreatorParamsProcessorWork{
 		self::validateProcessType($processType);
 		
 		$arrParams = $this->processParamsForOutput($arrParams);
+		
+		//sort by param type - special first 
+		if(!empty($arrParams))
+			usort($arrParams, array($this,"sortParamsBeforeProcess"));
 				
 		$data = array();
-	    		
+		
 		foreach($arrParams as $param){
 	
 			$type = UniteFunctionsUC::getVal($param, "type");
@@ -1914,7 +1970,7 @@ class UniteCreatorParamsProcessorWork{
 	
 			if($type != "imagebase_fields")
 				$data[$name] = $value;
-							
+			
 			$data = $this->getProcessedParamData($data, $value, $param, $processType);
 		}
 		

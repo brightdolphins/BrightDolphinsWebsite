@@ -6764,11 +6764,11 @@ class Wpr_Media_Grid extends Widget_Base {
 				if ( 'before' === $settings['element_extra_icon_pos'] ) {
 					ob_start();
 					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
-					$extra_icon = ob_get_clean();
-
+					$extra_icon = ob_get_clean();					 ob_get_clean();
+		
 					echo '<span class="wpr-grid-extra-icon-left">';
 						echo $extra_icon;
-					echo '</span>';
+				 	echo '</span>';
 				}
 
 				// Date
@@ -6779,10 +6779,11 @@ class Wpr_Media_Grid extends Widget_Base {
 					ob_start();
 					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
 					$extra_icon = ob_get_clean();
-
+					ob_get_clean();
+		
 					echo '<span class="wpr-grid-extra-icon-right">';
 						echo $extra_icon;
-					echo '</span>';
+				 	echo '</span>';
 				}
 				// Text: After
 				if ( 'after' === $settings['element_extra_text_pos'] ) {
@@ -6806,11 +6807,11 @@ class Wpr_Media_Grid extends Widget_Base {
 				if ( 'before' === $settings['element_extra_icon_pos'] ) {
 					ob_start();
 					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
-					$extra_icon = ob_get_clean();
-
+					$extra_icon = ob_get_clean();					 ob_get_clean();
+		
 					echo '<span class="wpr-grid-extra-icon-left">';
 						echo $extra_icon;
-					echo '</span>';
+				 	echo '</span>';
 				}
 
 				// Time
@@ -6821,10 +6822,11 @@ class Wpr_Media_Grid extends Widget_Base {
 					ob_start();
 					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
 					$extra_icon = ob_get_clean();
-
+					ob_get_clean();
+		
 					echo '<span class="wpr-grid-extra-icon-right">';
 						echo $extra_icon;
-					echo '</span>';
+				 	echo '</span>';
 				}
 				// Text: After
 				if ( 'after' === $settings['element_extra_text_pos'] ) {
@@ -6853,11 +6855,11 @@ class Wpr_Media_Grid extends Widget_Base {
 				if ( 'before' === $settings['element_extra_icon_pos'] ) {
 					ob_start();
 					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
-					$extra_icon = ob_get_clean();
-
+					$extra_icon = ob_get_clean();					 ob_get_clean();
+		
 					echo '<span class="wpr-grid-extra-icon-left">';
 						echo $extra_icon;
-					echo '</span>';
+				 	echo '</span>';
 				}
 					if ( 'yes' === $settings['element_show_avatar'] ) {
 						echo get_avatar( $author_id, $settings['element_avatar_size'] );
@@ -6870,10 +6872,11 @@ class Wpr_Media_Grid extends Widget_Base {
 					ob_start();
 					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
 					$extra_icon = ob_get_clean();
-
+					ob_get_clean();
+		
 					echo '<span class="wpr-grid-extra-icon-right">';
 						echo $extra_icon;
-					echo '</span>';
+				 	echo '</span>';
 				}
 				echo '</a>';
 
@@ -7015,10 +7018,11 @@ class Wpr_Media_Grid extends Widget_Base {
 					ob_start();
 					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
 					$extra_icon = ob_get_clean();
-
+					ob_get_clean();
+		
 					echo '<span class="wpr-grid-extra-icon-left">';
 						echo $extra_icon;
-					echo '</span>';
+				 	echo '</span>';
 				}
 
 				// Taxonomies
@@ -7035,10 +7039,11 @@ class Wpr_Media_Grid extends Widget_Base {
 					ob_start();
 					\Elementor\Icons_Manager::render_icon($settings['element_extra_icon'], ['aria-hidden' => 'true']);
 					$extra_icon = ob_get_clean();
-
+					ob_get_clean();
+		
 					echo '<span class="wpr-grid-extra-icon-right">';
 						echo $extra_icon;
-					echo '</span>';
+				 	echo '</span>';
 				}
 				// Text: After
 				if ( 'after' === $settings['element_extra_text_pos'] ) {

@@ -15,7 +15,7 @@ class UniteCreatorActions{
 	 * on update layout response, function for override
 	 */
 	protected function onUpdateLayoutResponse($response){
-
+		
 		$isUpdate = $response["is_update"];
 
 		//create
@@ -65,7 +65,13 @@ class UniteCreatorActions{
 
 		if(self::DEBUG_ERRORS == true)
 			ini_set("display_errors", "on");
-
+		
+		if(GlobalsUC::$inDev == true){
+			ini_set("display_errors", "on");
+			error_reporting(E_ALL);
+		}
+		
+		
 		$actionType = UniteFunctionsUC::getPostGetVariable("action", "", UniteFunctionsUC::SANITIZE_KEY);
 
 		if($actionType != GlobalsUC::PLUGIN_NAME . "_ajax_action")
@@ -160,12 +166,48 @@ class UniteCreatorActions{
 
 					HelperUC::ajaxResponseData($response);
 				break;
+				case "get_addon_revisions":
+
+					HelperProviderUC::verifyAdminPermission();
+					HelperProviderUC::verifyAddonRevisionsEnabled();
+
+					$response = $operations->getAddonRevisionsFromData($data);
+
+					HelperUC::ajaxResponseData($response);
+				break;
+				case "create_addon_revision":
+
+					HelperProviderUC::verifyAdminPermission();
+					HelperProviderUC::verifyAddonRevisionsEnabled();
+
+					$addons->createAddonRevision($data);
+
+					HelperUC::ajaxResponseSuccess(esc_html__("Revision created.", "unlimited-elements-for-elementor"));
+				break;
+				case "restore_addon_revision":
+
+					HelperProviderUC::verifyAdminPermission();
+					HelperProviderUC::verifyAddonRevisionsEnabled();
+
+					$response = $addons->restoreAddonRevision($data);
+
+					HelperUC::ajaxResponseSuccess(esc_html__("Revision restored.", "unlimited-elements-for-elementor"), $response);
+				break;
+				case "download_addon_revision":
+
+					HelperProviderUC::verifyAdminPermission();
+					HelperProviderUC::verifyAddonRevisionsEnabled();
+
+					$addons->downloadAddonRevision($data);
+					exit;
+				break;
 				case "update_addon":
 
 					HelperProviderUC::verifyAdminPermission();
-					
-					$response = $addons->updateAddonFromData($data);
-					HelperUC::ajaxResponseSuccess(esc_html__("Updated.","unlimited-elements-for-elementor"),$response);
+
+					$addons->updateAddonFromData($data);
+
+					HelperUC::ajaxResponseSuccess(esc_html__("Updated.", "unlimited-elements-for-elementor"));
 				break;
 				case "get_addon_bulk_dialog":
 
@@ -207,7 +249,7 @@ class UniteCreatorActions{
 
 					$response = $addons->createFromManager($data);
 
-					HelperUC::ajaxResponseSuccess(esc_html__("Addon added successfully", "unlimited-elements-for-elementor"), $response);
+					HelperUC::ajaxResponseSuccess(esc_html__("Widget added successfully", "unlimited-elements-for-elementor"), $response);
 				break;
 				case "update_addon_title":
 
@@ -215,7 +257,7 @@ class UniteCreatorActions{
 
 					$addons->updateAddonTitleFromData($data);
 
-					HelperUC::ajaxResponseSuccess(esc_html__("Addon updated successfully", "unlimited-elements-for-elementor"));
+					HelperUC::ajaxResponseSuccess(esc_html__("Widget updated successfully", "unlimited-elements-for-elementor"));
 				break;
 				case "update_addons_activation":
 
@@ -223,7 +265,7 @@ class UniteCreatorActions{
 
 					$addons->activateAddonsFromData($data);
 
-					HelperUC::ajaxResponseSuccess(esc_html__("Addons updated successfully", "unlimited-elements-for-elementor"));
+					HelperUC::ajaxResponseSuccess(esc_html__("Widgets updated successfully", "unlimited-elements-for-elementor"));
 				break;
 				case "remove_addons":
 
@@ -231,7 +273,7 @@ class UniteCreatorActions{
 
 					$response = $addons->removeAddonsFromData($data);
 
-					HelperUC::ajaxResponseSuccess(esc_html__("Addons Removed", "unlimited-elements-for-elementor"), $response);
+					HelperUC::ajaxResponseSuccess(esc_html__("Widgets Removed", "unlimited-elements-for-elementor"), $response);
 				break;
 				case "update_addons_order":
 
@@ -526,11 +568,11 @@ class UniteCreatorActions{
 					HelperUC::ajaxResponseSuccess(esc_html__("Settings Saved", "unlimited-elements-for-elementor"));
 				break;
 				case "get_terms_list_forselect":
-					
+
 					$arrTermsList = $operations->getTermsListForSelectFromData($data);
-					
+
 					HelperUC::ajaxResponseData($arrTermsList);
-					
+
 				break;
 				case "get_posts_list_forselect":
 

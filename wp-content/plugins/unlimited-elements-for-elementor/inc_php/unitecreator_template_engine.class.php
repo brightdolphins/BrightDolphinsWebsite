@@ -22,6 +22,11 @@ class UniteCreatorTemplateEngineWork{
 	private static $urlBaseCache = null;
 	private static $arrCollectedSchemaItems = array();
 	
+	private static $isPostIDSaved = false;
+	private static $originalQueriedObject;
+	private static $originalQueriedObjectID;
+	private static $originalPost;
+	
 	
 	
 	/**
@@ -74,19 +79,23 @@ class UniteCreatorTemplateEngineWork{
 			
 			$post = UniteFunctionsUC::getVal(GlobalsProviderUC::$arrFetchedPostsObjectsCache, $postID);
 			
-			$isPostIDSaved = false;
+			self::$isPostIDSaved = false;
 			
 			if(!empty($post)){
-				
-				$isPostIDSaved = true;
+								
+				self::$isPostIDSaved = true;
 				
 				global $wp_query;
 				
 				//backup the original querified object
 				$originalQueriedObject = $wp_query->queried_object;
+				self::$originalQueriedObject = $originalQueriedObject;
+				
 				$originalQueriedObjectID = $wp_query->queried_object_id;
+				self::$originalQueriedObjectID = $originalQueriedObjectID;
 				
 				$originalPost = $GLOBALS['post'];
+				self::$originalPost = $originalPost;
 				
 				$wp_query->queried_object = $post;
 				$wp_query->queried_object_id = $postID;
@@ -116,6 +125,8 @@ class UniteCreatorTemplateEngineWork{
 				
 		$htmlItem = $this->twig->render($templateName, $params);
 		
+		$htmlItem = do_shortcode($htmlItem);
+		
 		if(!empty($sap)){
 			if($index != 0)
 				echo UniteProviderFunctionsUC::escCombinedHtml($sap);
@@ -130,25 +141,39 @@ class UniteCreatorTemplateEngineWork{
 		if($this->isItemsFromPosts == true){
 			
 			GlobalsProviderUC::$isUnderRenderPostItem = false;
-			
+
 			//restore the original queried object
-						
-			if($isPostIDSaved == true){
-				
+			
+			if(self::$isPostIDSaved == true){
+									
 				$wp_query->queried_object = $originalQueriedObject;
 				$wp_query->queried_object_id = $originalQueriedObjectID;
 				$GLOBALS['post'] = $originalPost;
-								
 			}
-
-			
-			//HelperProviderUC::printDebugQueries();
-			//dmp("check queries");exit();
-			
+												
 		}
 		
 		GlobalsProviderUC::$isUnderItem = false;
 		
+		
+	}
+	
+	
+	/**
+	 * return saved post
+	 */
+	private function returnSavedPost(){
+		
+		if(self::$isPostIDSaved == false)
+			return(false);
+		
+		global $wp_query;
+			
+		$wp_query->queried_object = self::$originalQueriedObject;
+		$wp_query->queried_object_id = self::$originalQueriedObjectID;
+		$GLOBALS['post'] = self::$originalPost;
+		
+		self::$isPostIDSaved = false;
 		
 	}
 	
@@ -1139,6 +1164,14 @@ class UniteCreatorTemplateEngineWork{
 				
 				return($arrGallery);
 			break;
+			case "get_woo_image2":
+				
+				$objWoo = UniteCreatorWooIntegrate::getInstance();
+								
+				$image2 = $objWoo->getFirstGalleryImage($arg1, $arg2);	//productID , size
+				
+				return($image2);
+			break;
 			case "get_woo_endpoint":
 				
 				$arrEndpoints = UniteCreatorWooIntegrate::getWooEndpoint($arg1);
@@ -1172,7 +1205,7 @@ class UniteCreatorTemplateEngineWork{
 				$fieldname = $arg2;
 				
 				$value = UniteFunctionsWPUC::getPostCustomField($postID, $fieldname);
-				
+								
 				return($value);
 			break;
 			case "modify_text":
@@ -1189,6 +1222,15 @@ class UniteCreatorTemplateEngineWork{
 				
 				return($arrImage);
 			break;
+			case "get_term_custom_field":
+				
+				$termID = $arg1;
+				$fieldname = $arg2;
+				
+				$value = UniteFunctionsWPUC::getTermCustomField($termID, $fieldname);
+				
+				return($value);
+			break;
 			case "get_post_image":
 				
 				//termID, meta key
@@ -1204,7 +1246,24 @@ class UniteCreatorTemplateEngineWork{
 				HelperUC::$operations->putPostCustomFieldsDebug($postID);
 				
 			break;
+			case "put_term_meta_debug":
+				
+				$termID = $arg1;
+				
+				if(!empty($termID))
+					HelperUC::$operations->putTermCustomFieldsDebug($termID);
+				
+			break;
+			case "put_terms_meta_debug":
+				
+				$arrTerms = $arg1;
+				
+				HelperUC::$operations->putTermsCustomFieldsDebug($arrTerms);
+				
+			break;
 			case "put_post_content":
+				
+				$this->returnSavedPost();
 				
 				$content = HelperProviderCoreUC_EL::getPostContent($arg1, $arg2);
 				
@@ -1372,6 +1431,32 @@ class UniteCreatorTemplateEngineWork{
 				$sortFilterItems = UniteCreatorFiltersProcess::getSortFilterData($arg1, $this->arrParams);
 				
 				return($sortFilterItems);
+			break;
+			case "put_term_link":	//get some term link
+				
+				if(empty($url))
+					return(false);
+				
+				$url = get_term_link($arg1);
+				if(is_wp_error($url)){
+					dmp($url);
+				}					
+				else echo $url;
+			break;
+			case "put_woo_cart_html":
+				
+				$objWoo = UniteCreatorWooIntegrate::getInstance();
+
+				$objWoo->putCartHtml($arg1);
+				
+			break;
+			case "get_breakpoints":
+				
+				$arrBreakpoints = HelperProviderCoreUC_EL::getBreakpoints();
+				
+				dmp("breakpoints");
+				dmp($arrBreakpoints);
+				
 			break;
 			default:
 				

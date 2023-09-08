@@ -100,6 +100,13 @@ defined('UNLIMITED_ELEMENTS_INC') or die('Restricted access');
 					
 					HelperUC::addScript("jquery.dialogextend.min", "jquery-ui-dialogextend","js/dialog_extend", true);
 					
+					//clear dropzone third party inclues
+					UniteFunctionsWPUC::findAndRemoveInclude("dropzone.min");
+					
+					$deletedSelect2 = UniteFunctionsWPUC::findAndRemoveInclude("select2_js");
+					UniteFunctionsWPUC::findAndRemoveInclude("select2_css", false);
+										
+					
 					//dropzone
 					HelperUC::addScript("dropzone", "dropzone_js","js/dropzone");
 					HelperUC::addStyle("dropzone", "dropzone_css","js/dropzone");

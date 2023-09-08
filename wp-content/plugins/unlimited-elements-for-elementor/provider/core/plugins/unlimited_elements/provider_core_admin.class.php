@@ -22,6 +22,7 @@ class UniteProviderCoreAdminUC_Elementor extends UniteProviderAdminUC{
 			"addons_elementor",
 			"licenseelementor",
 			"settingselementor",
+			"forms-logs",
 			"troubleshooting-overload",
 			"troubleshooting-phpinfo",
 			"troubleshooting-memory-usage",
@@ -35,6 +36,7 @@ class UniteProviderCoreAdminUC_Elementor extends UniteProviderAdminUC{
 			"wpml-fields",
 			"backgrounds",
 			GlobalsUnlimitedElements::VIEW_TEMPLATES_ELEMENTOR,
+			GlobalsUnlimitedElements::VIEW_FORM_ENTRIES,
 			GlobalsUnlimitedElements::VIEW_CUSTOM_POST_TYPES,
 			"testsettings",
 		);
@@ -102,6 +104,11 @@ class UniteProviderCoreAdminUC_Elementor extends UniteProviderAdminUC{
 			$this->addSubMenuPage(GlobalsUnlimitedElements::VIEW_BACKGROUNDS, __('Background Widgets', "unlimited-elements-for-elementor"), "adminPages");
 
 		$this->addSubMenuPage(GlobalsUnlimitedElements::VIEW_TEMPLATES_ELEMENTOR, __('Templates', "unlimited-elements-for-elementor"), "adminPages");
+
+		$isFormEntriesEnabled = HelperProviderUC::isFormEntriesEnabled();
+
+		if($isFormEntriesEnabled === true)
+			$this->addSubMenuPage(GlobalsUnlimitedElements::VIEW_FORM_ENTRIES, __('Form Entries', "unlimited-elements-for-elementor"), "adminPages");
 
 		$this->addSubMenuPage("settingselementor", __('General Settings', "unlimited-elements-for-elementor"), "adminPages");
 

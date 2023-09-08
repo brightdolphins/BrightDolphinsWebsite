@@ -114,6 +114,26 @@ class UniteCreatorElementorPagination{
 			);
 
 			$widget->add_control(
+				$paramName.'_filtering_group',
+				[
+					'label' => __( 'Group', "unlimited-elements-for-elementor"),
+					'description' => __( 'Allow filtering group of widgets at once', "unlimited-elements-for-elementor"),
+					'type' => \Elementor\Controls_Manager::SELECT,
+					'default' => '',
+					'condition' => array($paramName.'_isajax'=>"true"),
+					'options' => [
+						'' => __( '[No Group]', "unlimited-elements-for-elementor"),
+						'group1' => __( 'Group1', "unlimited-elements-for-elementor"),
+						'group2' => __( 'Group2', "unlimited-elements-for-elementor"),
+						'group3' => __( 'Group3', "unlimited-elements-for-elementor"),
+						'group4' => __( 'Group4', "unlimited-elements-for-elementor"),
+						'group5' => __( 'Group5', "unlimited-elements-for-elementor")
+					],
+				]
+			);
+			
+			
+			$widget->add_control(
 				$paramName.'_disable_other_hooks',
 				array(
 					'label' => __( 'Disable Third Party Modifications', "unlimited-elements-for-elementor"),

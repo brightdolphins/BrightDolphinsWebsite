@@ -11,7 +11,6 @@ use Elementor\Group_Control_Background;
 use Elementor\Group_Control_Text_Shadow;
 use Elementor\Group_Control_Box_Shadow;
 use Elementor\Group_Control_Css_Filter;
-use Elementor\Core\Schemes\Typography;
 use Elementor\Core\Schemes;
 use Elementor\Repeater;
 use Elementor\Utils;
@@ -1272,7 +1271,7 @@ class UniteCreatorElementorWidget extends Widget_Base {
     			unset($arrControl["default"]);
     			
     			$arrControl["name"] = $name;
-    			$arrControl["types"] = array('classic', 'gradient', 'video');
+    			$arrControl["types"] = array('classic', 'gradient');
     			
     			if(!empty($selector))
     				$arrControl["selector"] = $selector;
@@ -1389,11 +1388,11 @@ class UniteCreatorElementorWidget extends Widget_Base {
     					$rangeUnit = "vh";
     				break;
     				case "vh_px":
-    					$arrControl["size_units"] = array("vh","px");
+    					$arrControl["size_units"] = array("vh","px","re,");
     					$rangeUnit = "vh";
     				break;
     				case "px_vh":
-    					$arrControl["size_units"] = array("px","vh");
+    					$arrControl["size_units"] = array("px","vh","rem");
     					$rangeUnit = "px";
     				break;
     				case "px_vh_percent":
@@ -1879,7 +1878,7 @@ class UniteCreatorElementorWidget extends Widget_Base {
     	$arrControl = array();
     	$arrControl["name"] = $controlName;
     	$arrControl["selector"] = $selector;
-    	$arrControl["scheme"] = Typography::TYPOGRAPHY_3;
+    	$arrControl["scheme"] = 3;
     	
     	if(!empty($title))
     		$arrControl["label"] = $title;
@@ -2816,9 +2815,10 @@ class UniteCreatorElementorWidget extends Widget_Base {
 	        
 	        $menuParam["type"] = UniteCreatorDialogParam::PARAM_MENU;
 	        $menuParam["name"] = $name."_menu";
+	        $menuParam["usefor"] = "multisource";
 	        
 	        $this->addElementorParamUC($menuParam);
-        
+        	
 	        $this->end_controls_section();
 	        
 	        
@@ -3735,7 +3735,7 @@ class UniteCreatorElementorWidget extends Widget_Base {
     	
 	    	$postListName = UniteFunctionsUC::getVal($arrPostListParam, "name");
 	    	$postsSource = UniteFunctionsUC::getVal($arrValues, $postListName."_source");
-	    	    	
+	    	
 	    	if($postsSource != "current")
 	    		return("");
     	}

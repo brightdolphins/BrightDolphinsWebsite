@@ -423,31 +423,14 @@ class UniteCreatorElementorIntegrate{
     	
     	//add hr control
     	require $this->pathControls."control_hr.php";
-    	if($isOldWay == true)
-        	$controls_manager->register_control('uc_hr', new Elementor\Control_UC_HR());
-    	else
-        	$controls_manager->register(new Elementor\Control_UC_HR());
+        $controls_manager->register(new Elementor\Control_UC_HR());
         
         //add audio control
     	require $this->pathControls."control_audio.php";
-        if($isOldWay == true)
-    	$controls_manager->register_control('uc_mp3',new Elementor\Control_UC_AUDIO());
-        else
     	$controls_manager->register(new Elementor\Control_UC_AUDIO());
-    	
-        //add addons selector control
-    	require $this->pathControls."control_addon_selector.php";
-        if($isOldWay == true)
-        $controls_manager->register_control('uc_addon_selector',new Elementor\Control_UC_AddonSelector());
-        else
-        $controls_manager->register(new Elementor\Control_UC_AddonSelector());
-        
+
         //add select post type control
-                
     	require $this->pathControls."control_select_posttype.php";
-        if($isOldWay == true)
-        $controls_manager->register_control('uc_select_special',new Elementor\Control_UC_SelectSpecial);
-        else
         $controls_manager->register(new Elementor\Control_UC_SelectSpecial);
         
         

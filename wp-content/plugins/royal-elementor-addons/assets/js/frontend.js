@@ -220,10 +220,12 @@
 			    changePositionType();
 			    changeAdminBarOffset();
 
-			    $(window).resize(function() { 
+			    $(window).smartresize(function() { 
 					distanceFromTop = $scope.offset().top;
-			        viewportWidth = $('body').prop('clientWidth') + 17,
-			        changePositionType();
+			        viewportWidth = $('body').prop('clientWidth') + 17;
+					if ( $(window).scrollTop() <= stickyEffectsOffset ) {
+						changePositionType();
+					}
 			    });
 			    
 			    if (!stickySectionExists) {
@@ -8453,7 +8455,7 @@
 
 			var fileUrl = {};
 
-			if ( $('body').find('.wpr-form-field-type-recaptcha-v3') ) {
+			if ( $('body').find('.wpr-form-field-type-recaptcha-v3').length > 0 ) {
 					var script = document.createElement('script');
 					script.src = 'https://www.google.com/recaptcha/api.js?render='+ $scope.find('#g-recaptcha-response').data('site-key') +'';
 					document.body.appendChild(script);

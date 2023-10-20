@@ -165,7 +165,7 @@ position: relative;
 .pt-plus-pie_chart.style-2 .pie_chart {
     display: inline-block;
     vertical-align: middle;
-    margin-right: 10px;
+    margin: 0 10px;
 }
 .pt-plus-pie_chart.style-2 .pie_chart-style2 {
     display: inline-block;

@@ -2218,7 +2218,7 @@ class L_ThePlus_Info_Box extends Widget_Base {
 				],
             ]
         );
-		$this->add_control(
+		$this->add_responsive_control(
             'img_max_width',
             [
                 'type' => Controls_Manager::SLIDER,

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-08-24 17:41+0530\n"
+"POT-Creation-Date: 2023-09-25 15:29+0530\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -774,10 +774,10 @@ msgstr ""
 
 #: includes/theplus_options.php:1808 modules/widgets/tp_accordion.php:872
 #: modules/widgets/tp_adv_text_block.php:185
-#: modules/widgets/tp_blockquote.php:2144
+#: modules/widgets/tp_blockquote.php:2143
 #: modules/widgets/tp_caldera_forms.php:2432
 #: modules/widgets/tp_contact_form_7.php:1964
-#: modules/widgets/tp_countdown.php:1347
+#: modules/widgets/tp_countdown.php:1355
 #: modules/widgets/tp_everest_form.php:1825
 #: modules/widgets/tp_flip_box.php:2013
 #: modules/widgets/tp_gravity_form.php:2528
@@ -850,8 +850,8 @@ msgstr ""
 #: modules/widgets/tp_age_gate.php:2039 modules/widgets/tp_age_gate.php:2078
 #: modules/widgets/tp_blockquote.php:104 modules/widgets/tp_blockquote.php:185
 #: modules/widgets/tp_blockquote.php:221 modules/widgets/tp_blockquote.php:234
-#: modules/widgets/tp_blockquote.php:297 modules/widgets/tp_blockquote.php:693
-#: modules/widgets/tp_blockquote.php:1544
+#: modules/widgets/tp_blockquote.php:297 modules/widgets/tp_blockquote.php:692
+#: modules/widgets/tp_blockquote.php:1543
 #: modules/widgets/tp_clients_listout.php:364
 #: modules/widgets/tp_countdown.php:270 modules/widgets/tp_countdown.php:338
 #: modules/widgets/tp_dark_mode.php:301 modules/widgets/tp_dark_mode.php:324
@@ -1110,8 +1110,8 @@ msgstr ""
 #: modules/widgets/tp_age_gate.php:2038 modules/widgets/tp_age_gate.php:2077
 #: modules/widgets/tp_blockquote.php:103 modules/widgets/tp_blockquote.php:184
 #: modules/widgets/tp_blockquote.php:220 modules/widgets/tp_blockquote.php:233
-#: modules/widgets/tp_blockquote.php:296 modules/widgets/tp_blockquote.php:692
-#: modules/widgets/tp_blockquote.php:1543
+#: modules/widgets/tp_blockquote.php:296 modules/widgets/tp_blockquote.php:691
+#: modules/widgets/tp_blockquote.php:1542
 #: modules/widgets/tp_clients_listout.php:363
 #: modules/widgets/tp_countdown.php:269 modules/widgets/tp_countdown.php:337
 #: modules/widgets/tp_dark_mode.php:300 modules/widgets/tp_dark_mode.php:323
@@ -1323,11 +1323,11 @@ msgid "Notable additions made to The Plus Addons for Elementor."
 msgstr ""
 
 #: includes/welcome-page.php:92 includes/welcome-page.php:103
-msgid "Compatibility : WordPress Version 6.3"
+msgid "Compatibility : Elementor Free & Pro 3.16"
 msgstr ""
 
-#: includes/welcome-page.php:93
-msgid "Add : Featured Image Border Radius"
+#: includes/welcome-page.php:93 includes/welcome-page.php:104
+msgid "Update : Blockquote : UI Improvement"
 msgstr ""
 
 #: includes/welcome-page.php:94 includes/welcome-page.php:105
@@ -1340,10 +1340,6 @@ msgstr ""
 
 #: includes/welcome-page.php:97
 msgid "Lite Full Change log"
-msgstr ""
-
-#: includes/welcome-page.php:104
-msgid "Update : Responsive Option For Pin text Height & Width"
 msgstr ""
 
 #: includes/welcome-page.php:108
@@ -2113,7 +2109,7 @@ msgid "Minute"
 msgstr ""
 
 #: includes/plus-options/metabox/includes/CMB2_JS.php:217
-#: modules/widgets/tp_countdown.php:849 modules/widgets/tp_countdown.php:1103
+#: modules/widgets/tp_countdown.php:853 modules/widgets/tp_countdown.php:1109
 msgid "Second"
 msgstr ""
 
@@ -2513,7 +2509,7 @@ msgid "ID"
 msgstr ""
 
 #: modules/helper-function.php:553 modules/widgets/tp_blockquote.php:73
-#: modules/widgets/tp_blockquote.php:561
+#: modules/widgets/tp_blockquote.php:560
 #: modules/widgets/tp_post_comment.php:869 modules/widgets/tp_post_meta.php:72
 msgid "Author"
 msgstr ""
@@ -3049,10 +3045,10 @@ msgstr ""
 #: modules/widgets/tp_age_gate.php:1824 modules/widgets/tp_age_gate.php:1907
 #: modules/widgets/tp_age_gate.php:2170 modules/widgets/tp_blockquote.php:340
 #: modules/widgets/tp_blockquote.php:488
-#: modules/widgets/tp_blockquote.php:1434
-#: modules/widgets/tp_blockquote.php:1983
-#: modules/widgets/tp_blockquote.php:2071
-#: modules/widgets/tp_blockquote.php:2112
+#: modules/widgets/tp_blockquote.php:1433
+#: modules/widgets/tp_blockquote.php:1982
+#: modules/widgets/tp_blockquote.php:2070
+#: modules/widgets/tp_blockquote.php:2111
 #: modules/widgets/tp_blog_listout.php:558
 #: modules/widgets/tp_blog_listout.php:641
 #: modules/widgets/tp_blog_listout.php:703
@@ -3088,7 +3084,7 @@ msgstr ""
 #: modules/widgets/tp_contact_form_7.php:1488
 #: modules/widgets/tp_contact_form_7.php:1594
 #: modules/widgets/tp_contact_form_7.php:1669
-#: modules/widgets/tp_countdown.php:1186 modules/widgets/tp_countdown.php:1382
+#: modules/widgets/tp_countdown.php:1194 modules/widgets/tp_countdown.php:1390
 #: modules/widgets/tp_dark_mode.php:524
 #: modules/widgets/tp_everest_form.php:208
 #: modules/widgets/tp_everest_form.php:338
@@ -3243,7 +3239,7 @@ msgstr ""
 #: modules/controls/group/plus-adv-shadow.php:781
 #: modules/widgets/tp_caldera_forms.php:65
 #: modules/widgets/tp_caldera_forms.php:103
-#: modules/widgets/tp_countdown.php:945 modules/widgets/tp_dark_mode.php:227
+#: modules/widgets/tp_countdown.php:949 modules/widgets/tp_dark_mode.php:227
 #: modules/widgets/tp_dark_mode.php:229 modules/widgets/tp_everest_form.php:70
 #: modules/widgets/tp_everest_form.php:108
 #: modules/widgets/tp_post_author.php:251 modules/widgets/tp_wp_forms.php:87
@@ -3326,11 +3322,11 @@ msgstr ""
 #: modules/widgets/tp_age_gate.php:1830 modules/widgets/tp_age_gate.php:1847
 #: modules/widgets/tp_age_gate.php:1913 modules/widgets/tp_age_gate.php:1967
 #: modules/widgets/tp_blockquote.php:494 modules/widgets/tp_blockquote.php:511
-#: modules/widgets/tp_blockquote.php:633 modules/widgets/tp_blockquote.php:680
-#: modules/widgets/tp_blockquote.php:1280
-#: modules/widgets/tp_blockquote.php:1440
-#: modules/widgets/tp_blockquote.php:1493
-#: modules/widgets/tp_blockquote.php:1716
+#: modules/widgets/tp_blockquote.php:632 modules/widgets/tp_blockquote.php:679
+#: modules/widgets/tp_blockquote.php:1279
+#: modules/widgets/tp_blockquote.php:1439
+#: modules/widgets/tp_blockquote.php:1492
+#: modules/widgets/tp_blockquote.php:1715
 #: modules/widgets/tp_caldera_forms.php:1658
 #: modules/widgets/tp_dark_mode.php:236 modules/widgets/tp_dark_mode.php:613
 #: modules/widgets/tp_flip_box.php:647 modules/widgets/tp_flip_box.php:1023
@@ -3420,10 +3416,10 @@ msgstr ""
 #: modules/widgets/tp_age_gate.php:1841 modules/widgets/tp_age_gate.php:1961
 #: modules/widgets/tp_age_gate.php:2214 modules/widgets/tp_blockquote.php:372
 #: modules/widgets/tp_blockquote.php:505
-#: modules/widgets/tp_blockquote.php:1487
-#: modules/widgets/tp_blockquote.php:2032
-#: modules/widgets/tp_blockquote.php:2087
-#: modules/widgets/tp_blockquote.php:2126
+#: modules/widgets/tp_blockquote.php:1486
+#: modules/widgets/tp_blockquote.php:2031
+#: modules/widgets/tp_blockquote.php:2086
+#: modules/widgets/tp_blockquote.php:2125
 #: modules/widgets/tp_blog_listout.php:576
 #: modules/widgets/tp_blog_listout.php:659
 #: modules/widgets/tp_blog_listout.php:721
@@ -3447,7 +3443,7 @@ msgstr ""
 #: modules/widgets/tp_contact_form_7.php:1513
 #: modules/widgets/tp_contact_form_7.php:1627
 #: modules/widgets/tp_contact_form_7.php:1683
-#: modules/widgets/tp_countdown.php:1254
+#: modules/widgets/tp_countdown.php:1262
 #: modules/widgets/tp_everest_form.php:1189
 #: modules/widgets/tp_everest_form.php:1308
 #: modules/widgets/tp_everest_form.php:1370
@@ -4254,7 +4250,7 @@ msgstr ""
 #: modules/widgets/tp_accordion.php:124 modules/widgets/tp_accordion.php:174
 #: modules/widgets/tp_adv_text_block.php:102
 #: modules/widgets/tp_adv_text_block.php:140
-#: modules/widgets/tp_age_gate.php:70 modules/widgets/tp_blockquote.php:1959
+#: modules/widgets/tp_age_gate.php:70 modules/widgets/tp_blockquote.php:1958
 #: modules/widgets/tp_blog_listout.php:352
 #: modules/widgets/tp_blog_listout.php:375
 #: modules/widgets/tp_blog_listout.php:402
@@ -4352,7 +4348,7 @@ msgstr ""
 #: modules/widgets/tp_accordion.php:125 modules/widgets/tp_accordion.php:175
 #: modules/widgets/tp_adv_text_block.php:103
 #: modules/widgets/tp_adv_text_block.php:141
-#: modules/widgets/tp_age_gate.php:71 modules/widgets/tp_blockquote.php:1960
+#: modules/widgets/tp_age_gate.php:71 modules/widgets/tp_blockquote.php:1959
 #: modules/widgets/tp_blog_listout.php:353
 #: modules/widgets/tp_blog_listout.php:376
 #: modules/widgets/tp_blog_listout.php:403
@@ -4554,7 +4550,7 @@ msgid "Extra Option"
 msgstr ""
 
 #: modules/widgets/tp_accordion.php:305 modules/widgets/tp_blockquote.php:100
-#: modules/widgets/tp_blockquote.php:962 modules/widgets/tp_button.php:253
+#: modules/widgets/tp_blockquote.php:961 modules/widgets/tp_button.php:253
 #: modules/widgets/tp_flip_box.php:161 modules/widgets/tp_flip_box.php:436
 #: modules/widgets/tp_info_box.php:221 modules/widgets/tp_info_box.php:455
 #: modules/widgets/tp_number_counter.php:221
@@ -4574,8 +4570,8 @@ msgstr ""
 #: modules/widgets/tp_adv_text_block.php:73
 #: modules/widgets/tp_age_gate.php:410 modules/widgets/tp_blockquote.php:146
 #: modules/widgets/tp_blockquote.php:163 modules/widgets/tp_blockquote.php:257
-#: modules/widgets/tp_blockquote.php:571 modules/widgets/tp_blockquote.php:876
-#: modules/widgets/tp_blockquote.php:1339 modules/widgets/tp_button.php:174
+#: modules/widgets/tp_blockquote.php:570 modules/widgets/tp_blockquote.php:875
+#: modules/widgets/tp_blockquote.php:1338 modules/widgets/tp_button.php:174
 #: modules/widgets/tp_contact_form_7.php:77
 #: modules/widgets/tp_contact_form_7.php:1032
 #: modules/widgets/tp_gravity_form.php:186
@@ -4619,7 +4615,7 @@ msgid "Gap"
 msgstr ""
 
 #: modules/widgets/tp_accordion.php:390 modules/widgets/tp_age_gate.php:1318
-#: modules/widgets/tp_age_gate.php:1621 modules/widgets/tp_blockquote.php:1395
+#: modules/widgets/tp_age_gate.php:1621 modules/widgets/tp_blockquote.php:1394
 #: modules/widgets/tp_button.php:319 modules/widgets/tp_caldera_forms.php:872
 #: modules/widgets/tp_caldera_forms.php:1037
 #: modules/widgets/tp_contact_form_7.php:690
@@ -4658,8 +4654,8 @@ msgstr ""
 #: modules/widgets/tp_blog_listout.php:630
 #: modules/widgets/tp_blog_listout.php:692
 #: modules/widgets/tp_clients_listout.php:471
-#: modules/widgets/tp_countdown.php:669 modules/widgets/tp_countdown.php:677
-#: modules/widgets/tp_countdown.php:957 modules/widgets/tp_countdown.php:1165
+#: modules/widgets/tp_countdown.php:669 modules/widgets/tp_countdown.php:679
+#: modules/widgets/tp_countdown.php:961 modules/widgets/tp_countdown.php:1171
 #: modules/widgets/tp_flip_box.php:990 modules/widgets/tp_flip_box.php:1358
 #: modules/widgets/tp_gallery_listout.php:552
 #: modules/widgets/tp_gallery_listout.php:614
@@ -4714,10 +4710,10 @@ msgstr ""
 #: modules/widgets/tp_age_gate.php:415 modules/widgets/tp_age_gate.php:443
 #: modules/widgets/tp_age_gate.php:2047 modules/widgets/tp_blockquote.php:150
 #: modules/widgets/tp_blockquote.php:168 modules/widgets/tp_blockquote.php:261
-#: modules/widgets/tp_blockquote.php:575 modules/widgets/tp_blockquote.php:718
-#: modules/widgets/tp_blockquote.php:880
-#: modules/widgets/tp_blockquote.php:1343
-#: modules/widgets/tp_blockquote.php:1569 modules/widgets/tp_button.php:178
+#: modules/widgets/tp_blockquote.php:574 modules/widgets/tp_blockquote.php:717
+#: modules/widgets/tp_blockquote.php:879
+#: modules/widgets/tp_blockquote.php:1342
+#: modules/widgets/tp_blockquote.php:1568 modules/widgets/tp_button.php:178
 #: modules/widgets/tp_caldera_forms.php:1548
 #: modules/widgets/tp_contact_form_7.php:81
 #: modules/widgets/tp_contact_form_7.php:1036
@@ -4758,8 +4754,8 @@ msgstr ""
 #: modules/widgets/tp_adv_text_block.php:81
 #: modules/widgets/tp_age_gate.php:419 modules/widgets/tp_age_gate.php:447
 #: modules/widgets/tp_blockquote.php:170 modules/widgets/tp_blockquote.php:265
-#: modules/widgets/tp_blockquote.php:579 modules/widgets/tp_blockquote.php:884
-#: modules/widgets/tp_blockquote.php:1347 modules/widgets/tp_button.php:182
+#: modules/widgets/tp_blockquote.php:578 modules/widgets/tp_blockquote.php:883
+#: modules/widgets/tp_blockquote.php:1346 modules/widgets/tp_button.php:182
 #: modules/widgets/tp_caldera_forms.php:1552
 #: modules/widgets/tp_contact_form_7.php:85
 #: modules/widgets/tp_contact_form_7.php:1040
@@ -4797,8 +4793,8 @@ msgstr ""
 #: modules/widgets/tp_age_gate.php:423 modules/widgets/tp_age_gate.php:451
 #: modules/widgets/tp_age_gate.php:2086 modules/widgets/tp_blockquote.php:151
 #: modules/widgets/tp_blockquote.php:169 modules/widgets/tp_blockquote.php:269
-#: modules/widgets/tp_blockquote.php:583 modules/widgets/tp_blockquote.php:888
-#: modules/widgets/tp_blockquote.php:1351 modules/widgets/tp_button.php:186
+#: modules/widgets/tp_blockquote.php:582 modules/widgets/tp_blockquote.php:887
+#: modules/widgets/tp_blockquote.php:1350 modules/widgets/tp_button.php:186
 #: modules/widgets/tp_caldera_forms.php:1556
 #: modules/widgets/tp_contact_form_7.php:89
 #: modules/widgets/tp_contact_form_7.php:1044
@@ -5030,8 +5026,8 @@ msgid "Gradient Angle"
 msgstr ""
 
 #: modules/widgets/tp_accordion.php:584 modules/widgets/tp_accordion.php:734
-#: modules/widgets/tp_blockquote.php:129 modules/widgets/tp_blockquote.php:701
-#: modules/widgets/tp_blockquote.php:1552 modules/widgets/tp_dark_mode.php:134
+#: modules/widgets/tp_blockquote.php:129 modules/widgets/tp_blockquote.php:700
+#: modules/widgets/tp_blockquote.php:1551 modules/widgets/tp_dark_mode.php:134
 #: modules/widgets/tp_flip_box.php:759 modules/widgets/tp_flip_box.php:937
 #: modules/widgets/tp_flip_box.php:1131 modules/widgets/tp_flip_box.php:1281
 #: modules/widgets/tp_heading_title.php:641
@@ -5110,9 +5106,9 @@ msgstr ""
 #: modules/widgets/tp_contact_form_7.php:1771
 #: modules/widgets/tp_countdown.php:414 modules/widgets/tp_countdown.php:457
 #: modules/widgets/tp_countdown.php:499 modules/widgets/tp_countdown.php:540
-#: modules/widgets/tp_countdown.php:914 modules/widgets/tp_countdown.php:970
-#: modules/widgets/tp_countdown.php:1016 modules/widgets/tp_countdown.php:1062
-#: modules/widgets/tp_countdown.php:1108
+#: modules/widgets/tp_countdown.php:918 modules/widgets/tp_countdown.php:976
+#: modules/widgets/tp_countdown.php:1022 modules/widgets/tp_countdown.php:1068
+#: modules/widgets/tp_countdown.php:1114
 #: modules/widgets/tp_everest_form.php:214
 #: modules/widgets/tp_everest_form.php:247
 #: modules/widgets/tp_everest_form.php:536
@@ -5175,8 +5171,8 @@ msgstr ""
 msgid "Content Background"
 msgstr ""
 
-#: modules/widgets/tp_accordion.php:832 modules/widgets/tp_blockquote.php:1928
-#: modules/widgets/tp_blockquote.php:2062 modules/widgets/tp_flip_box.php:1634
+#: modules/widgets/tp_accordion.php:832 modules/widgets/tp_blockquote.php:1927
+#: modules/widgets/tp_blockquote.php:2061 modules/widgets/tp_flip_box.php:1634
 #: modules/widgets/tp_header_extras.php:770
 #: modules/widgets/tp_info_box.php:1134 modules/widgets/tp_info_box.php:1301
 #: modules/widgets/tp_navigation_menu_lite.php:1173
@@ -5195,12 +5191,12 @@ msgstr ""
 
 #: modules/widgets/tp_accordion.php:881
 #: modules/widgets/tp_adv_text_block.php:194
-#: modules/widgets/tp_blockquote.php:2153
+#: modules/widgets/tp_blockquote.php:2152
 #: modules/widgets/tp_blog_listout.php:990 modules/widgets/tp_button.php:1042
 #: modules/widgets/tp_caldera_forms.php:2441
 #: modules/widgets/tp_clients_listout.php:851
 #: modules/widgets/tp_contact_form_7.php:1973
-#: modules/widgets/tp_countdown.php:1462
+#: modules/widgets/tp_countdown.php:1470
 #: modules/widgets/tp_everest_form.php:1834
 #: modules/widgets/tp_flip_box.php:2022
 #: modules/widgets/tp_gallery_listout.php:1112
@@ -5232,12 +5228,12 @@ msgstr ""
 
 #: modules/widgets/tp_accordion.php:898
 #: modules/widgets/tp_adv_text_block.php:211
-#: modules/widgets/tp_blockquote.php:2170
+#: modules/widgets/tp_blockquote.php:2169
 #: modules/widgets/tp_blog_listout.php:1008 modules/widgets/tp_button.php:1059
 #: modules/widgets/tp_caldera_forms.php:2458
 #: modules/widgets/tp_clients_listout.php:869
 #: modules/widgets/tp_contact_form_7.php:1990
-#: modules/widgets/tp_countdown.php:1479
+#: modules/widgets/tp_countdown.php:1487
 #: modules/widgets/tp_everest_form.php:1851
 #: modules/widgets/tp_flip_box.php:2040
 #: modules/widgets/tp_gallery_listout.php:1129
@@ -5260,12 +5256,12 @@ msgstr ""
 
 #: modules/widgets/tp_accordion.php:918
 #: modules/widgets/tp_adv_text_block.php:231
-#: modules/widgets/tp_blockquote.php:2190
+#: modules/widgets/tp_blockquote.php:2189
 #: modules/widgets/tp_blog_listout.php:1066 modules/widgets/tp_button.php:1079
 #: modules/widgets/tp_caldera_forms.php:2478
 #: modules/widgets/tp_clients_listout.php:926
 #: modules/widgets/tp_contact_form_7.php:2010
-#: modules/widgets/tp_countdown.php:1499
+#: modules/widgets/tp_countdown.php:1507
 #: modules/widgets/tp_everest_form.php:1871
 #: modules/widgets/tp_flip_box.php:2060
 #: modules/widgets/tp_gallery_listout.php:1187
@@ -5289,8 +5285,8 @@ msgstr ""
 #: modules/widgets/tp_accordion.php:930 modules/widgets/tp_accordion.php:999
 #: modules/widgets/tp_adv_text_block.php:243
 #: modules/widgets/tp_adv_text_block.php:312
-#: modules/widgets/tp_blockquote.php:2202
-#: modules/widgets/tp_blockquote.php:2271
+#: modules/widgets/tp_blockquote.php:2201
+#: modules/widgets/tp_blockquote.php:2270
 #: modules/widgets/tp_blog_listout.php:1078
 #: modules/widgets/tp_blog_listout.php:1147 modules/widgets/tp_button.php:1091
 #: modules/widgets/tp_button.php:1160
@@ -5300,7 +5296,7 @@ msgstr ""
 #: modules/widgets/tp_clients_listout.php:1007
 #: modules/widgets/tp_contact_form_7.php:2022
 #: modules/widgets/tp_contact_form_7.php:2091
-#: modules/widgets/tp_countdown.php:1508 modules/widgets/tp_countdown.php:1577
+#: modules/widgets/tp_countdown.php:1516 modules/widgets/tp_countdown.php:1585
 #: modules/widgets/tp_everest_form.php:1883
 #: modules/widgets/tp_everest_form.php:1952
 #: modules/widgets/tp_flip_box.php:2072 modules/widgets/tp_flip_box.php:2141
@@ -5339,12 +5335,12 @@ msgstr ""
 
 #: modules/widgets/tp_accordion.php:951
 #: modules/widgets/tp_adv_text_block.php:264
-#: modules/widgets/tp_blockquote.php:2223
+#: modules/widgets/tp_blockquote.php:2222
 #: modules/widgets/tp_blog_listout.php:1099 modules/widgets/tp_button.php:1112
 #: modules/widgets/tp_caldera_forms.php:2511
 #: modules/widgets/tp_clients_listout.php:959
 #: modules/widgets/tp_contact_form_7.php:2043
-#: modules/widgets/tp_countdown.php:1529
+#: modules/widgets/tp_countdown.php:1537
 #: modules/widgets/tp_everest_form.php:1904
 #: modules/widgets/tp_flip_box.php:2093
 #: modules/widgets/tp_gallery_listout.php:1220
@@ -5367,12 +5363,12 @@ msgstr ""
 
 #: modules/widgets/tp_accordion.php:965
 #: modules/widgets/tp_adv_text_block.php:278
-#: modules/widgets/tp_blockquote.php:2237
+#: modules/widgets/tp_blockquote.php:2236
 #: modules/widgets/tp_blog_listout.php:1113 modules/widgets/tp_button.php:1126
 #: modules/widgets/tp_caldera_forms.php:2525
 #: modules/widgets/tp_clients_listout.php:973
 #: modules/widgets/tp_contact_form_7.php:2057
-#: modules/widgets/tp_countdown.php:1543
+#: modules/widgets/tp_countdown.php:1551
 #: modules/widgets/tp_everest_form.php:1918
 #: modules/widgets/tp_flip_box.php:2107
 #: modules/widgets/tp_gallery_listout.php:1234
@@ -5395,12 +5391,12 @@ msgstr ""
 
 #: modules/widgets/tp_accordion.php:986
 #: modules/widgets/tp_adv_text_block.php:299
-#: modules/widgets/tp_blockquote.php:2258
+#: modules/widgets/tp_blockquote.php:2257
 #: modules/widgets/tp_blog_listout.php:1134 modules/widgets/tp_button.php:1147
 #: modules/widgets/tp_caldera_forms.php:2546
 #: modules/widgets/tp_clients_listout.php:994
 #: modules/widgets/tp_contact_form_7.php:2078
-#: modules/widgets/tp_countdown.php:1564
+#: modules/widgets/tp_countdown.php:1572
 #: modules/widgets/tp_everest_form.php:1939
 #: modules/widgets/tp_flip_box.php:2128
 #: modules/widgets/tp_gallery_listout.php:1255
@@ -5654,9 +5650,9 @@ msgstr ""
 msgid "Background Image"
 msgstr ""
 
-#: modules/widgets/tp_age_gate.php:485 modules/widgets/tp_blockquote.php:1452
-#: modules/widgets/tp_blockquote.php:1505
-#: modules/widgets/tp_blockquote.php:1655
+#: modules/widgets/tp_age_gate.php:485 modules/widgets/tp_blockquote.php:1451
+#: modules/widgets/tp_blockquote.php:1504
+#: modules/widgets/tp_blockquote.php:1654
 #: modules/widgets/tp_caldera_forms.php:1237
 #: modules/widgets/tp_caldera_forms.php:1291
 #: modules/widgets/tp_caldera_forms.php:1336
@@ -5664,7 +5660,7 @@ msgstr ""
 #: modules/widgets/tp_caldera_forms.php:1477
 #: modules/widgets/tp_caldera_forms.php:2364
 #: modules/widgets/tp_countdown.php:483 modules/widgets/tp_countdown.php:525
-#: modules/widgets/tp_countdown.php:566 modules/widgets/tp_countdown.php:1354
+#: modules/widgets/tp_countdown.php:566 modules/widgets/tp_countdown.php:1362
 #: modules/widgets/tp_dark_mode.php:406 modules/widgets/tp_dark_mode.php:454
 #: modules/widgets/tp_everest_form.php:1757
 #: modules/widgets/tp_gravity_form.php:1454
@@ -5701,7 +5697,7 @@ msgid "Right Side Image"
 msgstr ""
 
 #: modules/widgets/tp_age_gate.php:539 modules/widgets/tp_blockquote.php:230
-#: modules/widgets/tp_blockquote.php:843 modules/widgets/tp_flip_box.php:162
+#: modules/widgets/tp_blockquote.php:842 modules/widgets/tp_flip_box.php:162
 #: modules/widgets/tp_hovercard.php:160 modules/widgets/tp_hovercard.php:1058
 #: modules/widgets/tp_info_box.php:222
 #: modules/widgets/tp_number_counter.php:234
@@ -5736,15 +5732,15 @@ msgstr ""
 #: modules/widgets/tp_age_gate.php:1277 modules/widgets/tp_age_gate.php:1530
 #: modules/widgets/tp_age_gate.php:1584 modules/widgets/tp_age_gate.php:1940
 #: modules/widgets/tp_age_gate.php:1994 modules/widgets/tp_age_gate.php:2193
-#: modules/widgets/tp_age_gate.php:2237 modules/widgets/tp_blockquote.php:813
-#: modules/widgets/tp_blockquote.php:940
-#: modules/widgets/tp_blockquote.php:1307
-#: modules/widgets/tp_blockquote.php:1468
-#: modules/widgets/tp_blockquote.php:1521
-#: modules/widgets/tp_blockquote.php:1671
-#: modules/widgets/tp_blockquote.php:1726
-#: modules/widgets/tp_blockquote.php:2020
-#: modules/widgets/tp_blockquote.php:2049
+#: modules/widgets/tp_age_gate.php:2237 modules/widgets/tp_blockquote.php:812
+#: modules/widgets/tp_blockquote.php:939
+#: modules/widgets/tp_blockquote.php:1306
+#: modules/widgets/tp_blockquote.php:1467
+#: modules/widgets/tp_blockquote.php:1520
+#: modules/widgets/tp_blockquote.php:1670
+#: modules/widgets/tp_blockquote.php:1725
+#: modules/widgets/tp_blockquote.php:2019
+#: modules/widgets/tp_blockquote.php:2048
 #: modules/widgets/tp_blog_listout.php:859
 #: modules/widgets/tp_blog_listout.php:883 modules/widgets/tp_button.php:535
 #: modules/widgets/tp_button.php:549 modules/widgets/tp_button.php:696
@@ -5779,10 +5775,10 @@ msgstr ""
 #: modules/widgets/tp_contact_form_7.php:1647
 #: modules/widgets/tp_contact_form_7.php:1860
 #: modules/widgets/tp_contact_form_7.php:1893
-#: modules/widgets/tp_countdown.php:638 modules/widgets/tp_countdown.php:994
-#: modules/widgets/tp_countdown.php:1040 modules/widgets/tp_countdown.php:1086
-#: modules/widgets/tp_countdown.php:1132 modules/widgets/tp_countdown.php:1401
-#: modules/widgets/tp_countdown.php:1440 modules/widgets/tp_dark_mode.php:426
+#: modules/widgets/tp_countdown.php:638 modules/widgets/tp_countdown.php:1000
+#: modules/widgets/tp_countdown.php:1046 modules/widgets/tp_countdown.php:1092
+#: modules/widgets/tp_countdown.php:1138 modules/widgets/tp_countdown.php:1409
+#: modules/widgets/tp_countdown.php:1448 modules/widgets/tp_dark_mode.php:426
 #: modules/widgets/tp_dark_mode.php:474
 #: modules/widgets/tp_everest_form.php:366
 #: modules/widgets/tp_everest_form.php:412
@@ -5922,10 +5918,10 @@ msgstr ""
 #: modules/widgets/tp_age_gate.php:1399 modules/widgets/tp_age_gate.php:1484
 #: modules/widgets/tp_age_gate.php:1702 modules/widgets/tp_age_gate.php:1811
 #: modules/widgets/tp_age_gate.php:1894 modules/widgets/tp_blockquote.php:443
-#: modules/widgets/tp_blockquote.php:545 modules/widgets/tp_blockquote.php:611
-#: modules/widgets/tp_blockquote.php:651 modules/widgets/tp_blockquote.php:865
-#: modules/widgets/tp_blockquote.php:1376
-#: modules/widgets/tp_blockquote.php:1946 modules/widgets/tp_button.php:367
+#: modules/widgets/tp_blockquote.php:545 modules/widgets/tp_blockquote.php:610
+#: modules/widgets/tp_blockquote.php:650 modules/widgets/tp_blockquote.php:864
+#: modules/widgets/tp_blockquote.php:1375
+#: modules/widgets/tp_blockquote.php:1945 modules/widgets/tp_button.php:367
 #: modules/widgets/tp_caldera_forms.php:84
 #: modules/widgets/tp_caldera_forms.php:197
 #: modules/widgets/tp_caldera_forms.php:584
@@ -5940,7 +5936,7 @@ msgstr ""
 #: modules/widgets/tp_contact_form_7.php:1199
 #: modules/widgets/tp_contact_form_7.php:1475
 #: modules/widgets/tp_contact_form_7.php:1727
-#: modules/widgets/tp_countdown.php:588 modules/widgets/tp_countdown.php:1370
+#: modules/widgets/tp_countdown.php:588 modules/widgets/tp_countdown.php:1378
 #: modules/widgets/tp_everest_form.php:89
 #: modules/widgets/tp_everest_form.php:191
 #: modules/widgets/tp_everest_form.php:500
@@ -5981,15 +5977,15 @@ msgstr ""
 #: modules/widgets/tp_age_gate.php:1146 modules/widgets/tp_age_gate.php:1473
 #: modules/widgets/tp_age_gate.php:1800 modules/widgets/tp_age_gate.php:1883
 #: modules/widgets/tp_blockquote.php:432 modules/widgets/tp_blockquote.php:468
-#: modules/widgets/tp_blockquote.php:534 modules/widgets/tp_blockquote.php:622
-#: modules/widgets/tp_blockquote.php:662 modules/widgets/tp_blockquote.php:773
-#: modules/widgets/tp_blockquote.php:854 modules/widgets/tp_blockquote.php:973
-#: modules/widgets/tp_blockquote.php:1364
-#: modules/widgets/tp_blockquote.php:1935
+#: modules/widgets/tp_blockquote.php:534 modules/widgets/tp_blockquote.php:621
+#: modules/widgets/tp_blockquote.php:661 modules/widgets/tp_blockquote.php:772
+#: modules/widgets/tp_blockquote.php:853 modules/widgets/tp_blockquote.php:972
+#: modules/widgets/tp_blockquote.php:1363
+#: modules/widgets/tp_blockquote.php:1934
 #: modules/widgets/tp_blog_listout.php:835 modules/widgets/tp_button.php:378
 #: modules/widgets/tp_caldera_forms.php:1190
 #: modules/widgets/tp_caldera_forms.php:1376
-#: modules/widgets/tp_countdown.php:576 modules/widgets/tp_countdown.php:1360
+#: modules/widgets/tp_countdown.php:576 modules/widgets/tp_countdown.php:1368
 #: modules/widgets/tp_flip_box.php:1395
 #: modules/widgets/tp_gravity_form.php:1040
 #: modules/widgets/tp_gravity_form.php:1406
@@ -6034,12 +6030,12 @@ msgstr ""
 #: modules/widgets/tp_age_gate.php:1523 modules/widgets/tp_age_gate.php:1577
 #: modules/widgets/tp_age_gate.php:1933 modules/widgets/tp_age_gate.php:1987
 #: modules/widgets/tp_age_gate.php:2186 modules/widgets/tp_age_gate.php:2230
-#: modules/widgets/tp_blockquote.php:801 modules/widgets/tp_blockquote.php:933
-#: modules/widgets/tp_blockquote.php:1299
-#: modules/widgets/tp_blockquote.php:1461
-#: modules/widgets/tp_blockquote.php:1514
-#: modules/widgets/tp_blockquote.php:1664
-#: modules/widgets/tp_blockquote.php:1834
+#: modules/widgets/tp_blockquote.php:800 modules/widgets/tp_blockquote.php:932
+#: modules/widgets/tp_blockquote.php:1298
+#: modules/widgets/tp_blockquote.php:1460
+#: modules/widgets/tp_blockquote.php:1513
+#: modules/widgets/tp_blockquote.php:1663
+#: modules/widgets/tp_blockquote.php:1833
 #: modules/widgets/tp_caldera_forms.php:1248
 #: modules/widgets/tp_caldera_forms.php:1435
 #: modules/widgets/tp_caldera_forms.php:2057
@@ -6048,10 +6044,10 @@ msgstr ""
 #: modules/widgets/tp_caldera_forms.php:2216
 #: modules/widgets/tp_caldera_forms.php:2310
 #: modules/widgets/tp_caldera_forms.php:2375
-#: modules/widgets/tp_countdown.php:988 modules/widgets/tp_countdown.php:1034
-#: modules/widgets/tp_countdown.php:1080 modules/widgets/tp_countdown.php:1126
-#: modules/widgets/tp_countdown.php:1315 modules/widgets/tp_countdown.php:1395
-#: modules/widgets/tp_countdown.php:1433 modules/widgets/tp_dark_mode.php:418
+#: modules/widgets/tp_countdown.php:994 modules/widgets/tp_countdown.php:1040
+#: modules/widgets/tp_countdown.php:1086 modules/widgets/tp_countdown.php:1132
+#: modules/widgets/tp_countdown.php:1323 modules/widgets/tp_countdown.php:1403
+#: modules/widgets/tp_countdown.php:1441 modules/widgets/tp_dark_mode.php:418
 #: modules/widgets/tp_dark_mode.php:466 modules/widgets/tp_dark_mode.php:758
 #: modules/widgets/tp_dark_mode.php:815
 #: modules/widgets/tp_everest_form.php:1434
@@ -6263,8 +6259,8 @@ msgstr ""
 msgid "- Developer"
 msgstr ""
 
-#: modules/widgets/tp_blockquote.php:133 modules/widgets/tp_blockquote.php:746
-#: modules/widgets/tp_blockquote.php:1592 modules/widgets/tp_hovercard.php:382
+#: modules/widgets/tp_blockquote.php:133 modules/widgets/tp_blockquote.php:745
+#: modules/widgets/tp_blockquote.php:1591 modules/widgets/tp_hovercard.php:382
 #: modules/widgets/tp_pricing_table.php:1628
 #: modules/widgets/tp_scroll_navigation.php:75
 #: modules/widgets/tp_tabs_tours.php:254 modules/widgets/tp_tabs_tours.php:499
@@ -6343,9 +6339,9 @@ msgid "Drop Cap"
 msgstr ""
 
 #: modules/widgets/tp_blockquote.php:306
-#: modules/widgets/tp_blockquote.php:1618
-#: modules/widgets/tp_blockquote.php:1741
-#: modules/widgets/tp_blockquote.php:1823
+#: modules/widgets/tp_blockquote.php:1617
+#: modules/widgets/tp_blockquote.php:1740
+#: modules/widgets/tp_blockquote.php:1822
 msgid "Border Layout"
 msgstr ""
 
@@ -6373,72 +6369,72 @@ msgstr ""
 msgid "Quote Shadow"
 msgstr ""
 
-#: modules/widgets/tp_blockquote.php:690
+#: modules/widgets/tp_blockquote.php:689
 msgid "Author Extras"
 msgstr ""
 
-#: modules/widgets/tp_blockquote.php:703
-#: modules/widgets/tp_blockquote.php:1554 modules/widgets/tp_hovercard.php:250
+#: modules/widgets/tp_blockquote.php:702
+#: modules/widgets/tp_blockquote.php:1553 modules/widgets/tp_hovercard.php:250
 msgid "Absolute"
 msgstr ""
 
-#: modules/widgets/tp_blockquote.php:704
-#: modules/widgets/tp_blockquote.php:1555 modules/widgets/tp_hovercard.php:249
+#: modules/widgets/tp_blockquote.php:703
+#: modules/widgets/tp_blockquote.php:1554 modules/widgets/tp_hovercard.php:249
 msgid "Relative"
 msgstr ""
 
-#: modules/widgets/tp_blockquote.php:902 modules/widgets/tp_blockquote.php:985
+#: modules/widgets/tp_blockquote.php:901 modules/widgets/tp_blockquote.php:984
 #: modules/widgets/tp_post_meta.php:306
 #: modules/widgets/tp_social_embed.php:762
 msgid "Size"
 msgstr ""
 
-#: modules/widgets/tp_blockquote.php:1004
+#: modules/widgets/tp_blockquote.php:1003
 msgid "Top Icon Offset"
 msgstr ""
 
-#: modules/widgets/tp_blockquote.php:1028
-#: modules/widgets/tp_blockquote.php:1102
-#: modules/widgets/tp_blockquote.php:1228
+#: modules/widgets/tp_blockquote.php:1027
+#: modules/widgets/tp_blockquote.php:1101
+#: modules/widgets/tp_blockquote.php:1227
 msgid "Left Icon Offset"
 msgstr ""
 
-#: modules/widgets/tp_blockquote.php:1053
-#: modules/widgets/tp_blockquote.php:1127
-#: modules/widgets/tp_blockquote.php:1254
+#: modules/widgets/tp_blockquote.php:1052
+#: modules/widgets/tp_blockquote.php:1126
+#: modules/widgets/tp_blockquote.php:1253
 msgid "Right Icon Offset"
 msgstr ""
 
-#: modules/widgets/tp_blockquote.php:1078
+#: modules/widgets/tp_blockquote.php:1077
 msgid "Bottom Icon Offset"
 msgstr ""
 
-#: modules/widgets/tp_blockquote.php:1153
+#: modules/widgets/tp_blockquote.php:1152
 msgid "Top/Bottom Icon Offset"
 msgstr ""
 
-#: modules/widgets/tp_blockquote.php:1178
+#: modules/widgets/tp_blockquote.php:1177
 msgid "Left Top Icon Offset"
 msgstr ""
 
-#: modules/widgets/tp_blockquote.php:1203
+#: modules/widgets/tp_blockquote.php:1202
 msgid "Right Bottom Icon Offset"
 msgstr ""
 
-#: modules/widgets/tp_blockquote.php:1329
+#: modules/widgets/tp_blockquote.php:1328
 msgid "Tweet Button"
 msgstr ""
 
-#: modules/widgets/tp_blockquote.php:1415
+#: modules/widgets/tp_blockquote.php:1414
 #: modules/widgets/tp_team_member_listout.php:794
 msgid "Icon Offset"
 msgstr ""
 
-#: modules/widgets/tp_blockquote.php:1541
+#: modules/widgets/tp_blockquote.php:1540
 msgid "Tweet Extras"
 msgstr ""
 
-#: modules/widgets/tp_blockquote.php:1636
+#: modules/widgets/tp_blockquote.php:1635
 #: modules/widgets/tp_contact_form_7.php:394
 #: modules/widgets/tp_hovercard.php:634
 #: modules/widgets/tp_meeting_scheduler.php:120
@@ -6457,47 +6453,47 @@ msgstr ""
 msgid "Height"
 msgstr ""
 
-#: modules/widgets/tp_blockquote.php:1698
+#: modules/widgets/tp_blockquote.php:1697
 msgid "Border Size"
 msgstr ""
 
-#: modules/widgets/tp_blockquote.php:1752 modules/widgets/tp_dark_mode.php:380
+#: modules/widgets/tp_blockquote.php:1751 modules/widgets/tp_dark_mode.php:380
 #: modules/widgets/tp_hovercard.php:1291
 #: modules/widgets/tp_post_featured_image.php:222
 msgid "Background Size"
 msgstr ""
 
-#: modules/widgets/tp_blockquote.php:1777
-#: modules/widgets/tp_blockquote.php:1802
+#: modules/widgets/tp_blockquote.php:1776
+#: modules/widgets/tp_blockquote.php:1801
 msgid "Background Color1"
 msgstr ""
 
-#: modules/widgets/tp_blockquote.php:1784
-#: modules/widgets/tp_blockquote.php:1809
+#: modules/widgets/tp_blockquote.php:1783
+#: modules/widgets/tp_blockquote.php:1808
 msgid "Background Color2"
 msgstr ""
 
-#: modules/widgets/tp_blockquote.php:1841
+#: modules/widgets/tp_blockquote.php:1840
 msgid "Corner Background Color"
 msgstr ""
 
-#: modules/widgets/tp_blockquote.php:1851
+#: modules/widgets/tp_blockquote.php:1850
 msgid "Corner Border Color"
 msgstr ""
 
-#: modules/widgets/tp_blockquote.php:1865
+#: modules/widgets/tp_blockquote.php:1864
 msgid "Corner Border Size"
 msgstr ""
 
-#: modules/widgets/tp_blockquote.php:1884
+#: modules/widgets/tp_blockquote.php:1883
 msgid "Corner Position"
 msgstr ""
 
-#: modules/widgets/tp_blockquote.php:1906
+#: modules/widgets/tp_blockquote.php:1905
 msgid "Corner Size"
 msgstr ""
 
-#: modules/widgets/tp_blockquote.php:1957
+#: modules/widgets/tp_blockquote.php:1956
 #: modules/widgets/tp_caldera_forms.php:319
 #: modules/widgets/tp_caldera_forms.php:675
 #: modules/widgets/tp_caldera_forms.php:938
@@ -6545,7 +6541,7 @@ msgstr ""
 msgid "Box Border"
 msgstr ""
 
-#: modules/widgets/tp_blockquote.php:1967 modules/widgets/tp_button.php:473
+#: modules/widgets/tp_blockquote.php:1966 modules/widgets/tp_button.php:473
 #: modules/widgets/tp_caldera_forms.php:330
 #: modules/widgets/tp_caldera_forms.php:685
 #: modules/widgets/tp_caldera_forms.php:949
@@ -6596,8 +6592,8 @@ msgstr ""
 msgid "Border Style"
 msgstr ""
 
-#: modules/widgets/tp_blockquote.php:1989
-#: modules/widgets/tp_blockquote.php:2038 modules/widgets/tp_button.php:518
+#: modules/widgets/tp_blockquote.php:1988
+#: modules/widgets/tp_blockquote.php:2037 modules/widgets/tp_button.php:518
 #: modules/widgets/tp_button.php:590 modules/widgets/tp_caldera_forms.php:395
 #: modules/widgets/tp_caldera_forms.php:454
 #: modules/widgets/tp_caldera_forms.php:730
@@ -6692,7 +6688,7 @@ msgstr ""
 msgid "Border Color"
 msgstr ""
 
-#: modules/widgets/tp_blockquote.php:2000 modules/widgets/tp_button.php:496
+#: modules/widgets/tp_blockquote.php:1999 modules/widgets/tp_button.php:496
 #: modules/widgets/tp_caldera_forms.php:355
 #: modules/widgets/tp_caldera_forms.php:700
 #: modules/widgets/tp_caldera_forms.php:964
@@ -6748,7 +6744,7 @@ msgstr ""
 msgid "Border Width"
 msgstr ""
 
-#: modules/widgets/tp_blockquote.php:2103
+#: modules/widgets/tp_blockquote.php:2102
 #: modules/widgets/tp_caldera_forms.php:504
 #: modules/widgets/tp_caldera_forms.php:798
 #: modules/widgets/tp_caldera_forms.php:1966
@@ -6778,11 +6774,11 @@ msgstr ""
 msgid "Box Shadow Options"
 msgstr ""
 
-#: modules/widgets/tp_blockquote.php:2160
+#: modules/widgets/tp_blockquote.php:2159
 #: modules/widgets/tp_blog_listout.php:998 modules/widgets/tp_button.php:1049
 #: modules/widgets/tp_clients_listout.php:859
 #: modules/widgets/tp_contact_form_7.php:1980
-#: modules/widgets/tp_countdown.php:1469 modules/widgets/tp_flip_box.php:2030
+#: modules/widgets/tp_countdown.php:1477 modules/widgets/tp_flip_box.php:2030
 #: modules/widgets/tp_gallery_listout.php:1119
 #: modules/widgets/tp_heading_animation.php:227
 #: modules/widgets/tp_heading_title.php:1117
@@ -8140,20 +8136,20 @@ msgid "Inline Style"
 msgstr ""
 
 #: modules/widgets/tp_countdown.php:132 modules/widgets/tp_countdown.php:183
-#: modules/widgets/tp_countdown.php:408 modules/widgets/tp_countdown.php:711
-#: modules/widgets/tp_countdown.php:965
+#: modules/widgets/tp_countdown.php:408 modules/widgets/tp_countdown.php:715
+#: modules/widgets/tp_countdown.php:971
 msgid "Days"
 msgstr ""
 
 #: modules/widgets/tp_countdown.php:141 modules/widgets/tp_countdown.php:194
-#: modules/widgets/tp_countdown.php:451 modules/widgets/tp_countdown.php:757
-#: modules/widgets/tp_countdown.php:1011
+#: modules/widgets/tp_countdown.php:451 modules/widgets/tp_countdown.php:761
+#: modules/widgets/tp_countdown.php:1017
 msgid "Hours"
 msgstr ""
 
 #: modules/widgets/tp_countdown.php:151 modules/widgets/tp_countdown.php:205
-#: modules/widgets/tp_countdown.php:493 modules/widgets/tp_countdown.php:803
-#: modules/widgets/tp_countdown.php:1057
+#: modules/widgets/tp_countdown.php:493 modules/widgets/tp_countdown.php:807
+#: modules/widgets/tp_countdown.php:1063
 msgid "Minutes"
 msgstr ""
 
@@ -8244,85 +8240,85 @@ msgstr ""
 msgid "Days Background"
 msgstr ""
 
-#: modules/widgets/tp_countdown.php:684
+#: modules/widgets/tp_countdown.php:688
 msgid "Stroke Width"
 msgstr ""
 
-#: modules/widgets/tp_countdown.php:697
+#: modules/widgets/tp_countdown.php:701
 msgid "Trail Width"
 msgstr ""
 
-#: modules/widgets/tp_countdown.php:716 modules/widgets/tp_countdown.php:762
-#: modules/widgets/tp_countdown.php:808 modules/widgets/tp_countdown.php:854
+#: modules/widgets/tp_countdown.php:720 modules/widgets/tp_countdown.php:766
+#: modules/widgets/tp_countdown.php:812 modules/widgets/tp_countdown.php:858
 msgid "Counter Number Color"
 msgstr ""
 
-#: modules/widgets/tp_countdown.php:726 modules/widgets/tp_countdown.php:772
-#: modules/widgets/tp_countdown.php:818 modules/widgets/tp_countdown.php:864
+#: modules/widgets/tp_countdown.php:730 modules/widgets/tp_countdown.php:776
+#: modules/widgets/tp_countdown.php:822 modules/widgets/tp_countdown.php:868
 msgid "Counter Text Color"
 msgstr ""
 
-#: modules/widgets/tp_countdown.php:736 modules/widgets/tp_countdown.php:782
-#: modules/widgets/tp_countdown.php:828 modules/widgets/tp_countdown.php:874
+#: modules/widgets/tp_countdown.php:740 modules/widgets/tp_countdown.php:786
+#: modules/widgets/tp_countdown.php:832 modules/widgets/tp_countdown.php:878
 msgid "Counter Stroke Color"
 msgstr ""
 
-#: modules/widgets/tp_countdown.php:746 modules/widgets/tp_countdown.php:792
-#: modules/widgets/tp_countdown.php:838 modules/widgets/tp_countdown.php:884
+#: modules/widgets/tp_countdown.php:750 modules/widgets/tp_countdown.php:796
+#: modules/widgets/tp_countdown.php:842 modules/widgets/tp_countdown.php:888
 msgid "Counter Trail Color"
 msgstr ""
 
-#: modules/widgets/tp_countdown.php:897
+#: modules/widgets/tp_countdown.php:901
 msgid "Hover style"
 msgstr ""
 
-#: modules/widgets/tp_countdown.php:904
+#: modules/widgets/tp_countdown.php:908
 #: modules/widgets/tp_progress_bar.php:591
 msgid "Number Color"
 msgstr ""
 
-#: modules/widgets/tp_countdown.php:924
+#: modules/widgets/tp_countdown.php:928
 msgid "Stroke Color"
 msgstr ""
 
-#: modules/widgets/tp_countdown.php:934
+#: modules/widgets/tp_countdown.php:938
 msgid "Trail Color"
 msgstr ""
 
-#: modules/widgets/tp_countdown.php:1154
+#: modules/widgets/tp_countdown.php:1160
 msgid "Counter"
 msgstr ""
 
-#: modules/widgets/tp_countdown.php:1175
+#: modules/widgets/tp_countdown.php:1183
 msgid "Dark Theme"
 msgstr ""
 
-#: modules/widgets/tp_countdown.php:1191 modules/widgets/tp_countdown.php:1259
+#: modules/widgets/tp_countdown.php:1199 modules/widgets/tp_countdown.php:1267
 msgid "Top Options"
 msgstr ""
 
-#: modules/widgets/tp_countdown.php:1197 modules/widgets/tp_countdown.php:1265
+#: modules/widgets/tp_countdown.php:1205 modules/widgets/tp_countdown.php:1273
 msgid "Top Text Color"
 msgstr ""
 
-#: modules/widgets/tp_countdown.php:1215 modules/widgets/tp_countdown.php:1247
-#: modules/widgets/tp_countdown.php:1283
+#: modules/widgets/tp_countdown.php:1223 modules/widgets/tp_countdown.php:1255
+#: modules/widgets/tp_countdown.php:1291
 msgid "Border Top"
 msgstr ""
 
-#: modules/widgets/tp_countdown.php:1222 modules/widgets/tp_countdown.php:1290
+#: modules/widgets/tp_countdown.php:1230 modules/widgets/tp_countdown.php:1298
 msgid "Bottom Options"
 msgstr ""
 
-#: modules/widgets/tp_countdown.php:1229 modules/widgets/tp_countdown.php:1297
+#: modules/widgets/tp_countdown.php:1237 modules/widgets/tp_countdown.php:1305
 msgid "Bottom Text Color"
 msgstr ""
 
-#: modules/widgets/tp_countdown.php:1326
+#: modules/widgets/tp_countdown.php:1334
 msgid "Dot"
 msgstr ""
 
-#: modules/widgets/tp_countdown.php:1418
+#: modules/widgets/tp_countdown.php:1426
 #: modules/widgets/tp_scroll_navigation.php:517
 #: modules/widgets/tp_scroll_navigation.php:595
 msgid "hover"
@@ -12983,11 +12979,7 @@ msgstr ""
 msgid "Title Color Options"
 msgstr ""
 
-#: modules/widgets/tp_tabs_tours.php:922
-msgid "Under Line"
-msgstr ""
-
-#: modules/widgets/tp_tabs_tours.php:929
+#: modules/widgets/tp_tabs_tours.php:922 modules/widgets/tp_tabs_tours.php:929
 msgid "Underline"
 msgstr ""
 
@@ -13004,7 +12996,7 @@ msgid "Nav Inner Padding"
 msgstr ""
 
 #: modules/widgets/tp_tabs_tours.php:984
-msgid "Navigation Between Space"
+msgid "Space Between Navigation"
 msgstr ""
 
 #: modules/widgets/tp_tabs_tours.php:1174

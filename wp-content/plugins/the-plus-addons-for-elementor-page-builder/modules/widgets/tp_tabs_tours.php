@@ -919,7 +919,7 @@ class L_ThePlus_Tabs_Tours extends Widget_Base {
 		$this->start_controls_section(
 			'section_tab_underline',
 			[
-				'label' => esc_html__( 'Under Line', 'tpebl' ),
+				'label' => esc_html__( 'Underline', 'tpebl' ),
 				'tab' => Controls_Manager::TAB_STYLE,
 			]
 		);
@@ -981,7 +981,7 @@ class L_ThePlus_Tabs_Tours extends Widget_Base {
 		$this->add_responsive_control(
 			'nav_title_space',
 			[
-				'label' => esc_html__( 'Navigation Between Space', 'tpebl' ),
+				'label' => esc_html__( 'Space Between Navigation', 'tpebl' ),
 				'type' => Controls_Manager::SLIDER,
 				'size_units' => [ 'px'],
 				'range' => [

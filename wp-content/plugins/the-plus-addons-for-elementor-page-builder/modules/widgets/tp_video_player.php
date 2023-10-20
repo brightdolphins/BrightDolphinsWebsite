@@ -810,7 +810,7 @@ class L_ThePlus_Video_Player extends Widget_Base {
 				],
 			]
 		);
-		$this->add_control(
+		$this->add_responsive_control(
 			'play_icon_size',
 			[	
 				'label' => esc_html__( 'Icon Size', 'tpebl' ),

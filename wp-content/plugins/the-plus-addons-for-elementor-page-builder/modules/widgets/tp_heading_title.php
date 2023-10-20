@@ -381,12 +381,12 @@ class L_Theplus_Ele_Heading_Title extends Widget_Base {
 				],
             ]
         );
-		$this->add_control(
+		$this->add_responsive_control(
             'sep_width',
             [
                 'type' => Controls_Manager::SLIDER,
 				'label' => esc_html__('Separator Width', 'tpebl'),
-				'size_units' => [ '%' ],
+				'size_units' => [ '%', 'px' ],
 				'default' => [
 					'unit' => '%',
 					'size' => 100,
@@ -422,7 +422,7 @@ class L_Theplus_Ele_Heading_Title extends Widget_Base {
 				],
             ]
         );
-		$this->add_control(
+		$this->add_responsive_control(
             'sep_height',
             [
                 'type' => Controls_Manager::SLIDER,

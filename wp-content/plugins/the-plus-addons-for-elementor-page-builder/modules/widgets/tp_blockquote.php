@@ -548,7 +548,6 @@ class L_ThePlus_Block_Quote extends Widget_Base {
 				'selectors' => [
 					'{{WRAPPER}} .plus_blockquote .tp-bq-desc,{{WRAPPER}} .plus_blockquote .tp-bq-desc p' => 'margin: {{TOP}}{{UNIT}} {{RIGHT}}{{UNIT}} {{BOTTOM}}{{UNIT}} {{LEFT}}{{UNIT}};',
 				],
-				'separator' => 'after',		
 			]
 		);
 		$this->end_controls_section();
@@ -1767,7 +1766,7 @@ class L_ThePlus_Block_Quote extends Widget_Base {
 		$this->add_control(
 			'bl2o_bg_heading',
 			[
-				'label' => 'NOrmal',
+				'label' => 'Normal',
 				'type' => \Elementor\Controls_Manager::HEADING,							
 			]
 		);

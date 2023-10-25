@@ -68,13 +68,13 @@ Quick Tip: Don’t forget that you can simply drag the file into the terminal wi
 
 4. Login using Username: admin Password: root
 
-_**Warning!!!** Some images might have some error loading after being imported please compare them to the [Live Site](https://brightdolphins.com/) and make changes to the ones that aren't loading correctly_
+_**Warning!!!** Some images might have some error loading after being imported please compare them to the [Live Site](https://brightdolphins.com/) and make changes to the ones that aren't loading correctly
 
-# Making new project pages
+# Post
 
 **Posts page is where we make changes to content displayed in our project and career pages**
 
-## Create a new project
+## Making new project pages
 
 To create a new project, I recommended duplicating and modifying the existing project page by...
 
@@ -94,17 +94,35 @@ To create a new project, I recommended duplicating and modifying the existing pr
 - Visibility - Set to __Private__ when you still making change. Set to __Public__ when you are ready to make it go live
 - Template - Must set to __Elementor Canvas__
 - URL - Change PERMALINK if necessary
-- Category - Make sure only the __Project__ check box in the is active
-- Tags - add/change tags that are relevant to the project
-- Featured image - Upload highlight image that will be displayed on our project page
-- Excerpt - Project description that will display beneath the project name in our project page
+- Categories - Make sure only the __Project__ check box in the is active
+- Tags - add/change __tags__ that are relevant to the project
+- Featured image - Upload highlight image that will be displayed on __Our project__ page
+- Excerpt - Project description that will display beneath the project name on __Our project__ page
 
+6. To adjust and write more project detail Click on Edit with Elementor
+   
+## Making new career pages
 
- 
-
-9. Change the Project description in the Excerpt section on the Left menu
-
-10. To adjust and write more project detail Click on Edit with Elementor
+1. Click __add new__ to create new post
+2. Change page detail
+- Visibility - Set to __Private__ when you still making change. Set to __Public__ when you are ready to make it go live
+- Template - Must set to __Elementor Canvas__
+- URL - Change PERMALINK if necessary
+- Categories - Make sure only the __Career__ check box in the is active
+- Tags - add/change __tags__ that are relevant to the position
+- Featured image - You don't need to add any feature image for this page
+- Excerpt - Position location that will display on the location column on __careers__ page
+3. After change post categories to career text box will appear
+<img width="1030" alt="Screenshot 2566-10-25 at 15 29 39" src="https://github.com/brightdolphins/BrightDolphinsWebsite/assets/122365726/03eb70a6-570e-4264-bedb-2a68e3d12688">
+- Salary title - Header that will appear above salary detail
+- Salary - Add salary range for the position
+- Location title - Header that will appear above location detail
+- Location - add position location detail
+- Working hours title - Header that will appear above working hours detail
+- Working hours - Add position works hour
+- Qualifications title
+- Qualifications detail
+- Additional information
 
 ## Adjusting other main pages
 The pages page is where we make changes to all other main pages.

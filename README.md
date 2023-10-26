@@ -91,38 +91,57 @@ To create a new project, I recommended duplicating and modifying the existing pr
 
 5. Change project detail in the side menu
 
-- Visibility - Set to __Private__ when you still making change. Set to __Public__ when you are ready to make it go live
-- Template - Must set to __Elementor Canvas__
-- URL - Change PERMALINK if necessary
-- Categories - Make sure only the __Project__ check box in the is active
-- Tags - add/change __tags__ that are relevant to the project
-- Featured image - Upload highlight image that will be displayed on __Our project__ page
-- Excerpt - Project description that will display beneath the project name on __Our project__ page
+- __Visibility__ - Set to __Private__ when you still making change. Set to __Public__ when you are ready to make it go live
+- __Template__ - Must set to __Elementor Canvas__
+- __URL__ - Change PERMALINK if necessary
+- __Categories__ - Make sure only the __Project__ check box in the is active
+- __Tags__ - add/change __tags__ that are relevant to the project
+- __Featured image__ - Upload highlight image that will be displayed on __Our project__ page
+- __Excerpt__ - Project description that will display beneath the project name on __Our project__ page
 
 6. To adjust and write more project detail Click on Edit with Elementor
    
 ## Making new career pages
 
 1. Click __add new__ to create new post
+
 2. Change page detail
-- Visibility - Set to __Private__ when you still making change. Set to __Public__ when you are ready to make it go live
-- Template - Must set to __Elementor Canvas__
-- URL - Change PERMALINK if necessary
-- Categories - Make sure only the __Career__ check box in the is active
-- Tags - add/change __tags__ that are relevant to the position
-- Featured image - You don't need to add any feature image for this page
-- Excerpt - Position location that will display on the location column on __careers__ page
-3. After change post categories to career text box will appear
+- __Visibility__ - Set to __Private__ when you still making change. Set to __Public__ when you are ready to make it go live
+- __Template__ - Must set to __Elementor Canvas__
+- __URL__ - Change PERMALINK if necessary
+- __Categories__ - Make sure only the __Career__ check box in the is active
+- __Tags__ - add/change __tags__ that are relevant to the position
+- __Featured image__ - You don't need to add any feature image for this page
+- __Excerpt__ - Position location that will display on the location column on __careers__ page
+
+3. After changing post categories to career text box will appear
+
 <img width="1030" alt="Screenshot 2566-10-25 at 15 29 39" src="https://github.com/brightdolphins/BrightDolphinsWebsite/assets/122365726/03eb70a6-570e-4264-bedb-2a68e3d12688">
+
 - Salary title - Header that will appear above salary detail
 - Salary - Add salary range for the position
 - Location title - Header that will appear above location detail
-- Location - add position location detail
+- Location - Add position location detail
 - Working hours title - Header that will appear above working hours detail
-- Working hours - Add position works hour
-- Qualifications title
-- Qualifications detail
-- Additional information
+- Working hours - Add position work hours
+- Qualifications title - Header that will appear above qualifications detail
+- Qualifications detail - Add details of this position's qualifications 
+- Additional information - Any additional detail of this position detail you want to add
+
+4. Change the page template
+Now that you add all the detail change the template this page will display in.
+
+- Click __Edit with elementor__ at the top of the page
+- Click the Add template button(the folder icon)
+
+<img width="1323" alt="Screenshot 2566-10-26 at 18 00 43" src="https://github.com/brightdolphins/BrightDolphinsWebsite/assets/122365726/657cad3c-bd6c-4aec-bee2-f3471f63abb5">
+
+- Go to my Template section
+- Find template name __Careers__ then click __Insert__
+
+<img width="1324" alt="Screenshot 2566-10-26 at 18 02 04" src="https://github.com/brightdolphins/BrightDolphinsWebsite/assets/122365726/9d90c0d0-47e5-40ad-942d-cfc3ab343f91">
+
+5. Click __Publish__
 
 ## Adjusting other main pages
 The pages page is where we make changes to all other main pages.
@@ -150,4 +169,4 @@ WP2Static is a tool we use to deploy the site on Netlify.
 * try clear plugin cache by going to _WP2Static_ and _cache_ and click _Delete all caches_ ,then try _Generate static site_ again
 * try reinstall the plugin by click _plugins_ on the left menu, locate WP2Static. Click disable and delete it. Then follow this [instruction]((https://drive.google.com/file/d/1G18BTVJv993nNFKB7rzRdIDpApjImJaF/view?usp=drive_link))
 
-_You may need to change plugin version to the older or new one if the current version doesn't work on your PC you can search around on your search engine for it._
+_You may need to change the plugin version to the older or new one if the current version doesn't work on your PC you can search around on your search engine for it._

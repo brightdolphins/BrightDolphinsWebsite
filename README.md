@@ -1,10 +1,14 @@
+__Table of Contents__
+
 [Import WordPress to local Mamp](#Import-WordPress-to-local-Mamp)
 
-[Post](#Post)
+[Posts](#Posts) - How to adjust project and career pages.
 
-[Pages](#Pages)
+[Pages](#Pages) - How to adjust the main pages.
 
-[# Deploying Site/Make site go live](#Deploying-Site/Make-site-go-live)
+[Templates](#Templates) - How to adjust the main pages.
+
+[Deploying Site/Make site go live](#Deploying-Site/Make-site-go-live)
 
 # Import WordPress to local Mamp
 Every database is created with
@@ -19,7 +23,9 @@ username:[admin] password:[root]
 1. Install [Mamp](https://www.mamp.info/en/downloads/) on your computer
 2. Move the folder you clone from this GitHub into the Mamp root folder. If you're on Mac, it should be in Applications ▹ MAMP ▹ htdocs by default. Or you can locate the Mamp root folder under the Mamp setting.
 
-*You can't change any folder name or this won't work
+> [!WARNING]
+>You can't change any folder name or this won't work
+
 ## 1. Import Database
 ### Import Database using phpMyAdmin
 
@@ -59,7 +65,9 @@ CAREFUL: This will replace all tables in the database you specify!
 ⋅⋅* Hit the Enter Key
 ⋅⋅* Example:
 /applications/MAMP/library/bin/mysql -u root -p wordpress_db < /Applications/MAMP/htdocs/backupDB.sql
-Quick Tip: Don’t forget that you can simply drag the file into the terminal window and it will enter the location of the file for you.
+
+> [!NOTE]
+> Don’t forget that you can simply drag the file into the terminal window and it will enter the location of the file for you.
 
 3. You should be prompted with the following line:
 - Enter password:
@@ -80,11 +88,12 @@ Quick Tip: Don’t forget that you can simply drag the file into the terminal wi
 
 4. Login using Username: admin Password: root
 
-_**Warning!!!** Some images might have some error loading after being imported please compare them to the [Live Site](https://brightdolphins.com/) and make changes to the ones that aren't loading correctly
+> [!WARNING]
+> Some images might have some error loading after being imported please compare them to the [Live Site](https://brightdolphins.com/) and make changes to the ones that aren't loading correctly
 
-# Post
+# Posts
 
-**Posts page is where we make changes to content displayed in our project and career pages**
+__The Posts page__ is where we make changes to content displayed in our project and career pages
 
 ## Making new project pages
 
@@ -187,7 +196,8 @@ This is where On the Pages page Hovering on _Our Team_ pages then click edit wit
 
 - __Add a member__ - Hover over any member ▹ right click ▹ Duplicate ▹ move it to the section you want ▹ Change Image/Name/Job/Description on the left menu
 
-_Each row shouldn't have more than 3 people if there are more please move it to the new row by clicking the Plus icon on top of any section then move it to where it should be._
+> [!WARNING]
+> Each row shouldn't have more than 3 people if there are more please move it to the new row by clicking the Plus icon on top of any section then move it to where it should be._
 
 ## Careers
 
@@ -201,6 +211,13 @@ This is a page where the client can publish the form. Only the header and footer
 
 These are unused pages created only for testing
 
+# Templates
+This is where our global templates are stored
+- __Header-defult__ - The header that displays on a dark background
+- __Header-white__ - The header that displays on a light background
+- __Footer__ - Footer and contact forms that are displayed on the bottom of the site
+- __Careers__ - Template we used on every career page.(making changes to this won't change the existing career pages.)
+
 # Deploying Site/Make site go live
 WP2Static is a tool we use to deploy the site on Netlify.
 
@@ -209,8 +226,8 @@ WP2Static is a tool we use to deploy the site on Netlify.
 3. Wait for the process to be finished, after it is done the text will appear on the logs below.
 4. Check the live site, and make sure the change is made without any problem
 
-## If the site doesn't deploy correctly
-* try clear plugin cache by going to _WP2Static_ and _cache_ and click _Delete all caches_ ,then try _Generate static site_ again
-* try reinstall the plugin by click _plugins_ on the left menu, locate WP2Static. Click disable and delete it. Then follow this [instruction]((https://drive.google.com/file/d/1G18BTVJv993nNFKB7rzRdIDpApjImJaF/view?usp=drive_link))
-
-_You may need to change the plugin version to the older or new one if the current version doesn't work on your PC you can search around on your search engine for it._
+> [!NOTE]
+> If the site doesn't deploy correctly
+> try clearing plugin cache by going to _WP2Static_ and _cache_ and clicking _Delete all caches_ , then try _Generate static site_ again
+> try reinstalling the plugin by clicking _plugins_ on the left menu, locate WP2Static. Click disable and delete it. Then follow this [instruction]((https://drive.google.com/file/d/1G18BTVJv993nNFKB7rzRdIDpApjImJaF/view?usp=drive_link))
+>_You may need to change the plugin version to the older or new one if the current version doesn't work on your PC you can search around on your search engine for it._

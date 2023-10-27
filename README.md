@@ -1,8 +1,20 @@
+[Import WordPress to local Mamp](#Import-WordPress-to-local-Mamp)
+
+[Post](#Post)
+
+[Pages](#Pages)
+
+[# Deploying Site/Make site go live](#Deploying-Site/Make-site-go-live)
+
 # Import WordPress to local Mamp
-*Every database is created with
+Every database is created with
+
 username:[root] password:[root]
+
 and WordPress databases login are
+
 username:[admin] password:[root]
+
 ## Before you start
 1. Install [Mamp](https://www.mamp.info/en/downloads/) on your computer
 2. Move the folder you clone from this GitHub into the Mamp root folder. If you're on Mac, it should be in Applications ▹ MAMP ▹ htdocs by default. Or you can locate the Mamp root folder under the Mamp setting.
@@ -118,15 +130,15 @@ To create a new project, I recommended duplicating and modifying the existing pr
 
 <img width="1030" alt="Screenshot 2566-10-25 at 15 29 39" src="https://github.com/brightdolphins/BrightDolphinsWebsite/assets/122365726/03eb70a6-570e-4264-bedb-2a68e3d12688">
 
-- Salary title - Header that will appear above salary detail
-- Salary - Add salary range for the position
-- Location title - Header that will appear above location detail
-- Location - Add position location detail
-- Working hours title - Header that will appear above working hours detail
-- Working hours - Add position work hours
-- Qualifications title - Header that will appear above qualifications detail
-- Qualifications detail - Add details of this position's qualifications 
-- Additional information - Any additional detail of this position detail you want to add
+- __Salary title__ - Header that will appear above salary detail
+- __Salary__ - Add salary range for the position
+- __Location title__ - Header that will appear above location detail
+- __Location__ - Add position location detail
+- __Working hours title__ - Header that will appear above working hours detail
+- __Working hours__ - Add position work hours
+- __Qualifications title__ - Header that will appear above qualifications detail
+- __Qualifications detail__ - Add details of this position's qualifications 
+- __Additional information__ - Any additional detail of this position detail you want to add
 
 4. Change the page template
 Now that you add all the detail change the template this page will display in.
@@ -143,21 +155,53 @@ Now that you add all the detail change the template this page will display in.
 
 5. Click __Publish__
 
-## Adjusting other main pages
-The pages page is where we make changes to all other main pages.
+# Pages
+
+__Adjusting other main pages__ The pages page is where we make changes to all other main pages. To adjust the pages On the hovering on _pages name_ then click __edit with Elementor__.
+
+## Home 
+
+This is our homepage.
+
+## Our Projects
+
+This is where we display all of our company portfolio.
+
+## Our Services 
+
+This is where the details of our services are displayed.
+
+## Our Process
+
+This is where the details of our work process are displayed.
+
+## Our Team
+
+This is where On the Pages page Hovering on _Our Team_ pages then click edit with Elementor
+
+# Pages
 
 ### Adding/Removing Team member
-On the Pages page Hovering on _Our Team_ pages then click edit with Elementor
 
-* Remove a member
-	Hover over that member ▹ right click ▹ Delete
+- __Remove a member__ - Hover over that member ▹ right click ▹ Delete
 
-* Add a member
-	Hover over any member ▹ right click ▹ Duplicate ▹ move it to the section you want ▹ Change Image/Name/Job/Description on the left menu
+- __Add a member__ - Hover over any member ▹ right click ▹ Duplicate ▹ move it to the section you want ▹ Change Image/Name/Job/Description on the left menu
 
 _Each row shouldn't have more than 3 people if there are more please move it to the new row by clicking the Plus icon on top of any section then move it to where it should be._
 
-## Deploying Site/Make site go live
+## Careers
+
+This is where all the career opportunities in our company are displayed.
+
+## Contact
+
+This is a page where the client can publish the form. Only the header and footer are displayed here. Suppose you want to fix it. Please go fix those on __Templates__ page.
+
+## Unused/Thank you
+
+These are unused pages created only for testing
+
+# Deploying Site/Make site go live
 WP2Static is a tool we use to deploy the site on Netlify.
 
 1. Click _WP2Static_ on the left menu
@@ -165,7 +209,7 @@ WP2Static is a tool we use to deploy the site on Netlify.
 3. Wait for the process to be finished, after it is done the text will appear on the logs below.
 4. Check the live site, and make sure the change is made without any problem
 
-### If the site doesn't deploy correctly
+## If the site doesn't deploy correctly
 * try clear plugin cache by going to _WP2Static_ and _cache_ and click _Delete all caches_ ,then try _Generate static site_ again
 * try reinstall the plugin by click _plugins_ on the left menu, locate WP2Static. Click disable and delete it. Then follow this [instruction]((https://drive.google.com/file/d/1G18BTVJv993nNFKB7rzRdIDpApjImJaF/view?usp=drive_link))
 

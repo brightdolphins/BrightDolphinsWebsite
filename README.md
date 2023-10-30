@@ -27,6 +27,9 @@ username:[admin] password:[root]
 >You can't change any folder name or this won't work
 
 ## 1. Import Database
+
+There two ways you can do this.
+
 ### Import Database using phpMyAdmin
 
 1. Locate this project database which is the .sql file in this GitHub.

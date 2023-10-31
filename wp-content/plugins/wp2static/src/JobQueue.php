@@ -22,6 +22,17 @@ class JobQueue {
 
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
         dbDelta( $sql );
+
+        // There was an improper unique index which we must be sure to remove
+        if ( 1 === $wpdb->query( "SHOW INDEX FROM $table_name WHERE KEY_NAME = 'status'" ) ) {
+            $wpdb->query( "DROP INDEX status ON $table_name" );
+        }
+
+        Controller::ensureIndex(
+            $table_name,
+            'status2',
+            "CREATE INDEX status2 ON $table_name (status)"
+        );
     }
 
     /**
@@ -47,9 +58,9 @@ class JobQueue {
     }
 
     /**
-     *  Get all crawlable URLs
+     *  Get all jobs
      *
-     *  @return string[] All crawlable URLs
+     *  @return string[] All jobs
      */
     public static function getJobs() : array {
         global $wpdb;
@@ -104,6 +115,26 @@ class JobQueue {
 
         foreach ( $rows as $row ) {
             $jobs[] = $row;
+        }
+
+        return $jobs;
+    }
+
+    /**
+     * Get count of jobs organized by type
+     *
+     * @return int[] keys are job type and values are count
+     */
+    public static function getJobCountByType() : array {
+        global $wpdb;
+        $jobs = [];
+
+        $table_name = $wpdb->prefix . 'wp2static_jobs';
+        $query = "SELECT job_type, count(*) FROM $table_name GROUP BY job_type";
+
+        $rows = $wpdb->get_results( $query, 'ARRAY_N' );
+        foreach ( $rows as $row ) {
+            $jobs[ $row[0] ] = $row[1];
         }
 
         return $jobs;
@@ -192,12 +223,16 @@ class JobQueue {
         return $total_jobs;
     }
 
+    public static function getWaitingJobs() : int {
+        return static::getWaitingJobsCount();
+    }
+
     /**
      *  Get count of waiting jobs
      *
      *  @return int Waiting jobs
      */
-    public static function getWaitingJobs() : int {
+    public static function getWaitingJobsCount() : int {
         global $wpdb;
 
         $table_name = $wpdb->prefix . 'wp2static_jobs';
@@ -223,6 +258,45 @@ class JobQueue {
 
         if ( $total_jobs > 0 ) {
             WsLog::l( 'failed to truncate JobQueue: try deleting instead' );
+        }
+    }
+
+    /**
+     *  Detect any 'processing' jobs that are not running and change status to 'failed'.
+     *
+     *  @throws \Throwable
+     */
+    public static function markFailedJobs() : void {
+        global $wpdb;
+
+        $job_types = [ 'detect', 'crawl', 'post_process', 'deploy' ];
+        $table_name = $wpdb->prefix . 'wp2static_jobs';
+
+        $wpdb->query( 'START TRANSACTION' );
+
+        foreach ( $job_types as $type ) {
+            try {
+                $lock = "{$wpdb->prefix}.wp2static_jobs.$type";
+                $query = "SELECT IS_FREE_LOCK('$lock') AS free";
+                $free = intval( $wpdb->get_row( $query )->free );
+
+                if ( $free ) {
+                    $failed_jobs = $wpdb->query(
+                        "UPDATE $table_name
+                         SET status = 'failed'
+                         WHERE job_type = '$type' AND status = 'processing'"
+                    );
+                    if ( $failed_jobs ) {
+                        $s = $failed_jobs === 1 ? '' : 's';
+                        WsLog::l( "$failed_jobs processing $type job$s marked as failed." );
+                    }
+                }
+
+                $wpdb->query( 'COMMIT' );
+            } catch ( \Throwable $e ) {
+                $wpdb->query( 'ROLLBACK' );
+                throw $e;
+            }
         }
     }
 }

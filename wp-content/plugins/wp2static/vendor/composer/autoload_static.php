@@ -4,13 +4,14 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit914d4fed7a96a7989e43e3b060df8c3a
+class ComposerStaticInitf07006284bb29f898ef5203549181cac
 {
     public static $files = array (
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
         'd0b5a4bcb2eb77db006193765fbdeb4e' => __DIR__ . '/..' . '/leonstafford/wp2staticpromises/src/functions_include.php',
         '2edcfd5834be80ee2967bce938e96f65' => __DIR__ . '/..' . '/leonstafford/wp2staticpsr7/src/functions_include.php',
         '5a8a9c246f848495ce6ab4838c0cce72' => __DIR__ . '/..' . '/leonstafford/wp2staticguzzle/src/functions_include.php',
+        'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -21,6 +22,10 @@ class ComposerStaticInit914d4fed7a96a7989e43e3b060df8c3a
             'WP2StaticGuzzleHttp\\Psr7\\' => 25,
             'WP2StaticGuzzleHttp\\Promise\\' => 28,
             'WP2StaticGuzzleHttp\\' => 20,
+        ),
+        'S' => 
+        array (
+            'Symfony\\Polyfill\\Php80\\' => 23,
         ),
         'P' => 
         array (
@@ -50,6 +55,10 @@ class ComposerStaticInit914d4fed7a96a7989e43e3b060df8c3a
         array (
             0 => __DIR__ . '/..' . '/leonstafford/wp2staticguzzle/src',
         ),
+        'Symfony\\Polyfill\\Php80\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-php80',
+        ),
         'Psr\\Http\\Message\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/http-message/src',
@@ -61,7 +70,9 @@ class ComposerStaticInit914d4fed7a96a7989e43e3b060df8c3a
     );
 
     public static $classMap = array (
+        'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'PhpToken' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/PhpToken.php',
         'Psr\\Http\\Client\\ClientExceptionInterface' => __DIR__ . '/..' . '/psr/http-client/src/ClientExceptionInterface.php',
         'Psr\\Http\\Client\\ClientInterface' => __DIR__ . '/..' . '/psr/http-client/src/ClientInterface.php',
         'Psr\\Http\\Client\\NetworkExceptionInterface' => __DIR__ . '/..' . '/psr/http-client/src/NetworkExceptionInterface.php',
@@ -73,6 +84,11 @@ class ComposerStaticInit914d4fed7a96a7989e43e3b060df8c3a
         'Psr\\Http\\Message\\StreamInterface' => __DIR__ . '/..' . '/psr/http-message/src/StreamInterface.php',
         'Psr\\Http\\Message\\UploadedFileInterface' => __DIR__ . '/..' . '/psr/http-message/src/UploadedFileInterface.php',
         'Psr\\Http\\Message\\UriInterface' => __DIR__ . '/..' . '/psr/http-message/src/UriInterface.php',
+        'Stringable' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Stringable.php',
+        'Symfony\\Polyfill\\Php80\\Php80' => __DIR__ . '/..' . '/symfony/polyfill-php80/Php80.php',
+        'Symfony\\Polyfill\\Php80\\PhpToken' => __DIR__ . '/..' . '/symfony/polyfill-php80/PhpToken.php',
+        'UnhandledMatchError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/UnhandledMatchError.php',
+        'ValueError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
         'WP2StaticGuzzleHttp\\BodySummarizer' => __DIR__ . '/..' . '/leonstafford/wp2staticguzzle/src/BodySummarizer.php',
         'WP2StaticGuzzleHttp\\BodySummarizerInterface' => __DIR__ . '/..' . '/leonstafford/wp2staticguzzle/src/BodySummarizerInterface.php',
         'WP2StaticGuzzleHttp\\Client' => __DIR__ . '/..' . '/leonstafford/wp2staticguzzle/src/Client.php',
@@ -156,6 +172,7 @@ class ComposerStaticInit914d4fed7a96a7989e43e3b060df8c3a
         'WP2StaticGuzzleHttp\\TransferStats' => __DIR__ . '/..' . '/leonstafford/wp2staticguzzle/src/TransferStats.php',
         'WP2StaticGuzzleHttp\\Utils' => __DIR__ . '/..' . '/leonstafford/wp2staticguzzle/src/Utils.php',
         'WP2Static\\Addons' => __DIR__ . '/../..' . '/src/Addons.php',
+        'WP2Static\\AdminNotices' => __DIR__ . '/../..' . '/src/AdminNotices.php',
         'WP2Static\\CLI' => __DIR__ . '/../..' . '/src/CLI.php',
         'WP2Static\\Controller' => __DIR__ . '/../..' . '/src/Controller.php',
         'WP2Static\\CoreOptions' => __DIR__ . '/../..' . '/src/CoreOptions.php',
@@ -182,6 +199,7 @@ class ComposerStaticInit914d4fed7a96a7989e43e3b060df8c3a
         'WP2Static\\FileWriter' => __DIR__ . '/../..' . '/src/FileWriter.php',
         'WP2Static\\FilesHelper' => __DIR__ . '/../..' . '/src/FilesHelper.php',
         'WP2Static\\JobQueue' => __DIR__ . '/../..' . '/src/JobQueue.php',
+        'WP2Static\\OptionRenderer' => __DIR__ . '/../..' . '/src/OptionRenderer.php',
         'WP2Static\\Paginator' => __DIR__ . '/../..' . '/src/Paginator.php',
         'WP2Static\\PostProcessor' => __DIR__ . '/../..' . '/src/PostProcessor.php',
         'WP2Static\\ProcessedSite' => __DIR__ . '/../..' . '/src/ProcessedSite.php',
@@ -206,9 +224,9 @@ class ComposerStaticInit914d4fed7a96a7989e43e3b060df8c3a
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit914d4fed7a96a7989e43e3b060df8c3a::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit914d4fed7a96a7989e43e3b060df8c3a::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInit914d4fed7a96a7989e43e3b060df8c3a::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitf07006284bb29f898ef5203549181cac::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitf07006284bb29f898ef5203549181cac::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInitf07006284bb29f898ef5203549181cac::$classMap;
 
         }, null, ClassLoader::class);
     }

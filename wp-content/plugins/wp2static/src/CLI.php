@@ -9,6 +9,11 @@ use WP_CLI;
  */
 class CLI {
     /**
+     * @var array<string>
+     */
+    private $assoc_args = null;
+
+    /**
      * Display system information and health check
      */
     public function diagnostics() : void {
@@ -61,11 +66,14 @@ class CLI {
             [ 'key', 'value' ]
         );
 
-        $active_plugins = get_option( 'active_plugins' );
+        $active_plugins = (array) get_option( 'active_plugins' );
 
         WP_CLI::line( PHP_EOL . 'Active plugins:' . PHP_EOL );
 
         foreach ( $active_plugins as $active_plugin ) {
+            /**
+             * @var string $active_plugin
+             */
             WP_CLI::line( $active_plugin );
         }
 
@@ -78,21 +86,391 @@ class CLI {
 
     }
 
-    public function microtime_diff(
-        string $start,
-        string $end = null
-    ) : float {
-        if ( ! $end ) {
-            $end = microtime();
+    /**
+     * Get info on plugin status.
+     *
+     * ## OPTIONS
+     *
+     * [--no-next]
+     *
+     * <jobs>
+     *
+     * Get status on jobs
+     *
+     * <crawled-site>
+     *
+     * Get status on the crawled site
+     *
+     * <processed-site>
+     *
+     * Get status on the processed site
+     *
+     * <deployers>
+     *
+     * Get info on deployers
+     *
+     * ## EXAMPLES
+     *
+     * List current plugin status and show next step
+     *
+     *     wp wp2static status
+     *
+     * List current plugin status but don't show next step
+     *
+     *     wp wp2static status --no-next
+     *
+     * @param string[] $args  Arguments after command
+     * @param string[] $assoc_args  Parameters after command
+     */
+    public function status(
+      array $args,
+      array $assoc_args
+    ) : void {
+        list($action) = $this->parseArgs( $args );
+        $this->assoc_args = $assoc_args;
+
+        if ( $action === 'jobs' ) {
+            $this->jobStatus();
+        } elseif ( $action === 'crawled-site' ) {
+            $this->crawledSiteStatus();
+        } elseif ( $action === 'processed-site' ) {
+            $this->processedSiteStatus();
+        } elseif ( $action === 'deployers' ) {
+            $this->deployersStatus();
+        } else {
+            $this->defaultStatus();
         }
 
-        list( $start_usec, $start_sec ) = explode( ' ', $start );
-        list( $end_usec, $end_sec ) = explode( ' ', $end );
+        // separate output from next command
+        WP_CLI::line();
+    }
 
-        $diff_sec = intval( $end_sec ) - intval( $start_sec );
-        $diff_usec = floatval( $end_usec ) - floatval( $start_usec );
+    /**
+     * Output default status
+     */
+    protected function defaultStatus() : void {
+        // TODO handle when count doesn't change but different URLs are present
+        // - maybe that's an edge case that it's not worth caring about...
+        $detected_url_count = URLDetector::countURLs();
+        // WP_CLI::line(sprintf('%d URLs detected', $detected_url_count));
 
-        return floatval( $diff_sec ) + $diff_usec;
+        $crawlable_urls = CrawlQueue::getCrawlablePaths();
+        if ( count( $crawlable_urls ) === 0 ) {
+            WP_CLI::line( 'No URLs are queued for crawling.' );
+            $this->hintDetectNext();
+            return;
+        } elseif ( $detected_url_count > count( $crawlable_urls ) ) {
+            WP_CLI::warning(
+                sprintf(
+                    'There are more URLs on the site (%d) than queued for crawling (%d).',
+                    $detected_url_count,
+                    count( $crawlable_urls )
+                )
+            );
+            $this->hintDetectNext();
+            return;
+        } else {
+            WP_CLI::line(
+                WP_CLI::colorize(
+                    sprintf( '%%c%d URLs%%n %%mqueued for crawling%%n', count( $crawlable_urls ) )
+                )
+            );
+        }
+
+        $crawled_urls = StaticSite::getPaths();
+        if ( $crawled_urls ) {
+            WP_CLI::line(
+                WP_CLI::colorize(
+                    sprintf( '%%c%d URLs%%n %%mcrawled%%n', count( $crawled_urls ) )
+                )
+            );
+            if ( count( $crawled_urls ) < count( $crawlable_urls ) ) {
+                WP_CLI::line(
+                    WP_CLI::colorize(
+                        sprintf(
+                            '%%MThere are more URLs queued for crawling (%d)'
+                            . ' than there are urls that have been crawled (%d)%%n',
+                            count( $crawlable_urls ),
+                            count( $crawled_urls )
+                        )
+                    )
+                );
+
+                if ( $this->should_show_next() ) {
+                    WP_CLI::line(
+                        WP_CLI::colorize(
+                            "\n\tYou can run `%gwp wp2static status crawled-site%n`"
+                            . " to see the list of path differences\n"
+                        )
+                    );
+                }
+                  $this->hintCrawlNext();
+            }
+        } else {
+            WP_CLI::line( 'No URLs crawled.' );
+            $this->hintCrawlNext();
+        }
+
+        $processed_site_path = ProcessedSite::getPath();
+        $processed_site_urls = [];
+        if ( ! is_dir( $processed_site_path ) ) {
+            WP_CLI::line(
+                WP_CLI::colorize( '%rProcessed site does not exist%n' )
+            );
+            $this->hintProcessNext();
+        } else {
+            $processed_site_urls = ProcessedSite::getPaths();
+            WP_CLI::line(
+                WP_CLI::colorize(
+                    sprintf(
+                        '%%c%d URLs%%n in the %%mprocessed site%%n',
+                        count( $processed_site_urls )
+                    )
+                )
+            );
+            if ( count( $processed_site_urls ) < count( $crawled_urls ) ) {
+                WP_CLI::line(
+                    WP_CLI::colorize(
+                        sprintf(
+                            '%%MThere are more URLs crawled (%d)'
+                            . ' than there are urls that have been processed (%d)%%n',
+                            count( $crawled_urls ),
+                            count( $processed_site_urls )
+                        )
+                    )
+                );
+
+                if ( $this->should_show_next() ) {
+                    WP_CLI::line(
+                        WP_CLI::colorize(
+                            "\n\tYou can run `%gwp wp2static status processed-site%n`"
+                            . " to see the list of path differences\n"
+                        )
+                    );
+                }
+                $this->hintProcessNext();
+            }
+        }
+
+        if ( count( $processed_site_urls ) > 0 ) {
+            $deployer_enabled = Addons::getDeployer();
+            if ( $deployer_enabled ) {
+                $this->hintDeployNext();
+            } else {
+                $this->hintEnableDeployer();
+            }
+        }
+    }
+
+    private function deployersStatus() : void {
+        $deployers = Addons::getAll( 'deploy' );
+
+        $data = array_map(
+            function( $_ ) {
+                return [
+                    'name'        => $_->name,
+                    'slug'        => $_->slug,
+                    'description' => $_->description,
+                    'enabled'     => $_->enabled ? 'Yes' : 'No',
+                ];
+            },
+            $deployers
+        );
+
+        WP_CLI\Utils\format_items(
+            'table',
+            $data,
+            [ 'name', 'description', 'slug', 'enabled' ]
+        );
+
+        if ( Addons::getDeployer() ) {
+            $this->hintDeployNext();
+        } else {
+            $this->hintEnableDeployer();
+        }
+    }
+
+    private function hintEnableDeployer() : void {
+        if ( $this->should_show_next() ) {
+            WP_CLI::line(
+                WP_CLI::colorize(
+                    "\n\tYou can run `%gwp wp2static addons toggle <slug>%n`"
+                    . ' to enable a deployer'
+                )
+            );
+        }
+    }
+
+    private function hintDeployNext() : void {
+        if ( $this->should_show_next() ) {
+            WP_CLI::line(
+                WP_CLI::colorize(
+                    "\n\tYou can run `%gwp wp2static deploy%n`"
+                    . ' to deploy your site'
+                )
+            );
+        }
+    }
+
+    private function crawledSiteStatus() : void {
+        $crawlable_urls = array_map(
+            '\WP2Static\Crawler::transformPath',
+            CrawlQueue::getCrawlablePaths(),
+        );
+        $crawled_urls = StaticSite::getPaths();
+
+        $queued_but_not_crawled_urls = array_diff( $crawlable_urls, $crawled_urls );
+        $crawled_but_not_queued_urls = array_diff( $crawled_urls, $crawlable_urls );
+
+        if ( count( $queued_but_not_crawled_urls ) > 0 ) {
+            WP_CLI::line( 'You have URLs that are queued but not crawled:' );
+            WP_CLI\Utils\format_items(
+                'table',
+                $this->urlsToTableData( $queued_but_not_crawled_urls ),
+                [ 'url' ]
+            );
+        }
+
+        if ( count( $crawled_but_not_queued_urls ) > 0 ) {
+            WP_CLI::line( 'You have URLs that are crawled but not queued:' );
+            WP_CLI\Utils\format_items(
+                'table',
+                $this->urlsToTableData( $crawled_but_not_queued_urls ),
+                [ 'url' ]
+            );
+        }
+    }
+
+    private function processedSiteStatus() : void {
+        $crawled_urls = StaticSite::getPaths();
+        $processed_site_urls = ProcessedSite::getPaths();
+
+        $crawled_but_not_processed_urls = array_diff( $crawled_urls, $processed_site_urls );
+        $processed_but_not_crawled_urls = array_diff( $processed_site_urls, $crawled_urls );
+
+        if ( count( $crawled_but_not_processed_urls ) > 0 ) {
+            WP_CLI::line( 'You have URLs that are crawled but not processed:' );
+            WP_CLI\Utils\format_items(
+                'table',
+                $this->urlsToTableData( $crawled_but_not_processed_urls ),
+                [ 'url' ]
+            );
+        }
+
+        if ( count( $processed_but_not_crawled_urls ) > 0 ) {
+            if ( count( $crawled_but_not_processed_urls ) > 0 ) {
+                WP_CLI::line();
+            }
+
+            WP_CLI::line( 'You have URLs that are processed but not crawled:' );
+            WP_CLI\Utils\format_items(
+                'table',
+                $this->urlsToTableData( $processed_but_not_crawled_urls ),
+                [ 'url' ]
+            );
+        }
+    }
+
+    /**
+     * Convert a list of URLs to a table for CLI output
+     *
+     * @param array<string> $urls List of URLs
+     * @return array<array<string>>
+     */
+    private function urlsToTableData( array $urls ) : array {
+        return array_map(
+            function( $url ) {
+                return [ 'url' => $url ]; },
+            $urls
+        );
+    }
+
+    private function hintProcessNext() : void {
+        if ( $this->should_show_next() ) {
+            WP_CLI::line(
+                WP_CLI::colorize( "\n\tYou should run `%gwp wp2static post_process%n`" )
+            );
+        }
+    }
+
+    /**
+     * Show next action hint for detect unless suppressed.
+     *
+     * @uses should_show_next() to know if should show next or not
+     */
+    private function hintDetectNext() : void {
+        if ( $this->should_show_next() ) {
+            WP_CLI::line(
+                WP_CLI::colorize(
+                    "\n\tYou should run `%gwp wp2static detect%n`"
+                    . " to add URLs to the crawl queue\n"
+                )
+            );
+        }
+    }
+
+    /**
+     * Show next action hint for crawl unless suppressed.
+     *
+     * @uses should_show_next() to know if should show next or not
+     */
+    private function hintCrawlNext() : void {
+        if ( $this->should_show_next() ) {
+            WP_CLI::line(
+                WP_CLI::colorize( "\n\tYou should run `%gwp wp2static crawl%n`\n" )
+            );
+        }
+    }
+
+    /**
+     * Check to see if display of next is enabled
+     */
+    private function should_show_next() : bool {
+        if ( ! isset( $this->assoc_args['next'] ) ) {
+            return true;
+        }
+
+        return ! ! $this->assoc_args['next'];
+    }
+
+    /**
+     * Parse CLI args
+     *
+     * @param string[] $args CLI args
+     *
+     * @return mixed[] string or null: `[ $action, $option_name, $value ]`
+     */
+    private function parseArgs( $args ) {
+        $action      = isset( $args[0] ) ? $args[0] : null;
+        $option_name = isset( $args[1] ) ? $args[1] : null;
+        $value       = isset( $args[2] ) ? $args[2] : null;
+
+        return [ $action, $option_name, $value ];
+    }
+
+    /**
+     * Output job status details.
+     */
+    protected function jobStatus() : void {
+        $job_count = JobQueue::getWaitingJobsCount();
+        WP_CLI::line( sprintf( 'Waiting job count: %d', $job_count ) );
+        WP_CLI::line(
+            sprintf(
+                'Total job count: %d',
+                JobQueue::getTotalJobs()
+            )
+        );
+
+        $jobs_by_type = JobQueue::getJobCountByType();
+        $output_data = [];
+        $output_headers = [ 'type', 'count' ];
+        foreach ( $jobs_by_type as $type => $count ) {
+            $output_data[] = [
+                'type' => $type,
+                'count' => $count,
+            ];
+        }
+        WP_CLI\Utils\format_items( 'table', $output_data, $output_headers );
     }
 
     /**
@@ -106,6 +484,7 @@ class CLI {
         array $args,
         array $assoc_args
     ) : void {
+        CoreOptions::init();
         $deployer = Addons::getDeployer();
 
         if ( ! $deployer ) {
@@ -113,8 +492,9 @@ class CLI {
         } else {
             WsLog::l( 'Starting deployment' );
             do_action( 'wp2static_deploy', ProcessedSite::getPath(), $deployer );
-            do_action( 'wp2static_post_deploy_trigger', $deployer );
         }
+        WsLog::l( 'Starting post-deployment actions' );
+        do_action( 'wp2static_post_deploy_trigger', $deployer );
     }
 
     /**
@@ -170,6 +550,8 @@ class CLI {
             WP_CLI::error( 'Missing required argument: <get|set|list>' );
         }
 
+        CoreOptions::init();
+
         $plugin = Controller::getInstance();
 
         if ( $action === 'get' ) {
@@ -197,13 +579,8 @@ class CLI {
                 return;
             }
 
-            if ( empty( $value ) ) {
-                WP_CLI::error( 'Missing required argument: <value>' );
-                return;
-            }
-
             // encrypt basic auth pwd
-            if ( $option_name === 'basicAuthPassword' ) {
+            if ( ! empty( $value ) && $option_name === 'basicAuthPassword' ) {
                 $value = CoreOptions::encrypt_decrypt(
                     'encrypt',
                     $value
@@ -333,10 +710,7 @@ class CLI {
      * @param string[] $assoc_args Parameters after command
      */
     public function crawl( array $args, array $assoc_args ) : void {
-        $action = isset( $args[0] ) ? $args[0] : null;
-        $option_name = isset( $args[1] ) ? $args[1] : null;
-        $value = isset( $args[2] ) ? $args[2] : null;
-
+        CoreOptions::init();
         Controller::wp2staticCrawl();
     }
 
@@ -344,13 +718,15 @@ class CLI {
      * Detect WordPress URLs to crawl, based on saved options
      */
     public function detect() : void {
-        $detected_count = URLDetector::detectURLs();
+        CoreOptions::init();
+        $detected_count = URLDetector::enqueueURLs();
     }
 
     /**
      * Makes a copy of crawled static site with processing applied
      */
     public function post_process() : void {
+        CoreOptions::init();
         $post_processor = new PostProcessor();
         $post_processor->processStaticSite( StaticSite::getPath() );
     }
@@ -359,7 +735,7 @@ class CLI {
      * Process any jobs in the queue.
      */
     public function process_queue() : void {
-        $job_count = JobQueue::getWaitingJobs();
+        $job_count = JobQueue::getWaitingJobsCount();
 
         if ( $job_count === 0 ) {
             WP_CLI::success( 'No jobs in queue' );
@@ -373,7 +749,7 @@ class CLI {
     }
 
     /**
-     * Crawl Queue
+     * Crawl Cache
      *
      * <list>
      *
@@ -392,8 +768,6 @@ class CLI {
      */
     public function crawl_cache( array $args, array $assoc_args ) : void {
         $action = isset( $args[0] ) ? $args[0] : null;
-        $option_name = isset( $args[1] ) ? $args[1] : null;
-        $value = isset( $args[2] ) ? $args[2] : null;
 
         if ( $action === 'list' ) {
             $urls = CrawlCache::getHashes();
@@ -450,8 +824,6 @@ class CLI {
      */
     public function crawl_queue( array $args, array $assoc_args ) : void {
         $action = isset( $args[0] ) ? $args[0] : null;
-        $option_name = isset( $args[1] ) ? $args[1] : null;
-        $value = isset( $args[2] ) ? $args[2] : null;
 
         if ( $action === 'list' ) {
             $urls = CrawlQueue::getCrawlablePaths();
@@ -500,8 +872,6 @@ class CLI {
      */
     public function processed_site( array $args, array $assoc_args ) : void {
         $action = isset( $args[0] ) ? $args[0] : null;
-        $option_name = isset( $args[1] ) ? $args[1] : null;
-        $value = isset( $args[2] ) ? $args[2] : null;
 
         // also validate expected $action vs any
         if ( empty( $action ) ) {
@@ -543,8 +913,6 @@ class CLI {
      */
     public function static_site( array $args, array $assoc_args ) : void {
         $action = isset( $args[0] ) ? $args[0] : null;
-        $option_name = isset( $args[1] ) ? $args[1] : null;
-        $value = isset( $args[2] ) ? $args[2] : null;
 
         // also validate expected $action vs any
         if ( empty( $action ) ) {
@@ -592,8 +960,6 @@ class CLI {
      */
     public function deploy_cache( array $args, array $assoc_args ) : void {
         $action = isset( $args[0] ) ? $args[0] : null;
-        $option_name = isset( $args[1] ) ? $args[1] : null;
-        $value = isset( $args[2] ) ? $args[2] : null;
 
         if ( $action === 'list' ) {
             $paths = DeployCache::getPaths();
@@ -637,8 +1003,6 @@ class CLI {
      * @param string[] $assoc_args Parameters after command
      */
     public function full_workflow( array $args, array $assoc_args ) : void {
-        $action = isset( $args[0] ) ? $args[0] : null;
-
         $this->detect();
         $this->crawl( [], [] );
         $this->post_process();
@@ -654,8 +1018,6 @@ class CLI {
      * @param string[] $assoc_args Parameters after command
      */
     public function delete_all_cache( array $args, array $assoc_args ) : void {
-        $action = isset( $args[0] ) ? $args[0] : null;
-
         if ( ! isset( $assoc_args['force'] ) ) {
             $this->multilinePrint(
                 "no --force given. Please type 'yes' to confirm
@@ -718,6 +1080,7 @@ class CLI {
 
             }
 
+            // TODO Output details on if addon was enabled or disabled
             Controller::wp2staticToggleAddon( $addon_slug );
         }
     }

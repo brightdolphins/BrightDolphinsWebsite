@@ -135,6 +135,13 @@ class WordPressAdmin {
         );
 
         add_action(
+            'admin_post_wp2static_process_queue',
+            [ self::class, 'adminPostProcessQueue' ],
+            10,
+            0
+        );
+
+        add_action(
             'admin_post_wp2static_crawl_queue_delete',
             [ Controller::class, 'wp2staticCrawlQueueDelete' ],
             10,
@@ -193,6 +200,13 @@ class WordPressAdmin {
         add_action(
             'admin_post_wp2static_ui_save_job_options',
             [ Controller::class, 'wp2staticUISaveJobOptions' ],
+            10,
+            0
+        );
+
+        add_action(
+            'admin_post_wp2static_ui_save_advanced_options',
+            [ Controller::class, 'wp2staticUISaveAdvancedOptions' ],
             10,
             0
         );
@@ -268,6 +282,13 @@ class WordPressAdmin {
         );
 
         add_action(
+            'wp2static_process_xsl',
+            [ SimpleRewriter::class, 'rewrite' ],
+            10,
+            1
+        );
+
+        add_action(
             'save_post',
             [ Controller::class, 'wp2staticSavePostHandler' ],
             0
@@ -276,6 +297,18 @@ class WordPressAdmin {
         add_action(
             'trashed_post',
             [ Controller::class, 'wp2staticTrashedPostHandler' ],
+            0
+        );
+
+        add_action(
+            'admin_enqueue_scripts',
+            [ self::class, 'wp2staticAdminStyles' ],
+            0
+        );
+
+        add_action(
+            'admin_enqueue_scripts',
+            [ self::class, 'wp2staticAdminScripts' ],
             0
         );
 
@@ -301,6 +334,34 @@ class WordPressAdmin {
                 2
             );
         }
+
+        add_filter(
+            'plugin_row_meta',
+            [ self::class, 'wp2staticPluginMetaLinks' ],
+            10,
+            2
+        );
+
+        add_action(
+            'wp_ajax_wp2static_admin_notice_dismissal',
+            [ AdminNotices::class, 'handleDismissedNotice' ],
+            10,
+            1
+        );
+
+        // show admin notices on WP2Static pages if rules are met
+        if ( str_contains( URLHelper::getCurrent(), 'page=wp2static' ) ) {
+            add_action(
+                'admin_notices',
+                [ AdminNotices::class, 'showAdminNotices' ],
+                0
+            );
+
+            add_filter(
+                'admin_footer_text',
+                [ self::class, 'wp2staticAdminFooterText' ]
+            );
+        }
     }
 
     /**
@@ -315,6 +376,76 @@ class WordPressAdmin {
             add_filter( 'custom_menu_order', '__return_true' );
             add_filter( 'menu_order', [ Controller::class, 'setMenuOrder' ] );
         }
+    }
+
+    /*
+     * Do security checks before calling Controller::wp2staticProcessQueue
+     */
+    public static function adminPostProcessQueue() : void {
+        $method = filter_input( INPUT_SERVER, 'REQUEST_METHOD' );
+        if ( ! $method ) {
+            $msg = 'Empty method in request to admin-post.php (wp2static_process_queue)';
+        } elseif ( 'POST' !== $method ) {
+            $method = strval( $method );
+            $msg = "Invalid method in request to admin-post.php (wp2static_process_queue): $method";
+        }
+        $nonce = filter_input( INPUT_POST, '_wpnonce' );
+        $nonce_valid = $nonce && wp_verify_nonce( strval( $nonce ), 'wp2static_process_queue' );
+        if ( ! $nonce_valid ) {
+            $msg = 'Invalid nonce in request to admin-post.php (wpstatic_process_queue)';
+        }
+
+        if ( isset( $msg ) ) {
+            WsLog::l( $msg );
+            throw new \RuntimeException( $msg );
+        }
+
+        Controller::wp2staticProcessQueue();
+    }
+
+    public static function wp2staticAdminStyles() : void {
+        wp_register_style(
+            'wp2static_admin_styles',
+            plugins_url( '../css/admin/style.css', __FILE__ ),
+            [],
+            WP2STATIC_VERSION
+        );
+        wp_enqueue_style( 'wp2static_admin_styles' );
+    }
+
+    public static function wp2staticAdminScripts() : void {
+        wp_register_script(
+            'wp2static_admin_scripts',
+            plugins_url( '../js/admin/override-menu-style.js', __FILE__ ),
+            [],
+            WP2STATIC_VERSION,
+            false
+        );
+        wp_enqueue_script( 'wp2static_admin_scripts' );
+    }
+
+    public static function wp2staticAdminFooterText( string $content ) : string {
+        return 'Thank you for using ' .
+            // @phpcs:ignore Generic.Files.LineLength.TooLong
+            '<a href="https://link.strattic.com/wp2static-footer" target="_blank">WP2Static</a> by ' .
+            // @phpcs:ignore Generic.Files.LineLength.TooLong
+            '<a href="https://link.strattic.com/strattic-wp2static-footer" target="_blank">Strattic</a>.';
+    }
+
+    /**
+     * Add extra link to WP2Static's Plugins page entry
+     *
+     * @param mixed[] $links plugin meta links
+     * @param string $file path to the plugin's entrypoint
+     * @return mixed[] $links plugin meta links
+     */
+    public static function wp2staticPluginMetaLinks( $links, $file ) {
+        if ( $file === 'wp2static/wp2static.php' ) {
+            // phpcs:ignore Generic.Files.LineLength.MaxExceeded
+            $links[] = '<a id="wp2static-try-1-click-publish-plugin-screen" target="_blank" href="https://link.strattic.com/plugins-try-strattic">Try 1-Click Publish</a>';
+        }
+
+        return $links;
     }
 }
 

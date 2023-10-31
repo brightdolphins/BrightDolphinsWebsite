@@ -30,50 +30,51 @@ class SiteInfo {
         $site_url = trailingslashit( site_url() );
 
         // properties which should not change during plugin execution
-        self::$info = [
-            // Core
-            'site_path' => ABSPATH,
-            'site_url' => $site_url,
+        self::$info = apply_filters(
+            'wp2static_siteinfo',
+            [
+                // Core
+                'site_path' => ABSPATH,
+                'site_url' => $site_url,
 
-            /*
-                Note:  'home_path' => get_home_path(),
-                // errors trying to find it in WP2Static\get_home_path()...
-            */
-            'home_url' => trailingslashit( get_home_url() ),
-            'includes_path' => trailingslashit( ABSPATH . WPINC ),
-            'includes_url' => includes_url(),
+                /*
+                    Note:  'home_path' => get_home_path(),
+                    // errors trying to find it in WP2Static\get_home_path()...
+                */
+                'home_url' => trailingslashit( get_home_url() ),
+                'includes_path' => trailingslashit( ABSPATH . WPINC ),
+                'includes_url' => includes_url(),
 
-            /*
-                TODO: Q on subdir:
+                /*
+                    TODO: Q on subdir:
+                        Does it matter?
+                    'subdirectory' => $this->isSiteInstalledInSubDirectory(),
+                        A: It shouldn't, but current mechanism for rewriting URLs
+                    has some cases that require knowledge of it...
+                */
 
-                Does it matter?
-                'subdirectory' => $this->isSiteInstalledInSubDirectory(),
+                // Content
+                'content_path' => trailingslashit( WP_CONTENT_DIR ),
+                'content_url' => trailingslashit( content_url() ),
+                'uploads_path' =>
+                    trailingslashit( $upload_path_and_url['basedir'] ),
+                'uploads_url' => trailingslashit( $upload_path_and_url['baseurl'] ),
 
-                A: It shouldn't, but current mechanism for rewriting URLs
-                has some cases that require knowledge of it...
-            */
+                // Plugins
+                'plugins_path' => trailingslashit( WP_PLUGIN_DIR ),
+                'plugins_url' => trailingslashit( plugins_url() ),
 
-            // Content
-            'content_path' => trailingslashit( WP_CONTENT_DIR ),
-            'content_url' => trailingslashit( content_url() ),
-            'uploads_path' =>
-                trailingslashit( $upload_path_and_url['basedir'] ),
-            'uploads_url' => trailingslashit( $upload_path_and_url['baseurl'] ),
-
-            // Plugins
-            'plugins_path' => trailingslashit( WP_PLUGIN_DIR ),
-            'plugins_url' => trailingslashit( plugins_url() ),
-
-            // Themes
-            'themes_root_path' => trailingslashit( get_theme_root() ),
-            'themes_root_url' => trailingslashit( get_theme_root_uri() ),
-            'parent_theme_path' => trailingslashit( get_template_directory() ),
-            'parent_theme_url' =>
-                trailingslashit( get_template_directory_uri() ),
-            'child_theme_path' => trailingslashit( get_stylesheet_directory() ),
-            'child_theme_url' =>
-                trailingslashit( get_stylesheet_directory_uri() ),
-        ];
+                // Themes
+                'themes_root_path' => trailingslashit( get_theme_root() ),
+                'themes_root_url' => trailingslashit( get_theme_root_uri() ),
+                'parent_theme_path' => trailingslashit( get_template_directory() ),
+                'parent_theme_url' =>
+                    trailingslashit( get_template_directory_uri() ),
+                'child_theme_path' => trailingslashit( get_stylesheet_directory() ),
+                'child_theme_url' =>
+                    trailingslashit( get_stylesheet_directory_uri() ),
+            ]
+        );
     }
 
     /**
@@ -95,10 +96,15 @@ class SiteInfo {
             throw new WP2StaticException( $err );
         }
 
-        // Standardise all paths to use / (Windows support)
-        $path = str_replace( '\\', '/', self::$info[ $key ] );
+        /**
+         * @var string $original_path
+         */
+        $original_path = self::$info[ $key ];
 
-        return $path;
+        // Standardise all paths to use / (Windows support)
+        $standardised_path = str_replace( '\\', '/', $original_path );
+
+        return $standardised_path;
     }
 
     /**
@@ -119,7 +125,12 @@ class SiteInfo {
             throw new WP2StaticException( $err );
         }
 
-        return self::$info[ $key ];
+        /**
+         * @var string $url
+         */
+        $url = self::$info[ $key ];
+
+        return $url;
     }
 
     // TODO Use WP_Http 'curl_enabled' => $this->hasCurlSupport(),
@@ -137,7 +148,11 @@ class SiteInfo {
              self::$instance = new SiteInfo();
         }
 
+        /**
+         * @var string $uploads_dir
+         */
         $uploads_dir = self::$info['uploads_path'];
+
         return file_exists( $uploads_dir ) && is_writeable( $uploads_dir );
     }
 
@@ -146,6 +161,9 @@ class SiteInfo {
              self::$instance = new SiteInfo();
         }
 
+        /**
+         * @var string $structure
+         */
         $structure = get_option( 'permalink_structure' );
 
         return strlen( $structure ) && 0 === strcmp( $structure[-1], '/' );
@@ -156,7 +174,12 @@ class SiteInfo {
              self::$instance = new SiteInfo();
         }
 
-        return get_option( 'permalink_structure' );
+        /**
+         * @var string $permalink_structure
+         */
+        $permalink_structure = get_option( 'permalink_structure' );
+
+        return $permalink_structure;
     }
 
     /**
@@ -169,7 +192,12 @@ class SiteInfo {
              self::$instance = new SiteInfo();
         }
 
-        $url_host = parse_url( self::$info['site_url'], PHP_URL_HOST );
+        /**
+         * @var string $site_url
+         */
+        $site_url = self::$info['site_url'];
+
+        $url_host = parse_url( $site_url, PHP_URL_HOST );
 
         if ( ! is_string( $url_host ) ) {
             $err = 'Failed to get hostname from Site URL';

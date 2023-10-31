@@ -64,7 +64,7 @@
                 <td>
                 <p>The current officially supported PHP versions can be found on <a href="http://php.net/supported-versions.php" target="_blank">PHP.net</a></p>
 
-                <p>WP2Static now requires a minimum of PHP 7.3 and recommends PHP 7.4 for better performance. If your hosting provider doesn't provide PHP 7.4 or at least PHP 7.3, find a better one!</p>
+                <p>WP2Static now requires a minimum of PHP 7.4 and recommends PHP 8.0 for better performance. If your hosting provider doesn't provide PHP 8.0 or at least PHP 7.4, find a better one!</p>
                 </td>
             </tr>
             <tr>
@@ -80,7 +80,7 @@
                 <td>
                     <p>You need the cURL extension enabled on your web server</p>
 
-                    <p> This is a library that allows the plugin to better export your static site out to services like GitHub, S3, Dropbox, BunnyCDN, etc. It's usually an easy fix to get this working. You can try Googling "How to enable cURL extension for PHP", along with the name of the environment you are using to run your WordPress site. This may be something like DigitalOcean, GoDaddy or LAMP, MAMP, WAMP for your webserver on your local computer. If you're still having trouble, the developer of this plugin is easger to help you get up and running. Please ask for help on our <a href="https://forum.wp2static.com">forum</a>.</p>
+                    <p> This is a library that allows the plugin to better export your static site out to services like GitHub, S3, Dropbox, BunnyCDN, etc. It's usually an easy fix to get this working. You can try Googling "How to enable cURL extension for PHP", along with the name of the environment you are using to run your WordPress site. This may be something like DigitalOcean, GoDaddy or LAMP, MAMP, WAMP for your webserver on your local computer. If you're still having trouble, the developer of this plugin is eager to help you get up and running. Please ask for help on our <a href="https://forum.wp2static.com">forum</a>.</p>
                 </td>
             </tr>
             <tr>
@@ -110,14 +110,22 @@
     natcasesort( $view['extensions'] );
     $ar_list = $view['extensions'];
     $rows = (int) ceil( count( $ar_list ) / 5 );
-    $lists  = array_chunk( $ar_list, $rows );
 
-    foreach ( $lists as $column ) {
+    if ( $rows < 1 ) {
         echo '<tr>';
-        foreach ( $column as $item ) {
-            echo '<td>' . $item . '</td>';
-        }
+        echo '<td>No extensions loaded.</td>';
         echo '</tr>';
+    } else {
+        $lists = array_chunk( $ar_list, $rows );
+
+        foreach ( $lists as $column ) {
+            echo '<tr>';
+            foreach ( $column as $item ) {
+                $loaded_extension = strval( $item );
+                echo "<td>$loaded_extension</td>";
+            }
+            echo '</tr>';
+        }
     }
 
     ?>
@@ -138,8 +146,8 @@
             <?php foreach ( $view['coreOptions'] as $option ) : ?>
 
             <tr>
-            <td><?php echo $option['label']; ?></td>
-            <td><?php echo $option['value']; ?></td>
+            <td><?php echo $option->label; ?></td>
+            <td><?php echo $option->value; ?></td>
             </tr>
 
             <?php endforeach; ?>
@@ -170,15 +178,4 @@
 
         </tbody>
     </table>
-
-    <div style="display:none;">
-        <b>TODO: load add-on diagnostics here, via filter</b>
-
-        ie
-
-        <p>PHP DOMDocument library available</p>
-        <code>        $view['domDocumentAvailable'] = class_exists( 'DOMDocument' );</code>
-        <h2 class="title">You're missing a required PHP library (DOMDocument)</h2>
-        <p> This is a library that is used to parse the HTML documents when WP2Static crawls your site. It's usually an easy fix to get this working. You can try Googling "DOMDocument missing", along with the name of the environment you are using to run your WordPress site. This may be something like DigitalOcean, GoDaddy or LAMP, MAMP, WAMP for your webserver on your local computer. If you're still having trouble, the developer of this plugin is easger to help you get up and running. Please ask for help on our <a href="https://forum.wp2static.com">forum</a>.</p>
-    </div>
 </div>

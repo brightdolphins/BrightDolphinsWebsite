@@ -123,8 +123,9 @@ class SitemapParser {
             $sitemaps = $this->sitemaps;
             $urls = $this->urls;
             try {
-                $this->parse( $todo[0] );
+                $this->parse( strval( $todo[0] ) );
             } catch ( WP2StaticException $e ) {
+                WsLog::w( $e->getMessage() );
                 // Keep crawling
                 continue;
             }
@@ -140,7 +141,7 @@ class SitemapParser {
      */
     public function addToQueue( array $url_array ) : void {
         foreach ( $url_array as $url ) {
-            $url = $this->urlEncode( $url );
+            $url = $this->urlEncode( strval( $url ) );
             if ( $this->urlValidate( $url ) ) {
                 $this->queue[] = $url;
             }
@@ -180,6 +181,11 @@ class SitemapParser {
         }
         $this->history[] = $this->current_url;
         $response = is_string( $url_content ) ? $url_content : $this->getContent();
+
+        if ( ! $response ) {
+            return;
+        }
+
         if ( parse_url( $this->current_url, PHP_URL_PATH ) === self::ROBOTSTXT_PATH ) {
             $this->parseRobotstxt( $response );
             return;
@@ -217,7 +223,7 @@ class SitemapParser {
     /**
      * Request the body content of an URL
      *
-     * @return string Raw body content
+     * @return ?string Raw body content
      * @throws WP2StaticException
      */
     protected function getContent() {
@@ -232,9 +238,22 @@ class SitemapParser {
             if ( ! isset( $this->config['guzzle']['headers']['User-Agent'] ) ) {
                 $this->config['guzzle']['headers']['User-Agent'] = $this->user_agent;
             }
-            $client = new WP2StaticGuzzleHttp\Client();
+            $client = new WP2StaticGuzzleHttp\Client( [ 'verify' => false ] );
+
+            if ( ! is_array( $this->config['guzzle'] ) ) {
+                WsLog::w( 'Guzzle config is not in expected array format' );
+                return null;
+            }
             $res = $client->request( 'GET', $this->current_url, $this->config['guzzle'] );
-            return $res->getBody()->getContents();
+            if ( $res->getStatusCode() === 200 ) {
+                return $res->getBody()->getContents();
+            } else {
+                WsLog::w(
+                    'Got ' . $res->getStatusCode() .
+                    ' for sitemap url "' . $this->current_url . '", skipping.'
+                );
+                return null;
+            }
         } catch ( WP2StaticGuzzleHttp\Exception\TransferException $e ) {
             throw new WP2StaticException( 'Unable to fetch URL contents', 0, $e );
         } catch ( WP2StaticGuzzleHttp\Exception\GuzzleException $e ) {
@@ -252,7 +271,7 @@ class SitemapParser {
         // Split lines into array
         $lines = array_filter(
             array_map(
-                'trim',
+                fn ( $line ) => trim( (string) $line ),
                 (array) preg_split( '/\r\n|\n|\r/', $robotstxt )
             )
         );
@@ -269,7 +288,10 @@ class SitemapParser {
             $line = $line[0];
 
             // Split by directive and rule
-            $pair = array_map( 'trim', (array) preg_split( '/:/', $line, 2 ) );
+            $pair = array_map(
+                fn ( $line ) => trim( (string) $line ),
+                (array) preg_split( '/:/', $line, 2 )
+            );
             // Check if the line contains a sitemap
             if (
                 strtolower( $pair[0] ) !== self::XML_TAG_SITEMAP ||
@@ -302,7 +324,7 @@ class SitemapParser {
         if ( ! isset( $array['loc'] ) ) {
             return false;
         }
-        $array['loc'] = $this->urlEncode( trim( $array['loc'] ) );
+        $array['loc'] = $this->urlEncode( trim( strval( $array['loc'] ) ) );
         if ( $this->urlValidate( $array['loc'] ) ) {
             switch ( $type ) {
                 case self::XML_TAG_SITEMAP:
@@ -374,7 +396,12 @@ class SitemapParser {
             // Strings are not part of any documented sitemap standard
             return false;
         }
-        $array = array_filter( array_map( 'trim', (array) preg_split( '/\r\n|\n|\r/', $string ) ) );
+        $array = array_filter(
+            array_map(
+                fn ( $line ) => trim( (string) $line ),
+                (array) preg_split( '/\r\n|\n|\r/', $string )
+            )
+        );
         foreach ( $array as $line ) {
             if ( $this->isSitemapURL( $line ) ) {
                 $this->addArray( self::XML_TAG_SITEMAP, [ 'loc' => $line ] );

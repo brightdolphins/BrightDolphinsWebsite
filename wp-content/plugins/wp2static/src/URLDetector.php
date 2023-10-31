@@ -14,11 +14,19 @@ namespace WP2Static;
 
 class URLDetector {
 
+    public static function countURLs() : int {
+        return count( static::detectURLs( $quiet = true ) );
+    }
+
     /**
      * Detect URLs within site
+     *
+     * @return array<string>
      */
-    public static function detectURLs() : string {
-        WsLog::l( 'Starting to detect WordPress site URLs.' );
+    public static function detectURLs( bool $quiet = false ) : array {
+        if ( ! $quiet ) {
+            WsLog::l( 'Starting to detect WordPress site URLs.' );
+        }
 
         do_action(
             'wp2static_detect'
@@ -61,8 +69,30 @@ class URLDetector {
         }
 
         if ( CoreOptions::getValue( 'detectUploads' ) ) {
+            $filenames_to_ignore = CoreOptions::getLineDelimitedBlobValue( 'filenamesToIgnore' );
+
+            $filenames_to_ignore =
+                apply_filters(
+                    'wp2static_filenames_to_ignore',
+                    $filenames_to_ignore
+                );
+
+            $file_extensions_to_ignore = CoreOptions::getLineDelimitedBlobValue(
+                'fileExtensionsToIgnore'
+            );
+
+            $file_extensions_to_ignore =
+                apply_filters(
+                    'wp2static_file_extensions_to_ignore',
+                    $file_extensions_to_ignore
+                );
+
             $arrays_to_merge[] =
-                FilesHelper::getListOfLocalFilesByDir( SiteInfo::getPath( 'uploads' ) );
+                FilesHelper::getListOfLocalFilesByDir(
+                    SiteInfo::getPath( 'uploads' ),
+                    $filenames_to_ignore,
+                    $file_extensions_to_ignore
+                );
         }
 
         $detect_sitemaps = apply_filters( 'wp2static_detect_sitemaps', 1 );
@@ -137,6 +167,9 @@ class URLDetector {
             $arrays_to_merge[] = DetectAuthorPaginationURLs::detect( SiteInfo::getUrl( 'site' ) );
         }
 
+        /**
+         * @var string[] $url_queue
+         */
         $url_queue = call_user_func_array( 'array_merge', $arrays_to_merge );
 
         $url_queue = FilesHelper::cleanDetectedURLs( $url_queue );
@@ -148,19 +181,27 @@ class URLDetector {
 
         $unique_urls = array_unique( $url_queue );
 
+        $total_detected = (string) count( $unique_urls );
+
+        if ( ! $quiet ) {
+            WsLog::l(
+                "Detection complete. $total_detected URLs added to Crawl Queue."
+            );
+        }
+
+        return $unique_urls;
+    }
+
+    public static function enqueueURLs() : string {
+        $unique_urls = static::detectURLs();
+
         // No longer truncate before adding
         // addUrls is now doing INSERT IGNORE based on URL hash to be
         // additive and not error on duplicate
 
         CrawlQueue::addUrls( $unique_urls );
 
-        $total_detected = (string) count( $unique_urls );
-
-        WsLog::l(
-            "Detection complete. $total_detected URLs added to Crawl Queue."
-        );
-
-        return $total_detected;
+        return (string) count( $unique_urls );
     }
 }
 
